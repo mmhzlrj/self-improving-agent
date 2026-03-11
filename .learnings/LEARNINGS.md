@@ -253,6 +253,15 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY
 
 ### 7. Playwright CDP 后台发送（成功！）
 
+#### 尝试过程
+1. ❌ 直接用 curl 调用 CDP API - 失败
+2. ✅ 用 Playwright 连接 CDP - 成功！
+
+#### 关键发现
+- Browser Relay 端口 18800 就是 CDP 端口
+- 可以用 Playwright 连接并控制
+
+#### 代码
 ```javascript
 const { chromium } = require('playwright');
 
@@ -269,4 +278,7 @@ for (const p of ctx.pages()) {
 }
 ```
 
-**关键**：Browser Relay 端口 18800 就是 CDP 端口，可以用 Playwright 连接！
+#### 验证结果
+- 输入成功：✅
+- 发送成功：✅
+- 后台运行：✅（窗口不跳动）

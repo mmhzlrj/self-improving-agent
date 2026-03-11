@@ -187,3 +187,24 @@
 - 截图前先用 minimax.py 分析整个 Chrome 窗口
 - 或者用 screencapture 截取整个窗口
 - 不要假设页面是对的，必须先验证
+
+---
+
+### [ERR-20260311-005] 误以为 CDP 不需要 Playwright
+
+**Logged**: 2026-03-11
+**Priority**: medium
+**Status**: resolved
+**Area**: tools
+
+#### Summary
+最初尝试用 curl 直接调用 CDP API，但失败了
+
+#### Context
+- 直接用 curl 发送 CDP 命令不工作
+
+#### Suggested Fix
+- 使用 Playwright 连接 CDP
+
+#### Metadata
+- Related Files: LEARNINGS.md
