@@ -364,3 +364,8 @@ openclaw browser click e119  # 联网
   - 代码简洁易维护
 - 测试结果：5/5 平台成功
 - 文件：`~/.openclaw/workspace/scripts/cdp-setup-v3.sh`
+
+#### v3.2 (cdp-setup-v3.sh) - 最终版
+- 添加 all 模式导航
+- 每个平台设置前先 navigate 到对应 URL
+- 测试结果：5/5 全部成功

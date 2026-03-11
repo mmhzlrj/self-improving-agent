@@ -36,6 +36,14 @@ Things like:
 - 路径: `~/.openclaw/workspace/feishu-images/`
 - 命名规则: 精确到秒 (YYYY-MM-DD-HH-mm-ss.png)
 
+### AI 平台设置脚本
+
+- **位置**: `~/.openclaw/workspace/scripts/cdp-setup-v3.sh`
+- **用途**: 设置 AI 网页版的模型模式
+- **使用**: 
+  - 单平台: `~/.openclaw/workspace/scripts/cdp-setup-v3.sh deepseek`
+  - 全部: `~/.openclaw/workspace/scripts/cdp-setup-v3.sh all`
+
 ### 图片分析
 
 - **工具**: `~/.openclaw/workspace/skills/minimax-tools/minimax.py`
