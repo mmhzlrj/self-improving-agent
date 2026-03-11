@@ -249,4 +249,24 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY
 #### 结论
 - ❌ 不要尝试 osascript/dispatchEvent 模拟键盘
 - ✅ 豆包/千问/智谱/Kimi 可以用 JavaScript 后台发送
-- ✅ DeepSeek 需要用官方 API 或网络请求逆向
+- ✅ DeepSeek：可以用 Playwright CDP 后台发送！
+
+### 7. Playwright CDP 后台发送（成功！）
+
+```javascript
+const { chromium } = require('playwright');
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:18800');
+const ctx = browser.contexts()[0];
+
+for (const p of ctx.pages()) {
+    if (p.url().includes('deepseek')) {
+        // 输入
+        await p.fill('textarea', '问题');
+        // 发送
+        await p.keyboard.press('Enter');
+    }
+}
+```
+
+**关键**：Browser Relay 端口 18800 就是 CDP 端口，可以用 Playwright 连接！
