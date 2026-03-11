@@ -230,3 +230,23 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY
 - 发送前必须确保窗口激活
 - 先 `osascript -e 'tell application "Google Chrome" to activate'`
 - 然后再按回车发送
+
+### 6. 后台键盘输入不可能的原因（豆包分析）
+
+#### 三层安全机制
+1. **macOS**：Accessibility API 要求目标应用必须前台
+2. **Chrome**：检测 `isTrusted` 属性
+3. **DeepSeek 前端**：丢弃 `isTrusted=false` 的事件
+
+#### 可行方案
+| 方案 | 难度 | 说明 |
+|------|------|------|
+| DeepSeek API | ⭐ | 付费，稳定 |
+| 网络请求逆向 | ⭐⭐⭐ | 模拟 HTTP 请求 |
+| Playwright + Stealth | ⭐⭐⭐⭐ | 反检测插件 |
+| 虚拟桌面 | ⭐ | osascript + 切换桌面 |
+
+#### 结论
+- ❌ 不要尝试 osascript/dispatchEvent 模拟键盘
+- ✅ 豆包/千问/智谱/Kimi 可以用 JavaScript 后台发送
+- ✅ DeepSeek 需要用官方 API 或网络请求逆向
