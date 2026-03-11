@@ -282,3 +282,37 @@ for (const p of ctx.pages()) {
 - 输入成功：✅
 - 发送成功：✅
 - 后台运行：✅（窗口不跳动）
+
+### 8. Playwright CDP 通用代码（5个平台测试通过）
+
+```javascript
+const { chromium } = require('playwright');
+
+const browser = await chromium.connectOverCDP('http://127.0.0.1:18800');
+const ctx = browser.contexts()[0];
+
+for (const p of ctx.pages()) {
+    if (p.url().includes('平台域名')) {
+        // 通用输入（textarea 或 div）
+        const textarea = p.locator('textarea');
+        const editable = p.locator('div[contenteditable=true]');
+        
+        if (await textarea.count() > 0) {
+            await textarea.first().fill('问题');
+        } else if (await editable.count() > 0) {
+            await editable.first().fill('问题');
+        }
+        
+        // 发送
+        await p.keyboard.press('Enter');
+    }
+}
+```
+
+| 平台 | 选择器 | CDP 状态 |
+|------|--------|----------|
+| DeepSeek | textarea | ✅ |
+| 豆包 | textarea | ✅ |
+| 千问 | textarea | ✅ |
+| 智谱 | textarea | ✅ |
+| Kimi | div[contenteditable] | ✅ |
