@@ -316,3 +316,32 @@ for (const p of ctx.pages()) {
 | 千问 | textarea | ✅ |
 | 智谱 | textarea | ✅ |
 | Kimi | div[contenteditable] | ✅ |
+
+### 9. 平台模型设置
+
+| 平台 | 需要设置的模式 | 选择器/Ref |
+|------|----------------|------------|
+| DeepSeek | 深度思考 | button:has-text("深度思考") |
+| 豆包 | 专家模式 | button:has-text("快速") → menuitem:has-text("专家") |
+| 千问 | 思考模式 | 自动 → option:has-text("思考") |
+| 智谱 | 思考+联网 | 点击按钮开启 |
+| Kimi | 思考模式 | 默认已是思考模式 |
+
+### 设置脚本
+
+```bash
+# DeepSeek - 打开深度思考
+openclaw browser click e36
+
+# 豆包 - 切换到专家
+openclaw browser click e1070  # 快速按钮
+openclaw browser click e1182  # 专家选项
+
+# 千问 - 切换到思考
+openclaw browser click e86    # 自动按钮
+openclaw browser click e116  # 思考选项
+
+# 智谱 - 打开思考和联网
+openclaw browser click e117  # 思考
+openclaw browser click e119  # 联网
+```
