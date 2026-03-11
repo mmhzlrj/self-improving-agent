@@ -345,3 +345,22 @@ openclaw browser click e116  # 思考选项
 openclaw browser click e117  # 思考
 openclaw browser click e119  # 联网
 ```
+
+### 10. 平台设置脚本优化过程
+
+#### v1.0 (cdp-setup.sh)
+- 硬编码 ref
+- 问题：每次页面加载 ref 都变
+
+#### v2.0 (cdp-setup-dynamic.sh)
+- 尝试用 grep 动态获取 ref
+- 问题：bash 语法复杂，解析有问题
+
+#### v3.0 (cdp-setup-v3.sh) - 当前版本
+- 简化版：每次只获取第一个匹配的 ref
+- 特点：
+  - 统一流程：snapshot → grep → click
+  - 简化选择器：用文本匹配
+  - 代码简洁易维护
+- 测试结果：5/5 平台成功
+- 文件：`~/.openclaw/workspace/scripts/cdp-setup-v3.sh`
