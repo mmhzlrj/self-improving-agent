@@ -36,6 +36,15 @@ Things like:
 - 路径: `~/.openclaw/workspace/feishu-images/`
 - 命名规则: 精确到秒 (YYYY-MM-DD-HH-mm-ss.png)
 
+### 图片分析
+
+- **工具**: `~/.openclaw/workspace/skills/minimax-tools/minimax.py`
+- **用法**: 
+  ```bash
+  python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image "问题" "图片路径"
+  ```
+- **注意**: 输出为空时可能是用错工具了
+
 ### 经验教训目录
 
 - **路径**: `~/.openclaw/workspace/.learnings/`
