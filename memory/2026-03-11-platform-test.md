@@ -7,7 +7,7 @@
 2. `document.querySelector("textarea")` 找输入框
 3. 设置 value + dispatchEvent('input')
 4. 回车发送 或 遍历找发送按钮
-5. 等待 20 秒
+5. **等待 25 秒**
 6. 获取回答
 
 ### 结果

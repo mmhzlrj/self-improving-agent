@@ -1,12 +1,14 @@
 #!/bin/bash
-# CDP 平台设置脚本 - 最终版 (v3.1)
-# 简化验证，只确保点击执行
+# CDP 平台设置脚本 - 最终版 (v3.2)
+# 添加 all 模式导航
 
 PLATFORM="$1"
 
 case "$PLATFORM" in
     deepseek)
         echo "=== DeepSeek ==="
+        openclaw browser navigate "https://chat.deepseek.com/"
+        sleep 2
         openclaw browser evaluate --fn 'document.querySelector("textarea")?.focus()'
         sleep 1
         SNAP=$(openclaw browser snapshot 2>&1)
@@ -16,6 +18,8 @@ case "$PLATFORM" in
         
     doubao)
         echo "=== Doubao ==="
+        openclaw browser navigate "https://www.doubao.com/chat/38416305792801026"
+        sleep 2
         SNAP=$(openclaw browser snapshot 2>&1)
         MODEL=$(echo "$SNAP" | grep -E 'button "(快速|思考|专家)"' | grep -o 'ref=e[0-9]*' | head -1)
         [ -n "$MODEL" ] && openclaw browser click "$MODEL" && sleep 1
@@ -26,6 +30,8 @@ case "$PLATFORM" in
         
     qwen)
         echo "=== Qwen ==="
+        openclaw browser navigate "https://chat.qwen.ai/"
+        sleep 2
         SNAP=$(openclaw browser snapshot 2>&1)
         AUTO=$(echo "$SNAP" | grep "自动" | grep -o 'ref=e[0-9]*' | head -1)
         [ -n "$AUTO" ] && openclaw browser click "$AUTO" && sleep 1
@@ -36,6 +42,8 @@ case "$PLATFORM" in
         
     glm)
         echo "=== GLM ==="
+        openclaw browser navigate "https://chatglm.cn/"
+        sleep 2
         SNAP=$(openclaw browser snapshot 2>&1)
         THINK=$(echo "$SNAP" | grep -B2 "思考" | grep -o 'ref=e[0-9]*' | head -1)
         [ -n "$THINK" ] && openclaw browser click "$THINK" && sleep 1
@@ -46,6 +54,8 @@ case "$PLATFORM" in
         
     kimi)
         echo "=== Kimi ==="
+        openclaw browser navigate "https://kimi.moonshot.cn/"
+        sleep 2
         SNAP=$(openclaw browser snapshot 2>&1)
         if echo "$SNAP" | grep -q "思考"; then
             echo "✓ 已是思考模式"
@@ -53,12 +63,17 @@ case "$PLATFORM" in
         ;;
         
     all)
-        echo "=== All Platforms ==="
+        echo "=== 设置所有平台 ==="
         $0 deepseek
+        sleep 1
         $0 doubao
+        sleep 1
         $0 qwen
+        sleep 1
         $0 glm
+        sleep 1
         $0 kimi
+        echo "=== 全部完成 ==="
         ;;
         
     *)
