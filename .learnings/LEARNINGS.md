@@ -219,3 +219,9 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY
 - 必须用 osascript + 键盘输入
 - 用 cliclick 点击坐标激活输入框
 - 然后用 osascript 逐字输入
+- **重要**：osascript 命令要**合并成一次执行**，不能分多次（会内容连在一起）
+
+### 4. DeepSeek 截图要点
+- 截图前必须先确认窗口是否正确
+- 不要假设页面是对的，必须先验证
+- 用 minimax.py 分析整个 Chrome 窗口，确认是哪个页面

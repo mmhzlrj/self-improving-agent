@@ -165,3 +165,25 @@
 
 #### Metadata
 - Related Files: SOUL.md
+
+---
+
+### [ERR-20260311-004] 截图前没有确认窗口是否正确
+
+**Logged**: 2026-03-11
+**Priority**: high
+**Status**: resolved
+**Area**: workflow
+
+#### Summary
+用户说确保每一步窗口是对的，但我没有检查就直接截图
+
+#### Context
+- Chrome 有两个标签页：千问和 DeepSeek
+- 我直接用 openclaw browser screenshot，没有先确认是哪个页面
+- 结果截的是千问的图，但以为是 DeepSeek
+
+#### Suggested Fix
+- 截图前先用 minimax.py 分析整个 Chrome 窗口
+- 或者用 screencapture 截取整个窗口
+- 不要假设页面是对的，必须先验证
