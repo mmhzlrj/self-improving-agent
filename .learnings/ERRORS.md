@@ -118,3 +118,50 @@
 - Reproducible: N/A
 - Related Files: TOOLS.md
 - **See Also**: 重要规则 - rm -rf 不能随便用
+
+---
+
+### [ERR-20260311-002] 用 read 命令读图片而不是 image 工具
+
+**Logged**: 2026-03-11
+**Priority**: high
+**Status**: resolved
+**Area**: tools
+
+#### Summary
+分析图片时用 exec + read 命令，而不是用 OpenClaw 的 image 工具
+
+#### Context
+- 分析 Browser Relay 截图时
+- 用 `read` 命令读取图片文件
+- 应该用 `image` 工具
+
+#### Suggested Fix
+- 分析图片必须用 `image` 工具
+- 注意：需要切换到支持图片的模型（如 Claude）
+
+#### Metadata
+- Related Files: TOOLS.md
+
+---
+
+### [ERR-20260311-003] 没有等待用户指示就执行后续步骤
+
+**Logged**: 2026-03-11
+**Priority**: high
+**Status**: resolved
+**Area**: workflow
+
+#### Summary
+用户只说"执行步骤3"，我自动执行了步骤4、5、6、7
+
+#### Context
+- 用户要我一步步执行测试
+- 我没有等用户指示就继续了
+
+#### Suggested Fix
+- 用户说执行哪步就执行哪步
+- 不要自动执行后续步骤
+
+#### Metadata
+- Related Files: SOUL.md

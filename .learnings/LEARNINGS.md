@@ -199,3 +199,23 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY
 - Skill: `~/.openclaw/workspace/skills/doubao-osascript/`
 - 日志: `~/.openclaw/workspace/memory/2026-03-*.md`
 - Browser Relay: `~/.openclaw/workspace/memory/browser-relay-*.md`
+
+---
+
+## 重要规则（必须遵守）- 2026-03-11
+
+### 1. 图片分析必须用 image 工具
+- ❌ 禁止用 exec + read 命令读取图片
+- ✅ 必须用 `image` 工具分析图片
+- ⚠️ 注意：需要切换到支持图片的模型（如 Claude）
+
+### 2. 测试时必须等待用户指示
+- 用户说执行哪步就执行哪步
+- ❌ 禁止自动执行后续步骤
+- ✅ 等用户明确指示后再继续
+
+### 3. DeepSeek 自动化要点
+- JavaScript 设置 value 无效（页面不显示）
+- 必须用 osascript + 键盘输入
+- 用 cliclick 点击坐标激活输入框
+- 然后用 osascript 逐字输入
