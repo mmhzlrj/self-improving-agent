@@ -1,0 +1,46 @@
+{
+  "profile_id": "personal",
+  "name": "个人助理",
+  "description": "适合个人使用的 AI 助理配置",
+  "version": "1.0.0",
+  
+  "locale": {
+    "language": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "currency": "CNY"
+  },
+  
+  "channels": {
+    "primary": "telegram",
+    "fallback": "webchat"
+  },
+  
+  "modules": {
+    "enabled": [
+      "messaging",
+      "web-search",
+      "weather",
+      "lobster-p2p"
+    ],
+    "config": {}
+  },
+  
+  "workflows": {
+    "enabled": [
+      "daily-brief"
+    ],
+    "config": {
+      "daily-brief": {
+        "time": "07:30",
+        "include": ["weather", "news"]
+      }
+    }
+  },
+  
+  "personalization": {
+    "name": "",
+    "greeting": "你好",
+    "style": "casual",
+    "topics_interest": []
+  }
+}

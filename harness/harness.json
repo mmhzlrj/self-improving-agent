@@ -1,0 +1,73 @@
+{
+  "harness": {
+    "name": "OpenClaw Personal AI Assistant",
+    "version": "1.0.0",
+    "description": "全球化私人 AI 助理定制系统"
+  },
+  
+  "core": {
+    "agent_engine": "core/agent-engine.js",
+    "context_manager": "core/context-manager.js",
+    "memory_system": "core/memory-system.js",
+    "tool_bridge": "core/tool-bridge.js"
+  },
+  
+  "modules": {
+    "enabled": [
+      "messaging",
+      "web-search",
+      "browser",
+      "ocr",
+      "pdf",
+      "feishu-doc",
+      "feishu-wiki",
+      "feishu-drive",
+      "weather",
+      "lobster-p2p"
+    ],
+    "available": {
+      "communication": ["messaging"],
+      "knowledge": ["web-search", "browser", "pdf", "ocr"],
+      "productivity": ["feishu-doc", "feishu-wiki", "feishu-drive"],
+      "i18n": ["weather"],
+      "network": ["lobster-p2p"]
+    }
+  },
+  
+  "workflows": {
+    "enabled": [],
+    "available": [
+      "onboarding",
+      "daily-brief",
+      "meeting-prep",
+      "research",
+      "weekly-report"
+    ]
+  },
+  
+  "profiles": {
+    "default": "profiles/default/config.json",
+    "templates": [
+      "profiles/templates/business.yaml",
+      "profiles/templates/developer.yaml",
+      "profiles/templates/personal.yaml"
+    ]
+  },
+  
+  "i18n": {
+    "default_locale": "zh-CN",
+    "supported": ["zh-CN", "en-US", "ja-JP", "zh-TW"],
+    "fallback": "zh-CN"
+  },
+  
+  "channels": {
+    "supported": ["webchat", "telegram", "discord", "whatsapp", "signal", "feishu", "dingtalk", "qqbot"],
+    "default": "webchat"
+  },
+  
+  "standards": {
+    "module_spec": "standards/module-spec.md",
+    "workflow_spec": "standards/workflow-spec.md",
+    "i18n_spec": "standards/i18n-spec.md"
+  }
+}

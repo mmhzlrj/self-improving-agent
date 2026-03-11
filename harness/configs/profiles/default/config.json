@@ -1,0 +1,43 @@
+{
+  "profile_id": "default",
+  "name": "默认配置",
+  "description": "OpenClaw AI 助理默认配置",
+  "version": "1.0.0",
+  
+  "locale": {
+    "language": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "currency": "CNY"
+  },
+  
+  "channels": {
+    "primary": "webchat",
+    "fallback": "webchat"
+  },
+  
+  "modules": {
+    "enabled": [
+      "messaging",
+      "web-search",
+      "browser",
+      "weather"
+    ],
+    "config": {}
+  },
+  
+  "workflows": {
+    "enabled": [],
+    "config": {}
+  },
+  
+  "personalization": {
+    "name": "用户",
+    "greeting": "你好",
+    "style": "friendly"
+  },
+  
+  "limits": {
+    "max_daily_messages": 1000,
+    "max_workflow_runs_per_day": 100
+  }
+}

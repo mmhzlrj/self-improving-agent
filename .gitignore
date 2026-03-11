@@ -1,0 +1,13 @@
+# OS
+.DS_Store
+com.google.Chrome
+
+# 临时文件
+*.png
+*.jpg
+*.js
+*.mjs
+
+# 配置
+config/
+.mcp-servers/

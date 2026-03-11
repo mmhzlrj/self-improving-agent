@@ -1,0 +1,85 @@
+# HEARTBEAT.md
+
+# 定期任务
+
+## 不定时任务
+
+### Jetson Thor Nano 爆料监控
+- **任务**：定期搜索 Jetson Thor Nano 最新消息
+- **频率**：每月一次
+- **搜索关键词**：Jetson Thor Nano release, specs, price, rumor
+- **发现新消息时**：立即通过飞书通知用户
+
+#### 2026年3月8日 监控结果
+- Jetson AGX Thor 已发布（$3,499，2025年9月发货，Blackwell 架构）
+- 未发现明确的 "Jetson Thor Nano" 产品发布消息
+- 社区有讨论 Jetson Nano 2026年底停产后继任产品，但名称未确认
+- 继续监控
+
+---
+
+# Keep this file empty (or with only comments) to skip heartbeat API calls.
+
+# Add tasks below when you want the agent to check something periodically.
+
+## MiniMax Coding Plan 额度监控
+
+### 任务信息
+- **任务**：检查 MiniMax Coding Plan 套餐剩余额度
+- **频率**：每天 3 次（早、中、晚）
+- **查询方式**：curl 直接查询，不用 API
+
+### 套餐信息
+- 总量：600 次 / 5小时（最后一个周期4小时）
+- 周期：20:00-00:00 (UTC+8)
+- 重置：每5小时滚动
+
+### ⚠️ 提醒阈值（仅在这些阈值触发时通知）
+| 阈值 | 剩余次数 | 状态 |
+|------|---------|------|
+| 80% | < 120 | ⚠️ 提醒 |
+| 90% | < 60 | ⚠️ 提醒 |
+| 95% | < 30 | 🔴 提醒 |
+| 99% | < 6 | 🚨 紧急 |
+
+### 提醒时不显示完整信息，只显示：
+- 当前已用比例
+- 距离重置时间
+- 剩余次数
+```bash
+curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains" \
+  -H "Authorization: Bearer sk-cp-wEiHHliuPGtLE9x63yViVXozeZu0UxOicm7MIuRpzBs-b7pkz78gr61YYCZ46yNjauf6eFh8LkBFnP4fhvBzmxFWSjAbWZo5S7ag7d5vDtijN9akDB6NNA4" | python3 -c "
+import json, sys
+from datetime import datetime, timezone, timedelta
+
+data = json.load(sys.stdin)
+tz = timezone(timedelta(hours=8))
+now = datetime.now(tz)
+
+for m in data['model_remains']:
+    start_ts = m['start_time'] / 1000
+    end_ts = m['end_time'] / 1000
+    remaining = m['current_interval_usage_count']
+    total = m['current_interval_total_count']
+    used = total - remaining
+    
+    start_dt = datetime.fromtimestamp(start_ts, tz)
+    end_dt = datetime.fromtimestamp(end_ts, tz)
+    remaining_seconds = (end_dt - now).total_seconds()
+    hours = int(remaining_seconds // 3600)
+    minutes = int((remaining_seconds % 3600) // 60)
+    pct_used = (used / total) * 100
+    
+    print(f'模型: {m[\"model_name\"]}')
+    print(f'周期: {start_dt.strftime(\"%H:%M\")} - {end_dt.strftime(\"%H:%M\")}')
+    print(f'剩余: {remaining} ({100-pct_used:.1f}%)')
+    print(f'已用: {used} ({pct_used:.1f}%)')
+    print(f'重置: {hours}小时{minutes}分钟后')
+"
+```
+
+### 提醒文案
+- 80%：⚠️ MiniMax 套餐剩余不足 20%
+- 90%：⚠️ MiniMax 套餐剩余不足 10%
+- 95%：🔴 MiniMax 套餐剩余不足 5%
+- 99%：🚨 MiniMax 套餐即将用完！

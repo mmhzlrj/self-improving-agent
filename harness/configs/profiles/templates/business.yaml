@@ -1,0 +1,71 @@
+{
+  "profile_id": "business-assistant",
+  "name": "商业助理",
+  "description": "适合商务人士的 AI 助理配置",
+  "version": "1.0.0",
+  
+  "locale": {
+    "language": "zh-CN",
+    "timezone": "Asia/Shanghai",
+    "currency": "CNY"
+  },
+  
+  "channels": {
+    "primary": "wechat",
+    "secondary": ["telegram", "feishu"],
+    "fallback": "webchat"
+  },
+  
+  "modules": {
+    "enabled": [
+      "messaging",
+      "email",
+      "calendar",
+      "web-search",
+      "browser",
+      "weather",
+      "feishu-doc",
+      "feishu-wiki",
+      "feishu-drive"
+    ],
+    "config": {
+      "calendar": {
+        "providers": ["google", "microsoft"],
+        "sync_interval": 300
+      },
+      "email": {
+        "provider": "imap",
+        "sync_interval": 300,
+        "notify_important": true
+      }
+    }
+  },
+  
+  "workflows": {
+    "enabled": [
+      "daily-brief",
+      "meeting-prep",
+      "weekly-report"
+    ],
+    "config": {
+      "daily-brief": {
+        "time": "08:00",
+        "include": ["calendar", "emails", "news"]
+      },
+      "meeting-prep": {
+        "prepare_minutes": 30
+      },
+      "weekly-report": {
+        "day": "friday",
+        "time": "17:00"
+      }
+    }
+  },
+  
+  "personalization": {
+    "name": "",
+    "greeting": "早上好",
+    "style": "professional",
+    "topics_interest": ["商业", "科技", "财经"]
+  }
+}

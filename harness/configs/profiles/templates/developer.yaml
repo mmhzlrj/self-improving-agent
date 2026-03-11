@@ -1,0 +1,63 @@
+{
+  "profile_id": "developer",
+  "name": "开发者",
+  "description": "适合软件工程师的 AI 助理配置",
+  "version": "1.0.0",
+  
+  "locale": {
+    "language": "en-US",
+    "timezone": "UTC",
+    "currency": "USD"
+  },
+  
+  "channels": {
+    "primary": "discord",
+    "secondary": ["telegram"],
+    "fallback": "webchat"
+  },
+  
+  "modules": {
+    "enabled": [
+      "messaging",
+      "web-search",
+      "browser",
+      "ocr",
+      "pdf",
+      "github"
+    ],
+    "config": {
+      "github": {
+        "username": "",
+        "auto_review": true
+      }
+    }
+  },
+  
+  "workflows": {
+    "enabled": [
+      "code-review",
+      "research"
+    ],
+    "config": {
+      "code-review": {
+        "auto_review_prs": true,
+        "check_linters": true
+      },
+      "research": {
+        "max_sources": 10
+      }
+    }
+  },
+  
+  "personalization": {
+    "name": "",
+    "greeting": "Hey",
+    "style": "technical",
+    "topics_interest": ["AI", "编程", "开源"]
+  },
+  
+  "limits": {
+    "max_daily_messages": 5000,
+    "max_workflow_runs_per_day": 500
+  }
+}
