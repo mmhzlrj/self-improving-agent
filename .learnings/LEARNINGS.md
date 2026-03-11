@@ -225,3 +225,8 @@ unset HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY
 - 截图前必须先确认窗口是否正确
 - 不要假设页面是对的，必须先验证
 - 用 minimax.py 分析整个 Chrome 窗口，确认是哪个页面
+
+### 5. DeepSeek 发送要点
+- 发送前必须确保窗口激活
+- 先 `osascript -e 'tell application "Google Chrome" to activate'`
+- 然后再按回车发送
