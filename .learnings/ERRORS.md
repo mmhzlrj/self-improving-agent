@@ -134,14 +134,14 @@
 #### Context
 - 分析 Browser Relay 截图时
 - 用 `read` 命令读取图片文件
-- 应该用 `image` 工具
+- 应该用 MiniMax tools 的 `minimax.py image` 命令
 
 #### Suggested Fix
-- 分析图片必须用 `image` 工具
-- 注意：需要切换到支持图片的模型（如 Claude）
+- 分析图片必须用 `minimax.py image` 命令
+- 命令：`python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image "问题" "图片路径"`
 
 #### Metadata
-- Related Files: TOOLS.md
+- Related Files: skills/minimax-tools/
 
 ---
 
