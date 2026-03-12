@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// 智库 subagent2 - CDP 后台模式 + 多轮收集
+// 智库 subagent2 - 实时完整回复展示
 
 const { chromium } = require('playwright');
 const QUESTION = process.argv[2] || "用一句话介绍深圳";
@@ -19,7 +19,8 @@ async function ensureBrowser() {
 }
 
 async function main() {
-    console.log("=== subagent2 开始 ===");
+    console.log(`\n🤖 智库问答 (subagent2)`);
+    console.log(`问题: ${QUESTION}\n`);
     
     const ok = await ensureBrowser();
     if (!ok) { console.log("Browser 未运行"); return; }
@@ -28,25 +29,18 @@ async function main() {
         headers: { 'Client-Wants-Ephemeral-DevTools-Context': 'true' }
     });
     const ctx = browser.contexts()[0];
-    console.log("页面数:", ctx.pages().length);
     
-    const collected = { '千问': false, '智谱': false, 'Kimi': false, '豆包': false, 'DeepSeek': false };
+    const collected = { '千问': '', '智谱': '', 'Kimi': '', '豆包': '', 'DeepSeek': '' };
     
     async function findOrOpen(url, name) {
         for (const p of ctx.pages()) {
-            if (p.url().includes(url.replace('https://', '').split('/')[0])) {
-                return p;
-            }
+            if (p.url().includes(url.replace('https://', '').split('/')[0])) return p;
         }
-        console.log(`打开: ${name}`);
         try {
             const page = await ctx.newPage();
             await page.goto(url, { timeout: 15000, waitUntil: 'domcontentloaded' });
             return page;
-        } catch(e) {
-            console.log(`失败: ${e.message}`);
-            return null;
-        }
+        } catch(e) { return null; }
     }
     
     async function ask(page, q) {
@@ -54,90 +48,49 @@ async function main() {
         await page.waitForTimeout(1500);
         const ta = page.locator('textarea').first();
         if (await ta.count() > 0) {
-            await ta.fill(q);
-            await ta.press('Enter');
-            console.log("已提问");
+            await ta.fill(q); await ta.press('Enter');
         } else {
             const ed = page.locator('div[contenteditable="true"]').first();
             if (await ed.count() > 0) {
-                await ed.fill(q);
-                await ed.press('Enter');
-                console.log("已提问");
+                await ed.fill(q); await ed.press('Enter');
             }
         }
     }
     
-    // 时间点1-2: 提问 (豆包, DeepSeek)
-    console.log("\n=== 提问阶段 ===");
-    let p1 = await findOrOpen('https://www.doubao.com/chat/', '豆包');
-    await ask(p1, QUESTION);
+    async function collectAndShow(name, url) {
+        if (collected[name]) return;
+        let p = await findOrOpen(url, name);
+        if (!p) return;
+        const text = await p.evaluate(() => document.body.innerText);
+        const lines = text.split('\n').filter(l => l.trim().length > 3);
+        const reply = lines.slice(-50).join('\n').trim();
+        if (reply.includes(QUESTION.slice(0, 3))) {
+            collected[name] = reply;
+            console.log(`【${name}】`);
+            console.log(reply);
+            console.log(`进度: ${Object.values(collected).filter(v => v).length}/5 已收集\n`);
+        }
+    }
     
-    let p2 = await findOrOpen('https://chat.deepseek.com/', 'DeepSeek');
-    await ask(p2, QUESTION);
+    // 提问
+    await findOrOpen('https://www.doubao.com/chat/', '豆包');
+    await ask(await findOrOpen('https://www.doubao.com/chat/', '豆包'), QUESTION);
+    await findOrOpen('https://chat.deepseek.com/', 'DeepSeek');
+    await ask(await findOrOpen('https://chat.deepseek.com/', 'DeepSeek'), QUESTION);
     
-    // 等待回复
-    console.log("\n等待回复 (15秒)...");
     await new Promise(r => setTimeout(r, 15000));
     
-    // 收集阶段 - 多轮轮询
-    console.log("\n=== 收集阶段 ===");
+    // 收集
     for (let round = 1; round <= MAX_ROUNDS; round++) {
-        console.log(`\n--- 第 ${round}/${MAX_ROUNDS} 轮 ---`);
+        await collectAndShow('千问', 'https://chat.qwen.ai/');
+        await collectAndShow('智谱', 'https://chatglm.cn/');
+        await collectAndShow('Kimi', 'https://www.kimi.com/');
         
-        // 收集千问
-        if (!collected['千问']) {
-            let p3 = await findOrOpen('https://chat.qwen.ai/', '千问');
-            if (p3) {
-                const text = await p3.evaluate(() => document.body.innerText);
-                if (text.includes(QUESTION.slice(0, 5))) {
-                    console.log(`\n=== 千问 ===`);
-                    console.log(text.slice(-400));
-                    collected['千问'] = true;
-                }
-            }
-        }
-        
-        // 收集智谱
-        if (!collected['智谱']) {
-            let p4 = await findOrOpen('https://chatglm.cn/', '智谱');
-            if (p4) {
-                const text = await p4.evaluate(() => document.body.innerText);
-                if (text.includes(QUESTION.slice(0, 5))) {
-                    console.log(`\n=== 智谱 ===`);
-                    console.log(text.slice(-400));
-                    collected['智谱'] = true;
-                }
-            }
-        }
-        
-        // 收集Kimi
-        if (!collected['Kimi']) {
-            let p5 = await findOrOpen('https://www.kimi.com/', 'Kimi');
-            if (p5) {
-                const text = await p5.evaluate(() => document.body.innerText);
-                if (text.includes(QUESTION.slice(0, 5))) {
-                    console.log(`\n=== Kimi ===`);
-                    console.log(text.slice(-400));
-                    collected['Kimi'] = true;
-                }
-            }
-        }
-        
-        const remaining = Object.values(collected).filter(v => !v).length;
-        console.log(`进度: ${5 - remaining}/5 已收集`);
-        
-        if (remaining === 0) {
-            console.log("全部收集完成!");
-            break;
-        }
-        
-        if (round < MAX_ROUNDS) {
-            console.log("等待下一轮...");
-            await new Promise(r => setTimeout(r, 10000));
-        }
+        if (Object.values(collected).filter(v => v).length === 5) break;
+        if (round < MAX_ROUNDS) await new Promise(r => setTimeout(r, 10000));
     }
     
-    console.log("\n=== subagent2 完成 ===");
+    console.log("✅ 完成 (subagent2)\n");
     await browser.close();
 }
 
