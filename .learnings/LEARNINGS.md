@@ -501,3 +501,32 @@ async function findOrOpen(url, name) {
     return page;
 }
 ```
+
+### 15. 多轮收集轮询优化
+
+**问题**：AI 生成回复需要时间，单次收集可能获取不到
+
+**解决方案**：多轮轮询收集
+
+```javascript
+const MAX_ROUNDS = 3;
+
+for (let round = 1; round <= MAX_ROUNDS; round++) {
+    // 检查每个平台是否有新回复
+    if (text.includes(QUESTION.slice(0, 5))) {
+        console.log("已收集");
+        collected[name] = true;
+    }
+    
+    // 检查是否全部完成
+    if (全部收集完成) break;
+    
+    // 等待下一轮
+    await new Promise(r => setTimeout(r, 10000));
+}
+```
+
+**测试结果**：
+- 3轮轮询，每轮间隔10秒
+- 自动检测问题关键词判断是否有新回复
+- 5个平台回复全部成功获取

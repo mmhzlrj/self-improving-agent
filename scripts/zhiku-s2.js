@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-// 智库 subagent2 - CDP 后台模式
+// 智库 subagent2 - CDP 后台模式 + 多轮收集
 
 const { chromium } = require('playwright');
 const QUESTION = process.argv[2] || "用一句话介绍深圳";
+const MAX_ROUNDS = 3;
 
 async function ensureBrowser() {
     for (let i = 0; i < 10; i++) {
@@ -29,10 +30,11 @@ async function main() {
     const ctx = browser.contexts()[0];
     console.log("页面数:", ctx.pages().length);
     
+    const collected = { '千问': false, '智谱': false, 'Kimi': false, '豆包': false, 'DeepSeek': false };
+    
     async function findOrOpen(url, name) {
         for (const p of ctx.pages()) {
             if (p.url().includes(url.replace('https://', '').split('/')[0])) {
-                console.log(`复用: ${name}`);
                 return p;
             }
         }
@@ -65,30 +67,75 @@ async function main() {
         }
     }
     
-    async function collect(page, name) {
-        if (!page) return;
-        await page.waitForTimeout(500);
-        const text = await page.evaluate(() => document.body.innerText);
-        console.log(`\n=== ${name} ===`);
-        console.log(text.slice(-350));
-    }
-    
     // 时间点1-2: 提问 (豆包, DeepSeek)
+    console.log("\n=== 提问阶段 ===");
     let p1 = await findOrOpen('https://www.doubao.com/chat/', '豆包');
     await ask(p1, QUESTION);
     
     let p2 = await findOrOpen('https://chat.deepseek.com/', 'DeepSeek');
     await ask(p2, QUESTION);
     
-    // 时间点3-5: 收集 (千问, 智谱, Kimi)
-    let p3 = await findOrOpen('https://chat.qwen.ai/', '千问');
-    await collect(p3, '千问');
+    // 等待回复
+    console.log("\n等待回复 (15秒)...");
+    await new Promise(r => setTimeout(r, 15000));
     
-    let p4 = await findOrOpen('https://chatglm.cn/', '智谱');
-    await collect(p4, '智谱');
-    
-    let p5 = await findOrOpen('https://www.kimi.com/', 'Kimi');
-    await collect(p5, 'Kimi');
+    // 收集阶段 - 多轮轮询
+    console.log("\n=== 收集阶段 ===");
+    for (let round = 1; round <= MAX_ROUNDS; round++) {
+        console.log(`\n--- 第 ${round}/${MAX_ROUNDS} 轮 ---`);
+        
+        // 收集千问
+        if (!collected['千问']) {
+            let p3 = await findOrOpen('https://chat.qwen.ai/', '千问');
+            if (p3) {
+                const text = await p3.evaluate(() => document.body.innerText);
+                if (text.includes(QUESTION.slice(0, 5))) {
+                    console.log(`\n=== 千问 ===`);
+                    console.log(text.slice(-400));
+                    collected['千问'] = true;
+                }
+            }
+        }
+        
+        // 收集智谱
+        if (!collected['智谱']) {
+            let p4 = await findOrOpen('https://chatglm.cn/', '智谱');
+            if (p4) {
+                const text = await p4.evaluate(() => document.body.innerText);
+                if (text.includes(QUESTION.slice(0, 5))) {
+                    console.log(`\n=== 智谱 ===`);
+                    console.log(text.slice(-400));
+                    collected['智谱'] = true;
+                }
+            }
+        }
+        
+        // 收集Kimi
+        if (!collected['Kimi']) {
+            let p5 = await findOrOpen('https://www.kimi.com/', 'Kimi');
+            if (p5) {
+                const text = await p5.evaluate(() => document.body.innerText);
+                if (text.includes(QUESTION.slice(0, 5))) {
+                    console.log(`\n=== Kimi ===`);
+                    console.log(text.slice(-400));
+                    collected['Kimi'] = true;
+                }
+            }
+        }
+        
+        const remaining = Object.values(collected).filter(v => !v).length;
+        console.log(`进度: ${5 - remaining}/5 已收集`);
+        
+        if (remaining === 0) {
+            console.log("全部收集完成!");
+            break;
+        }
+        
+        if (round < MAX_ROUNDS) {
+            console.log("等待下一轮...");
+            await new Promise(r => setTimeout(r, 10000));
+        }
+    }
     
     console.log("\n=== subagent2 完成 ===");
     await browser.close();
