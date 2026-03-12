@@ -208,3 +208,40 @@
 
 #### Metadata
 - Related Files: LEARNINGS.md
+
+### [ERR-20260311-006] 自动启动浏览器时打开 Google
+
+**Logged**: 2026-03-11
+**Priority**: medium
+**Status**: open
+**Area**: automation
+
+#### Summary
+尝试用 `openclaw browser open https://www.google.com` 启动浏览器，但 Google 在中国大陆无法访问
+
+#### Context
+- 自动启动浏览器时使用了 Google 网址
+- 中国大陆无法访问 Google
+
+#### Suggested Fix
+- 改用中国可访问的 URL，如百度 (https://www.baidu.com) 或必应 (https://www.bing.com)
+
+### [ERR-20260311-007] Headless 模式下部分平台需要登录
+
+**Logged**: 2026-03-11
+**Priority**: high
+**Status**: open
+**Area**: automation
+
+#### Summary
+使用真正的 headless 模式时，Kimi 等平台需要登录才能使用
+
+#### Context
+- 使用 chromium-headless-shell 启动全新浏览器
+- Kimi 页面显示需要登录
+- 其他平台可能也有类似问题
+
+#### Suggested Fix
+- 需要先在有头模式下登录各平台
+- 或者使用已登录的浏览器配置文件
+- 尝试使用 Browser CDP 连接已有登录会话

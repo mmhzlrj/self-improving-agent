@@ -369,3 +369,135 @@ openclaw browser click e119  # 联网
 - 添加 all 模式导航
 - 每个平台设置前先 navigate 到对应 URL
 - 测试结果：5/5 全部成功
+
+### 11. Subagent 工作流设计原则
+
+**分配逻辑**：
+- subagent1 分配：千问、智谱、Kimi（3个）
+- subagent2 分配：豆包、DeepSeek（2个）
+- 先后动的时间差被充分利用
+
+**subagent1**：
+```
+步骤1：打开千问网页 → 提问
+步骤2：打开智谱网页 → 提问
+步骤3：打开Kimi网页 → 提问
+步骤4：切换到豆包网页 → 收集回复
+步骤5：切换到DeepSeek网页 → 收集回复
+```
+
+**subagent2**：
+```
+步骤1：打开豆包网页 → 提问
+步骤2：打开DeepSeek网页 → 提问
+步骤3：切换到千问网页 → 收集回复
+步骤4：切换到智谱网页 → 收集回复
+步骤5：切换到Kimi网页 → 收集回复
+```
+
+**关键点**：
+- 利用 subagent 先后动的时间差
+- Browser Relay 是 Chrome 插件，多个标签页共享
+- 通过 CDP 可以获取同一个 Chrome PID 下的所有标签页
+
+**表述方式**：
+- ❌ 错误："直接切换到已打开的标签页"
+- ✅ 正确："如果之前没关，就直接接着问，如果关了就重新打开"
+
+### 12. Subagent 工作流实战（两个 subagent 配合）
+
+**核心问题**：
+- 2个 subagent 如何分工合作？
+- 如何复用已打开的页面？
+
+**工作流设计**：
+- subagent1：千问→智谱→Kimi（提问），然后收集豆包/DeepSeek
+- subagent2：豆包→DeepSeek（提问），然后收集千问/智谱/Kimi
+- 关键：同时开始，复用已有页面
+
+**技术实现**：
+- findOrOpen 函数：先查已有页面，找到就复用，找不到才打开
+- 复用逻辑：用 URL 关键词匹配
+
+**错误记录**：
+1. ❌ 打开空白 URL - "doubao.com" 导致 invalid URL
+   - 修复：使用完整 URL "https://www.doubao.com/chat/"
+2. ❌ 每次都打开新页面 - 导致重复窗口
+   - 修复：先检查现有页面，复用而非新建
+
+**最终脚本**：
+- zhiku-subagent1.js - 负责 3 个平台提问 + 2 个平台收集
+- zhiku-subagent2.js - 负责 2 个平台提问 + 3 个平台收集
+
+**测试结果**：
+- 全部复用已有页面，没有打开新页面
+- 5 个平台的回复都成功获取
+
+### 13. 真正的后台模式 (CDP)
+
+**方案**：
+- 使用 Playwright CDP 连接到 Browser Relay
+- 通过 `Client-Wants-Ephemeral-DevTools-Context` 头实现真正后台
+- 复用已有页面，无需登录
+
+**脚本**：
+- zhiku-s1.js - subagent1 (千问→智谱→Kimi→收集豆包/DeepSeek)
+- zhiku-s2.js - subagent2 (豆包→DeepSeek→收集千问/智谱/Kimi)
+
+**关键代码**：
+```javascript
+const browser = await chromium.connectOverCDP('http://127.0.0.1:18800', {
+    headers: { 'Client-Wants-Ephemeral-DevTools-Context': 'true' }
+});
+```
+
+**优势**：
+- 无窗口跳动
+- 复用已登录会话
+- 真正的后台操作
+
+### 14. 智库工作流实战总结
+
+#### 试错过程
+
+1. **同时派发导致重复打开**
+   - 最初每个 subagent 都尝试打开全部5个页面
+   - 导致重复窗口
+
+2. **URL 错误**
+   - "doubao.com" → "invalid URL"
+   - 修复：使用完整 URL
+
+3. **Headless 需要登录**
+   - chromium-headless-shell 无法登录
+   - 修复：CDP 连接已有会话
+
+4. **自动启动打开 Google**
+   - 中国大陆无法访问
+   - 修复：改用百度
+
+#### 最终方案
+
+```javascript
+// CDP 后台模式
+const browser = await chromium.connectOverCDP('http://127.0.0.1:18800', {
+    headers: { 'Client-Wants-Ephemeral-DevTools-Context': 'true' }
+});
+```
+
+#### 关键代码
+
+```javascript
+// 复用已有页面
+async function findOrOpen(url, name) {
+    for (const p of ctx.pages()) {
+        if (p.url().includes(url.replace('https://', '').split('/')[0])) {
+            return p;  // 复用
+        }
+    }
+    // 没找到才打开新页面
+    const page = await ctx.newPage();
+    await page.goto(url);
+    return page;
+}
+```
