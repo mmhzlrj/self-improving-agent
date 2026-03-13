@@ -4,6 +4,97 @@
 
 ---
 
+## 2026-03-13
+
+### [ERR-20260313-001] mcp-adapter 插件安装失败 - 缺少 openclaw.extensions
+
+**Logged**: 2026-03-13
+**Priority**: high
+**Status**: resolved
+**Area**: plugin
+
+#### Summary
+NPM 安装的 mcp-adapter 插件缺少 openclaw.extensions 字段，无法安装
+
+#### Context
+- 执行 `openclaw plugins install mcp-adapter` 失败
+- 错误信息：`package.json missing openclaw.extensions`
+
+#### Suggested Fix
+- 从源码安装：先 npm pack 下载包，然后 `openclaw plugins install /tmp/package`
+
+#### Metadata
+- Reproducible: yes
+- Related Files: openclaw.json, openclaw-mcp-adapter
+
+---
+
+### [ERR-20260313-002] mcporter 不支持 stdio 类型 MCP 服务器
+
+**Logged**: 2026-03-13
+**Priority**: medium
+**Status**: workaround
+**Area**: mcp
+
+#### Summary
+mcporter 主要支持 HTTP 类型 MCP 服务器，不支持 stdio 和 WebSocket
+
+#### Context
+- 尝试配置 Playwright MCP 和 WebMCP 到 mcporter
+- stdio 类型需要通过 openclaw-mcp-adapter 插件
+
+#### Suggested Fix
+- 使用 openclaw-mcp-adapter 插件代替 mcporter
+- 或手动启动 MCP 服务器通过其他方式调用
+
+#### Metadata
+- Related Files: mcporter.json
+
+---
+
+### [ERR-20260313-003] stale openclaw-mcp 配置项
+
+**Logged**: 2026-03-13
+**Priority**: low
+**Status**: resolved
+**Area**: config
+
+#### Summary
+之前安装 openclaw-mcp (npm 包) 后卸载，但配置未清理干净
+
+#### Context
+- 日志中出现 `plugins.entries.openclaw-mcp: plugin not found` 警告
+- 需要手动从 openclaw.json 中删除
+
+#### Suggested Fix
+- 手动删除 openclaw.json 中的 `"openclaw-mcp"` 配置项
+
+#### Metadata
+- Related Files: openclaw.json
+
+---
+
+### [ERR-20260313-004] Gateway 进程未完全重启
+
+**Logged**: 2026-03-13
+**Priority**: medium
+**Area**: gateway
+
+#### Summary
+Gateway 进程被 kill 后未正确重启，导致配置未生效
+
+#### Context
+- 多次执行 kill 和 start，但旧进程仍在运行
+- 需要确保完全停止旧进程后再启动
+
+#### Suggested Fix
+- 使用 `pkill -9` 强制杀死进程
+- 或使用 `openclaw gateway stop` 等待完全停止
+
+#### Metadata
+
+---
+
 ## 2026-03-10
 
 ### [ERR-20260310-001] 消息缓冲机制问题
