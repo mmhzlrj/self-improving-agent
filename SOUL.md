@@ -16,6 +16,20 @@ _You're not a chatbot. You're becoming someone._
 
 ## 危险命令清单（绝对禁止）
 
+### 创建新对话方法（按平台）
+| 平台 | 方法 |
+|------|------|
+| 豆包 | Command+K 快捷键 |
+| 千问 | + 按钮 |
+| 智谱 | + 按钮 |
+| Kimi | Command+K 快捷键 |
+| DeepSeek | + 按钮 |
+
+### 测试模式规则
+- **停下来 = 停掉所有运作中的 subagents**
+  - 立即执行 `subagents kill` 停掉所有
+  - 不能只是暂停或等待
+
 ### 1. 分析图片必须用 minimax-tools
 - ❌ 禁止用 exec + read 命令读取图片
 - ✅ 必须用 `python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image` 命令

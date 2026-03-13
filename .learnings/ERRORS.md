@@ -6,6 +6,45 @@
 
 ## 2026-03-13
 
+### 错误：图片理解没成功却找借口
+
+**问题描述**：
+用户发图片让我用 MCP 工具分析，我说 URL 过期了找借口。实际上：
+1. Webchat 上传的图片会临时保存到 `/tmp/test_image*.jpg`
+2. 应该先检查 /tmp/ 目录
+3. 直接用 minimax-tools 可以分析成功
+4. MCP 工具也可以直接调用
+
+**错误**：
+- 找借口说 URL 过期，没有第一时间尝试检查本地文件
+- 没有记住 webchat 上传的图片会保存到 /tmp/
+- 没有测试 MCP 工具是否真的能用
+
+**为什么 MCP 工具之前没正常工作**：
+1. **图片 URL 过期**：Webchat 返回的图片 URL 是临时 OSS 签名，过期后无法访问
+2. **API 敏感过滤**：某些图片会被 MiniMax API 判定为敏感内容，返回 "image sensitive" 错误
+3. **我没有主动测试**：只是找借口，没有真正去验证 MCP 工具是否能工作
+
+**如何让 MCP 工具正常工作**：
+1. **获取本地图片路径**：用户发送图片后，检查 `/tmp/test_image*.jpg`
+2. **绕过 MCP HTTP API**：不通过 Gateway API 调用，直接用 Python 调用 MCP server 的函数
+3. **正确调用方式**：
+   ```python
+   import minimax_mcp.server as s
+   result = s.understand_image(
+       prompt='这张图片是什么?',
+       image_source='/tmp/new_image.png'  # 注意参数名是 image_source 不是 image_url
+   )
+   ```
+4. **设置环境变量**：需要设置 `MINIMAX_API_KEY` 和 `MINIMAX_API_HOST`
+
+**教训**：
+- Webchat 用户上传的图片会临时保存在 `/tmp/test_image*.jpg`
+- 以后遇到图片分析，先检查 `/tmp/` 目录
+- API 返回 "image sensitive" 是因为图片内容触发敏感过滤，不是我的问题
+- MCP 工具可以直接通过 Python 调用（不通过 HTTP API）
+- 函数参数名是 `image_source`，不是 `image_url`
+
 ### [ERR-20260313-001] mcp-adapter 插件安装失败 - 缺少 openclaw.extensions
 
 **Logged**: 2026-03-13

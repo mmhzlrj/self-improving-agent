@@ -46,12 +46,29 @@ Things like:
 
 ### 图片分析
 
-- **工具**: `~/.openclaw/workspace/skills/minimax-tools/minimax.py`
-- **用法**: 
-  ```bash
-  python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image "问题" "图片路径"
-  ```
-- **注意**: 输出为空时可能是用错工具了
+**优先使用 MCP 工具**：
+```python
+import minimax_mcp.server as s
+result = s.understand_image(
+    prompt='问题内容',
+    image_source='/tmp/图片路径.jpg'  # 参数名是 image_source，不是 image_url
+)
+# 需要设置环境变量: MINIMAX_API_KEY, MINIMAX_API_HOST
+```
+
+**备选 minimax.py**：
+```bash
+python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image "问题" "图片路径"
+```
+
+**优先级**：
+1. 先尝试 MCP 工具 `minimax_understand_image`（更稳定）
+2. 如果失败（返回 "image sensitive" 或 "output sensitive"），再尝试 minimax.py
+3. 图片路径从 `/tmp/` 目录获取（如 `/tmp/test_image*.jpg`）
+
+**注意事项**：
+- 输出为空时可能是用错工具了
+- MiniMax API 会过滤敏感内容（返回 1026/1027 错误）
 
 ### 经验教训目录
 
