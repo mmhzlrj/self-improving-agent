@@ -72,7 +72,7 @@ async function main() {
         } else {
             // 千问/智谱/DeepSeek 重新加载页面创建新对话
             await page.goto(page.url());
-            await page.waitForTimeout(2000);
+            await page.waitForTimeout(3000);
             console.log("[重新加载]");
         }
         
@@ -97,52 +97,83 @@ async function main() {
         
         let content = '';
         
-        // 轮询等待复制按钮出现
-        for (let i = 0; i < 2; i++) {
-            console.log(`[${name}] 等待回复 ${(i+1)*10}s...`);
-            await page.waitForTimeout(10000);
+        // 等待回复出现 - 使用DOM元素检测
+        try {
+            await page.waitForFunction(() => {
+                const body = document.body.innerText;
+                return body.includes('已思考') || 
+                       body.includes('正在搜索') || 
+                       body.includes('已完成') ||
+                       body.includes('已阅读') ||
+                       body.includes('参考') ||
+                       (body.length > 200 && body.split('\n').length > 5);
+            }, { timeout: 30000 }).then(() => {
+                console.log(`[${name}] 检测到回复内容`);
+            }).catch(() => {
+                console.log(`[${name}] 等待回复超时`);
+            });
             
-            const btnCount = await page.locator('button').count();
-            if (btnCount > 3) {
-                console.log(`[${name}] 检测到回复（按钮数: ${btnCount}）`);
-                
-                const text = await page.evaluate(() => document.body.innerText);
-                const lines = text.split('\n').filter(l => l.trim().length > 3);
-                content = lines.slice(-50).join('\n');
-                
-                if (content.length > 50) break;
-            }
+            await page.waitForTimeout(3000);
+            
+        } catch(e) {
+            console.log(`[${name}] 等待回复异常: ${e.message}`);
         }
         
-        if (!content || content.length < 50) {
-            const text = await page.evaluate(() => document.body.innerText);
-            const lines = text.split('\n').filter(l => l.trim().length > 3);
-            content = lines.slice(-50).join('\n');
+        // 获取页面内容
+        const text = await page.evaluate(() => {
+            const selectors = [
+                '[data-role="assistant"]',
+                '.message-content',
+                '.assistant-message',
+                '[class*="response"]',
+                '[class*="reply"]'
+            ];
+            
+            for (const sel of selectors) {
+                const el = document.querySelector(sel);
+                if (el && el.innerText.length > 50) {
+                    return el.innerText;
+                }
+            }
+            
+            const allText = document.body.innerText;
+            const lines = allText.split('\n');
+            for (let i = lines.length - 1; i >= 0; i--) {
+                if (lines[i].includes('已思考') || 
+                    lines[i].includes('正在搜索') || 
+                    lines[i].includes('已完成') ||
+                    lines[i].includes('参考') ||
+                    lines[i].includes('已阅读')) {
+                    return lines.slice(i).join('\n');
+                }
+            }
+            return lines.join('\n');
+        });
+        
+        content = text;
+        
+        if (content.length < 100 || (content.includes('新建对话') && content.includes('历史对话'))) {
+            const allText = await page.evaluate(() => document.body.innerText);
+            const allLines = allText.split('\n').filter(l => l.trim().length > 2);
+            content = allLines.join.join('\n');
         }
         
         console.log(`\n=== ${name} ===`);
-        console.log(content.slice(-500));
+        console.log(content);
         
         // 保存到文件
         saveToFile(name, content);
     }
     
-    // 提问 (豆包, DeepSeek)
-    let p1 = await findOrOpen('https://www.doubao.com/chat/', '豆包');
-    await ask(p1, QUESTION, '豆包');
+    // 千问
+    let p1 = await findOrOpen('https://chat.qwen.ai/', '千问');
+    await ask(p1, QUESTION, '千问');
+    await collect(p1, '千问');
     
+    // DeepSeek
     let p2 = await findOrOpen('https://chat.deepseek.com/', 'DeepSeek');
     await ask(p2, QUESTION, 'DeepSeek');
-    
-    // 收集 (千问, Kimi, 智谱)
-    let p3 = await findOrOpen('https://chat.qwen.ai/', '千问');
-    await collect(p3, '千问');
-    
-    let p4 = await findOrOpen('https://www.kimi.com/', 'Kimi');
-    await collect(p4, 'Kimi');
-    
-    let p5 = await findOrOpen('https://chatglm.cn/', '智谱');
-    await collect(p5, '智谱');
+    await collect(p2, 'DeepSeek');
     
     console.log("\n=== subagent2 完成 ===");
     await browser.close();

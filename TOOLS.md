@@ -62,6 +62,17 @@ Things like:
   - `FEATURE_REQUESTS.md` - 功能请求
 - **注意**: 不要放到 skill 目录下的 .learnings，要统一放到 workspace 根目录
 
+### 查看 Markdown 文件
+
+- **Skill**: mdview
+- **用途**: 用浏览器打开 MD 文件，效果类似 GitHub
+- **路径**: `~/.openclaw/workspace/skills/mdview/`
+- **命令**: 
+  ```bash
+  python3 ~/.openclaw/workspace/tools/mdview.py <文件路径>
+  ```
+- **教训**: 2026-03-12 用错skill，直接用exec打开而非mdview
+
 ---
 
 ## Why Separate?

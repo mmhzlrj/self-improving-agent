@@ -20,7 +20,8 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Add tasks below when you want the agent to check something periodically.
+# Last check: 2026-03-12 11:47
+# 剩余 252 次 (42%)，重置 3小时25分钟后，无需提醒
 
 ## MiniMax Coding Plan 额度监控
 

@@ -2,7 +2,21 @@
 // 智库 subagent1 - CDP 后台模式
 
 const { chromium } = require('playwright');
+const fs = require('fs');
+const path = require('path');
 const QUESTION = process.argv[2] || "用一句话介绍深圳";
+
+// 保存到文件
+function saveToFile(name, content) {
+    const today = new Date().toISOString().slice(0, 10);
+    const dir = path.join(process.env.HOME, '.openclaw/workspace/zhiku_output', today, name);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    
+    const safeName = QUESTION.slice(0, 15).replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+    const file = path.join(dir, `${safeName}.md`);
+    fs.writeFileSync(file, content);
+    console.log(`[保存] ${file}`);
+}
 
 async function ensureBrowser() {
     for (let i = 0; i < 10; i++) {
@@ -82,43 +96,29 @@ async function main() {
     async function collect(page, name) {
         if (!page) return;
         
-        // 轮询等待回复生成，每10秒检查一次，最多60秒
         let content = '';
-        let done = false;
         
-        for (let i = 0; i < 6; i++) {
+        // 轮询等待复制按钮出现（按钮数量增加表示回复完成）
+        for (let i = 0; i < 2; i++) {
             console.log(`[${name}] 等待回复 ${(i+1)*10}s...`);
             await page.waitForTimeout(10000);
             
-            // 检查是否有回复内容
-            const pageText = await page.evaluate(() => document.body.innerText);
-            if (pageText.includes('回答') || pageText.includes('完成') || pageText.includes('正在') === false) {
-                console.log(`[${name}] 检测到回复`);
+            // 检查按钮数量（回复完成后按钮会增加）
+            const btnCount = await page.locator('button').count();
+            if (btnCount > 3) {
+                console.log(`[${name}] 检测到回复（按钮数: ${btnCount}）`);
                 
-                // 尝试点击复制按钮获取完整内容
-                try {
-                    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-                    await page.waitForTimeout(1000);
-                    
-                    const copyBtn = page.locator('button, [role="button"]').first();
-                    if (await copyBtn.count() > 0) {
-                        await copyBtn.click();
-                        await page.waitForTimeout(500);
-                        content = await page.evaluate(async () => {
-                            try { return await navigator.clipboard.readText(); } catch(e) { return ''; }
-                        });
-                    }
-                } catch(e) {}
+                // 直接用 innerText 获取内容，不点击
+                const text = await page.evaluate(() => document.body.innerText);
+                const lines = text.split('\n').filter(l => l.trim().length > 3);
+                content = lines.slice(-50).join('\n');
                 
-                if (content && content.length > 20) {
-                    done = true;
-                    break;
-                }
+                if (content.length > 50) break;
             }
         }
         
-        // 备选：用 innerText
-        if (!content || content.length < 20) {
+        // 备选
+        if (!content || content.length < 50) {
             const text = await page.evaluate(() => document.body.innerText);
             const lines = text.split('\n').filter(l => l.trim().length > 3);
             content = lines.slice(-50).join('\n');
@@ -126,6 +126,9 @@ async function main() {
         
         console.log(`\n=== ${name} ===`);
         console.log(content.slice(-500));
+        
+        // 保存到文件
+        saveToFile(name, content);
     }
     
     // 时间点1-3: 提问 (智谱, 千问, Kimi)

@@ -530,3 +530,184 @@ for (let round = 1; round <= MAX_ROUNDS; round++) {
 - 3轮轮询，每轮间隔10秒
 - 自动检测问题关键词判断是否有新回复
 - 5个平台回复全部成功获取
+
+### 16. 智库 subagent 方案
+
+#### 痛点
+- 脚本输出合并到一个内容块
+- 无法看到独立步骤进度
+
+#### 方案
+使用 subagent 并行执行，每个 subagent 独立输出
+
+#### 架构
+- 5个 subagent 并行运行
+- 复用现有浏览器标签页
+- 每个步骤/回复独立显示
+
+#### 总结块格式
+```
+【总结】
+收到 X/5 个平台的回复：
+千问：简短观点
+智谱：简短观点
+...
+综合观点：...
+```
+
+#### 测试验证
+- sessions_spawn 测试成功
+- 每个 subagent 输出是独立内容块
+
+### 工作模式定义
+
+#### 测试模式
+- 每一步都要听用户指挥
+- 问了才能做
+- 用于调试和验证
+
+#### 自动模式
+- 自己按照流程自主执行
+- 遇到问题自己判断解决
+- 用于正式运行
+
+### 测试模式规则
+
+**停下来 = 停掉所有运作中的 subagents**
+- 立即执行 subagents kill
+- 不能只是暂停或等待
+
+### 创建新对话的方法（按平台）
+
+| 平台 | 方法 |
+|------|------|
+| 豆包 | Command+K 快捷键 |
+| 千问 | + 按钮 |
+| 智谱 | + 按钮 |
+| Kimi | Command+K 快捷键 |
+| DeepSeek | + 按钮 |
+
+### 调试时的原则
+
+1. **只检查需要的页面**：检查千问就只检查千问，不要打开豆包和Kimi
+2. **只做必要的操作**：不需要的操作不要做，避免浪费资源
+3. **先想清楚再行动**：不要想一出是一出
+
+### 各平台高级模型选择
+
+| 平台 | 高级模式 |
+|------|----------|
+| 豆包 | 专家模式 |
+| Kimi | 思考模式 |
+| DeepSeek | 深度思考 + 智能搜索 |
+| 千问 | 默认 |
+| 智谱 | 思考 + 联网 |
+
+### 智库 Skill 激活方式
+- 看到"智库"关键字时，激活此技能执行问答
+
+### 待修复BUG - 智库 Skill
+
+1. **无头模式**：不打开用户可见的Chrome标签页
+2. **网页正常打开**：确保页面加载完成
+3. **正确收集回复**：找到对的按钮
+4. **保存本地文件**：把回复保存到文件
+5. **读取总结**：读取文件并总结给用户
+
+### 智库测试结果判断标准
+
+**成功**：获取到当前问题的完整回复
+**失败**：历史列表、搜索中、空白
+
+---
+
+## 2026-03-12 智库v0.5优化 - 复制按钮点击方案
+
+### 问题背景
+当前智库脚本存在以下问题：
+1. 千问输入框readonly超时
+2. 获取内容不完整/获取到历史对话
+3. 应该用复制按钮而非innerText获取内容
+
+### AI回复优化方案（来自智库5个平台）
+
+#### 1. 等待回复完成
+不要只等"正在搜索"，要等以下标记出现：
+- "已完成"、"参考"、"已阅读"、"思考结束"
+- 或检测到复制按钮出现
+
+#### 2. 复制按钮选择器（各平台）
+
+| 平台 | 选择器 |
+|------|--------|
+| 千问 | `button[aria-label*="复制"]` 或 `button:has-text("复制")` |
+| 智谱 | `button[title*="复制"]` |
+| 豆包 | `button[aria-label*="复制"]` 或 `.copy-icon` |
+| Kimi | `button[aria-label*="复制"]` |
+| DeepSeek | `button[aria-label*="Copy"], button[aria-label*="复制"]` |
+
+#### 3. 点击策略
+```javascript
+// 先找到最后一条AI回复容器
+const lastAssistant = page.locator('[data-role="assistant"]').last();
+
+// 在回复容器内找复制按钮
+const copyBtn = lastAssistant.locator('button[aria-label*="复制"]');
+
+// 等待按钮可见（有些平台需要hover才显示）
+await copyBtn.waitFor({ state: 'visible' });
+await copyBtn.click();
+
+// 如果按钮隐藏，先hover回复容器
+await lastAssistant.hover();
+await page.waitForTimeout(300);
+```
+
+#### 4. 从剪贴板读取内容
+```javascript
+const content = await page.evaluate(async () => {
+    return await navigator.clipboard.readText();
+});
+```
+
+#### 5. 完整collect函数示例
+```javascript
+async function collect(page, name) {
+    if (!page) return;
+    
+    // 等待回复完成
+    await page.waitForFunction(() => {
+        const body = document.body.innerText;
+        return body.includes('已完成') || 
+               body.includes('参考') ||
+               body.includes('已阅读') ||
+               body.includes('思考结束');
+    }, { timeout: 60000 });
+    
+    // 等待额外渲染时间
+    await page.waitForTimeout(2000);
+    
+    // 点击复制按钮
+    try {
+        const copyBtn = page.locator('button[aria-label*="复制"], button:has-text("复制")').last();
+        await copyBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await copyBtn.click();
+        await page.waitForTimeout(500);
+        
+        // 从剪贴板读取
+        const content = await page.evaluate(async () => {
+            return await navigator.clipboard.readText();
+        });
+        
+        saveToFile(name, content);
+    } catch(e) {
+        // 备用：用innerText
+        const text = await page.evaluate(() => document.body.innerText);
+        saveToFile(name, text);
+    }
+}
+```
+
+### 文件位置
+- 脚本：`~/.openclaw/workspace/skills/zhiku/scripts/zhiku-s1-v4.js`
+- 文档：`~/.openclaw/workspace/skills/zhiku/智库headless工作流v0.4.md`

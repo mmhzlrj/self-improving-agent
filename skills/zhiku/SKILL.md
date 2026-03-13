@@ -3,12 +3,27 @@
 ## 介绍
 通过 CDP 后台模式同时向 5 个国产 AI 平台提问并收集回复。
 
+## 激活方式
+看到"智库"关键字时，激活此技能执行问答。
+
 ## 脚本位置
 
 | 脚本 | 功能 |
 |------|------|
-| `scripts/zhiku-s1-v2.js` | subagent1：提问智谱、千问、Kimi |
-| `scripts/zhiku-s2-v2.js` | subagent2：提问豆包、DeepSeek，收集智谱 |
+| `scripts/zhiku-s1-v4.js` | subagent1：提问+收集豆包、Kimi |
+| `scripts/zhiku-s2-v4.js` | subagent2：提问+收集千问、DeepSeek |
+| `scripts/zhiku-s3-v4.js` | subagent3：提问+收集智谱（单独处理） |
+
+## 使用方式
+
+```bash
+# 1. 先启动 subagent3（智谱，最慢）
+node ~/.openclaw/workspace/skills/zhiku/scripts/zhiku-s3-v4.js "问题" &
+
+# 2. 同时启动 subagent1 和 subagent2
+node ~/.openclaw/workspace/skills/zhiku/scripts/zhiku-s1-v4.js "问题" &
+node ~/.openclaw/workspace/skills/zhiku/scripts/zhiku-s2-v4.js "问题" &
+```
 
 ## 使用方式
 
