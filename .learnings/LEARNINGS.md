@@ -4,6 +4,78 @@
 
 ---
 
+## 2026-03-14
+
+### 主题：智库5平台问答自动化测试
+
+#### 平台测试结果汇总
+
+| 平台 | 测试结果 | 关键经验 |
+|------|----------|----------|
+| DeepSeek | ✅ 成功 | Playwright + keyboard.type |
+| 智谱 | ✅ 成功 | CDP 失败，Playwright 成功 |
+| 千问 | ✅ 成功 | CDP 失败，Playwright 成功 |
+| 豆包 | ✅ 成功 | 需滚动到页面底部 |
+| Kimi | ✅ 成功 | 需点击"问点难的"进入聊天 |
+
+#### 失败经验（重点记录）
+
+**1. 智谱 - CDP 原生接口发送失败**
+- 方法：`websocket` + `Input.dispatchKeyEvent`
+- 问题：发送后页面无反应，输入框内容未清空
+- 原因：智谱有反自动化检测，CDP 模拟的键盘事件被拦截
+- 解决：改用 Playwright 的 `keyboard.type` + `press("Enter")`
+
+**2. 千问 - CDP 多种发送方式都失败**
+- 方法1：`Input.dispatchKeyEvent` 发送 Enter
+- 方法2：`Input.dispatchMouseEvent` 点击发送按钮坐标
+- 方法3：`Runtime.evaluate` 模拟 KeyboardEvent
+- 问题：全部失败，页面显示"已经完成思考"但消息未发送
+- 解决：Playwright 的 `keyboard.type` 可以成功绕过
+
+**3. 豆包 - 输入框找不到**
+- 问题：textarea 选择器找到的元素不在视口内
+- 错误：`TimeoutError: element is outside of the viewport`
+- 解决：`page.evaluate("window.scrollTo(0, document.body.scrollHeight)")` 滚动到底部
+
+**4. Kimi - textarea 选择器找不到聊天输入框**
+- 问题：Kimi 主页没有聊天输入框，需先进入聊天界面
+- 尝试：`wait_for_selector("textarea")` 超时
+- 解决：
+  1. 点击"问点难的"按钮进入聊天
+  2. 使用 `query_selector_all("input, textarea")` 找到输入元素
+  3. 直接 `fill()` 和 `press("Enter")` 发送
+
+#### 成功经验（关键突破）
+
+**1. Playwright 连接已登录 Chrome 绕过反自动化**
+```python
+from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp("http://127.0.0.1:18800")
+    
+    for page in browser.contexts[0].pages:
+        if "目标平台" in page.url.lower():
+            # 模拟真实打字
+            page.keyboard.type("问题内容", delay=100)
+            page.keyboard.press("Enter")
+            page.wait_for_load_state("networkidle", timeout=15000)
+```
+
+**2. 文件命名规则（问题+平台+时间）**
+```python
+def simplify_question(q, max_len=20):
+    q = q.strip()
+    if len(q) <= max_len:
+        return q
+    return q[:max_len] + "..."
+
+# 文件名示例: DeepSeek_请用一句话解释什么是人工智能？_20260314_172537.md
+```
+
+---
+
 ## 2026-03-11
 
 ### 主题：豆包网页版自动化对话

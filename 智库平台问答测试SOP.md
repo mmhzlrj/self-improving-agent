@@ -274,7 +274,21 @@ cmd = {"method": "Runtime.evaluate", "params": {"expression": """
 
 ### 5.1 文件保存路径
 - **保存目录**：`~/.openclaw/workspace/ai-responses/`
-- **文件命名**：`{平台名}_{时间戳}.md`
+- **文件命名**：`{平台名}_{问题（精简到20字内）}_{时间戳}.md`
+
+#### 问题命名规则
+```python
+def simplify_question(q, max_len=20):
+    """精简问题到指定长度"""
+    q = q.strip()
+    if len(q) <= max_len:
+        return q
+    return q[:max_len] + "..."
+
+# 示例
+# 问题: "请用一句话解释什么是人工智能？"
+# 文件名: "DeepSeek_请用一句话解释什么是人工智能？_20260314_121000.md"
+```
 
 ### 5.2 保存格式
 ```markdown
