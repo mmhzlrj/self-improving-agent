@@ -4,6 +4,46 @@ Captured learnings, corrections, and discoveries. Review before major tasks.
 
 ---
 
+## LRN-20260314-003 智库5平台问答自动化测试
+
+**Logged**: 2026-03-14T17:40:00+08:00
+**Priority**: high
+**Status**: complete
+**Area**: automation
+
+### Summary
+5个AI平台（DeepSeek、智谱、千问、豆包、Kimi）问答自动化测试经验总结
+
+### Details
+**测试平台结果：**
+| 平台 | 结果 | 关键经验 |
+|------|------|----------|
+| DeepSeek | ✅ | Playwright + keyboard.type |
+| 智谱 | ✅ | CDP失败，Playwright成功 |
+| 千问 | ✅ | CDP失败，Playwright成功 |
+| 豆包 | ✅ | 需滚动到页面底部 |
+| Kimi | ✅ | 需点击"问点难的"进入聊天 |
+
+**核心发现：**
+1. CDP 原生接口（WebSocket）容易被各平台反自动化检测拦截
+2. Playwright 连接已登录 Chrome + keyboard.type 是通用解决方案
+3. 各平台预处理：
+   - 智谱/千问：直接用 Playwright
+   - 豆包：先滚动到页面底部
+   - Kimi：先点击按钮进入聊天界面
+
+### Pattern-Key
+智库平台自动化, CDP反自动化, Playwright绕过
+
+### See Also
+- `智库平台问答测试SOP.md`
+- `智谱问答测试执行日志.md`
+- `千问问答测试执行日志.md`
+- `豆包问答测试执行日志.md`
+- `Kimi问答测试执行日志.md`
+
+---
+
 ## LRN-20260314-002 SOP 编写规范模板
 
 **Logged**: 2026-03-14T10:43:00+08:00
