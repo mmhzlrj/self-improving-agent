@@ -6,6 +6,52 @@
 
 ## 2026-03-14
 
+### 主题：智库5平台"openclaw是什么"复杂问题测试
+
+#### 测试结果
+
+| 平台 | 结果 | 备注 |
+|------|------|------|
+| DeepSeek | ✅ | 成功，有联网搜索 |
+| 智谱 | ✅ | 成功，有联网搜索 |
+| 千问 | ❌ | 无联网功能 |
+| 豆包 | ✅ | 成功，有联网搜索 |
+| Kimi | ❌ | 页面结构特殊 |
+
+#### 新方法验证
+
+- `wait_for_function` 比固定字符串匹配更灵活
+- 不同平台需要不同的检测条件
+- 复杂问题（需要联网搜索）需要更长的等待时间
+
+#### 成功经验
+
+1. **灵活等待函数**：
+```python
+page.wait_for_function(
+    """() => {
+        const body = document.body.innerText;
+        const generating = ["思考中", "生成中", "loading", "正在思考"];
+        for (const text of generating) {
+            if (body.includes(text)) return false;
+        }
+        return body.length > 200;
+    }""",
+    timeout=60000
+)
+```
+
+2. **复杂问题需要更长时间**：联网搜索的问题需要等待更久
+
+#### 失败经验
+
+1. **千问**：无联网功能，无法回答实时问题
+2. **Kimi**：页面使用 contenteditable div，不是标准 input/textarea，需要特殊处理
+
+---
+
+## 2026-03-14
+
 ### 主题：智库5平台问答自动化测试
 
 #### 平台测试结果汇总

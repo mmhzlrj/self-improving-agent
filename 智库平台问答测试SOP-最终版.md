@@ -133,29 +133,110 @@ if inputs:
 
 ## 四、等待回复
 
-### 4.1 轮询检查状态
+### 4.1 使用 Playwright 灵活等待（推荐）
 
 ```python
-# 每3秒检查一次，最多等待60秒
+from playwright.sync_api import sync_playwright
 import time
 
-max_wait = 60
-interval = 3
-elapsed = 0
+with sync_playwright() as p:
+    browser = p.chromium.connect_over_cdp("http://127.0.0.1:18800")
+    
+    for page in browser.contexts[0].pages:
+        if "目标平台" in page.url.lower():
+            # 方法1：等待输入框被清空（消息已发送）
+            # 适用于：发送后输入框会清空的平台
+            try:
+                page.wait_for_function(
+                    """() => document.querySelector("textarea").value === """"",
+                    timeout=60000
+                )
+                print("✅ 消息已发送")
+            except:
+                print("⚠️ 等待超时")
+            
+            # 方法2：等待加载动画消失
+            # 适用于：有加载动画的平台
+            try:
+                page.wait_for_selector(
+                    "[class*='loading'], [class*='spinner']",
+                    state="hidden",
+                    timeout=60000
+                )
+                print("✅ 加载完成")
+            except:
+                print("⚠️ 等待加载超时")
+            
+            # 方法3：等待回复内容出现（最通用）
+            # 适用于：所有平台
+            try:
+                # 等待页面出现新内容（回复通常在用户问题之后）
+                page.wait_for_function(
+                    """() => {
+                        const texts = document.body.innerText;
+                        // 检查是否有 AI 回复的迹象
+                        // - 包含"完成思考"
+                        // - 包含"内容由AI生成"
+                        // - 有新的段落出现
+                        return texts.includes("完成") || 
+                               texts.includes("内容由") ||
+                               texts.length > 500;
+                    }""",
+                    timeout=60000
+                )
+                print("✅ AI 回复已生成")
+            except Exception as e:
+                print(f"⚠️ 等待回复超时: {e}")
+            
+            # 方法4：等待某个元素出现
+            # 适用于：知道回复容器选择器的平台
+            try:
+                page.wait_for_selector(
+                    "div[class*='message'], div[class*='response']",
+                    state="visible",
+                    timeout=60000
+                )
+                print("✅ 回复容器已出现")
+            except:
+                print("⚠️ 等待超时")
+            
+            # 获取最终页面内容
+            content = page.inner_text("body")
+            print("页面内容:", content[:200])
+            
+            break
+    
+    browser.close()
+```
 
-while elapsed < max_wait:
-    # 检查页面是否有"停止对话"等生成中的标志
-    status = page.evaluate("""
-        document.body.innerText.indexOf("停止对话") > -1 ? "生成中" : "完成"
-    """)
-    
-    if status == "完成":
-        print('✅ AI回复生成完成')
-        break
-    
-    print(f'等待生成中... ({elapsed}s)')
-    time.sleep(interval)
-    elapsed += interval
+### 4.2 高级：动态检测生成完成
+
+```python
+# 更智能的检测：等待回复区域稳定
+page.wait_for_function(
+    """() => {
+        // 检查是否还在生成
+        const body = document.body.innerText;
+        
+        // 生成中的标志
+        const generating = [
+            "思考中", "生成中", "loading", 
+            "正在思考", "正在生成", "Stop"
+        ];
+        
+        for (const text of generating) {
+            if (body.includes(text)) {
+                return false; // 还在生成
+            }
+        }
+        
+        // 检查是否有有效回复内容（长度 > 100 字符）
+        return body.length > 100;
+    }""",
+    timeout=120000,  # 2分钟超时
+    polling=1000    # 每秒检查一次
+)
+print("✅ 生成完成")
 ```
 
 ---
