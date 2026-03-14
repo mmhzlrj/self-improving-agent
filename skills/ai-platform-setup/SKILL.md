@@ -37,12 +37,12 @@
 
 ## 各平台功能对照
 
-| 平台 | 设置的功能 | URL |
-|------|-----------|-----|
-| DeepSeek | 深度思考 | https://chat.deepseek.com/ |
-| 豆包 | 专家模式 | https://www.doubao.com/chat/38416305792801026 |
-| 千问 | 思考模式 | https://chat.qwen.ai/ |
-| 智谱 | 思考+联网 | https://chatglm.cn/ |
+| 平台 | 高级模式 | URL |
+|------|----------|-----|
+| DeepSeek | 深度思考 + 智能搜索 | https://chat.deepseek.com/ |
+| 豆包 | 专家模式 | https://www.doubao.com/chat/ |
+| 千问 | 默认 | https://chat.qwen.ai/ |
+| 智谱 | 思考 + 联网 | https://chatglm.cn/ |
 | Kimi | 思考模式 | https://www.kimi.com/ |
 
 ## 脚本位置

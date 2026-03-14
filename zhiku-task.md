@@ -164,15 +164,35 @@ with sync_playwright() as p:
 - 如果支持，直接调用工具提问
 - 优势：不需要启动浏览器，工具在客户端执行
 
-**方案 B：使用 Playwright MCP + CDP 18800**
+**方案 B：使用 Chrome DevTools MCP + CDP 18800**
 - 连接到用户已有的浏览器（不启动新窗口）
 - 复用已打开的页面
-- 当前正在测试的方案
+- 当前正在测试的方案 ✅ 已配置 27 个工具
 
 ### 目标 2：实现 5 平台同时提问
 
+**当前可用 MCP 工具**：
+
+| MCP 服务器 | 工具数 | 关键工具 |
+|-----------|--------|----------|
+| Chrome DevTools MCP | 27 | list_pages, navigate_page, new_page, click, fill_form, type_text, wait_for, take_screenshot, get_console_messages |
+| Playwright MCP | 22 | 浏览器自动化 |
+| MiniMax MCP | 2 | web_search, understand_image |
+
+**Chrome DevTools MCP 工具映射到任务**：
+
+| 任务步骤 | 可用工具 | 说明 |
+|---------|----------|------|
+| 1. 检查连接 | list_pages | 列出所有浏览器标签页 |
+| 2. 获取页面 | navigate_page / select_page | 导航到 URL / 切换标签页 |
+| 3. 创建新对话 | click + type_text + navigate_page | 点击按钮/输入URL新建对话 |
+| 4. 发送问题 | type_text + click | 输入问题并发送 |
+| 5. 等待响应 | wait_for | 等待元素出现/消失 |
+| 6. 提取内容 | get_console_messages / take_screenshot | 获取响应/截图 |
+| 7. 保存文件 | 需调用 file 工具 | 保存到本地 |
+
 **需要解决的问题**：
-1. 如何为每个平台创建新对话
+1. 如何为每个平台创建新对话（各平台方式不同）
 2. 如何发送问题
 3. 如何等待响应完成（动态检测）
 4. 如何提取响应内容

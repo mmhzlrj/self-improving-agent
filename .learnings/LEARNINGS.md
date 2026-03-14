@@ -711,3 +711,98 @@ async function collect(page, name) {
 ### 文件位置
 - 脚本：`~/.openclaw/workspace/skills/zhiku/scripts/zhiku-s1-v4.js`
 - 文档：`~/.openclaw/workspace/skills/zhiku/智库headless工作流v0.4.md`
+
+## LRN-20260314-002 SOP 编写规范模板
+
+**Logged**: 2026-03-14T10:43:00+08:00
+**Priority**: high
+**Status**: pending
+**Area**: workflow
+
+### Summary
+未来写任何 SOP 都要参考"智库平台配置SOP"的详细程度，禁止用"其他步骤同上"简化
+
+### Details
+SOP 模板规范（来自智库平台配置SOP.md）：
+
+**必须包含的要素：**
+1. **背景** - 说明这个 SOP 要解决什么问题
+2. **配置清单** - 表格形式，列出所有平台和需要开启的功能
+3. **完整操作流程** - 每个步骤都要详细写出，不能省略
+4. **重要原则** - 强调必须严格按照 SOP 执行
+
+**每个操作的 Step 规范（4步法）：**
+- Step A: 用 XPath/选择器找到目标元素
+- Step B: 检查当前状态（是否已开启）
+- Step C: 只在关闭状态时才执行操作
+- Step D: 验证结果
+
+**禁止出现的描述：**
+- ❌ "其他步骤同上"
+- ❌ "类似操作"
+- ❌ "参考上面"
+
+**正确做法：**
+- ✅ 每个操作都要完整写出 4 个 Step
+- ✅ 每个 Step 都要有具体的代码/命令
+- ✅ XPath/选择器要明确写出
+
+### Metadata
+- Source: user_feedback
+- Related Files: 智库平台配置SOP.md
+- Tags: sop, template, best_practice
+
+---
+
+## LRN-20260314-001 测试过程详细记录规范
+
+**Logged**: 2026-03-14T10:37:00+08:00
+**Priority**: high
+**Status**: pending
+**Area**: workflow
+
+### Summary
+任何操作都要详细记录过程，包括工具、脚本、用法、问题、解决方案
+
+### Details
+用户在测试智库5平台时提醒：未来做任何操作都要做好详细的过程记录。这不仅是任务需求，更是一个重要的工作习惯。
+
+### Suggested Action
+1. 每次操作前先想好要记录什么
+2. 记录内容：
+   - 操作步骤 - 每一步做了什么
+   - 工具/脚本 - 具体用了什么，怎么用的
+   - 结果 - 成功/失败，输出是什么
+   - 问题 - 遇到什么错误
+   - 解决方案 - 怎么解决的
+   - 教训 - 学到了什么，下次注意什么
+3. 优先记录到 memory/YYYY-MM-DD.md
+4. 重要教训要同步到 .learnings/LEARNINGS.md
+
+### Metadata
+- Source: user_feedback
+- Related Files: memory/2026-03-14.md, AGENTS.md
+- Tags: workflow, documentation, best_practice
+
+---
+
+## 2026-03-14 严重错误：Chrome 配置重置
+
+**问题**：
+- 用 `--user-data-dir` 启动了新的 Chrome 实例
+- 导致 OpenClaw token 和 5 个 AI 平台登录 cookies 丢失
+- 网页报错：unauthorized: gateway token missing
+
+**根本原因**：
+- 没有先检查已有的 Chrome 配置
+- 随意指定新的 user-data-dir
+
+**禁止行为**：
+- ❌ 禁止用 `--user-data-dir` 启动 Chrome（会创建新配置）
+- ❌ 禁止重启正在使用的 Chrome
+- ❌ 禁止创建新的 Chrome 配置目录
+
+**正确做法**：
+- ✅ 先检查现有 Chrome 状态
+- ✅ 如果需要启动，使用默认配置或不指定 user-data-dir
+- ✅ 复用已有登录状态
