@@ -279,3 +279,11 @@
 - **每次修改配置确认正常后，必须运行：`bash ~/.openclaw/backup/update-golden.sh` 更新 golden 备份**
 - 涉及的重要配置文件：`openclaw.json`、`auth-profiles.json`、`models.json`
 
+---
+
+## self-improving-agent submodule 仓库
+
+- **原 remote**：`https://github.com/peterskoett/self-improving-agent.git`（无推送权限）
+- **新 remote**：`https://github.com/mmhzlrj/self-improving-agent.git` ✅ 已配置
+- **状态**：已推送成功
+
