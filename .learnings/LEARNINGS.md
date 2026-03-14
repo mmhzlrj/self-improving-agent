@@ -806,3 +806,83 @@ SOP 模板规范（来自智库平台配置SOP.md）：
 - ✅ 先检查现有 Chrome 状态
 - ✅ 如果需要启动，使用默认配置或不指定 user-data-dir
 - ✅ 复用已有登录状态
+
+## 2026-03-14 智库测试教训
+
+### 禁止在SOP测试中截图问用户
+- **问题**：测试中遇到问题就截图问用户，没有自己解决
+- **教训**：SOP测试必须自己完成，不能依赖用户帮助
+- **改进**：遇到问题先尝试多种方法解决，确实解决不了再记录
+
+
+## 2026-03-14 智库平台配置测试
+
+### 成功完成的配置
+| 平台 | 功能 | 状态 |
+|------|------|------|
+| DeepSeek | 深度思考 | ✅ |
+| DeepSeek | 智能搜索 | ✅ |
+| 智谱 | 思考 | ✅ |
+| 智谱 | 联网 | ✅ |
+| 豆包 | 快速→专家 | ✅ |
+| Kimi | K2.5思考 | ✅ |
+| 千问 | 保持默认 | ⏭️ |
+
+### 豆包切换失败教训
+
+#### 问题
+豆包从"快速"切换到"专家"失败，尝试多种方法都无效。
+
+#### 失败尝试
+1. btn.click() - Radix UI 不响应
+2. MouseEvent 模拟 - 无效
+3. Input.dispatchMouseEvent 坐标点击 - 无效
+4. focus() + click() - 无效
+5. ArrowDown + Enter - 菜单未打开，无效
+6. 坐标点击专家位置 - 菜单未打开，无效
+
+#### 成功方法
+1. 用空格键打开菜单：`KeyboardEvent('keydown', {key: ' '})`
+2. 等待1秒
+3. 遍历元素，用 `textContent.trim() === '专家'` 找到选项并点击
+4. 验证结果
+
+#### 关键教训
+- Radix UI 下拉框必须用键盘事件触发
+- 菜单未打开时所有操作都无效
+- 打开菜单后才能操作选项
+- 用精确匹配而非 includes
+
+### 各平台测试详细记录
+
+#### DeepSeek/智谱
+- **失败尝试**：检查父级是否有 active class
+- **成功方法**：检查按钮自身的 class 是否包含 'selected'
+- **关键**：按钮的 class 直接包含开启状态
+
+#### Kimi
+- **失败尝试**：
+  1. 页面在 Kimi 官网而非对话页面
+  2. Page.navigate 和 window.location.href 都不能实际跳转
+- **成功方法**：
+  1. 用 URL 参数 `?chat_enter_method=new_chat` 导航
+  2. 用 `[class*="model"]` 选择器找到模型选择器
+  3. 检查 class 中是否包含 active 或 selected
+
+#### 豆包（Radix UI）
+- **失败尝试**：btn.click()、MouseEvent、Input.dispatchMouseEvent、ArrowDown+Enter
+- **成功方法**：
+  1. 用空格键 `KeyboardEvent('keydown', {key: ' '})` 打开菜单
+  2. 遍历元素用 textContent 精确匹配找到选项
+  3. 用元素.click() 点击
+
+### 各平台关键差异总结
+| 平台 | 选择器方式 | 状态判断 | 特殊问题 |
+|------|------------|----------|----------|
+| DeepSeek/智谱 | textContent | selected class | - |
+| Kimi | [class*="model"] | active/selected | 需要导航到对话页 |
+| 豆包 | getElementById | text检查 | Radix UI 需空格键 |
+
+### 2026-03-14 智库配置 SOP 最终版
+- 已创建最终版: `智库平台配置SOP-最终版.md`
+- 包含完整正确的操作流程和代码
