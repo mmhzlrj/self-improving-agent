@@ -4,6 +4,31 @@ Captured learnings, corrections, and discoveries. Review before major tasks.
 
 ---
 
+## LRN-20260314-004 智库5平台复杂问题测试
+
+**Logged**: 2026-03-14T18:05:00+08:00
+**Priority**: high
+**Status**: complete
+**Area**: automation
+
+### Summary
+测试"openclaw是什么"复杂问题，验证 wait_for_function 灵活等待方法
+
+### Details
+**测试结果**：
+| 平台 | 结果 |
+|------|------|
+| DeepSeek | ✅ |
+| 智谱 | ✅ |
+| 千问 | ❌ (无联网) |
+| 豆包 | ✅ |
+| Kimi | ❌ (页面结构特殊) |
+
+### Pattern-Key
+复杂问题测试, wait_for_function, 联网搜索
+
+---
+
 ## LRN-20260314-003 智库5平台问答自动化测试
 
 **Logged**: 2026-03-14T17:40:00+08:00
@@ -154,5 +179,45 @@ response_text = deepseek_page.locator("div[class*='message']").last.inner_text()
   - ~/.openclaw/workspace/Playwright 连接已登录 Chrome 解决 DeepSeek 输入问题 SOP.md
   - ~/.openclaw/workspace/Playwright_Chrome_执行日志.md
 - Tags: playwright, deepseek, automation, cdp
+
+---
+
+## LRN-20260317-001 智库5平台"一句话"简单问题测试
+
+**Logged**: 2026-03-17T21:00:00+08:00
+**Priority**: high
+**Status**: complete
+**Area**: automation
+
+### Summary
+测试"请用一句话解释什么是人工智能？"简单问题，获取5个平台回复
+
+### Details
+**测试结果**：
+| 平台 | 结果 | 回复内容 |
+|------|------|----------|
+| DeepSeek | ✅ | 人工智能是让计算机系统模拟人类智能... |
+| 智谱 | ✅ | 人工智能是指由计算机系统所表现出的智能... |
+| 千问 | ✅ | 人工智能是让机器模拟、延伸和扩展人类智能... |
+| 豆包 | ✅ | 人工智能，就是让机器模拟、延伸甚至超越人类... |
+| Kimi | ✅ | 人工智能是让计算机系统能够模拟人类智能行为... |
+
+### 成功经验
+
+**各平台"思考完成"关键词**：
+| 平台 | 关键词 | 说明 |
+|------|--------|------|
+| DeepSeek | 已思考 | 页面显示"已思考 XX 秒" |
+| 智谱 | 思考结束 | 页面显示"思考结束" |
+| 千问 | 已经完成思考 | 页面显示"已经完成思考" |
+| 豆包 | 处理中消失 | "AI 正在思考"或"处理中"消失 |
+| Kimi | 问题文本分割 | 取问题文本之后的内容 |
+
+**复制按钮检测**：
+- 关键：很多按钮需要 hover() 才显示
+- 方法：滚动到关键词位置 → 等待网络稳定 → hover() 触发 → 多策略检测
+
+### Pattern-Key
+智库平台, 思考完成关键词, 复制按钮检测, hover()
 
 ---
