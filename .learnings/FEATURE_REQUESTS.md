@@ -43,3 +43,13 @@
 
 ### 相关文件
 - `~/.openclaw/workspace/skills/lobster-p2p/`
+
+## 2026-03-19
+
+### Chrome 调试端口开机自启
+- 当前手动启动，开机后需重新运行 Chrome 调试
+- 考虑用 launchd 或自启动脚本
+
+### Qwen parent_id 状态管理
+- 当前方案：每次调用新建 chat，避免 parent_id 维护
+- 如需多轮对话上下文：需要管理 parent_id 和消息历史
