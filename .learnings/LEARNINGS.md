@@ -258,3 +258,65 @@ window.fetch = async (...args) => {
 ### v1.0 版本文件
 - `skills/zhiku/SKILL.md`
 - `skills/zhiku/scripts/zhiku-ask.js`
+
+---
+
+## 调研方法论（2026-03-21 新增）
+
+### 规则：调研必须多源交叉验证
+
+**触发条件**：用户说"调研一下 XXX"或"你去查一下 XXX"
+
+**必须同时调用以下工具（并行）：**
+
+1. **deepseek_deepseek_chat**（智库平台）
+   - 用搜索模式（thinking=false, search=true）
+   - 作为主要深度调研工具
+
+2. **web_fetch**（直接获取一手页面）
+   - 目标：官方文档、官方博客、产品页面
+   - 绕过 AI 的知识截止限制
+   - 注意：禁止带 maxChars 参数
+
+3. **deep-research skill**
+   - 路径：`~/.openclaw/workspace/skills/deep-research/SKILL.md`
+   - 使用方法：先读 SKILL.md，按 skill 要求执行
+
+4. **sessions_spawn（多个子 Agent）**
+   - 用 3-5 个子 Agent 并行调研不同角度
+   - 每个 Agent 负责调研一个具体维度
+
+5. **其他 AI 平台**
+   - 如用户提到具体平台（千问、智谱、Kim 等），也调用
+
+### 不允许的调研方式
+- ❌ 只调用 DeepSeek Chat 一个工具
+- ❌ 直接凭 AI 的知识库回答，不做实时搜索
+- ❌ 用过期的 AI 知识回答新问题
+
+### 调研流程
+1. 确定调研维度（3-5 个）
+2. 并行调用多种工具
+3. 交叉验证结果
+4. 整理结论，明确哪些是确认的事实，哪些是估算
+
+
+## 2026-03-21 教训追加
+
+### 1. Genesis 硬件门槛必须调研后写入
+- **错误**：写成了"RTX 4090 即可"
+- **正确**：最低 GTX 1080 6GB，RTX 3060 12GB 推荐入门
+- **教训**：所有技术数据必须经过调研验证，不能凭感觉写进文档
+
+### 2. SOP 重组时不能留空引用
+- **错误**：写了"详见第十章"但没写内容
+- **教训**：不能只写目录结构就交差
+
+### 3. 调研必须用多个平台
+- **规则**：deepseek_deepseek_chat + web_fetch + deep-research skill + 3-5个子Agent + 其他AI平台
+- **教训**：用户明确要求就要遵守，不能偷懒只用一个工具
+
+### 4. iPhone 作为 OpenClaw 节点的 GPIO 价值
+- Jetson Nano 和 ESP32-Cam 都有 40 针 GPIO
+- 有线 GPIO 应急停止 <1ms，无线 WiFi >100ms
+- 这个洞察是被用户提醒后才想到的，要主动考虑
