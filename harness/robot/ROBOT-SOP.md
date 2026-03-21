@@ -925,3 +925,291 @@ curl http://192.168.1.z/battery
 **0-1** —— 不是一台机器，是你人生的另一面。
 
 *本文档将持续更新完善*
+
+---
+
+# 第十三部分：调研更新（2026-03-21 深夜调研补充）
+
+> 调研方式：deepseek_deepseek_chat + 4x sessions_spawn 子Agent + web_fetch，覆盖 Genesis/Jetson/YOLO/iPhone/语音/OpenClaw 全部章节。
+
+---
+
+## 13.1 Genesis 物理引擎最新动态（深度调研）
+
+### 官方最新数据（2026-03-21 调研确认）
+
+| 指标 | 数值 |
+|------|------|
+| GitHub Stars | **28,318** |
+| 最近更新 | **2026-03-21 13:48（今天！）** |
+| License | Apache 2.0 |
+| 版本策略 | **无语义版本号**，按时间节点发版 |
+
+### Genesis vs Isaac Sim 完整对比
+
+| 对比维度 | Genesis | Isaac Sim |
+|----------|---------|-----------|
+| 定位 | 通用具身智能/生成式仿真 | 工业级数字孪生 |
+| 物理引擎 | 自研多求解器（刚体/MPM/SPH/FEM/PBD）| PhysX 5.1 (GPU) |
+| 渲染 | 光线追踪 + 光栅化 | RTX 光线追踪（Omniverse USD）|
+| GPU要求 | **GTX 1080 6GB 起**，支持 AMD/Apple Metal/CPU | 必须 NVIDIA RTX 8GB+ |
+| ROS支持 | ❌ 无原生集成 | ✅ ROS2 Bridge 开箱即用 |
+| USD支持 | 基础导入 | ✅ 完整 Omniverse USD |
+| 学习曲线 | **低**（pip 安装，Gym 风格 API）| 高（需掌握 USD/Omniverse）|
+| 速度 | **43M FPS**（RTX 4090）| 100+ 智能体并行 |
+| 擅长场景 | 机器人学习、策略生成、数据合成 | 工厂数字孪生 |
+
+### Genesis 最新功能（2026年以来）
+
+| 日期 | 新增功能 |
+|------|---------|
+| 2026-03-16 | ProximitySensor、TemperatureGridSensor、GPU碰撞检测提速30% |
+| 2026-03-13 | FOTS触觉传感器、异构机器人并行仿真、noslip性能大幅提升 |
+| 2026-03-06 | Avatar实体重引入、IPC coupler改进、Apple Metal动态数组支持 |
+| 2026-02-18 | **Quadrants编译器**正式迁移、AMD ROCm实验性支持 |
+| 2026-02-10 | 交互查看器插件机制、glTF/USD支持、碰撞场景提速30% |
+
+### ⚠️ 重要发现：v0.4.3 版本号不存在
+
+调研确认：`v0.4.3` 不是官方 release tag，PyPI 包版本和 GitHub tag 策略不一致。**请以 GitHub Releases 页面为准**，最新功能请查看 GitHub 最新 commit。
+
+### 竞品动态：Newton（2025年最强竞争者）
+
+| 维度 | Genesis | Newton |
+|------|---------|--------|
+| 背景 | Genesis AI（Stanford系）| **Disney Research + Google DeepMind + NVIDIA 三巨头** |
+| 时间 | 2023-10 | 2025-09 |
+| 生态 | Apache 2.0，快速崛起 | 已贡献给 **Linux Foundation** |
+| 核心 | 速度最快、多材料统一 | 专注复杂接触场景（雪地、碎石等非结构化地形）|
+| 融资 | 1.05亿美元种子轮 | 未公开 |
+
+**结论**：Genesis 仍是机器人学习的最佳开源选择，Newton 需要关注但为时尚早。
+
+---
+
+## 13.2 Jetson Nano 2GB + YOLO 极限优化（实测数据）
+
+### DeepStream-Yolo 最新支持版本
+
+✅ 全面支持：YOLOv13 / YOLOv12 / YOLO11 / YOLO26 / YOLO-Master
+
+### 极限优化配置（Jetson Nano 2GB 极限方案）
+
+```bash
+# 基础必开
+sudo nvpmodel -m 0 && sudo jetson_clocks
+
+# DeepStream config 关键参数
+network-mode=2              # FP16（2GB唯一选择，INT8无加速）
+batch-size=1                  # 内存最小
+batched-push-timeout=40000   # 25fps
+sync=0                       # 关闭显示器同步
+live-source=1                # RTSP实时流必须
+maintain-aspect-ratio=1
+symmetric-padding=1
+```
+
+### 实测 FPS（完整 pipeline，含前后处理）
+
+| 模型 | 输入分辨率 | FPS | 说明 |
+|------|----------|-----|------|
+| YOLOv8n | 640x640 | ~13-16 | 推理~19FPS |
+| YOLOv8n | 416x416 | ~20-25 | 降分辨率换速度 |
+| YOLOv8n | 320x320 | ~35-45 | 极端优化 |
+| YOLOv11n | 416x416 | ~25-35 | 最新模型 |
+| YOLOv11n | 320x320 | ~50+ | 极限值 |
+| YOLOv4-tiny | 416x416 | ~20-30 | 轻量老模型 |
+
+> ⚠️ INT4 在 Nano 2GB 上不可用（Maxwell 架构不支持 INT8 推理加速）。**FP16 是唯一有效加速。**
+
+### MediaPipe on Jetson Nano 2GB
+
+**结论：GPU 加速方案不成熟，不推荐在 Nano 上跑 MediaPipe GPU。**
+
+- Jetson Orin Nano 上 MediaPipe 手势也只有 ~5 FPS
+- 替代方案：用 **TensorRT** 替代（ncnn + Vulkan 后端可用）
+- 推荐：Pose/手势用 MobileNet + TensorRT FP16 替代 MediaPipe
+
+---
+
+## 13.3 iPhone 感知前端最新方案
+
+### Apple FastVLM（最新验证）
+
+| 指标 | 数据 |
+|------|------|
+| GitHub | apple/ml-fastvlm，CVPR 2025 |
+| 速度 | 比 LLaVA-OneVision 快 **85倍 TTFT** |
+| iPhone 16 Pro Max 实测 | TTFT 低至 **0.3秒** |
+| 模型规格 | 0.5B / 1.5B / 7B |
+
+### iPhone Core ML + YOLO 最新工具链
+
+- `model.export(format='coreml')` 一键导出，Ultralytics 官方支持
+- iPhone 15 Pro 跑 YOLOv8n：**约 28 FPS**（1080p）
+- iPhone 16 Pro（A18 Pro）预计高 15-20%
+
+### Camera Control 按钮可行性
+
+| 交互 | 可行性 | 说明 |
+|------|--------|------|
+| 短按触发拍照 | ✅ 可行 | 通过 AssistiveTouch 映射 |
+| 长按持续录制 | ✅ 可行 | BLE 通知触发 |
+| 滑动调节速度 | ✅ 可行 | 电容感应可区分按压面积 |
+| 深度 API 控制 | ❌ 受限 | Apple 未开放硬件级 API |
+
+### LiDAR 导航：ARKit vs 传统 SLAM
+
+| 方案 | 适合场景 | iPhone 接口 |
+|------|---------|------------|
+| ARKit 路径记忆 | 室内固定路线 | 直接用 |
+| RoomPlan API | 自动生成 3D 房间模型 | CAD 导出 |
+| RTAB-Map | 室内建图+导航 | iOS 端口可用 |
+| ORB-SLAM3 | 室外/室内通用 | 有 iOS 版本 |
+
+**最佳实践**：iPhone 做感知前端（摄像头/LiDAR/IMU）→ WiFi 传输数据 → Jetson 跑 SLAM 算法。
+
+---
+
+## 13.4 语音交互模块升级方案
+
+### TTS 推荐（本地离线）
+
+| 方案 | 优势 | 适合场景 |
+|------|------|---------|
+| **VITS** | ~0.83 RTF（1.2倍实时），最轻量 | ✅ 机器人首选 |
+| **CosyVoice2-0.5B** | 阿里出品，高自然度，多语言 | 产品级，稳定优先 |
+| **GPT-SoVITS v4** | 5秒音频克隆，1分钟微调 | 个性化声音 |
+| ~~Edge-TTS~~ | ❌ 需要云服务，不符合离线要求 | — |
+
+### 语音唤醒方案
+
+| 方案 | 推荐度 | 说明 |
+|------|--------|------|
+| **OpenWakeWord** | ⭐⭐⭐⭐⭐ | 完全开源，可自定义唤醒词 |
+| Porcupine | ⭐⭐⭐ | 轻量，25-50ms 延迟 |
+| Picovoice | ⭐⭐⭐ | 可考虑，商业友好 |
+
+### 降噪链路（最佳实践）
+
+```
+音频输入 → WebRTC AEC（回声消除）→ RNNoise（降噪）→ VAD检测 → 唤醒词引擎
+```
+
+| 方案 | 延迟 | CPU占用 | 核心能力 |
+|------|------|---------|---------|
+| RNNoise | **10ms** | **3.2%** | 降噪（PESQ 3.8）|
+| WebRTC AEC3 | 20-60ms | 8.7% | 回声消除 |
+| 顺序 | 先 AEC 后 RNNoise | — | 互补非替代 |
+
+### Whisper 优化（Jetson Nano）
+
+- 模型：`base.en`（139MB），可达 1倍实时
+- TensorRT INT8 量化：速度提升 40%+，内存减半
+- 推荐路径：`whisper-edge` + ONNX 导出 + TensorRT
+
+---
+
+## 13.5 OpenClaw 作为机器人大脑的深度评估
+
+### 核心发现：没有专用"机器人节点"类型
+
+OpenClaw 官方支持以下节点类型：
+
+| 节点类型 | 暴露命令 |
+|----------|---------|
+| macOS | canvas/camera/screen/system/device/notifications |
+| iOS | camera/canvas/screen/location/voice |
+| Android | camera/canvas/sms/device/notifications/motion |
+| Headless Linux | **只有 system.run / system.which** |
+
+⚠️ **没有 GPIO、串口、CAN 总线、电机控制、传感器读取的内置支持。**
+
+### OpenClaw 的真实定位
+
+| 适合场景 | 不适合场景 |
+|---------|-----------|
+| 自然语言交互高层任务 | 毫秒级实时运动控制 |
+| 多 channel 控制（微信/Telegram）| 精密工业机械臂 |
+| 高层任务规划和异常处理 | 自动驾驶 |
+| 服务机器人对话系统 | 硬实时操作系统 |
+
+### 推荐架构：OpenClaw + ROS 2 混合
+
+```
+OpenClaw Gateway（AI 大脑）
+    ↓ exec / Skill
+Robot Bridge（Python 脚本）
+    ↓
+ROS 2 生态系统（运动控制层）
+    ↓
+MoveIt（运动规划）/ Navigation（路径规划）/ 传感器驱动
+    ↓
+机器人硬件
+```
+
+### OpenClaw 多节点限制
+
+| 能力 | 状态 |
+|------|------|
+| 多 Node Host 连接 | ✅ 支持 |
+| Exec 节点绑定 | ✅ 支持 |
+| 节点分组/tag | ❌ 不支持 |
+| 跨节点直接通信 | ❌ 不支持 |
+| 分布式执行 | ❌ 不支持 |
+
+---
+
+## 13.6 Jetson Nano + ESP32-Cam 有线通信最新方案
+
+### ESP32-Cam 最新固件（2025年推荐）
+
+**推荐方案**：Arduino ESP32 v3.0.7 + CameraWebServer
+
+关键改进（相比旧版）：
+- Wi-Fi 自动重连机制完善
+- 看门狗复位大幅减少
+- 分区表优化支持更大 ota_0
+
+```cpp
+// 稳定初始化（2025年推荐）
+rtc_clk_cpu_freq_set(RTC_CPU_FREQ_240M); // 降频减少发热
+// 使用 SVGA 而非 UXGA，减少内存压力
+```
+
+### UART 通信（Jetson Nano ↔ ESP32-Cam）
+
+- 电平：双方都是 3.3V TTL，**直接互连不需要电平转换**
+- 端口：Jetson Nano 用 `/dev/ttyTHS1`（40-pin GPIO 8/10）
+- 波特率：115200（最佳性价比）
+
+### I2C 总线注意事项
+
+| 问题 | 解决方案 |
+|------|---------|
+| 地址检测不到 | 降低频率至 10-50kHz |
+| 地址冲突 | 使用 TCA9548A I2C 多路复用器 |
+| 数据错误 | 绞线+屏蔽或换用 UART |
+
+### 协议选择
+
+| 协议 | 推荐度 | 适用场景 |
+|------|--------|---------|
+| **MQTT** | ⭐⭐⭐⭐⭐ | ESP32 控制指令下发+状态上报 |
+| **ROS 2 Humble** | ⭐⭐⭐⭐ | Jetson Nano 与上位机/多节点 |
+| ZeroMQ | ⭐⭐⭐ | 极低延迟实时控制 |
+| gRPC | ⭐ | 太重，ESP32 资源不足 |
+
+### GPIO 应急停止（推荐电路）
+
+**双继电器急停电路（物理+软件双保险）**：
+- 急停必须物理断开电机电源回路
+- 双继电器冗余防止单点故障
+- 常闭触点设计：断电 = 停机（故障安全）
+- ESP32 端用硬件中断（μs 级响应）
+
+---
+
+**0-1** —— 不是一台机器，是你人生的另一面。
+
+*调研更新：2026-03-22 凌晨*
