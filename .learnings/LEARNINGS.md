@@ -320,3 +320,24 @@ window.fetch = async (...args) => {
 - Jetson Nano 和 ESP32-Cam 都有 40 针 GPIO
 - 有线 GPIO 应急停止 <1ms，无线 WiFi >100ms
 - 这个洞察是被用户提醒后才想到的，要主动考虑
+
+## 2026-03-22 新增教训
+
+### 1. 收到任务必须先记录再执行
+- **问题：** 收到任务后直接执行，没有记录。导致任务内容丢失，无法追溯
+- **教训：** 先在 memory/YYYY-MM-DD.md 记录 `hh-mm 收到任务：<内容>`
+- **格式：** 完成任务后更新 `hh-mm 完成：<总结>`
+
+### 2. zhiku MCP 是用来问各平台知识的
+- **错误：** 用 zhiku MCP 问"模型能不能在iPhone跑"（应该是问平台知识，不是问模型本身）
+- **正确：** 问"iPhone AI 目标检测方案有哪些"（让平台给出建议）
+- **不能用 zhiku 问：** 模型技术细节、纯实现问题（应该 web_fetch 官方文档）
+
+### 3. zhiku MCP 超时问题
+- **原因1：** goto timeout 太短（15-20s），'load' 等待太久
+- **原因2：** Qwen textarea 有两个元素，用 `.first()` 选中了只读隐藏的那个
+- **调试方法：** 先单独测试各平台，确认 browser 能打开，再看 evaluate 逻辑
+
+### 4. Playwright locator 选错元素
+- **问题：** Qwen 的 `textarea` 有两个，一个 readonly/hidden，一个可见
+- **解决：** 用 `textarea:not([readonly]):not([aria-hidden="true"])` 选择可见元素

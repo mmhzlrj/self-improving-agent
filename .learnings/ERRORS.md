@@ -753,3 +753,14 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
 - **错误：** 页面收不到响应
 - **原因：** 只读流没有 enqueue 回新 stream
 - **解决：** `controller.enqueue(value)` 把每个 chunk 传回给页面
+
+## 2026-03-22 错误记录
+
+### 错误：zhiku MCP 4个平台同时超时
+- **平台：** Kimi/豆包/GLM/千问
+- **原因：** 
+  1. page.goto timeout 太短（15-20s）
+  2. waitUntil: 'load' 等待太久
+  3. Qwen textarea locator 选中了只读隐藏元素
+- **修复：** timeout 45s，waitUntil: 'domcontentloaded'，Qwen 加 :not() 过滤
+- **教训：** extensions 目录不在 git 仓库，本地修改后直接生效
