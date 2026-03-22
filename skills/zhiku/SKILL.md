@@ -1,3 +1,8 @@
+---
+name: zhiku
+description: 智库五平台并行搜索 - DeepSeek/Kimi/Doubao/GLM/Qwen 同时思考
+---
+
 # 智库 Skill
 
 ## 介绍
