@@ -27,8 +27,8 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-22 16:39
-# MiniMax 已用 3%，剩余 584/600，重置 3h50m后，无需提醒
+# Last check: 2026-03-22 18:39
+# MiniMax 已用 8.7%，剩余 547/600，重置 1h20m后，无需提醒
 
 ## MiniMax Coding Plan 额度监控
 
