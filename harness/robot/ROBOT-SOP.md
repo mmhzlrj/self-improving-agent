@@ -624,20 +624,103 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 
 ## 6.1 本地 LLM 推理
 
-| 工具 | 作用 | 适用阶段 |
-|------|------|---------|
-| **NIM** | NVIDIA 推理微服务容器，API 兼容 OpenAI | 阶段一 |
-| **TensorRT-LLM** | NIM 底层引擎，FP8/INT4 量化 | 阶段一 |
-| **vLLM** | 开源 LLM 推理引擎 | 阶段一 |
-| **AMD Quark** | AMD 推理量化工具 | AI Halo |
+> **调研时间**：2026-03-22
+> **调研工具**：zhiku(DeepSeek/Kimi/Doubao) + subagent × 2 + web_fetch(OpenClaw docs)
+
+### 推理框架对比
+
+| 框架 | RTX 2060 (Turing) | AMD AI Halo (Strix Halo) | OpenClaw 支持 |
+|------|-------------------|--------------------------|---------------|
+| **vLLM** | ✅ 支持，AWQ/GPTQ 量化 | ✅ ROCm 后端支持 | ✅ OpenAI-compatible API |
+| **TensorRT-LLM** | ✅ 支持，INT4/INT8 量化 | ❌ NVIDIA 专有 | ❌ 不支持 |
+| **Ollama** | ✅ 原生 CUDA | ✅ ROCm/Vulkan | ✅ 原生集成（推荐）|
+| **LM Studio** | ✅ CUDA | ✅ ROCm | ✅ OpenAI-compatible |
+| **AMD Quark** | ❌ 不适用 | ✅ 官方量化工具 | ❌ 不支持 |
+
+### CUDA 对 RTX 2060 的支持
+
+| 项目 | 详情 |
+|------|------|
+| 架构 | Turing (SM 7.5) |
+| CUDA 12.x 支持 | ✅ **完全支持** |
+| 推荐驱动 | ≥ 525.60.13 (Linux) / ≥ 528.33 (Windows) |
+| 推荐 CUDA 版本 | **CUDA 11.8**（图灵最优）/ CUDA 12.4+（可用）|
+| FP8 精度 | ❌ 不支持（需要 Ada/Hopper）|
+| Tensor Core | ✅ 第一代，支持 FP16/INT8 |
+
+**建议**：RTX 2060 生产环境用 **CUDA 11.8**，开发尝鲜用 **CUDA 12.4+**
+
+### ROCm 对 AMD AI Halo 128GB 的支持
+
+| ROCm 版本 | 支持状态 | 说明 |
+|-----------|---------|------|
+| ROCm 6.x | ❌ **不支持** | gfx1151 (RDNA 3.5) 不在 6.x 官方支持列表 |
+| **ROCm 7.0+** | ✅ **官方支持** | 正式支持 Strix Halo (gfx1151)，集成 rocWMMA |
+| **ROCm 7.2.2** | ✅ **推荐版本** | CES 2026 发布，Day-0 优化支持 |
+| ROCm 7.9 (nightly) | ✅ 实验性 | 897 tokens/s (Qwen3-30B 提示词处理) |
+
+**性能数据**（llama.cpp, Qwen3-30B, 2048 tokens 上下文）：
+- Vulkan 后端：~412 tokens/s
+- ROCm 7.0.2 + ROCm 后端：**876.9 tokens/s** (+112%)
 
 ### 各硬件能跑的模型
 
-| 硬件 | 能跑的模型 |
-|------|---------|
-| RTX 5050 9GB GDDR7 | Qwen3.5-4B/9B 4-bit |
-| AMD AI Halo 128GB | Qwen3.5-122B（4-bit 量化需 ~70GB）|
-| DGX Spark | 200B 参数模型 |
+| 硬件 | 能跑的模型 | 量化方案 |
+|------|---------|---------|
+| RTX 2060 6GB | Qwen3.5-1.5B/4B 4-bit | INT4/INT8 量化 |
+| RTX 2060 6GB | YOLO/Gemma 2B | FP16 |
+| AMD AI Halo 128GB | Qwen3.5-122B（4-bit 需 ~70GB）| AWQ/GPTQ |
+| AMD AI Halo 128GB | LLaMA 70B / Mistral 70B | FP16 直接跑 |
+| DGX Spark 128GB | 200B 参数模型（统一内存）| FP16 |
+
+### NemoClaw — NVIDIA 官方 OpenClaw 优化栈
+
+**NemoClaw** 是 NVIDIA GTC 2026 为 OpenClaw 定制的官方软件栈：
+
+| 特性 | 说明 |
+|------|------|
+| **OpenShell** | 安全沙箱，限制 AI 权限（防恶意操作）|
+| **隐私路由器** | 敏感数据本地处理，按需调用云端 |
+| **安全护栏** | 企业级合规性，AI 无法同时上网+读写文件+执行代码 |
+| **一键安装** | 简化 OpenClaw 部署 |
+
+**对贵庚的影响**：企业级安全护栏 → OpenClaw 可进入生产环境
+
+### DGX Spark 对 OpenClaw 的原生支持
+
+| 特性 | 说明 |
+|------|------|
+| 硬件 | GB10 芯片，128GB 统一内存，1 PFLOPS |
+| OpenClaw | ✅ **官方原生支持**，NVIDIA 官方指南 |
+| 推荐后端 | **LM Studio** 或 **Ollama** |
+| 可跑模型 | GPT-OSS-120B, MiniMax-M2.5, Qwen3.5-35B |
+| 部署方式 | 三行命令完成环境配置+模型下载+网关启动 |
+
+### OpenClaw 本地 LLM 配置推荐
+
+**推荐栈**：LM Studio + MiniMax M2.5（Responses API）
+
+```json5
+{
+  models: {
+    mode: "merge",
+    providers: {
+      lmstudio: {
+        baseUrl: "http://127.0.0.1:1234/v1",
+        apiKey: "lmstudio",
+        api: "openai-responses",
+        models: [{
+          id: "minimax-m2.5-gs32",
+          name: "MiniMax M2.5 GS32",
+          contextWindow: 196608,
+        }]
+      }
+    }
+  }
+}
+```
+
+**备选**：Ollama（更简单，`openclaw onboard` 自动配置）
 
 ---
 
