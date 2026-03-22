@@ -412,3 +412,20 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
   --user-data-dir="$HOME/Library/Application Support/Google/Chrome/Chrome-Debug-Profile" \
   2>/dev/null &
 ```
+
+### 10. webauth-mcp v2.0 最终成功（2026-03-22）
+
+**成功**：
+- 4个工具全部正常工作（SSE流式检测替代固定等待）
+- Doubao/Kimi/Qwen/DeepSeek：API token + SSE done 信号
+- GLM：浏览器 cookies JWT + fetch拦截器 + SSE done 信号
+- GLM思考过程混入：去重逻辑修复（`t.length >= _lastText.length`）
+
+**失败/教训**：
+- Node函数不能在`p.evaluate()`里调用（browser V8隔离）→ 解析逻辑必须内联
+- `goto(timeout:45000)` 会因页面慢而失败 → 去掉固定timeout
+- GLM refresh_token已失效（HTTP 400）→ 改用浏览器cookies JWT认证
+- Gateway重启杀Chrome → 每次重启后手动重开Chrome-Debug-Profile
+- 5个webauth工具长调研全部超时 → webauth只适合短问答（<10秒），长调研用subagent
+
+**文件位置**：`~/.openclaw/extensions/webauth-mcp/server.mjs`（v2.0.1）

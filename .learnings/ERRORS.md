@@ -798,3 +798,14 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
 - **原因**：Gateway fork 了 Chrome 进程，重启时一并终止
 - **修复**：Gateway 重启后手动重启 Chrome（用正确的 Chrome-Debug-Profile）
 - **教训**：webauth 工具依赖 Chrome，Gateway 重启前要先确认
+
+### webauth-mcp v2.0 完整错误记录（2026-03-22）
+
+| # | 错误 | 现象 | 根因 | 修复 |
+|---|------|------|------|------|
+| 1 | Kimi: `ReferenceError: readKimiSSE is not defined` | API调用失败 | Node.js函数在`p.evaluate()`里访问不到 | 解析逻辑内联到evaluate内部 |
+| 2 | Doubao/Kimi: 45秒超时 | 页面加载慢时goto失败 | 固定timeout | 去掉goto的timeout参数 |
+| 3 | GLM: HTTP 400 refresh_token失效 | token刷新失败 | refresh_token有有效期 | 改用浏览器cookies JWT认证 |
+| 4 | GLM: 思考过程混入最终回复 | 输出混乱 | 累加了所有text chunk | 去重（只取最长增量）+ think类型分离 |
+| 5 | Gateway重启杀Chrome | Chrome调试端口断 | LaunchAgent fork机制 | 重启后手动重开Chrome-Debug-Profile |
+| 6 | 5个webauth工具长调研全部超时 | 调研只DeepSeek返回 | webauth设计用于短问答 | 调研改用subagent |

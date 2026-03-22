@@ -56,3 +56,10 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 2. **用已有 profile** — 不创建新的 `--user-data-dir`
 3. **精细化控制** — 只关需要重启的 Chrome 实例，不杀所有窗口
 4. **先问用户** — 如果必须重启 Chrome，先说明影响并获得同意
+
+## 2026-03-22 更新：Gateway重启频率记录
+
+今日 Gateway 重启了 ~10+ 次，每次都被杀 Chrome。这说明：
+- **webauth-mcp 每次代码修改都要重启 Gateway**
+- **每次重启都要手动重开 Chrome**
+- 教训：尽量攒多个修改再一次性重启，减少循环
