@@ -1,6 +1,6 @@
 ---
 name: deep-research
-description: 深度调研工作流 - 当需要调研某个主题时，自动深入搜索、多轮迭代、形成方案
+description: 深度调研工作流 - 当需要调研某个主题时，自动并行调用 zhiku(五平台) + tavily + web_fetch + subagent，多工具协同形成方案
 metadata:
   {
     "openclaw": {
@@ -112,22 +112,46 @@ metadata:
 
 ## 工具使用建议
 
+调研必须同时调用多种工具，并行执行，不只靠一个平台：
+
 | 工具 | 用途 |
 |------|------|
+| `zhiku-ask.js` | 五平台并行搜索（DeepSeek/Kimi/Doubao/GLM/Qwen） |
+| `tavily-search` | 实时网络搜索，获取最新信息 |
+| `web_fetch` | 获取官方页面详细内容 |
 | `sessions_spawn` (subagent) | 并行搜索不同角度 |
 | `web_search` | 快速获取最新信息 |
-| `web_fetch` | 获取详细内容 |
 | `browser` | 用 Chrome 搜索最新内容、处理复杂页面 |
+
+**并行调用原则（必须遵守）：**
+当用户说"调研"时，同时启动：
+1. `node zhiku-ask.js "[问题]"` — 五平台并行思考
+2. `tavily_search` — 实时搜索最新结果
+3. `web_fetch` — 获取官方文档
+4. 派 3-5 个 subagent 从不同角度搜索
+
+总耗时 = 最慢工具的时间（约 30-60 秒），比串行快 5 倍。
 
 ---
 
 ## 秘塔 AI 搜索工作流参考
 
 1. **智能理解**：理解用户真实需求
-2. **全网搜索**：多来源、多角度
+2. **全网搜索**：多来源、多角度（zhiku五平台 + tavily + subagent）
 3. **自动整理**：结构化输出
 4. **深度挖掘**：追问扩展
 5. **原文引用**：标注来源
+
+**多工具并行调研示例：**
+```
+用户：调研一下 RTX 5050
+→ 我立即并行启动：
+  1. zhiku-ask.js "RTX 5050 规格参数、发布时间、价格"
+  2. tavily_search "RTX 5050 release date specs price 2026"
+  3. web_fetch NVIDIA官方页面
+  4. subagent×3 分别搜索：评测/游戏性能、vs AMD竞品、发售日期
+→ 汇总所有结果 → 形成完整报告
+```
 
 ---
 
