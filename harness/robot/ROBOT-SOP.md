@@ -689,22 +689,113 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 
 ### AMD 官方 OpenClaw 优化 — RyzenClaw & RadeonClaw
 
-**来源**：AMD 官方技术博客（2026-03-13）  
-**链接**：[Run OpenClaw Locally On AMD Ryzen AI Max+ Processors and Radeon GPUs](https://www.amd.com/en/resources/articles/run-openclaw-locally-on-amd-ryzen-ai-max-and-radeon-gpus.html)
+> **调研时间**：2026-03-22
+> **来源**：AMD 官方技术博客（2026-03-13）  
+> **链接**：[Run OpenClaw Locally On AMD Ryzen AI Max+ Processors and Radeon GPUs](https://www.amd.com/en/resources/articles/run-openclaw-locally-on-amd-ryzen-ai-max-and-radeon-gpus.html)
 
-AMD 在 AI Halo 上市前就为 OpenClaw 做了提前适配，发布了两套官方方案：
+AMD 在 AI Halo 上市前就为 OpenClaw 做了提前适配，发布了两套官方方案（BKC: Best Known Configuration）：
 
-| 方案 | 硬件 | 显存/内存 | 速度 | 上下文 | 并发智能体 |
-|------|------|-----------|------|--------|-----------|
-| **RyzenClaw** | Ryzen AI Max+（128GB 统一内存）| 128GB | 45 tokens/s | 260K | 最多 6 个 |
-| **RadeonClaw** | Radeon AI PRO R9700 | 32GB | 120 tokens/s | 190K | 最多 2 个 |
+#### 硬件平台对比
 
-**推荐模型**：Qwen 3.5 35B A3B（AWQ 量化）
+| 方案 | RyzenClaw | RadeonClaw |
+|------|-----------|------------|
+| **硬件** | AMD Ryzen AI Max+ 395 | AMD Radeon AI PRO R9700 |
+| **形态** | 笔记本/迷你主机（FP11） | 桌面独立显卡 |
+| **CPU** | 16核 Zen 5 / 32线程 | 独立显卡 |
+| **NPU** | XDNA 2，**50 TOPS** | - |
+| **GPU** | 40 CU RDNA 3.5 | 32GB GDDR6 |
+| **统一内存/显存** | 128GB LPDDR5X（可划96GB为VRAM）| 32GB GDDR6 |
+| **内存带宽** | 256 GB/s | - |
 
-**贵庚适配**：
-- 如果买 **AI Halo 128GB**（Ryzen AI Max+）→ 用 **RyzenClaw** 方案
-- 如果买 **AMD 桌面显卡**（如 R9700）→ 用 **RadeonClaw** 方案
-- AMD 官方方案使用 **LM Studio** 或 **llama.cpp** 作为推理引擎
+#### Ryzen AI Max+ 395 完整规格
+
+| 项目 | 规格 |
+|------|------|
+| 核心/线程 | 16核 / 32线程（Zen 5，4nm）|
+| 频率 | 基准 3.0GHz / 加速 5.1GHz |
+| 缓存 | L2 16MB + L3 64MB = **80MB** |
+| NPU 算力 | **50 TOPS**（INT8，XDNA 2）|
+| GPU | 40 CU RDNA 3.5（Radeon 8060S）|
+| 内存 | 最高 128GB LPDDR5X 8000 MT/s |
+| TDP | 55W（cTDP 45-120W）|
+
+#### 性能数据（Qwen 3.5 35B A3B 模型）
+
+| 性能指标 | RyzenClaw | RadeonClaw |
+|-----------|-----------|------------|
+| **生成速度** | 45 tokens/s | 120 tokens/s |
+| **输入处理** | 10K tokens ≈ 19.5秒 | 10K tokens ≈ 4.4秒 |
+| **最大上下文** | **260K tokens** | 190K tokens |
+| **并发智能体** | **6 个** | 2 个 |
+| **推荐模型** | Qwen 3.5 35B A3B（AWQ）| 同左 |
+
+#### 部署步骤（AMD 官方，约 1 小时）
+
+**第一步：驱动 + 显存配置**
+1. 安装最新版 AMD Software: Adrenalin Edition
+2. Ryzen AI Max+ 用户：桌面右键 → AMD Software → Performance → Tuning → Variable Graphics Memory → **设置为 96GB** → 重启
+
+**第二步：LM Studio 配置**
+1. 下载 [LM Studio](https://lmstudio.ai/)
+2. 下载模型：`Qwen3.5 35B A3B`
+3. 按 `Ctrl+L` 打开加载选项：
+   - Context Length: **190000**
+   - GPU Offload: **MAX**
+   - Flash Attention: ✅ 启用
+   - Max Concurrent Predictions: **6**（= 主智能体数 + 主×子智能体数）
+   - Unified KV Cache: ✅ 启用（节省内存）
+4. 按 `Ctrl+2` 打开开发者模式 → 启动服务器 → 允许" Serve on Local Network"
+5. 关闭"Auto unload unused JIT loaded models"
+
+**第三步：WSL2 + OpenClaw**
+```powershell
+# PowerShell 管理员
+wsl --install -d Ubuntu-24.04
+# 重启后进入 WSL
+wsl.exe
+
+# 启用 systemd
+sudo tee /etc/wsl.conf >/dev/null <<'EOF'
+[boot]
+systemd=true
+EOF
+wsl --shutdown && wsl.exe
+
+# 安装 Homebrew + OpenClaw
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+curl -fsSL https://openclaw.ai/install.sh | bash
+```
+
+**第四步：OpenClaw 配置**
+1. 运行 `openclaw` → 选择 **Custom Provider**
+2. 粘贴 LM Studio API 地址（如 `http://localhost:1234/v1`）
+3. 输入 API Key：`lmstudio`
+4. 选择 **Anthropic-compatible API**
+5. 粘贴模型名称 → 验证成功
+
+**第五步：配置智能体参数**
+发送指令给 OpenClaw：
+```
+You are running locally using LM Studio and a Qwen model with 190000 context. 
+please update the openclaw.json file with max context 190000, max agent count 2, 
+and max sub-agent count 2. When done, restart the gateway.
+```
+
+**第六步：本地 Embedding（可选）**
+```
+Please read the docs and configure the local embedding model for memory.md support.
+```
+
+#### 贵庚适配建议
+
+| 预算 | 推荐方案 | 说明 |
+|------|---------|------|
+| < ¥10,000 | RTX 2060 + Ollama | 入门，本地跑 7B 模型 |
+| ¥10,000-20,000 | **AI Halo 128GB** | ✅ RyzenClaw，多智能体，260K 上下文 |
+| ¥15,000+ | Radeon AI PRO R9700 | ✅ RadeonClaw，速度快 3 倍 |
+| ¥100,000+ | DGX Spark | NVIDIA 官方支持，大模型 |
+
+**核心优势**：统一内存架构消除 CPU↔GPU 数据拷贝，128GB 全部可用于 LLM
 
 ### DGX Spark 对 OpenClaw 的原生支持
 
