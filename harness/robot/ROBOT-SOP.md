@@ -625,7 +625,7 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 ## 6.1 本地 LLM 推理
 
 > **调研时间**：2026-03-22
-> **调研工具**：zhiku(DeepSeek/Kimi/Doubao) + subagent × 2 + web_fetch(OpenClaw docs)
+> **调研工具**：zhiku(DeepSeek/Kimi/Doubao) + subagent × 2 + web_fetch(OpenClaw docs) + AMD 官方博客(3月13日)
 
 ### 推理框架对比
 
@@ -634,8 +634,9 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 | **vLLM** | ✅ 支持，AWQ/GPTQ 量化 | ✅ ROCm 后端支持 | ✅ OpenAI-compatible API |
 | **TensorRT-LLM** | ✅ 支持，INT4/INT8 量化 | ❌ NVIDIA 专有 | ❌ 不支持 |
 | **Ollama** | ✅ 原生 CUDA | ✅ ROCm/Vulkan | ✅ 原生集成（推荐）|
-| **LM Studio** | ✅ CUDA | ✅ ROCm | ✅ OpenAI-compatible |
+| **LM Studio** | ✅ CUDA | ✅ ROCm | ✅ **AMD 官方推荐** |
 | **AMD Quark** | ❌ 不适用 | ✅ 官方量化工具 | ❌ 不支持 |
+| **RyzenClaw/RadeonClaw** | ❌ 不适用 | ✅ **AMD 官方方案** | ✅ 官方适配 |
 
 ### CUDA 对 RTX 2060 的支持
 
@@ -685,6 +686,25 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 | **一键安装** | 简化 OpenClaw 部署 |
 
 **对贵庚的影响**：企业级安全护栏 → OpenClaw 可进入生产环境
+
+### AMD 官方 OpenClaw 优化 — RyzenClaw & RadeonClaw
+
+**来源**：AMD 官方技术博客（2026-03-13）  
+**链接**：[Run OpenClaw Locally On AMD Ryzen AI Max+ Processors and Radeon GPUs](https://www.amd.com/en/resources/articles/run-openclaw-locally-on-amd-ryzen-ai-max-and-radeon-gpus.html)
+
+AMD 在 AI Halo 上市前就为 OpenClaw 做了提前适配，发布了两套官方方案：
+
+| 方案 | 硬件 | 显存/内存 | 速度 | 上下文 | 并发智能体 |
+|------|------|-----------|------|--------|-----------|
+| **RyzenClaw** | Ryzen AI Max+（128GB 统一内存）| 128GB | 45 tokens/s | 260K | 最多 6 个 |
+| **RadeonClaw** | Radeon AI PRO R9700 | 32GB | 120 tokens/s | 190K | 最多 2 个 |
+
+**推荐模型**：Qwen 3.5 35B A3B（AWQ 量化）
+
+**贵庚适配**：
+- 如果买 **AI Halo 128GB**（Ryzen AI Max+）→ 用 **RyzenClaw** 方案
+- 如果买 **AMD 桌面显卡**（如 R9700）→ 用 **RadeonClaw** 方案
+- AMD 官方方案使用 **LM Studio** 或 **llama.cpp** 作为推理引擎
 
 ### DGX Spark 对 OpenClaw 的原生支持
 
