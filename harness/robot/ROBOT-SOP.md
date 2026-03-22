@@ -136,7 +136,7 @@
 | Jetson Nano | **2GB**（量产模块，非4GB开发套件）| 1 | 可用 |
 | ESP32-Cam | OV2640 | 1 | 可用 |
 | Cyber Bricks | ESP32-C3（XA003/XA004/XA005）+ 电机 + 舵机 | 2 | 已有（拓竹赠送）|
-| 星闪设备 | 未知型号 | ? | 测试中 |
+| 星闪设备 | 小熊派 BearPi-Pico H3863（海思 Hi3863V100）/ 触觉智能 RK3506 星闪板 | 待采购 | 调研完成，推荐采购 |
 | 拓竹 H2C | 3D打印机 | 1 | 可用 |
 | Ubuntu 台式机 | 5600G+32G+RTX 2060 | 1 | 可用（待对接 Gateway）|
 | MacBook Pro | OpenClaw Gateway | 1 | 运行中 |
@@ -1602,6 +1602,7 @@ curl http://192.168.1.z/battery
 | **Genesis** | 2026-03-21 仍有更新，GTX 1080 6GB 即可跑 |
 | **Genesis vs Newton** | Newton（Disney+DeepMind+NVIDIA三巨头，Linux Foundation）需关注但为时尚早 |
 | **Jetson Thor Nano** | 仍然不存在，继续每月一次监控 |
+| **星闪设备** | BearPi-Pico H3863（海思Hi3863V100，40针GPIO）/ RK3506星闪板（59元核心板）；和ESP32对比：时延<20μs vs >10ms，并发4096 vs 7-20；但缺少"40针GPIO+星闪原生"标准品，需RISC-V开发板+星闪Dongle组合方案 |
 
 ---
 
