@@ -337,3 +337,50 @@
 ### 更新的文档
 - ROBOT-SOP.md: v0.9（GTC 2026版）
 - 0-1-报名表-六问六答.md: 预算更新为梯度采购方案
+
+---
+
+## 2026-03-22 Chrome+webauth 调试（重要）
+
+### 背景
+Gateway 重启后 webauth_mcp 工具全部报错。修复过程中发现多个严重失误。
+
+### 关键配置（必须记住）
+
+**Chrome Debug Profile**
+- Profile 名：Chrome-Debug-Profile
+- 路径：`~/Library/Application Support/Google/Chrome/Chrome-Debug-Profile`
+- 调试端口：9223
+- 用途：5个AI页面（豆包/Kimi/GLM/千问/DeepSeek）已登录状态
+
+**webauth 工具名（有前缀）**
+- `toolPrefix: true` 导致工具名是 `webauth_*`
+- 正确：`webauth_doubao_chat`、`webauth_kimi_chat`、`webauth_glm_chat`、`webauth_qwen_chat`
+- 错误：写成 `doubao_chat`、`kimi_chat`（无前缀）
+- 配置位置：`~/.openclaw/openclaw.json` → `alsoAllow`
+
+**Chrome 启动命令（唯一正确方式）**
+```bash
+nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9223 \
+  --user-data-dir="$HOME/Library/Application Support/Google/Chrome/Chrome-Debug-Profile" \
+  2>/dev/null &
+```
+
+**错误方式（绝对不要再犯）**
+- ❌ `--user-data-dir=/tmp/chrome-debug`（空白 profile）
+- ❌ `osascript -e 'quit app "Google Chrome"'`（关所有窗口）
+- ❌ 用 curl 操作 Chrome DevTools（无法跳转 URL）
+- ✅ 用 Playwright 连接已有 Chrome
+
+### 今日修复的问题
+1. alsoAllow 工具名加 `webauth_` 前缀 ✅
+2. 启动 Chrome-Debug-Profile（9223端口）✅
+3. GLM `is_networking: false` → `is_networking: true` ✅
+4. 验证全部 5 个工具正常工作 ✅
+
+### 经验文档位置
+- `memory/2026-03-22.md` — 当日详细日志
+- `.learnings/chrome-debug-profile.md` — Chrome profile 管理 SOP
+- `.learnings/playwright-chrome-cdp.md` — Playwright+CDP 经验规范
+- `.learnings/platform-mode-params.md` — 各平台模式 API 参数
