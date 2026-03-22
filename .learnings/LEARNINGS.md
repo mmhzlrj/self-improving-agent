@@ -361,3 +361,54 @@ window.fetch = async (...args) => {
 - ✅ 用 Playwright 连接已有 Chrome（`chromium.connectOverCDP(wsUrl)`）
 - ✅ Chrome-Debug-Profile 路径正确
 - ✅ 操作前先问用户
+
+### 7. webauth-mcp 修复：SSE流式检测 vs 固定等待（2026-03-22）
+
+**问题**：Doubao/Kimi/GLM/Qwen 四个工具在长回复时超时，因为用了 `waitForTimeout(1000)` 固定等待，不知道AI什么时候回复完成。
+
+**根因**：
+1. `goto(timeout: 45000)` 会因页面加载慢而超时
+2. `waitForTimeout(1000)` 是固定等待，不管回复有没有开始
+3. GLM/Qwen/Kimi 的响应时间是动态的（思考模式30-60秒）
+
+**修复方案**：
+1. 去掉 `goto` 的固定 timeout 参数
+2. 去掉所有 `waitForTimeout` 固定等待
+3. 每个平台用 SSE 的 `done` 信号检测回复完成：
+   - Doubao: `data.event === 'message_end' || data.event === 'done'`
+   - Kimi: `chunk.op === 'complete' || chunk.result?.finish`
+   - GLM: `chunk.status === 'completed' || chunk.done`
+   - Qwen: `window._qwenSSEDone === true`（通过 `waitForFunction()` 检测）
+4. 最多等 90 秒（`timeout: 90000`）
+
+**架构教训**：
+- Node.js 函数（如 `readKimiSSE()`）不能在 `p.evaluate()` 里调用——evaluate 运行在浏览器 V8 上下文，访问不到 Node.js 的函数
+- **解决**：把解析逻辑内联到 evaluate 内部，或者用 `waitForFunction()` 检测全局变量
+
+**GLM 特殊问题**：refresh_token 已失效（HTTP 400），无法通过 API 刷新 token
+- **解决**：改用 Playwright 注入 fetch 拦截器，在页面上下文捕获 SSE 流，用 cookies 自动认证
+
+**GLM 当前状态**：能返回但思考过程和最终回复混在一起，需要过滤 `think` 类型的 chunk
+
+### 8. webauth-glm 的特殊架构（2026-03-22）
+
+**问题**：GLM 的 token 是 JWT（`chatglm_token`）不是简单的 Bearer token，而且 refresh_token 已失效
+
+**方案**：不用 token 认证，直接用浏览器 cookies
+```javascript
+const cookies = await ctx.cookies(['https://chatglm.cn']);
+const cookieStr = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+// 然后注入 fetch 拦截器捕获 SSE
+```
+
+**关键区别**：Doubao/Kimi/Qwen 用 API token；GLM 用浏览器 cookies 的 JWT
+
+### 9. Gateway 重启会杀 Chrome（2026-03-22）
+
+**每次重启 Gateway 后必须手动重启 Chrome-Debug-Profile**：
+```bash
+nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9223 \
+  --user-data-dir="$HOME/Library/Application Support/Google/Chrome/Chrome-Debug-Profile" \
+  2>/dev/null &
+```

@@ -779,3 +779,22 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
   - Chrome-Debug-Profile 是给 AI 页面用的，端口 9223
   - Gateway 重启会杀 Chrome，之后必须重新启动 Chrome
   - 操作前先确认，不要偷懒
+
+### webauth-glm: refresh_token 失效（2026-03-22）
+- **现象**：HTTP 400，`chatglm_refresh_token` 已过期
+- **原因**：GLM 的 refresh_token 有有效期
+- **修复**：改用浏览器 cookies 的 JWT（`chatglm_token`），不用 refresh token
+- **架构**：注入 fetch 拦截器捕获 SSE，不用 token 认证
+- **教训**：存储凭证要从浏览器 cookies 提取，不能只存 API token
+
+### webauth-mcp: Node函数在evaluate里不可用（2026-03-22）
+- **现象**：`ReferenceError: readKimiSSE is not defined`
+- **原因**：`p.evaluate()` 运行在浏览器 V8 上下文，Node.js 函数不在作用域
+- **修复**：把解析逻辑内联到 evaluate 内部，或用 `waitForFunction()` 检测全局变量
+- **教训**：browser V8 和 Node.js 是两个隔离的 JavaScript 上下文
+
+### Gateway 重启杀 Chrome（2026-03-22，每次重启都发生）
+- **现象**：Gateway restart 后 Chrome 调试端口 9223 无响应
+- **原因**：Gateway fork 了 Chrome 进程，重启时一并终止
+- **修复**：Gateway 重启后手动重启 Chrome（用正确的 Chrome-Debug-Profile）
+- **教训**：webauth 工具依赖 Chrome，Gateway 重启前要先确认

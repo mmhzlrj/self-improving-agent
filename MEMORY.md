@@ -384,3 +384,27 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - `.learnings/chrome-debug-profile.md` — Chrome profile 管理 SOP
 - `.learnings/playwright-chrome-cdp.md` — Playwright+CDP 经验规范
 - `.learnings/platform-mode-params.md` — 各平台模式 API 参数
+
+## webauth-mcp 修复记录（2026-03-22）
+
+### 修复内容
+- 所有平台去掉固定 `waitForTimeout`，改用 SSE `done` 信号检测
+- Doubao: `data.event === 'message_end'`
+- Kimi: `chunk.op === 'complete'`
+- GLM: `chunk.status === 'completed'` + 改用 cookies 认证
+- Qwen: `waitForFunction(() => window._qwenSSEDone)`
+- 版本：v2.0.1
+
+### 重要教训
+- `p.evaluate()` 里不能调用 Node.js 函数（browser V8 和 Node.js 隔离）
+- GLM 的 refresh_token 会失效，改用浏览器 cookies JWT
+- Gateway 重启后必须手动重启 Chrome-Debug-Profile
+
+### GLM 当前状态
+- 能返回但思考过程和最终回复混在一起
+- 需要过滤 `ct.type === 'think'` 的 chunk
+
+### deepresearch skill 执行记录（2026-03-22）
+- 调研星闪设备时只用了 DeepSeek，其他 4 个 webauth 工具全部超时
+- webauth 工具只适合短问答（<10秒），不适合长调研任务
+- 以后调研应该用 `sessions_spawn` subagent，而不是 webauth
