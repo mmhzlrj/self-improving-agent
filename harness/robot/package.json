@@ -1,0 +1,18 @@
+{
+  "name": "robot",
+  "version": "1.0.0",
+  "description": "- [ROBOT-SOP.md](./ROBOT-SOP.md) - 详细实施标准操作程序",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "markdown-pdf": "^11.0.0"
+  }
+}

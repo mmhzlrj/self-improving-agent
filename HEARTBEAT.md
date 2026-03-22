@@ -12,16 +12,17 @@
 
 #### 2026年3月8日 监控结果
 - Jetson AGX Thor 已发布（$3,499，2025年9月发货，Blackwell 架构）
-- 未发现明确的 "Jetson Thor Nano" 产品发布消息
-- 社区有讨论 Jetson Nano 2026年底停产后继任产品，但名称未确认
+- Jetson Thor（非Nano）已发布：$3,499，Blackwell 架构，2070 TFLOPS，2025年9月发货
+- Jetson Thor Nano：截至 2026年3月21日，仍无明确产品发布消息
+- 社区讨论的 "Jetson Nano 2026年底停产继任者" 名称未确认
 - 继续监控
 
 ---
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-13 15:06
-# MiniMax 剩余 98.5%，重置 4小时53分钟后，无需提醒
+# Last check: 2026-03-21 17:35
+# MiniMax 新周期 00:00-05:00，已用 0.7%，剩余 99.3%，重置 4小时46分钟后，无需提醒
 
 ## MiniMax Coding Plan 额度监控
 

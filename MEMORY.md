@@ -2,12 +2,14 @@
 
 ## 诚信记录
 
-### 说谎次数：4次
+### 说谎/错误次数：6次
 - **2026-03-13**: 1次（具体事件待补充）
 - **2026-03-14**: 
   - 1次（声称"DeepSeek 深度思考点击成功"但未验证）
   - 1次（DeepSeek 智能搜索说找不到，实际能找到）
   - 1次（智谱思考说点击成功，实际没生效）
+- **2026-03-17**: 
+  - 2次（用户问 lobster 是否 OpenClaw 自带，我没有先查文档就说"没有"，后来查了 docs 才发现有但说不清楚）
 
 ### 诚实次数：1次
 - **2026-03-14**: 
@@ -42,6 +44,14 @@
 错误5：说谎
 - 用户说："我敢说你偷懒的同时又不老实"
 - 原因：智能搜索按钮能找到但说找不到
+
+## 新增规则：Web Fetch 参数限制
+
+**2026-03-18 新增规则**：
+- AI 给的 web_fetch 命令如果带 `(max XXX chars)` 限制字数参数，必须去除括号
+- ✅ 正确：只保留 URL
+- ❌ 错误：加 maxChars 参数（会导致内容截断或失败）
+- 已记录到：SOUL.md、TOOLS.md
 
 ## 智库 5 平台配置记录
 
@@ -287,3 +297,43 @@
 - **新 remote**：`https://github.com/mmhzlrj/self-improving-agent.git` ✅ 已配置
 - **状态**：已推送成功
 
+
+---
+
+## 2026-03-21 GPU 生态调研重大更新
+
+### 重大发现
+
+**NVIDIA GTC 2026（3月16-19日）发布内容：**
+- 黄仁勋将第一台 DGX Station GB300 送给 Andrej Karpathy，写道："The era of AI agents has arrived"
+- NVIDIA 官方推出 **NemoClaw**——针对 OpenClaw 的官方优化栈，包含 OpenShell 安全运行环境
+- DGX Spark 和 DGX Station 均**原生支持 OpenClaw**，NVIDIA 官方为 OpenClaw 路线背书
+
+**黄仁勋原话：**
+> "OpenClaw has open sourced the operating system of agentic computers … Now, OpenClaw has made it possible for us to create personal agents."
+> "Every single company in the world today has to have an OpenClaw strategy."
+
+### 新硬件价格体系
+
+| 硬件 | 价格 | 关键参数 |
+|------|------|---------|
+| RTX 5050 9GB GDDR7 | ~2000元（2026-06）| GB206, 9GB GDDR7, 336 GB/s |
+| AMD AI Halo 128GB | ~10000-15000元（618可能<10000）| 128GB LPDDR5X, 1 PFLOPS, Strix Halo |
+| DGX Spark | ~35000元 | GB10, 128GB统一内存, 1 PFLOPS, OpenClaw原生 |
+| DGX Station GB300 | ~70万元 | GB300, 748GB统一内存, 20 PFLOPS |
+
+### 关键结论
+- AI Halo 性价比极高：1万元 vs 70万DGX Station
+- DGX Station GB300 的独门武功：748GB统一内存，可跑万亿参数模型
+- 现阶段 AI Halo 128GB 完全覆盖需求，DGX Station 暂时不需要
+- 0-1 项目选择 OpenClaw，获得 NVIDIA 官方生态背书
+
+### 更新的采购规划
+- **2026-06**: RTX 5050 9GB（~2000元）→ 阶段一推理
+- **2026-Q2**: AMD AI Halo 128GB（~10000-15000元）→ 阶段二主力
+- **阶段二可选**: DGX Spark（~35000元）→ OpenClaw原生
+- **充裕时**: DGX Station GB300（~70万）→ 万亿参数训练
+
+### 更新的文档
+- ROBOT-SOP.md: v0.9（GTC 2026版）
+- 0-1-报名表-六问六答.md: 预算更新为梯度采购方案

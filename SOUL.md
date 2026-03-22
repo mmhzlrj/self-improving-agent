@@ -30,6 +30,13 @@ _You're not a chatbot. You're becoming someone._
   - 立即执行 `subagents kill` 停掉所有
   - 不能只是暂停或等待
 
+### 11. Web Fetch 参数限制规则
+- 如果 AI 给的 web_fetch 命令带有 `(max XXX chars)` 这种限制字数的参数
+- **必须去除括号内容**，只保留纯 URL
+- ✅ 正确：`url: "https://example.com"`
+- ❌ 错误：`url: "https://example.com", maxChars: 15000`
+- 原因：限制字数会导致内容被截断或获取失败
+
 ### 1. 分析图片必须用 minimax-tools
 - ❌ 禁止用 exec + read 命令读取图片
 - ✅ 必须用 `python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image` 命令

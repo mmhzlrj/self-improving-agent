@@ -1,0 +1,88 @@
+新建会话
+⌘
+K
+网站
+文档
+PPT
+表格
+深度研究
+Kimi Code
+Kimi Claw
+历史会话
+复制按钮获取
+请用一句话解释什么是人工智能？
+帮我找一下文档里面关于福永街道或者机场东的描述
+OpenClaw
+请用一句话解释什么是人工智能？
+查看全部
+查看手机应用
+用户1084
+升级
+复制按钮获取
+我尝试用playwright去获取网页中的复制按钮，代码如下：
+# 1. 滚动到回复内容位置
+page.evaluate("""
+    () => {
+        const all = document.querySelectorAll('*');
+        for (let el of all) {
+            if (el.innerText && el.innerText.includes('关键词')) {
+                el.scrollIntoViewIfNeeded();
+                return;
+            }
+        }
+    }
+""")
+page.wait_for_timeout(1000)
+
+# 2. 用 get_by_text 检测
+for text in ["复制", "分享", "编辑"]:
+    elements = page.get_by_text(text, exact=False).all()
+    visible = [e for e in elements if e.is_visible()]
+    print(f"'{text}': {len(visible)} 个")
+是哪里写的不对吗？我获取不到
+编辑
+复制
+分享
+你的代码有几个常见问题，导致无法正确获取"复制"按钮。让我帮你分析并提供修复方案：
+主要问题
+1. 滚动代码的问题
+scrollIntoViewIfNeeded() 是 Playwright 元素方法，不是原生 DOM 方法。而且你的 evaluate 缺少 return 值。
+2. get_by_text 的局限性
+很多现代网站的按钮是图标 + 文字或纯图标，或者文字在 Shadow DOM 内，get_by_text 可能检测不到。
+3. 时序问题
+滚动后等待 1 秒可能不够，特别是有懒加载或动画的情况。
+修复后的代码
+Python
+复制
+from playwright.sync_api import sync_playwright
+
+# 方法1: 修复滚动 + 增强检测
+with sync_playwright() as p:
+    browser = p.chromium.launch(headless=False)
+    page = browser.new_page()
+    page.goto("你的网址")
+    
+    # 1. 更可靠的滚动到包含"关键词"的元素
+    page.evaluate("""() => {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        let node;
+        while (node = walker.nextNode()) {
+            if (node.textContent.includes('关键词')) {
+                const el = node.parentElement;
+                el.scrollIntoView({ behavior: 'instant', block: 'center' });
+                return true;
+            }
+        }
+        return false;
+    }""")
+    
+    # 等待内容稳定（网络请求完成 + 动画结束）
+    page.wait_for_load_state("networkidle")
+    page.wait_for_timeout(500)
+    
+    # 2. 多策略检测按钮
+    strategies = [
+        # 策略A: 通过文字（包含模糊匹配）
+        lambda: page.get_by_text("复制", exact=False).all(),
+        # 策略B: 通过 role
+        lambda: page.get_by_role("button", name=re.compile("

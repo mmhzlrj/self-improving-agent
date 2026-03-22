@@ -24,331 +24,611 @@
 
 ---
 
-## 三、测试流程
+## 三、核心代码框架
 
-### 3.1 Step A: 确认页面状态
-
-**执行命令**:
-```bash
-curl -s http://127.0.0.1:18800/json | python3 -c "
-import json,sys
-data=json.load(sys.stdin)
-for p in data:
-    if '平台名' in p['title']:
-        print(f\"ID: {p['id']}\")
-        print(f\"URL: {p['url']}\")
-"
-```
-
-### 3.2 Step B: 使用 Playwright 测试（通用方法）
-
-**核心代码**:
 ```python
+import time
+import threading
+from datetime import datetime
 from playwright.sync_api import sync_playwright
 
-with sync_playwright() as p:
-    browser = p.chromium.connect_over_cdp("http://127.0.0.1:18800")
+
+class PlatformTask:
+    """代表一个平台的等待任务"""
+    def __init__(self, name, page):
+        self.name = name          # 平台名称
+        self.page = page         # Playwright 页面对象
+        self.status = "pending"  # pending / completed / user_stopped
+        self.reply_text = ""     # 最终回复内容
+        self.start_time = datetime.now()
+        self.last_ask_time = None
+
+
+def create_hook(page):
+    """返回检测回复是否完成的 Hook 函数"""
     
-    for page in browser.contexts[0].pages:
-        if "平台关键字" in page.url.lower():
-            # 预处理（根据平台选择）
-            # ...
+    def hook(page):
+        # 方法1：检测复制按钮出现（最可靠）
+        try:
+            strategies = [
+                page.get_by_text("复制", exact=False),
+                page.get_by_text("Copy", exact=False),
+                page.get_by_role("button", name="复制"),
+                page.locator('[aria-label*="复制" i], [title*="复制" i]'),
+            ]
             
-            # 找到输入框并输入
-            page.wait_for_selector("textarea", timeout=5000)
-            page.click("textarea")
-            page.keyboard.type("问题内容", delay=100)
+            for loc in strategies:
+                if loc.count() > 0 and loc.first.is_visible(timeout=2000):
+                    reply = page.evaluate("() => document.body.innerText")
+                    return True, reply[:2000]
+        except:
+            pass
+        
+        # 方法2：检查内容长度
+        content = page.evaluate("() => document.body.innerText")
+        if len(content) > 200:
+            return True, content[:2000]
+        
+        return False, ""
+    
+    return hook
+
+
+def ask_user(platform_name):
+    """询问用户如何处理超时任务"""
+    print(f"\n[{platform_name}] 已超过2分钟，仍在等待回复。")
+    print("请选择：")
+    print("1. 继续等待（默认1分钟后回来再问）")
+    print("2. 停止等待，总结当前已拿到的回复")
+    choice = input("输入选项（1/2，默认1）：").strip()
+    return choice == '2'
+
+
+def yield_manager(tasks, global_timeout=120, check_interval=5):
+    """主循环：轮询所有任务状态，处理超时询问"""
+    
+    while True:
+        all_completed = True
+        now = datetime.now()
+        
+        for task in tasks:
+            if task.status != "pending":
+                continue
             
-            # 发送
-            page.keyboard.press("Enter")
+            all_completed = False
             
-            # 等待回复
-            page.wait_for_load_state("networkidle", timeout=15000)
+            # 调用 Hook 检测是否完成
+            completed, reply = task.hook(task.page)
+            if completed:
+                # 二次确认：回到网页检查回复是否完整
+                actual_content = task.page.evaluate("() => document.body.innerText")
+                
+                if len(reply) < len(actual_content) * 0.8:
+                    print(f"[{task.name}] 警告：回复可能不完整，重新获取")
+                    reply = actual_content[:2000]
+                
+                task.status = "completed"
+                task.reply_text = reply
+                print(f"[{task.name}] 回复完成（二次确认通过）")
+                continue
             
-            # 获取回复
-            content = page.inner_text("body")
+            # 检查是否超时
+            elapsed = (now - task.start_time).total_seconds()
+            if elapsed > global_timeout:
+                if task.last_ask_time is None or (now - task.last_ask_time).total_seconds() > 60:
+                    stop = ask_user(task.name)
+                    task.last_ask_time = now
+                    if stop:
+                        task.status = "user_stopped"
+                        print(f"[{task.name}] 用户选择停止等待")
+                    else:
+                        task.start_time = now
+                        print(f"[{task.name}] 继续等待，重新计时2分钟")
+        
+        if all_completed:
+            print("所有平台回复已完成或已停止。")
             break
-```
+        
+        time.sleep(check_interval)
 
-### 3.3 Step C: 各平台详细操作
 
-#### DeepSeek
-```python
-# 无需预处理
-page.keyboard.type("问题", delay=100)
-page.keyboard.press("Enter")
-```
+def main():
+    with sync_playwright() as p:
+        browser = p.chromium.connect_over_cdp("http://127.0.0.1:18800")
+        
+        tasks = []
+        
+        for page in browser.contexts[0].pages:
+            url = page.url
+            
+            if "deepseek" in url:
+                tasks.append(PlatformTask("DeepSeek", page))
+            elif "chatglm" in url:
+                tasks.append(PlatformTask("智谱", page))
+            elif "qwen" in url:
+                tasks.append(PlatformTask("千问", page))
+            elif "doubao" in url:
+                tasks.append(PlatformTask("豆包", page))
+            elif "kimi" in url:
+                tasks.append(PlatformTask("Kimi", page))
+        
+        # 为每个任务创建 hook
+        for task in tasks:
+            task.hook = create_hook(task.page)
+        
+        yield_manager(tasks, global_timeout=120, check_interval=5)
+        
+        print("\n=== 最终结果 ===")
+        for task in tasks:
+            status_emoji = "✅" if task.status == "completed" else "⏸️" if task.status == "user_stopped" else "⌛"
+            print(f"{status_emoji} {task.name}: {task.reply_text[:100]}...")
 
-#### 智谱
-```python
-# 无需预处理（CDP会失败，必须用Playwright）
-page.keyboard.type("问题", delay=100)
-page.keyboard.press("Enter")
-```
 
-#### 千问
-```python
-# 无需预处理（CDP会失败，必须用Playwright）
-page.keyboard.type("问题", delay=100)
-page.keyboard.press("Enter")
-```
-
-#### 豆包
-```python
-# 需要先滚动到页面底部
-page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-page.wait_for_timeout(1000)
-
-page.keyboard.type("问题", delay=100)
-page.keyboard.press("Enter")
-```
-
-#### Kimi
-```python
-# 需要先点击"问点难的"进入聊天
-# 或者导航到 /chat
-
-# 方法1：点击按钮
-page.evaluate("""
-    var all = document.querySelectorAll("*");
-    for(var i=0; i<all.length; i++) {
-        if(all[i].textContent.indexOf("问点难的") !== -1) {
-            all[i].click();
-            return;
-        }
-    }
-""")
-
-# 方法2：直接导航
-page.goto("https://kimi.com/chat")
-
-# 然后找到输入元素
-inputs = page.query_selector_all("input, textarea")
-if inputs:
-    inputs[0].fill("问题")
-    page.keyboard.press("Enter")
+if __name__ == "__main__":
+    main()
 ```
 
 ---
 
-## 四、等待回复
+## 四、各平台发送问题
 
-### 4.1 使用 Playwright 灵活等待（推荐）
-
-```python
-from playwright.sync_api import sync_playwright
-import time
-
-with sync_playwright() as p:
-    browser = p.chromium.connect_over_cdp("http://127.0.0.1:18800")
-    
-    for page in browser.contexts[0].pages:
-        if "目标平台" in page.url.lower():
-            # 方法1：等待输入框被清空（消息已发送）
-            # 适用于：发送后输入框会清空的平台
-            try:
-                page.wait_for_function(
-                    """() => document.querySelector("textarea").value === """"",
-                    timeout=60000
-                )
-                print("✅ 消息已发送")
-            except:
-                print("⚠️ 等待超时")
-            
-            # 方法2：等待加载动画消失
-            # 适用于：有加载动画的平台
-            try:
-                page.wait_for_selector(
-                    "[class*='loading'], [class*='spinner']",
-                    state="hidden",
-                    timeout=60000
-                )
-                print("✅ 加载完成")
-            except:
-                print("⚠️ 等待加载超时")
-            
-            # 方法3：等待回复内容出现（最通用）
-            # 适用于：所有平台
-            try:
-                # 等待页面出现新内容（回复通常在用户问题之后）
-                page.wait_for_function(
-                    """() => {
-                        const texts = document.body.innerText;
-                        // 检查是否有 AI 回复的迹象
-                        // - 包含"完成思考"
-                        // - 包含"内容由AI生成"
-                        // - 有新的段落出现
-                        return texts.includes("完成") || 
-                               texts.includes("内容由") ||
-                               texts.length > 500;
-                    }""",
-                    timeout=60000
-                )
-                print("✅ AI 回复已生成")
-            except Exception as e:
-                print(f"⚠️ 等待回复超时: {e}")
-            
-            # 方法4：等待某个元素出现
-            # 适用于：知道回复容器选择器的平台
-            try:
-                page.wait_for_selector(
-                    "div[class*='message'], div[class*='response']",
-                    state="visible",
-                    timeout=60000
-                )
-                print("✅ 回复容器已出现")
-            except:
-                print("⚠️ 等待超时")
-            
-            # 获取最终页面内容
-            content = page.inner_text("body")
-            print("页面内容:", content[:200])
-            
-            break
-    
-    browser.close()
-```
-
-### 4.2 高级：动态检测生成完成
+### 4.1 发送问题通用函数
 
 ```python
-# 更智能的检测：等待回复区域稳定
-page.wait_for_function(
-    """() => {
-        // 检查是否还在生成
-        const body = document.body.innerText;
-        
-        // 生成中的标志
-        const generating = [
-            "思考中", "生成中", "loading", 
-            "正在思考", "正在生成", "Stop"
-        ];
-        
-        for (const text of generating) {
-            if (body.includes(text)) {
-                return false; // 还在生成
+QUESTION = "请用一句话解释什么是人工智能？"
+
+
+def check_and_enable_deepseek(page):
+    """DeepSeek: 检查并开启深度思考和智能搜索"""
+    print("[DeepSeek] 检查配置...")
+    
+    # 检查深度思考
+    def check_deepthink():
+        all_el = page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '深度思考') {
+                    var isActive = all[i].className && all[i].className.indexOf('selected') !== -1;
+                    return isActive ? '已开启' : '已关闭';
+                }
+            }
+            return '未找到';
+        }""")
+        return all_el
+    
+    # 检查智能搜索
+    def check_search():
+        return page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '智能搜索') {
+                    var isActive = all[i].className && all[i].className.indexOf('selected') !== -1;
+                    return isActive ? '已开启' : '已关闭';
+                }
+            }
+            return '未找到';
+        }""")
+    
+    # 开启深度思考
+    if check_deepthink() != '已开启':
+        page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '深度思考') {
+                    all[i].click();
+                    return;
+                }
+            }
+        }""")
+        page.wait_for_timeout(500)
+        print("[DeepSeek] 已开启深度思考")
+    
+    # 开启智能搜索
+    if check_search() != '已开启':
+        page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '智能搜索') {
+                    all[i].click();
+                    return;
+                }
+            }
+        }""")
+        page.wait_for_timeout(500)
+        print("[DeepSeek] 已开启智能搜索")
+
+
+def check_and_enable_zhipu(page):
+    """智谱: 检查并开启思考和联网"""
+    print("[智谱] 检查配置...")
+    
+    # 检查思考
+    def check_think():
+        return page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '思考') {
+                    var isActive = all[i].className && all[i].className.indexOf('selected') !== -1;
+                    return isActive ? '已开启' : '已关闭';
+                }
+            }
+            return '未找到';
+        }""")
+    
+    # 检查联网
+    def check联网():
+        return page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '联网') {
+                    var isActive = all[i].className && all[i].className.indexOf('selected') !== -1;
+                    return isActive ? '已开启' : '已关闭';
+                }
+            }
+            return '未找到';
+        }""")
+    
+    # 开启思考
+    if check_think() != '已开启':
+        page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '思考') {
+                    all[i].click();
+                    return;
+                }
+            }
+        }""")
+        page.wait_for_timeout(500)
+        print("[智谱] 已开启思考")
+    
+    # 开启联网
+    if check联网() != '已开启':
+        page.evaluate("""() => {
+            var all = document.querySelectorAll('*');
+            for(var i=0; i<all.length; i++) {
+                if(all[i].textContent && all[i].textContent.trim() === '联网') {
+                    all[i].click();
+                    return;
+                }
+            }
+        }""")
+        page.wait_for_timeout(500)
+        print("[智谱] 已开启联网")
+
+
+def check_and_enable_doubao(page):
+    """豆包: 从快速切换到专家模式"""
+    print("[豆包] 检查配置...")
+    
+    # 先查找按钮 ID
+    btn_id = page.evaluate("""() => {
+        var es = document.querySelectorAll('button,div');
+        for(var i=0; i<es.length; i++) {
+            if(es[i].textContent && es[i].textContent.trim() === '快速') {
+                return es[i].id;
             }
         }
+        return null;
+    }""")
+    
+    if not btn_id:
+        print("[豆包] 未找到快速按钮")
+        return
+    
+    # 检查是否已经是专家模式
+    current_mode = page.evaluate(f"""() => {{
+        var btn = document.getElementById('{btn_id}');
+        if(btn) {{
+            return btn.textContent.trim();
+        }}
+        return '';
+    }}""")
+    
+    if current_mode.startswith('专家'):
+        print("[豆包] 已是专家模式")
+        return
+    
+    # 用空格键打开菜单
+    page.evaluate(f"""() => {{
+        var btn = document.getElementById('{btn_id}');
+        if(btn) {{
+            btn.focus();
+            var event = new KeyboardEvent('keydown', {{
+                key: ' ',
+                code: 'Space',
+                bubbles: true
+            }});
+            btn.dispatchEvent(event);
+        }}
+    }}""")
+    page.wait_for_timeout(1000)
+    
+    # 点击"专家"选项
+    page.evaluate("""() => {
+        var all = document.getElementsByTagName('*');
+        for(var i=0; i<all.length; i++) {
+            if(all[i].textContent.trim() === '专家') {
+                all[i].click();
+                return;
+            }
+        }
+    }""")
+    page.wait_for_timeout(1000)
+    print("[豆包] 已切换到专家模式")
+
+
+def check_and_enable_kimi(page):
+    """Kimi: 从K2.5快速切换到K2.5思考"""
+    print("[Kimi] 检查配置...")
+    
+    # 导航到对话页面
+    page.goto("https://www.kimi.com/?chat_enter_method=new_chat")
+    page.wait_for_timeout(3000)
+    
+    # 检查当前模式
+    current = page.evaluate("""() => {
+        var t = document.body.innerText;
+        var p = t.indexOf('K2.5');
+        if(p >= 0) {
+            var mode = t.substring(p, p + 20);
+            if(mode.includes('思考')) {
+                return '思考';
+            } else if(mode.includes('快速')) {
+                return '快速';
+            }
+        }
+        return '未知';
+    }""")
+    
+    if current == '思考':
+        print("[Kimi] 已是K2.5思考模式")
+        return
+    
+    # 点击当前模式按钮打开菜单
+    page.evaluate("""() => {
+        var es = document.querySelectorAll('*');
+        for(var i=0; i<es.length; i++) {
+            if(es[i].textContent === 'K2.5 快速') {
+                es[i].click();
+                return;
+            }
+        }
+    }""")
+    page.wait_for_timeout(1000)
+    
+    # 点击"K2.5 思考"
+    page.evaluate("""() => {
+        var es = document.querySelectorAll('*');
+        for(var i=0; i<es.length; i++) {
+            if(es[i].textContent === 'K2.5 思考') {
+                es[i].click();
+                return;
+            }
+        }
+    }""")
+    page.wait_for_timeout(1000)
+    print("[Kimi] 已切换到K2.5思考模式")
+
+
+def send_question(page, platform_name):
+    """发送问题到指定平台 - 包含配置检查和创建新对话"""
+    
+    # Step 1: 配置检查（根据配置SOP）
+    print(f"[{platform_name}] 开始配置检查...")
+    
+    if platform_name == "DeepSeek":
+        check_and_enable_deepseek(page)
+    elif platform_name == "智谱":
+        check_and_enable_zhipu(page)
+    elif platform_name == "豆包":
+        check_and_enable_doubao(page)
+    elif platform_name == "Kimi":
+        check_and_enable_kimi(page)
+    else:
+        print(f"[{platform_name}] 保持默认配置")
+    
+    # Step 2: 创建新对话（确保是新问题）
+    print(f"[{platform_name}] 创建新对话...")
+    
+    if platform_name == "Kimi":
+        # Kimi: 打开新会话链接（已在check_and_enable_kimi中处理）
+        page.wait_for_timeout(1000)
         
-        // 检查是否有有效回复内容（长度 > 100 字符）
-        return body.length > 100;
-    }""",
-    timeout=120000,  # 2分钟超时
-    polling=1000    # 每秒检查一次
-)
-print("✅ 生成完成")
+    elif platform_name == "豆包":
+        # 豆包: 滚动到底部，点击新对话
+        page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+        page.wait_for_timeout(500)
+        try:
+            new_btn = page.get_by_text("新对话").or_(page.get_by_text("+ 新对话"))
+            if new_btn.count() > 0:
+                new_btn.first.click()
+                page.wait_for_timeout(1000)
+        except:
+            pass
+            
+    else:
+        # 其他平台(DeepSeek/智谱/千问): 刷新页面
+        page.reload()
+        page.wait_for_timeout(2000)
+    
+    # Step 3: 发送问题
+    print(f"[{platform_name}] 发送问题...")
+    
+    try:
+        if platform_name == "千问":
+            # 千问: 先点击 body 获取焦点
+            page.click("body")
+            page.wait_for_timeout(500)
+        
+        # 等待输入框
+        try:
+            page.wait_for_selector("textarea", timeout=5000)
+        except:
+            page.get_by_role("textbox").first.click()
+            page.wait_for_timeout(500)
+        
+        page.click("textarea")
+        page.wait_for_timeout(300)
+        
+        # 输入并发送
+        page.keyboard.type(QUESTION, delay=50)
+        page.wait_for_timeout(300)
+        page.keyboard.press("Enter")
+        
+        print(f"[{platform_name}] ✅ 问题已发送")
+        return True
+        
+    except Exception as e:
+        print(f"[{platform_name}] ❌ 发送失败: {str(e)[:100]}")
+        return False
 ```
 
----
+### 4.2 各平台直接跳转发送
 
-## 五、保存回复到 MD 文件
-
-### 5.1 文件命名规则
 ```python
-def simplify_question(q, max_len=20):
-    """精简问题到指定长度"""
-    q = q.strip()
-    if len(q) <= max_len:
-        return q
-    return q[:max_len] + "..."
+# DeepSeek
+page.goto("https://chat.deepseek.com/")
+page.wait_for_timeout(2000)
+page.wait_for_selector("textarea", timeout=5000)
+page.click("textarea")
+page.keyboard.type(question, delay=100)
+page.keyboard.press("Enter")
 
-# 文件名: 平台_问题_日期时间.md
-# 示例: DeepSeek_请用一句话解释什么是人工智能？_20260314_172537.md
-```
+# 智谱
+page.goto("https://chatglm.cn/main/alltoolsdetail?lang=zh")
+page.wait_for_timeout(2000)
+page.wait_for_selector("textarea", timeout=5000)
+page.click("textarea")
+page.keyboard.type(question, delay=100)
+page.keyboard.press("Enter")
 
-### 5.2 保存格式
-```markdown
-# {平台名} AI回复
+# 千问
+page.goto("https://chat.qwen.ai/")
+page.wait_for_timeout(2000)
+page.wait_for_selector("textarea", timeout=5000)
+page.click("textarea")
+page.keyboard.type(question, delay=100)
+page.keyboard.press("Enter")
 
-## 原始问题
-{问题内容}
+# 豆包
+page.goto("https://www.doubao.com/chat/")
+page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+page.wait_for_timeout(500)
+page.wait_for_selector("textarea", timeout=5000)
+page.click("textarea")
+page.keyboard.type(question, delay=100)
+page.keyboard.press("Enter")
 
-## 回复时间
-{时间}
-
-## 回复内容
-{AI回复内容}
-
-## 平台信息
-- 平台：{平台名}
-- 模型：{模型名}
-- 配置：{配置信息}
-```
-
-### 5.3 保存代码
-```python
-from datetime import datetime
-import os
-
-question = "请用一句话解释什么是人工智能？"
-reply = "AI回复内容"
-platform = "DeepSeek"
-timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-simplified_q = simplify_question(question)
-
-content = f'''# {platform} AI回复
-
-## 原始问题
-{question}
-
-## 回复时间
-{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-
-## 回复内容
-{reply}
-
-## 平台信息
-- 平台：{platform}
-- 模型：xxx
-- 配置：xxx
-'''
-
-os.makedirs('ai-responses', exist_ok=True)
-filename = f'ai-responses/{platform}_{simplified_q}_{timestamp}.md'
-with open(filename, 'w', encoding='utf-8') as f:
-    f.write(content)
+# Kimi - 使用新会话链接
+page.goto("https://www.kimi.com/?chat_enter_method=new_chat")
+page.wait_for_timeout(2000)
+page.wait_for_selector(".chat-input-editor", timeout=5000)
+page.click(".chat-input-editor")
+page.keyboard.type(question, delay=100)
+page.keyboard.press("Enter")
 ```
 
 ---
 
-## 六、测试清单
+## 五、测试流程清单
 
-| 步骤 | 操作 | DeepSeek | 智谱 | 千问 | 豆包 | Kimi |
-|------|------|----------|------|------|------|------|
-| 1 | 配置检查 | ✅ | ✅ | ⏭️ | ✅ | ✅ |
-| 2 | 打开网页 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 3 | 输入问题 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 4 | 发送 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 5 | 等待回复 | ✅ | ✅ | ✅ | ✅ | ✅ |
-| 6 | 保存MD | ✅ | ✅ | ✅ | ✅ | ✅ |
-
----
-
-## 七、常见错误及解决
-
-### 7.1 CDP 发送失败
-- **原因**：智谱、千问等平台有反自动化检测
-- **解决**：改用 Playwright 的 keyboard.type
-
-### 7.2 输入框找不到
-- **豆包**：需要滚动到页面底部
-- **Kimi**：需要先进入聊天界面
-
-### 7.3 元素不在视口内
-- **解决**：`page.evaluate("window.scrollTo(0, document.body.scrollHeight)")`
+| 步骤 | 操作 | 说明 |
+|------|------|------|
+| 1 | 确认 Chrome CDP 连接 | `curl http://127.0.0.1:18800/json` |
+| 2 | 确认平台配置 | 5个平台功能已开启 |
+| 3 | 创建 PlatformTask | 为每个平台创建任务对象 |
+| 4 | 发送问题 | 同时发送给所有平台 |
+| 5 | 创建 hook | 为每个任务绑定检测函数 |
+| 6 | 启动 yield_manager | 主循环轮询所有任务 |
+| 7 | hook 检测完成 | 检测复制按钮或内容长度 |
+| 8 | 二次确认 | 对比内容是否完整 |
+| 9 | 2分钟超时 | 询问用户继续/停止 |
+| 10 | 汇总结果 | 输出所有平台的回复 |
 
 ---
 
-## 八、经验总结
+## 六、需要注意的问题
 
-1. **Playwright 连接已登录 Chrome 是通用解决方案**
-2. **CDP 原生接口容易被反自动化检测拦截**
-3. **各平台需要不同的预处理**
-4. **测试过程要实时记录日志**
+### 1. 复制按钮检测
+- 很多按钮需要 hover 才显示
+- 用 `page.mouse.move(500, 500)` 触发
+- 多种策略检测：get_by_text, get_by_role, aria-label
+
+### 2. 2分钟超时询问
+- 超过2分钟仍在进行中才询问
+- 避免频繁询问（至少间隔1分钟）
+- 用户选择继续等待 → 重置计时器
+
+### 3. 二次确认
+- hook 返回后对比内容长度
+- 如果差距 > 20%，重新获取
+
+### 4. 并行处理
+- Playwright 是同步的，用主循环轮询
+- 每个任务独立检测，不阻塞其他平台
 
 ---
 
-## 版本信息
-- **创建日期**：2026-03-14
-- **版本**：v1.0
+## 七、设计理念
+
+### 1. Hook + Yield 模式
+- **Hook**：检测回复是否完成的函数
+- **Yield**：主循环，轮询所有任务状态
+
+### 2. 事件驱动
+- 不使用固定等待时间
+- 自动检测完成标志
+
+### 3. 用户兜底
+- 2分钟超时询问用户
+- 用户决定继续等待或停止
+
+### 4. 二次确认
+- 自动验证回复完整性
+- 确保不丢失内容
+
+---
+
+## 八、流程图
+
+```
+开始
+  │
+  ▼
+确认 CDP 连接
+  │
+  ▼
+发送问题 → 所有平台
+  │
+  ▼
+创建 hook 检测函数
+  │
+  ▼
+yield_manager 主循环
+  │
+  ├─► Hook 检测 ──完成──► 二次确认 ──► 标记完成
+  │       │
+  │       └─未完成─► 检查超时
+  │                     │
+  │                     ├─超过2分钟─► 询问用户 ──┐
+  │                     │                       │
+  │                     └─未超时─► 等待5秒 ────┘
+  │
+  ▼
+所有任务完成/用户停止
+  │
+  ▼
+汇总结果
+  │
+  ▼
+结束
+```
+
+---
+
+## 九、版本信息
+
+- **版本**：v3.1
+- **更新日期**：2026-03-17
 - **测试平台**：DeepSeek、智谱、千问、豆包、Kimi

@@ -45,10 +45,25 @@ Capture what matters. Decisions, context, things to remember. Skip the secrets u
 - When you make a mistake → document it so future-you doesn't repeat it
 - **Text > Brain** 📝
 
+### ✅ 任务记录规范（收到任务时必执行）
+
+**收到任务时 → 先记录再执行：**
+```markdown
+hh-mm 收到任务：<任务内容>
+```
+
+**完成任务后 → 更新记录：**
+```markdown
+hh-mm 完成：<内容总结>
+```
+
+**文件：** `memory/YYYY-MM-DD.md`（当天日志）
+
 ## Safety
 
 - Don't exfiltrate private data. Ever.
 - Don't run destructive commands without asking.
+- **配置文件变更必须先征得用户同意**（修改 openclaw.json 等配置文件 = 影响正在运行的服务，等同于系统变更）
 - `trash` > `rm` (recoverable beats gone forever)
 - When in doubt, ask.
 

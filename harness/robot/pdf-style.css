@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+body {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  line-height: 1.8;
+  color: #333;
+  margin: 60px 50px;
+}
+
+h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  border-bottom: 3px solid #1a1a1a;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  page-break-after: avoid;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-top: 36px;
+  margin-bottom: 16px;
+  padding-left: 12px;
+  border-left: 4px solid #1a1a1a;
+  page-break-after: avoid;
+}
+
+h3 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #555;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  page-break-after: avoid;
+}
+
+p {
+  margin: 12px 0;
+  text-align: justify;
+}
+
+strong {
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+blockquote {
+  background: #f8f8f8;
+  border-left: 4px solid #888;
+  margin: 20px 0;
+  padding: 16px 20px;
+  font-style: italic;
+  color: #555;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 13px;
+}
+
+th {
+  background: #1a1a1a;
+  color: white;
+  font-weight: 500;
+  padding: 10px 14px;
+  text-align: left;
+}
+
+td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+tr:nth-child(even) {
+  background: #fafafa;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 30px 0;
+}
+
+code {
+  background: #f4f4f4;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'SF Mono', Monaco, monospace;
+  font-size: 12px;
+}
+
+a {
+  color: #1a1a1a;
+  text-decoration: underline;
+}
+
+ul, ol {
+  margin: 12px 0;
+  padding-left: 24px;
+}
+
+li {
+  margin: 6px 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Cover page */
+h1:first-of-type {
+  font-size: 42px;
+  text-align: center;
+  border-bottom: none;
+  margin-top: 120px;
+}
+
+h1:first-of-type + p {
+  text-align: center;
+  font-size: 18px;
+  color: #666;
+  margin-top: 20px;
+}
