@@ -519,18 +519,38 @@ sudo mkswap /swapfile && sudo swapon /swapfile
 
 ## 5.2 iPhone AI 目标检测方案
 
-### 五平台完整对比
+> **调研时间**：2026-03-22
+> **调研工具**：zhiku(DeepSeek) + subagent × 2 + web search
+> **A18 Pro NPU 基准**：Geekbench AI 量化分数 **44,672**（比 A17 Pro 高 33%）
 
-| 平台 | iPhone 视觉方案 | 可用性 | 备注 |
-|------|---------------|--------|------|
-| **Apple Vision** | `VNDetectObjectsRequest` | ✅ 最佳 | 免费+极快，只支持人脸/人体/条码/文字/矩形 |
-| **Core ML + YOLO** | Ultralytics 导出 Core ML | ✅ 最佳 | 通用物体检测，30-60 FPS（A18 Pro）|
-| **MediaPipe** | 谷歌全链路框架 | ✅ 推荐 | 人脸/手势/姿态/物体一条龙，0.81ms |
-| **FastVLM（苹果官方）** | FastViTHD 视觉编码器 | ✅ 新发现 | iPhone 本地跑 VLM，0.5B 版本专为手机优化 |
-| **豆包/字节** | 云端 API | ❌ 不适用 | 无端侧 SDK |
-| **千问/Qwen** | GGUF + llama.cpp | ⚠️ 可行但慢 | 不适合实时检测 |
-| **Kimi/Moonshot** | k1 iOS App 有视觉 | ❌ 手机跑不了 | Kimi-VL 开源需 24GB GPU |
-| **智谱/GLM** | 云端架构 | ❌ 不适用 | GLM-4.5V 太大 |
+### 四平台完整对比
+
+| 平台 | iPhone 视觉方案 | 可用性 | 推荐指数 | 备注 |
+|------|---------------|--------|---------|------|
+| **Apple Vision** | `VNDetectObjectsRequest` | ✅ 最佳 | ⭐⭐⭐⭐⭐ | 免费+极快，120fps+，只支持常见类目 |
+| **Core ML + YOLO** | Ultralytics 导出 Core ML | ✅ 最佳 | ⭐⭐⭐⭐⭐ | 通用物体检测，30-60 FPS（A18 Pro）|
+| **MediaPipe** | 谷歌全链路框架 | ✅ 推荐 | ⭐⭐⭐⭐ | 跨平台，功能全，编译配置复杂 |
+| **FastVLM（苹果官方）** | FastViTHD 视觉编码器 | ✅ 新发现 | ⭐⭐⭐ | iPhone 本地跑 VLM，多模态理解 |
+
+### YOLO 在 Apple Silicon 性能基准（M4 Pro/M4 Max 参考）
+
+| 模型 | 芯片 | FPS | 说明 |
+|------|------|-----|------|
+| YOLOv11n | M4 Pro | **97.6** | 实时检测首选 |
+| YOLOv8n | M4 Pro | **92.6** | 最快，最轻量 |
+| YOLOv8s | M4 Pro | 68.8 | 速度精度平衡 |
+| YOLOv8m | M4 Pro | 43.7 | 精度更高 |
+| YOLOv11m-seg | M4 Max | ~8 | 分割任务 |
+
+*注：A18 Pro 与 M4 同架构（Neural Engine +统一内存），A18 Pro NPU 量化分数比 A17 Pro 高 33%*
+
+### A18 Pro vs A17 Pro
+
+| 指标 | A18 Pro | A17 Pro | 提升 |
+|------|---------|---------|------|
+| NPU 量化分数 | **44,672** | 33,479 | +33% |
+| CPU 单核 | **3376** | 2842 | +19% |
+| CPU 多核 | **8219** | 7020 | +17% |
 
 ### 三大主力方案详解
 
@@ -542,6 +562,7 @@ sudo mkswap /swapfile && sudo swapon /swapfile
 | `VNDetectFaceRectanglesRequest` | 人脸检测 |
 | `VNDetectBarcodesRequest` | 条码/二维码 |
 | `VNRecognizeTextRequest` | 文字识别 OCR |
+| `VNRecognizeObjectsRequest` | 通用物体检测（4000+类）|
 
 ```swift
 // 最简人体检测代码
@@ -552,10 +573,11 @@ try handler.perform([request])
 
 **② Core ML + YOLO（通用物体检测首选）**
 
-| 模型 | A18 Pro FPS | 说明 |
-|------|------------|------|
-| YOLOv11n | **30-60 FPS** | 实时检测首选 |
-| YOLOv8n | **25-50 FPS** | 成熟稳定 |
+| 模型 | A18 Pro 预估 FPS | 说明 |
+|------|----------------|------|
+| YOLOv11n | **40-60 FPS** | 实时检测首选 |
+| YOLOv8n | **35-50 FPS** | 成熟稳定 |
+| YOLOv8s | **25-40 FPS** | 速度精度平衡 |
 
 ```bash
 # 一键导出 Core ML（Ultralytics 官方支持）
@@ -575,6 +597,7 @@ yolo export model=yolov11n.pt format=coreml nms=True imgsz=800
 苹果官方开源，专为 iPhone 端侧 VLM 设计：
 - **0.5B 版本**可直接在 iPhone 本地运行，无需联网
 - 首字延迟比 LLaVA-OneVision **快 85 倍**（FastViTHD 视觉编码器）
+- MLX 缓存：重复图像延迟从 21.7秒 → 0.78秒（28倍加速）
 - Safari 网页版 Demo：实时摄像头画面 + AI 即时描述
 
 ### VLM vs YOLO：怎么选
@@ -582,7 +605,7 @@ yolo export model=yolov11n.pt format=coreml nms=True imgsz=800
 | 维度 | YOLO（目标检测）| VLM（视觉语言模型）|
 |------|----------------|------------------|
 | 输出 | 边界框 + 类别 | 文字描述 |
-| 速度 | ⚡ 毫秒级（30-60 FPS）| 秒级 |
+| 速度 | ⚡ 毫秒级（40-60 FPS）| 秒级（TTFT 1秒）|
 | 精度定位 | ✅ 高精度边界框 | ❌ 无法输出精确坐标 |
 | 泛化能力 | 受限训练集 | 理解任意场景 |
 
@@ -590,7 +613,7 @@ yolo export model=yolov11n.pt format=coreml nms=True imgsz=800
 ```
 iPhone 摄像头
     ↓
-YOLO11n（Core ML）→ 实时物体检测 → Jetson Nano 运动控制
+YOLOv11n（Core ML）→ 实时物体检测 → Jetson Nano 运动控制
     ↓
 FastVLM 0.5B → 语义理解 → 贵庚大脑
 ```
