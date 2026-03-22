@@ -35,7 +35,7 @@ python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image "描述这�
 
 ## API 信息
 
-- API Key: sk-cp-wEiHHliuPGtLE9x63yViVXozeZu0UxOicm7MIuRpzBs-b7pkz78gr61YYCZ46yNjauf6eFh8LkBFnP4fhvBzmxFWSjAbWZo5S7ag7d5vDtijN9akDB6NNA4
+- API Key: sk-cp-Zosvx8d6zR6EI34fzFEWopC1kvtXdtzpMPWObv8goBG4MyNJTzK-vuniGGQV5TPOcICyJP-qIjWQ66KlY5mtOm6Z1oAVA1lugbkRDjE1QyMFX6phXsGVOPA
 - API Host: https://api.minimaxi.com
 
 ## 优势

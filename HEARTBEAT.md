@@ -27,8 +27,10 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-22 21:01
-# MiniMax 已用 8.7%，剩余 547/600，重置 1h20m后，无需提醒
+# Last check: 2026-03-22 22:28
+# MiniMax 新年度套餐已激活，23个模型全部 600/600 满额度
+# 新Key: sk-cp-Zosvx8d6...（年度套餐）
+# 旧Key已过期（7天试用）
 
 ## MiniMax Coding Plan 额度监控
 
@@ -56,7 +58,7 @@
 - 剩余次数
 ```bash
 curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains" \
-  -H "Authorization: Bearer sk-cp-wEiHHliuPGtLE9x63yViVXozeZu0UxOicm7MIuRpzBs-b7pkz78gr61YYCZ46yNjauf6eFh8LkBFnP4fhvBzmxFWSjAbWZo5S7ag7d5vDtijN9akDB6NNA4" | python3 -c "
+  -H "Authorization: Bearer sk-cp-Zosvx8d6zR6EI34fzFEWopC1kvtXdtzpMPWObv8goBG4MyNJTzK-vuniGGQV5TPOcICyJP-qIjWQ66KlY5mtOm6Z1oAVA1lugbkRDjE1QyMFX6phXsGVOPA" | python3 -c "
 import json, sys
 from datetime import datetime, timezone, timedelta
 

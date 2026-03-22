@@ -69,5 +69,5 @@ result = subprocess.run(
 
 已配置：
 ```
-sk-cp-wEiHHliuPGtLE9x63yViVXozeZu0UxOicm7MIuRpzBs-b7pkz78gr61YYCZ46yNjauf6eFh8LkBFnP4fhvBzmxFWSjAbWZo5S7ag7d5vDtijN9akDB6NNA4
+sk-cp-Zosvx8d6zR6EI34fzFEWopC1kvtXdtzpMPWObv8goBG4MyNJTzK-vuniGGQV5TPOcICyJP-qIjWQ66KlY5mtOm6Z1oAVA1lugbkRDjE1QyMFX6phXsGVOPA
 ```

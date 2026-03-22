@@ -13,7 +13,7 @@ from urllib.parse import urlparse
 
 # MiniMax API 配置
 # 请替换为你的 API Key
-API_KEY = "sk-cp-wEiHHliuPGtLE9x63yViVXozeZu0UxOicm7MIuRpzBs-b7pkz78gr61YYCZ46yNjauf6eFh8LkBFnP4fhvBzmxFWSjAbWZo5S7ag7d5vDtijN9akDB6NNA4"
+API_KEY = "sk-cp-Zosvx8d6zR6EI34fzFEWopC1kvtXdtzpMPWObv8goBG4MyNJTzK-vuniGGQV5TPOcICyJP-qIjWQ66KlY5mtOm6Z1oAVA1lugbkRDjE1QyMFX6phXsGVOPA"
 API_HOST = "https://api.minimaxi.com"
 
 def web_search(query, num_results=5):
