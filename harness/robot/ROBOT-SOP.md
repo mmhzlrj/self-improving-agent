@@ -630,17 +630,19 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 
 ## 6.1 本地 LLM 推理
 
-> **调研时间**：2026-03-22
-> **调研工具**：zhiku(DeepSeek/Kimi/Doubao) + subagent × 2 + web_fetch(OpenClaw docs) + AMD 官方博客(3月13日)
+> **调研时间**：2026-03-22（第二轮补充）
+> **调研工具**：DeepSeek (深度搜索) + web_fetch(AMD 官方博客 3月13日) + vLLM/SGLang 官方文档
+> **补充内容**：vLLM ROCm v0.14.0 详情、SGLang ROCm 支持、RTX 2060 Ollama + Q4_K_M 最佳实践
 
 ### 推理框架对比
 
 | 框架 | RTX 2060 (Turing) | AMD AI Halo (Strix Halo) | OpenClaw 支持 |
 |------|-------------------|--------------------------|---------------|
-| **vLLM** | ✅ 支持，AWQ/GPTQ 量化 | ✅ ROCm 后端支持 | ✅ OpenAI-compatible API |
-| **TensorRT-LLM** | ✅ 支持，INT4/INT8 量化 | ❌ NVIDIA 专有 | ❌ 不支持 |
-| **Ollama** | ✅ 原生 CUDA | ✅ ROCm/Vulkan | ✅ 原生集成（推荐）|
+| **vLLM** | ✅ 支持，AWQ/GPTQ 量化 | ✅ ROCm v0.14.0+ 一等公民 | ✅ OpenAI-compatible API |
+| **TensorRT-LLM** | ✅ 支持，INT4/INT8（复杂）| ❌ NVIDIA 专有 | ❌ 不支持 |
+| **Ollama** | ✅ 推荐，Q4_K_M 最优 | ✅ ROCm/Vulkan | ✅ 原生集成（推荐）|
 | **LM Studio** | ✅ CUDA | ✅ ROCm | ✅ **AMD 官方推荐** |
+| **SGLang** | ❌ 不推荐 | ✅ ROCm 原生，复杂 Agent 任务 | ✅ OpenAI-compatible API |
 | **AMD Quark** | ❌ 不适用 | ✅ 官方量化工具 | ❌ 不支持 |
 | **RyzenClaw/RadeonClaw** | ❌ 不适用 | ✅ **AMD 官方方案** | ✅ 官方适配 |
 
@@ -650,12 +652,39 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 |------|------|
 | 架构 | Turing (SM 7.5) |
 | CUDA 12.x 支持 | ✅ **完全支持** |
-| 推荐驱动 | ≥ 525.60.13 (Linux) / ≥ 528.33 (Windows) |
-| 推荐 CUDA 版本 | **CUDA 11.8**（图灵最优）/ CUDA 12.4+（可用）|
-| FP8 精度 | ❌ 不支持（需要 Ada/Hopper）|
+| 推荐驱动 | ≥ 550（N卡最新驱动）|
+| 推荐 CUDA 版本 | **CUDA 12.4 / 12.6**（推荐）；CUDA 11.8 仍可用但不推荐新装 |
+| FP8 精度 | ❌ 不支持（需要 Ada/Hopper 及更新架构）|
 | Tensor Core | ✅ 第一代，支持 FP16/INT8 |
 
-**建议**：RTX 2060 生产环境用 **CUDA 11.8**，开发尝鲜用 **CUDA 12.4+**
+> **更新（2026-03）**：CUDA 12.x 的显存管理优化对 6GB 显存的 RTX 2060 更友好，建议生产环境使用 CUDA 12.x。
+
+### RTX 2060 本地 LLM 最佳实践
+
+> **调研时间**：2026-03-22
+> **来源**：DeepSeek 搜索 + 技术社区基准测试
+
+**框架选择**：Ollama（底层 llama.cpp，性能相同，易用性更高）
+
+**量化方案优先级**：
+
+| 量化级别 | 7B-8B 模型显存占用 | 推荐度 | 说明 |
+|---------|-----------------|-------|------|
+| **Q4_K_M** | **~4.5 GB** | ⭐⭐⭐⭐⭐ | 首选，精度/速度/显存最佳平衡 |
+| Q5_K_M | ~5.5 GB | ⭐⭐⭐⭐ | 精度更高，显存接近极限 |
+| Q8_0 | ~7.5 GB | ❌ | 超出 6GB，无法纯 GPU 运行 |
+| FP16 | ~16 GB | ❌ | 无法运行 |
+
+**推荐组合**：Ollama + GGUF (Q4_K_M) + Qwen2.5-7B/Instruct
+
+```bash
+# 一键安装
+curl -fsSL https://ollama.com/install.sh | sh
+# 运行量化模型
+ollama run qwen2.5:7b-instruct-q4_K_M
+```
+
+**TensorRT-LLM**：不推荐 RTX 2060 使用。编译复杂、显存预分配大、维护成本高，llama.cpp/Ollama 已足够。
 
 ### ROCm 对 AMD AI Halo 128GB 的支持
 
@@ -670,12 +699,49 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 - Vulkan 后端：~412 tokens/s
 - ROCm 7.0.2 + ROCm 后端：**876.9 tokens/s** (+112%)
 
+### vLLM ROCm 支持（v0.14.0+）
+
+> **来源**：AMD ROCm 官方博客（2026-01-20）、vLLM 官方文档（2026-02/03）
+
+| vLLM 版本 | ROCm 支持 | 说明 |
+|-----------|----------|------|
+| v0.12.0 / v0.13.0 | ✅ 一等公民 | AITER 内核、FP8 量化、DeepSeek MoE 优化 |
+| **v0.14.0** | ✅ **推荐版本** | 官方 Docker 镜像/wheel，一键安装，CI 通过率 93% |
+| v0.15.0+ | ✅ 持续优化 | 继续增强 RDNA 支持 |
+
+**RDNA 3.5 (gfx1151) 注意事项**：
+- 需要 ROCm **7.0.2 或更高版本**
+- 使用 Triton Flash Attention（`FLASH_ATTENTION_TRITON_AMD_ENABLE=TRUE`），而非 CDNA 的 AITER
+- 滑动窗口注意力可能有约束，Paged Attention 在 RDNA 上有限制
+
+**推荐部署**：使用官方 Docker `vllm/vllm-openai-rocm:v0.14.0`，避免 conda 装 NCCL 链接问题。
+
+### SGLang ROCm 支持
+
+> **来源**：SGLang 官方文档（2026-03-13）、AMD 官方（2026-01-29）
+
+- 原生支持 AMD Instinct MI300X/MI355X，RDNA 系列通过标准 ROCm 栈运行
+- 支持 FP8、AWQ 量化（通过 Triton/AITER 加速）
+- Marlin 内核的量化（`awq_marlin`）不可用
+- 适合复杂 Agent 任务（结构化输出、多轮对话）
+
+**启动示例**：
+```bash
+SGLANG_USE_AITER=1 python3 -m sglang.launch_server --model <model> --quantization awq
+```
+
+### LMCache（KV Cache 复用优化）
+
+> **来源**：AMD/社区（2026年）
+
+在长文档场景下，vLLM + LMCache 可将首字延迟（TTFT）降低 **3-10 倍**。适合反复分析同一文档的场景（如贵庚记忆检索）。
+
 ### 各硬件能跑的模型
 
 | 硬件 | 能跑的模型 | 量化方案 |
 |------|---------|---------|
-| RTX 2060 6GB | Qwen3.5-1.5B/4B 4-bit | INT4/INT8 量化 |
-| RTX 2060 6GB | YOLO/Gemma 2B | FP16 |
+| RTX 2060 6GB | Qwen2.5-7B Q4_K_M / Qwen3.5-4B Q4_K_M | GGUF Q4_K_M（~4.5GB）|
+| RTX 2060 6GB | Gemma 2B / YOLO 系列 | FP16 |
 | AMD AI Halo 128GB | Qwen3.5-122B（4-bit 需 ~70GB）| AWQ/GPTQ |
 | AMD AI Halo 128GB | LLaMA 70B / Mistral 70B | FP16 直接跑 |
 | DGX Spark 128GB | 200B 参数模型（统一内存）| FP16 |
