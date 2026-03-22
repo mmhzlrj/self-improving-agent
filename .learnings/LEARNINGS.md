@@ -341,3 +341,23 @@ window.fetch = async (...args) => {
 ### 4. Playwright locator 选错元素
 - **问题：** Qwen 的 `textarea` 有两个，一个 readonly/hidden，一个可见
 - **解决：** 用 `textarea:not([readonly]):not([aria-hidden="true"])` 选择可见元素
+
+### 5. Chrome+webauth 调试（2026-03-22 重大失误）
+- **症状：** Gateway 重启后 webauth_doubao/kimi/glm/qwen 全部报 "Tool not found"
+- **根因1：** alsoAllow 里工具名没有 `webauth_` 前缀（因为 toolPrefix: true）
+- **根因2：** Gateway 重启杀死了 Chrome（LaunchAgent fork 机制）
+- **根因3：** GLM 的 `is_networking: false` 未开启联网搜索
+- **修复1：** alsoAllow 加上 `webauth_` 前缀，重启 Gateway
+- **修复2：** 启动 Chrome-Debug-Profile（端口 9223）
+- **修复3：** `webauth-mcp/server.mjs` line 357：`is_networking: true`
+- **验证：** 5个工具全部正常
+
+### 6. 绝对不能再犯的错误
+- ❌ `osascript -e 'quit app "Google Chrome"'` — 关所有窗口，用户正常页面全丢
+- ❌ `--user-data-dir=/tmp/chrome-debug` — 空白 profile，登录状态丢失
+- ❌ 用 curl 操作 Chrome DevTools — 无法跳转 URL，只创建 about:blank
+- ❌ 没有用 Playwright —放着现成 skill 不用，乱搞
+- ❌ Gateway 重启前不确认 Chrome 状态
+- ✅ 用 Playwright 连接已有 Chrome（`chromium.connectOverCDP(wsUrl)`）
+- ✅ Chrome-Debug-Profile 路径正确
+- ✅ 操作前先问用户

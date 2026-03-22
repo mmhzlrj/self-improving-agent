@@ -764,3 +764,18 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
   3. Qwen textarea locator 选中了只读隐藏元素
 - **修复：** timeout 45s，waitUntil: 'domcontentloaded'，Qwen 加 :not() 过滤
 - **教训：** extensions 目录不在 git 仓库，本地修改后直接生效
+
+### 错误：webauth_mcp 全部 Tool not found（2026-03-22）
+- **平台：** Doubao/Kimi/GLM/Qwen
+- **原因：**
+  1. alsoAllow 工具名没有 `webauth_` 前缀（toolPrefix: true）
+  2. Gateway 重启杀死 Chrome，webauth server 断开
+  3. GLM `is_networking: false` 联网未开启
+- **修复：**
+  1. alsoAllow 加 `webauth_` 前缀：`webauth_doubao_chat` 等
+  2. 启动 Chrome-Debug-Profile（`--remote-debugging-port=9223 --user-data-dir=Chrome-Debug-Profile路径`）
+  3. `webauth-mcp/server.mjs` line 357：`is_networking: true`
+- **教训：**
+  - Chrome-Debug-Profile 是给 AI 页面用的，端口 9223
+  - Gateway 重启会杀 Chrome，之后必须重新启动 Chrome
+  - 操作前先确认，不要偷懒
