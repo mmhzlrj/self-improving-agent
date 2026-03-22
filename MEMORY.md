@@ -400,8 +400,8 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - GLM 的 refresh_token 会失效，改用浏览器 cookies JWT
 - Gateway 重启后必须手动重启 Chrome-Debug-Profile
 
-### GLM 当前状态
-- 能返回但思考过程和最终回复混在一起
+### GLM 当前状态（已修复）
+- 已修复：去重逻辑（只取最长text chunk）+ think类型过滤
 - 需要过滤 `ct.type === 'think'` 的 chunk
 
 ### deepresearch skill 执行记录（2026-03-22）
