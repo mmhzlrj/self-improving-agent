@@ -17,12 +17,18 @@
 - 社区讨论的 "Jetson Nano 2026年底停产继任者" 名称未确认
 - 继续监控
 
+#### 2026年3月22日 监控结果
+- Jetson AGX Thor 已正式上市，$3,499，128GB，2070 TFLOPS，Blackwell 架构
+- Jetson Thor Nano：**仍然不存在**，NVIDIA 目前 Nano 级别主力仍是 Jetson Orin Nano Super（$249）
+- Jetson AGX Thor 应用案例：卡特彼勒Cat AI助手（语音+挖掘机）、GR00T机器人（UIUC黑客松冠军）
+- 结论：Thor Nano 短期内无望，继续监控即可，无需频繁检查
+
 ---
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-21 17:35
-# MiniMax 新周期 00:00-05:00，已用 0.7%，剩余 99.3%，重置 4小时46分钟后，无需提醒
+# Last check: 2026-03-22 16:39
+# MiniMax 已用 3%，剩余 584/600，重置 3h50m后，无需提醒
 
 ## MiniMax Coding Plan 额度监控
 
