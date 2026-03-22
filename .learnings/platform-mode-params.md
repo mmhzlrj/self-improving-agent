@@ -11,7 +11,7 @@
 |------|------|---------|---------|------|
 | Doubao | 专家模式 | `webauth-mcp/server.mjs` | `ext.use_deep_think: '1'` | ✅ 已启用 |
 | Kimi | K2.5思考模式 | `webauth-mcp/server.mjs` | `options.thinking: true` | ✅ 已启用 |
-| GLM | 思考+联网 | `webauth-mcp/server.mjs` | `assistantId: glm-4-think` + `is_networking` | ⚠️ `is_networking: false` 未启用 |
+| GLM | 思考+联网 | `webauth-mcp/server.mjs` | `assistantId: glm-4-think` + `is_networking: true` | ✅ 已修复联网参数 |
 | DeepSeek | 深度思考+智能搜索 | `deepseek-mcp-server/deepseek-mcp-server.mjs` | `thinking_enabled: true` + `search_enabled: true` | ✅ 已启用 |
 | Qwen | 默认（qwen-plus）| `webauth-mcp/server.mjs` | 无显式参数，依赖页面当前状态 | ✅ 保持默认 |
 
@@ -78,5 +78,4 @@ search_enabled: search,      // 默认 true
 ### GLM 联网模式未启用
 - **现象**：`is_networking: false`，智谱不会联网搜索
 - **位置**：`webauth-mcp/server.mjs` line 357
-- **需改为**：`is_networking: true`
-- **风险**：未知，需测试后验证
+- **状态**：✅ 已修复并验证（2026-03-22）
