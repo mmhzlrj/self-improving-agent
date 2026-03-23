@@ -4,8 +4,8 @@
 **记忆系统**: 贵庚
 **文档版本**: v3.0（重组版）
 **创建日期**: 2026-03-07
-**更新日期**: 2026-03-22
-**字数**: 6068
+**更新日期**: 2026-03-23
+**字数**: 6235
 
 ---
 
@@ -191,6 +191,22 @@
 | **阶段一** | NAS | 本地备份贵庚所有 raw data | 3,000元 |
 | **可选** | DGX Spark | NVIDIA 官方 OpenClaw 支持，NemoClaw 优化 | ~35,000元 |
 | **充裕时** | DGX Station GB300 | 748GB 统一内存，20 PFLOPS | ~70万 |
+
+---
+
+## 2.5 技术可行性：五条技术路线
+
+这件事在 2024-2026 年变得真正可行，是因为五条技术路线同时成熟：
+
+**第一条：开源 AI Agent 框架。** OpenClaw 是全球最流行的开源 AI Agent 项目，被称为"个人 AI 的操作系统"。2026 年 GTC 上黄仁勋宣布 *"AI agents era has arrived"*，NVIDIA 官方推出 NemoClaw（集成 OpenShell 安全沙箱 + Nemotron 模型），AMD 推出 RyzenClaw / RadeonClaw 部署指南（128GB 统一内存跑 70B 模型），Intel 优化 OpenClaw 混合 AI 执行（本地 + 云端），腾讯推出 QClaw 深度集成微信/QQ 生态。Claw 已成为 AI Agent 领域的命名共识，各大厂商纷纷围绕 OpenClaw 构建自己的配套生态。0-1 基于 OpenClaw 构建，获得了整个行业生态的背书。
+
+**第二条：消费级物理仿真。** Genesis 是华人团队（CMU、MIT 等）开源的物理仿真引擎，RTX 4090 上 43M FPS，比 NVIDIA Isaac Sim 快 10-80 倍；GTX 1080 6GB 起就能跑（Ubuntu 台式机 RTX 2060 6GB 可用），MIT 开源免费，让数字孪生训练的门槛从 Isaac Sim 的 RTX 3090+ 降到几千元。
+
+**第三条：个人制造工具链。** 拓竹 H2C + Bambu Suite + Cyber Bricks，让一个人在家里就能完成从 3D 打印结构件到精密加工到运动控制的全流程。
+
+**第四条：本地大模型推理。** Ollama + GGUF (Q4_K_M) 让 7B 模型在现有台式机 RTX 2060 上跑；vLLM / LM Studio / SGLang 各有优势——Ollama 最易用、vLLM 吞吐最高、SGLang 支持复杂 Agent 任务；AMD AI Halo 128GB（618 可能低于 1 万）跑 Qwen3.5-122B。所有推理完全本地，贵庚的记忆系统可以完全本地化，隐私安全。
+
+**第五条：统一内存架构芯片走向成熟。** 苹果 M 系列、AMD AI Max 系列都采用 CPU/GPU/NPU 共享物理内存的统一内存架构，避免了传统 CPU 与独立显存之间的数据搬运开销——苹果 M5 带宽 153GB/s、MacBook 24GB 可跑 30B 模型（4-bit 量化），AMD AI Max+ 128GB 统一内存、256GB/s 带宽、可跑 70B 参数模型；英特尔 Lunar Lake 也尝试了封装内存设计，虽然已确认是短期尝试但说明行业方向一致。LPDDR5X / LPDDR6 等低电压、大容量、高带宽内存颗粒解决了传输瓶颈；PCIe 5.0 / 6.0 的高带宽打通了芯片与内存之间的最后一公里。这些技术同时成熟，让大模型本地化推理真正具备可行性。
 
 ---
 

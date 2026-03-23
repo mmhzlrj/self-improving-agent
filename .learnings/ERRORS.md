@@ -809,3 +809,26 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
 | 4 | GLM: 思考过程混入最终回复 | 输出混乱 | 累加了所有text chunk | 去重（只取最长增量）+ think类型分离 |
 | 5 | Gateway重启杀Chrome | Chrome调试端口断 | LaunchAgent fork机制 | 重启后手动重开Chrome-Debug-Profile |
 | 6 | 5个webauth工具长调研全部超时 | 调研只DeepSeek返回 | webauth设计用于短问答 | 调研改用subagent |
+
+## 2026-03-23
+
+### 错误：遇到问题先修复，没先记录
+
+**问题**：Kimi/GLM/Qwen 的 webauth 工具报 SSE 超时（45秒），用户明确说"出现这种问题要先记录，修复都还是第二步"，我没有第一时间记录就先去测试和尝试修复。
+
+**错误**：没有执行"先记录再修复"的流程。
+
+**教训**：
+- 遇到任何问题 → 第一步：写入 LEARNINGS.md 或 ERRORS.md
+- 修复是第二步，不是第一步
+- 所有未解决的问题都要先记录再排查，不能边修边想
+- AGENTS.md、SOUL.md 里的任务记录规范同样适用于问题记录
+
+**当前问题（未解决）**：
+- Kimi：SSE 超时
+- GLM：SSE 超时  
+- Qwen：SSE 超时
+- Doubao：✅ 正常
+- DeepSeek：✅ 正常
+
+**扣分**：-1

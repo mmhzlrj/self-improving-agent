@@ -89,12 +89,13 @@ python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image "问题" "�
 
 - **Skill**: mdview
 - **用途**: 用浏览器打开 MD 文件，效果类似 GitHub
-- **路径**: `~/.openclaw/workspace/skills/mdview/`
+- **mdview.py 路径**: `~/.openclaw/workspace/tools/mdview.py`（不是 skills/mdview/ 下）
+- **SKILL.md 路径**: `~/.openclaw/workspace/skills/mdview/SKILL.md`
 - **命令**: 
   ```bash
   python3 ~/.openclaw/workspace/tools/mdview.py <文件路径>
   ```
-- **教训**: 2026-03-12 用错skill，直接用exec打开而非mdview
+- **教训**: 2026-03-12 用错skill；2026-03-23 路径记错，mdview.py 在 tools/ 而非 skills/mdview/ 下
 
 ### Web Fetch 使用规范
 

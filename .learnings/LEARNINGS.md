@@ -429,3 +429,23 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - 5个webauth工具长调研全部超时 → webauth只适合短问答（<10秒），长调研用subagent
 
 **文件位置**：`~/.openclaw/extensions/webauth-mcp/server.mjs`（v2.0.1）
+
+## 2026-03-23 新增
+
+### 5. webauth 工具 SSE 超时问题（未解决）
+
+**现象**：Chrome 9223 端口正常运行，但 Kimi/GLM/Qwen 的 SSE 流持续超时（45秒），Doubao/DeepSeek 正常。
+
+**可能的根因**：
+1. Kimi/GLM/Qwen 的页面 URL 或 cookie 状态问题
+2. SSE 流检测逻辑问题：`waitForFunction()` 或 SSE 解析函数在某些平台不触发
+3. 页面加载完成但 SSE 流始终不来（平台侧问题）
+
+**正确的应对流程（必须先做！）**：
+1. **第一步：记录** → 先把问题写入 LEARNINGS.md / ERRORS.md，不要先动手修
+2. 第二步：排查 → 确认是工具问题还是平台页面问题
+3. 第三步：修复 → 改代码或调整参数
+4. 第四步：验证 → 测试确认修复
+5. 第五步：更新记录 → 把修复方案记入文档
+
+**教训**：遇到问题先写下来，不要边修边想。
