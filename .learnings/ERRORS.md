@@ -878,3 +878,198 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
 
 ### 扣分
 - 未及时记录：-1
+
+## 2026-03-23 Doubao MCP Server v2.0 失败 + v3.0 成功
+
+### [ERR-20260323-001] doubao-mcp-server v2.0 纯 Node.js fetch 方案失败
+
+**Logged**: 2026-03-23T18:44:00+08:00
+**Priority**: high
+**Status**: resolved
+**Area**: backend
+
+#### Summary
+将 doubao-mcp-server 改成和 deepseek-mcp-server 一样的纯 Node.js fetch 架构，结果豆包 API 返回 400。
+
+#### Error
+```
+豆包 API 错误: 400 - （空 body）
+```
+
+#### Context
+- 目标：让 doubao-mcp-server 不依赖 Chrome 调试端口，独立运行
+- 方案：从 creds.json 读 sessionid + cookie，Node.js 直接 fetch
+- 结果：豆包所有请求都返回 400
+
+#### Root Cause
+豆包有字节跳动的反爬 SDK（`window.bdms`），它 hook 了浏览器内部的 fetch，**自动注入**以下参数到请求 URL：
+1. **`msToken`** — 从 localStorage `xmst` 获取
+2. **`a_bogus`** — 动态生成的反爬签名
+
+Node.js 的 fetch 没有这个拦截器，所以请求缺少这两个参数 → 400。
+
+#### Debugging Process（浪费了很多时间）
+1. 怀疑缺 `msToken` → 从 localStorage 提取 `xmst` → 带 msToken fetch → 还是 400
+2. 尝试在 `page.evaluate` 里 fetch（有拦截器）→ 还是 400！
+3. 逆向 `window.bdms.frontierSign` → 只能生成 `X-Bogus` header，不是 `a_bogus` URL 参数
+4. **卡住** → 用户建议去看 zero-token 项目
+
+#### Resolution
+- **Resolved**: 2026-03-23T19:30:00+08:00
+- 用户建议看 `openclaw-zero-token/src/providers/doubao-web-client-browser.ts`
+- 该文件的关键发现：URL 参数**不能**带 `sessionid`/`clientKey`/`msToken`/`a_bogus`，浏览器拦截器自动注入
+- `version_code` 要用 `"20800"`（不是 `"100800"`）
+- 需要额外参数：`samantha_web: "1"`, `use_olympus_account: "1"`, `region: "CN"`, `sys_region: "CN"` 等
+
+#### Metadata
+- Reproducible: yes
+- Related Files: `~/.openclaw/extensions/doubao-mcp-server/doubao-mcp-server.mjs`
+- See Also: LRN-20260323-001 (豆包 API 参数经验)
+- Tags: doubao, a_bogus, msToken, bdms, anti-crawl
+
+---
+
+### [LRN-20260323-001] 豆包 API 正确调用方式（best_practice）
+
+**Logged**: 2026-03-23T19:30:00+08:00
+**Priority**: critical
+**Status**: resolved
+**Area**: backend
+
+#### Summary
+豆包 samantha API 必须在浏览器 page.evaluate 里调用，且 URL 参数有严格要求。
+
+#### Details
+从 zero-token 项目 `doubao-web-client-browser.ts` 学到的正确方式：
+
+**URL 查询参数（必须带）：**
+```javascript
+new URLSearchParams({
+  aid: '497858',
+  device_platform: 'web',
+  language: 'zh',
+  pkg_type: 'release_version',
+  real_aid: '497858',
+  region: 'CN',
+  samantha_web: '1',         // 关键！
+  sys_region: 'CN',
+  use_olympus_account: '1',   // 关键！
+  version_code: '20800',      // 关键！不是 100800
+});
+```
+
+**URL 查询参数（绝对不能带）：**
+- ❌ `sessionid` — 浏览器拦截器自动注入
+- ❌ `clientKey` — 浏览器拦截器自动注入
+- ❌ `msToken` — 浏览器拦截器自动注入
+- ❌ `a_bogus` — 浏览器拦截器自动生成
+
+**Request Headers（必须带）：**
+```
+Content-Type: application/json
+Accept: text/event-stream
+Referer: https://www.doubao.com/chat/
+Origin: https://www.doubao.com
+Agw-js-conv: str
+```
+
+**SSE 响应格式（samantha 格式）：**
+```
+data: {"event_type": 2001, "event_data": "{\"message\":{\"content\":\"{\\\"text\\\":\\\"文字\\\"}\",\"content_type\":2001},\"is_finish\":false}"}
+data: {"event_type": 2003, ...}  // 结束
+```
+
+解析逻辑：
+1. `event_type === 2001` → 数据块
+2. `JSON.parse(event_data)` → 获取 message
+3. `JSON.parse(message.content)` → 获取 `{text: "文字"}`
+4. `is_finish === true` 时跳过
+
+**字节 bdms 反爬 SDK：**
+- SDK 位于 `window.bdms`，加载后自动 hook fetch
+- 自动注入 `msToken`（localStorage `xmst`）和 `a_bogus`（动态签名）
+- 从 Node.js fetch 永远无法获得这些参数
+- `bdms.frontierSign()` 只能生成 `X-Bogus` header（不是 URL 参数 `a_bogus`）
+- **唯一方案：在 page.evaluate() 里调 fetch**
+
+#### Suggested Action
+1. doubao-mcp-server v3.0 已按此方式实现
+2. 不再尝试纯 Node.js 方案（除非逆向 a_bogus 算法）
+
+#### Metadata
+- Source: zero-token project (openclaw-zero-token/src/providers/doubao-web-client-browser.ts)
+- Related Files: `~/.openclaw/extensions/doubao-mcp-server/doubao-mcp-server.mjs`
+- Tags: doubao, samantha, a_bogus, msToken, bdms, SSE
+- Pattern-Key: api.doubao_samantha_params
+- Recurrence-Count: 1
+- First-Seen: 2026-03-23
+- Last-Seen: 2026-03-23
+
+---
+
+### [LRN-20260323-002] 调研第三方代码的重要性（best_practice）
+
+**Logged**: 2026-03-23T19:30:00+08:00
+**Priority**: high
+**Status**: resolved
+**Area**: workflow
+
+#### Summary
+自己在豆包 API 上卡了快 1 小时，用户一句话建议看 zero-token 项目，5 分钟就找到了正确方案。
+
+#### Details
+- **问题**：doubao-mcp-server v2.0 纯 Node.js fetch 返回 400，尝试了各种方法都失败
+- **时间浪费**：约 50 分钟（18:44 - 19:30）
+- **解决**：用户建议看 `openclaw-zero-token/src/providers/doubao-web-client-browser.ts`，立刻发现了正确参数和方案
+- **zero-token 项目里有**：
+  - `doubao-web-client.ts`（Node.js 直接 fetch 版，也有 a_bogus 问题）
+  - `doubao-web-client-browser.ts`（Playwright page.evaluate 版，正确方案）
+
+#### Suggested Action
+- **遇到 API 集成问题时，第一时间看 openclaw-zero-token 项目**
+- 路径：`~/.openclaw/workspace/openclaw-zero-token/src/providers/`
+- 目录结构：每个平台有 `-auth.ts`（登录）和 `-client.ts`（API 调用）
+- 有些平台有 `-client-browser.ts`（浏览器方式），这是解决反爬的正确方案
+
+#### Metadata
+- Source: user_feedback
+- Related Files: `openclaw-zero-token/src/providers/`
+- Tags: zero-token, debugging, workflow, anti-crawl
+- See Also: LRN-20260323-001
+
+---
+
+### [LRN-20260323-003] 豆包 MCP Server v3.0 最终架构（best_practice）
+
+**Logged**: 2026-03-23T19:30:00+08:00
+**Priority**: medium
+**Status**: resolved
+**Area**: backend
+
+#### Summary
+doubao-mcp-server 最终架构：Playwright + page.evaluate，和 webauth-mcp 类似但独立。
+
+#### Details
+**架构对比：**
+| | doubao v2.0（失败）| doubao v3.0（成功）| deepseek |
+|---|---|---|---|
+| API 调用方式 | Node.js fetch | page.evaluate fetch | Node.js fetch |
+| 需要 Chrome | ❌ | ✅ (9223) | ❌ |
+| 凭证存储 | creds.json | 浏览器 cookie | creds-18800-full.json |
+| 反爬签名 | 缺少 → 400 | 自动注入 ✅ | PoW WASM（可本地算）|
+| 依赖 | 无 | playwright-core | 无 |
+
+**doubao-mcp-server v3.0 文件：**
+- 路径：`~/.openclaw/extensions/doubao-mcp-server/doubao-mcp-server.mjs`
+- 依赖：Chrome-Debug-Profile 9223 端口 + 豆包已登录
+- 不再需要 `creds.json`
+
+**和 webauth-mcp 的区别：**
+- webauth-mcp 是通用工具，支持多个平台
+- doubao-mcp-server v3.0 是独立的 doubao 专用工具
+- doubao-mcp-server v3.0 不依赖 webauth-mcp，可以独立运行
+
+#### Metadata
+- Source: development
+- Related Files: `~/.openclaw/extensions/doubao-mcp-server/doubao-mcp-server.mjs`
+- Tags: doubao, mcp, playwright, architecture
