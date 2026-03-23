@@ -300,6 +300,285 @@ Jetson Nano(控制) → ESP32-Cam × 2 + Cyber Bricks
 
 ---
 
+## 3.4 ROS 2 支持情况与替代框架
+
+> 调研时间：2026-03-23，来源：豆包专家模式深度调研
+> **结论：Jetson Nano 2GB 可完整跑 ROS 2；ESP32-CAM / H3863 / iPhone 需通过 micro-ROS / rosbridge 间接接入**
+
+### 硬件 ROS 2 支持总览
+
+| 设备 | ROS 2 支持 | 推荐方案 | 备注 |
+|------|-----------|---------|------|
+| **Jetson Nano 2GB** | ✅ 完整支持 | ROS 2 Foxy + Ubuntu 18.04（仅装 ros-base） | 2GB 内存需精简，禁用 GUI |
+| **ESP32-CAM** | ⚠️ 间接支持 | micro-ROS + WiFi / UART | 520KB SRAM 限制，仅跑精简节点 |
+| **BearPi Pico H3863** | ⚠️ 间接支持 | micro-ROS + 星闪 SLE / WiFi | 暂无官方包，需自行移植 |
+| **iPhone 16 Pro** | ⚠️ 间接支持 | rosbridge (WebSocket) / Zenoh / MCP | Swift + ARKit 是最佳原生感知方案 |
+
+---
+
+### 3.4.1 Jetson Nano 2GB — 完整 ROS 2 方案
+
+#### 推荐版本
+
+| ROS 2 版本 | Ubuntu | 适配度 | 备注 |
+|------------|--------|--------|------|
+| **Foxy Fitzroy** | 20.04 LTS | ✅ 最佳 | 稳定、内存友好、生态成熟（LTS） |
+| **Humble Hawksbill** | 22.04 LTS | ⚠️ 可跑 | 内存占用更高，需深度优化 |
+| Galactic / Iron | — | ❌ 不推荐 | 非 LTS，维护周期短 |
+
+#### 安装步骤（Foxy + ros-base）
+
+```bash
+# 1. 配置 locale
+sudo apt update && sudo apt install locales
+sudo locale-gen en_US.UTF-8
+export LANG=en_US.UTF-8
+
+# 2. 添加 ROS 2 源
+sudo apt install -y curl gnupg2 lsb-release
+sudo curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.key \
+  -o /usr/share/keyrings/ros-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \
+  http://packages.ros.org/ros2/ubuntu $(. /etc/os-release && echo $UBUNTU_CODENAME) main" \
+  | sudo tee /etc/apt/sources.list.d/ros2.list > /dev/null
+
+# 3. 安装（仅 ros-base，节省内存）
+sudo apt update
+sudo apt install -y ros-foxy-ros-base python3-argcomplete
+
+# 4. 初始化
+sudo apt install -y python3-rosdep
+sudo rosdep init
+rosdep update
+
+# 5. 环境
+echo "source /opt/ros/foxy/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### 资源占用
+
+| 组件 | 内存占用 | 说明 |
+|------|---------|------|
+| ROS 2 Foxy core | ~300-400MB | 仅核心，无 GUI |
+| rviz2 | ~500MB | 可选，Nano 2GB 不建议跑 |
+| 完整 ros-base | ~600-800MB | 包含 rclcpp / rclpy / msgs |
+
+**优化建议**：永远只装 `ros-foxy-ros-base`，用远程 rviz2 或手机/平板做可视化。
+
+---
+
+### 3.4.2 ESP32-CAM — micro-ROS 接入方案
+
+#### 核心限制
+- **520KB SRAM / 4MB Flash**：无法跑完整 ROS 2 栈
+- 标准 ROS 2 依赖 POSIX 线程、动态内存，FreeRTOS 不满足
+- OV2640 JPEG 压缩可发布，但高分辨率/高帧率会占满内存
+
+#### 方案 1：micro-ROS + WiFi（推荐）
+
+```
+ESP32-CAM (micro-ROS 节点)
+    ↓ WiFi UDP
+micro-ros-agent (运行在 Jetson Nano / PC)
+    ↓
+ROS 2 主节点
+```
+
+```cpp
+// ESP32 端示例（Arduino + micro_ROS）
+#include <micro_ros_arduino.h>
+#include <sensor_msgs/msg/compressed_image.h>
+
+rcl_node_t node;
+rcl_publisher_t pub;
+sensor_msgs__msg__CompressedImage msg;
+
+void setup() {
+  // WiFi 连接
+  set_microros_wifi_transports("SSID", "password", "agent-ip", 8888);
+  
+  // 创建节点
+  rclc_node_init_default(&node, "esp32_cam", "", &support);
+  
+  // 创建发布者
+  rclc_publisher_init_default(&pub, &node, ROSIDL_GET_MSG_TYPE_SUPPORT(
+    sensor_msgs, msg, CompressedImage), "/camera/image/compressed");
+}
+
+void loop() {
+  // 采集 OV2640 JPEG → 发布
+  camera_fb_t *fb = esp_camera_fb_get();
+  if (fb) {
+    msg.format.data = (char*)"jpeg";
+    msg.data.data = fb->buf;
+    msg.data.size = fb->len;
+    rcl_publish(&pub, &msg, NULL);
+    esp_camera_fb_return(fb);
+  }
+  delay(100); // 10 FPS
+}
+```
+
+**Jetson Nano 端启动代理**：
+```bash
+# 安装 micro-ROS agent
+sudo apt install -y ros-foxy-micro-ros-agent
+
+# WiFi 模式启动
+ros2 run micro_ros_agent micro_ros_agent wifi \
+  --help  # 查看参数
+ros2 run micro_ros_agent micro_ros_agent wifi -h <agent-host> -p 8888
+```
+
+#### 方案 2：micro-ROS + UART（低延迟，有线）
+
+```
+ESP32-CAM ← USB-TTL → Jetson Nano (micro-ros-agent)
+```
+
+```bash
+# Jetson Nano 端
+ros2 run micro_ros_agent micro_ros_agent serial --dev /dev/ttyUSB0 -b 921600
+```
+
+#### 方案 3：HTTP/MJPEG 流（最简，不跑 micro-ROS）
+
+```python
+# Jetson Nano 拉取 ESP32-CAM MJPEG 流，转 ROS 2 Image
+import cv2, rclpy
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+
+cap = cv2.VideoCapture('http://esp32-ip/stream')
+bridge = CvBridge()
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if ret:
+        msg = bridge.cv2_to_imgmsg(frame, encoding="bgr8")
+        publisher.publish(msg)
+```
+
+**推荐配置**：QVGA (320×240) / 5-10 FPS，避免 ESP32 内存溢出。
+
+---
+
+### 3.4.3 BearPi Pico H3863 — 移植方案
+
+#### 现状
+- Hi3863（RISC-V 32bit，240MHz，4MB Flash）**无 MMU，无法跑标准 Linux**
+- **无官方 micro-ROS 包**，需基于 FreeRTOS + RISC-V 工具链自行移植
+- 星闪 SLE / WiFi 6 / BLE 三模通信是 H3863 的独特优势
+
+#### 移植路径
+
+```
+1. 搭建 Hi3863 开发环境（RISC-V 工具链 + 小熊派 SDK）
+2. 移植 micro-ROS 核心（rcl / rclc，基于 FreeRTOS）
+3. 适配 Micro XRCE-DDS 到 Hi3863 的 UART / SPI / WiFi 驱动
+4. 主机运行 micro-ros-agent，桥接到 ROS 2
+5. 星闪 SLE 作为传输层（<5ms 延迟，适合实时控制）
+```
+
+#### 星闪 SLE vs 其他无线方案对比
+
+| 方案 | 延迟 | 可靠性 | 适用场景 |
+|------|------|--------|---------|
+| **星闪 SLE** | <5ms | 极高 | 机器人实时控制（推荐） |
+| UWB | <1ms | 极高 | 高精度定位 + 控制 |
+| BLE 5.3 | 10-20ms | 高 | 低速关节、传感器 |
+| WiFi 6 | 10-30ms | 中 | 高清图传、非实时 |
+
+---
+
+### 3.4.4 iPhone 16 Pro — rosbridge / MCP 方案
+
+#### 架构
+
+```
+iPhone (Swift + ARKit)
+    ↓ WebSocket / MCP
+rosbridge_server (Jetson Nano / PC)
+    ↓
+ROS 2 主节点
+```
+
+#### Swift + rosbridge 示例
+
+```swift
+import ARKit
+import Starscream  // WebSocket 库
+
+class ROS2Bridge: WebSocketDelegate {
+    let socket: WebSocket
+    
+    init(agentHost: String, port: Int) {
+        let url = URL(string: "ws://\(agentHost):\(port)")!
+        socket = WebSocket(request: URLRequest(url: url))
+        socket.delegate = self
+        socket.connect()
+    }
+    
+    // ARKit 每帧回调
+    func session(_ session: ARSession, didUpdate frame: ARFrame) {
+        // 发布 Odometry（VIO 位姿）
+        let odom: [String: Any] = [
+            "op": "publish",
+            "topic": "/iphone/odom",
+            "msg": [
+                "header": ["stamp": ["sec": Int64(Date().timeIntervalSince1970)]],
+                "pose": ["pose": ["position": ["x": frame.camera.transform.columns.3.x,
+                                               "y": frame.camera.transform.columns.3.y,
+                                               "z": frame.camera.transform.columns.3.z]]
+            ]
+        ]
+        if let data = try? JSONSerialization.data(withJSONObject: odom) {
+            socket.write(data: data)
+        }
+    }
+    
+    func didReceive(event: WebSocketEvent, client: WebSocketClient) {
+        // 接收 ROS 2 发来的控制指令
+        if case .text(let str) = event {
+            if let data = str.data(using: .utf8),
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               json["op"] as? String == "publish" {
+                // 解析指令 → 执行动作
+            }
+        }
+    }
+}
+```
+
+#### 替代方案对比
+
+| 方案 | 优点 | 缺点 |
+|------|------|------|
+| **rosbridge** | 成熟、JSON 易用、工具多 | 额外序列化开销 |
+| **Zenoh** | 更高效、支持 DDS 互通 | iOS 端库少 |
+| **MCP (Model Context Protocol)** | 与 OpenClaw 原生集成 | 需自行实现 Swift 端 |
+
+**推荐**：用 rosbridge 先跑通，后续可升级到 Zenoh 提升效率。
+
+---
+
+### 3.4.5 比 ROS 2 更好的替代框架
+
+| 框架 | 优势 | 适用场景 |
+|------|------|---------|
+| **Micro-ROS** | 极轻量、MCU 可跑、与 ROS 2 完全兼容 | ESP32、H3863 等嵌入式 MCU |
+| **ROS 1** | 生态最成熟、文档最多、简单场景首选 | 简单机器人、无需新特性 |
+| **SROS2** | ROS 2 安全加固（TLS / DDS 加密） | 高安全场景 |
+| **YUR** | 极轻量、Web 可视化、快速原型 | 教学、Web 端监控 |
+
+**对于 0-1 项目的建议**：
+- **Jetson Nano**：ROS 2 Foxy，与 OpenClaw 通过 MQTT / WebSocket 桥接
+- **ESP32-CAM / H3863**：micro-ROS，无缝接入 ROS 2 网络，星闪作为高速传输层
+- **iPhone**：rosbridge，作为感知前端独立运行，不依赖 ROS 2 生态
+
+---
+
 # 第四章：实施阶段
 
 ## Phase 0：Ubuntu 台式机对接 Gateway
