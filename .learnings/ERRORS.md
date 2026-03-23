@@ -853,3 +853,28 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
 1. Gateway 重启前先确认 Chrome 状态
 2. Chrome 重启后立即刷新 token（从浏览器 cookie 重新提取）
 3. 不要依赖 auth-credentials 文件里的 token（会过期）
+
+## 2026-03-23 第二次 SSE 超时（deep-search 测试时）
+
+### 错误表
+
+| 工具 | 错误 | 备注 |
+|------|------|------|
+| Kimi | `MCP error -32001: Request timed out` | 之前通，现在超时 |
+| GLM | `MCP error -32001: Request timed out` | 之前通，现在超时 |
+| Qwen | `MCP error -32001: Request timed out` | 之前通，现在超时 |
+| Doubao | ✅ 正常 | |
+| DeepSeek | ✅ 正常（简短问题） | 复杂问题也超时 |
+
+### 根因分析
+- 可能是 Token 又过期了（Kimi/GLM/Qwen 的 cookie 在页面刷新后失效）
+- 或者 Gateway 重启导致 Chrome 状态变化
+- DeepSeek 在复杂长问题上也会超时（与之前相同问题）
+
+### 教训
+- 每次工具调用失败都要立即记录，不能等
+- 工具通了之后又超时，说明状态不稳定，需要查根因
+- 不能假设"修好了就一直好了"
+
+### 扣分
+- 未及时记录：-1
