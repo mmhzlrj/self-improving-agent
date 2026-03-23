@@ -409,24 +409,30 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - webauth 工具只适合短问答（<10秒），不适合长调研任务
 - 以后调研应该用 `sessions_spawn` subagent，而不是 webauth
 
-## 2026-03-23 webauth 工具 SSE 超时问题
+## 2026-03-23 webauth 工具 SSE 超时问题（✅ 已解决）
 
-### 当前状态
+### 最终状态（5平台全部通过）
 | 工具 | 状态 |
 |------|------|
-| Doubao | ✅ 正常 |
-| DeepSeek | ✅ 正常 |
-| Kimi | ❌ SSE 超时 |
-| GLM | ❌ SSE 超时 |
-| Qwen | ❌ SSE 超时 |
+| Doubao | ✅ |
+| Kimi | ✅ |
+| GLM | ✅ 无杂音 |
+| Qwen | ✅ |
+| DeepSeek | ✅ |
 
-### 问题描述
-Chrome 9223 调试端口正常，页面能加载、cookie 有效，但 SSE 流持续 45 秒超时。Doubao/DeepSeek 正常说明 MCP server 本身没问题。
+### 根因
+1. Token 过期（HTTP-only cookie 存在文件里已失效）
+2. Kimi API URL 错误（moonshot.cn → www.kimi.com）
+3. Token 获取方式错误（从文件读 → 从浏览器 cookie 读）
+
+### 关键修复
+- **Token 刷新**：Gateway 重启后用 Playwright 从浏览器 cookie 提取新 token
+- **Kimi URL**：`https://www.kimi.com/apiv2/kimi.gateway.chat.v1.ChatService/Chat`
+- **Kimi 认证**：HTTP-only cookie 必须用 ctx.cookies() 读，再传进 page.evaluate()
 
 ### 教训
-**遇到问题先记录再修复**，没有例外。流程：
-1. 写入 LEARNINGS.md + ERRORS.md
-2. 排查根因
-3. 修复
-4. 验证
-5. 更新文档
+**遇到问题先记录再修复**，没有例外。
+
+### 经验文档
+- `.learnings/LEARNINGS.md` — 详细修复过程
+- `.learnings/ERRORS.md` — 错误记录

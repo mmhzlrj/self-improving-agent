@@ -1,6 +1,10 @@
 {
   "qwen_session": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ1c2VyLWNlbnRlciIsImV4cCI6MTc4OTQ2NzAwMCwiaWF0IjoxNzczOTE3MjAwLCJqdGkiOiJkOHV0OWwwdG1tcGZicW9ibWc3ZSIsInR5cGUiOiJhY2Nlc3MiLCJhcHBJZCI6InF3ZW4iLCJzdWIiOiJ1c2VyLWNlbnRlciIsInNwYWNlX2lkIjoiZGVmYXVsdCIsInVzZXJuYW1lIjoi6Zu35aW25aW2IiwiZW1haWwiOiI3NjI0Njk2QHFxLmNvbSIsImFic3RyYWN0X3VzZXJfaWQiOiJ1c2VyLWNlbnRlciIsInNzaWQiOiIxNzczOTE3MjAwMDQ3IiwiaWQiOiI2OTczN2FmMzBkMTk0YjZhN2UwMTIzMWYiLCJyZWdpb24iOiJjbiJ9...",
   "qwen_csrf_token": "a42f6b53-2f6f-4e2a-b9b0-4ccb80d7b6a3",
-  "userInfo": {"username":"用户名","email":"76249696@qq.com"},
-  "capturedAt": "2026-03-19T14:04:00+08:00"
+  "userInfo": {
+    "username": "用户名",
+    "email": "76249696@qq.com"
+  },
+  "capturedAt": 1774237265662,
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImZkNmQzM2Y2LTlhNWUtNDFiZC05ZTRkLTRmZTQ5NWVhYTBkZSIsImxhc3RfcGFzc3dvcmRfY2hhbmdlIjoxNzczMjEyMzAzLCJleHAiOjE3NzY4MjkyNjN9.pLk_D778tHg94KZZsWMH33aWqqdZkbvA_jTNJ-GQdSE"
 }

@@ -832,3 +832,24 @@ Gateway 进程被 kill 后未正确重启，导致配置未生效
 - DeepSeek：✅ 正常
 
 **扣分**：-1
+
+## 2026-03-23 webauth 工具 SSE 超时（已解决）
+
+### 错误表
+
+| 平台 | 错误信息 | 根因 | 修复 |
+|------|---------|------|------|
+| Kimi | `Request timed out` | Token 过期 + API URL 错误 | 刷新 cookie + 改 API URL |
+| GLM | `Request timed out` | Token 过期（refresh_token HTTP 400）| 刷新 cookie |
+| Qwen | `Request timed out` | Token 过期 | 刷新 cookie |
+| Doubao | ✅ 正常 | — | — |
+| DeepSeek | ✅ 正常 | — | — |
+
+### 扣分记录
+- 本次扣 0（已修复）
+- 教训：之前没先记录就动手修，违反流程
+
+### 预防措施
+1. Gateway 重启前先确认 Chrome 状态
+2. Chrome 重启后立即刷新 token（从浏览器 cookie 重新提取）
+3. 不要依赖 auth-credentials 文件里的 token（会过期）

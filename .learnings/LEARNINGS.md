@@ -449,3 +449,77 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 5. 第五步：更新记录 → 把修复方案记入文档
 
 **教训**：遇到问题先写下来，不要边修边想。
+
+## 2026-03-23 webauth-mcp 大修复（5平台全部通）
+
+### 问题现象
+Chrome 9223 重启后，Kimi/GLM/Qwen 报 SSE 超时（Doubao/DeepSeek 正常）
+
+### 根因（分3层）
+
+**第一层：Token 过期**
+- Kimi/GLM/Qwen 的认证 token 存在 `auth-credentials/*.json` 文件里
+- 这些 token 是 HTTP-only Cookie，文件里的版本已过期
+- 之前 token 是通过 loadCredentials() 从文件读取
+
+**第二层：Kimi API URL 错误**
+- 之前 Kimi 用了 `https://moonshot.cn/api/chat/completion`（错误）
+- Kimi 正确端点是 `https://www.kimi.com/apiv2/kimi.gateway.chat.v1.ChatService/Chat`
+
+**第三层：Token 获取方式**
+- HTTP-only Cookie（kimi-auth）JavaScript `document.cookie` 读不到
+- 必须用 Playwright 的 `ctx.cookies()` 读取，再传进 `page.evaluate()`
+- 正确流程：Playwright 从浏览器拿 cookie → 注入 page context → 调用 API
+
+### 修复方案
+
+**1. Token 刷新脚本（每次 Gateway 重启后都要做）：**
+```javascript
+// 用 Playwright 从当前浏览器会话提取 token
+const browser = await chromium.connectOverCDP(wsUrl);
+const ctx = browser.contexts()[0];
+const cookies = await ctx.cookies(['https://www.kimi.com']);
+const kimiAuth = cookies.find(c => c.name === 'kimi-auth')?.value;
+// 写入 auth-credentials/kimi.json
+```
+
+**2. Kimi API URL 修复：**
+- ✅ 正确：`https://www.kimi.com/apiv2/kimi.gateway.chat.v1.ChatService/Chat`
+- ❌ 错误：`https://moonshot.cn/api/chat/completion`（会返回 HTML）
+
+**3. Kimi Token 获取修复：**
+```javascript
+// 从浏览器 cookie 获取（不用文件里的）
+const cookies = await ctx.cookies(['https://www.kimi.com']);
+const kimiAuth = cookies.find(c => c.name === 'kimi-auth')?.value;
+if (!kimiAuth) throw new Error('[Kimi] 未找到 kimi-auth Cookie，请在 Chrome 中登录 www.kimi.com');
+// 在 page.evaluate 里用 Authorization: Bearer ${kimiAuth} 调用 API
+```
+
+**4. GLM/Qwen 直接复用机制：**
+- GLM：fetch 拦截器注入到页面，读取 window._glmText
+- Qwen：fetch 拦截器注入到页面，读取 window._qwenText
+- 两者不需要手动拿 token（拦截器自动捕获）
+
+### 关键教训
+
+1. **HTTP-only Cookie 必须从浏览器读**，不能读文件（文件里的是旧版，会过期）
+2. **API URL 必须和页面域名一致**（www.kimi.com 不是 moonshot.cn）
+3. **Gateway 重启会杀 Chrome**，Chrome 重启后 token 仍是新的（从浏览器 cookie 刷新）
+4. **遇到问题先记录再修复**（已写入 ERRORS.md）
+
+### 验证方法
+
+```javascript
+// 快速验证 5 平台是否都通
+webauth_doubao_chat("1+1")  // ✅
+webauth_kimi_chat("1+1")     // ✅
+webauth_glm_chat("1+1")     // ✅
+webauth_qwen_chat("1+1")    // ✅
+deepseek_deepseek_chat("1+1") // ✅
+```
+
+### 错误标识格式（已加上）
+- `[Kimi] ...` — Kimi 相关错误
+- `[GLM] ...` — GLM 相关错误
+- `[Qwen] ...` — Qwen 相关错误
