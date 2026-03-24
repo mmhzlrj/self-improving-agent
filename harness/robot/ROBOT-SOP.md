@@ -184,13 +184,13 @@
 
 | 时间 | 设备 | 理由 | 价格 |
 |------|------|------|------|
-| **2026-06** | RTX 5050 9GB GDDR7 | 插入现有台式机，跑 Qwen3.5-4B/9B 4-bit | ~2,000元 |
+| **2026-06** | RTX 5050 9GB GDDR7（96-bit，336 GB/s）| 插入现有台式机，跑 Qwen3.5-4B/9B 4-bit | ~2,000元 |
 | **Q2** | AMD AI Halo 128GB | 跑 Qwen3.5-122B，本地训练贵庚，618 可能低于1万 | ~10,000-15,000元 |
 | **阶段一** | Jetson AGX Thor | 替代 Nano 作为 0-1 主控 | ~24,000元 |
 | **阶段一（备选）** | Jetson Thor Nano | 年底上市后替换，预计性价比最高 | ~2,000元（期待价）|
 | **阶段一** | 全景摄像头 | 360° 视觉冗余 | 3,000元 |
 | **阶段一** | NAS | 本地备份贵庚所有 raw data | 3,000元 |
-| **可选** | DGX Spark | NVIDIA 官方 OpenClaw 支持，NemoClaw 优化 | ~35,000元 |
+| **可选** | DGX Spark | NVIDIA 官方 OpenClaw 支持，NemoClaw 优化，2026年2月涨价 | ~34,999元（京东自营）|
 | **充裕时** | DGX Station GB300 | 748GB 统一内存，20 PFLOPS | ~70万 |
 
 ---
@@ -201,7 +201,7 @@
 
 **第一条：开源 AI Agent 框架。** OpenClaw 是全球最流行的开源 AI Agent 项目，被称为"个人 AI 的操作系统"。2026 年 GTC 上黄仁勋宣布 *"AI agents era has arrived"*，NVIDIA 官方推出 NemoClaw（集成 OpenShell 安全沙箱 + Nemotron 模型），AMD 推出 RyzenClaw / RadeonClaw 部署指南（128GB 统一内存跑 70B 模型），Intel 优化 OpenClaw 混合 AI 执行（本地 + 云端），腾讯推出 QClaw 深度集成微信/QQ 生态。Claw 已成为 AI Agent 领域的命名共识，各大厂商纷纷围绕 OpenClaw 构建自己的配套生态。0-1 基于 OpenClaw 构建，获得了整个行业生态的背书。
 
-**第二条：消费级物理仿真。** Genesis 是华人团队（CMU、MIT 等）开源的物理仿真引擎，RTX 4090 上 43M FPS，比 NVIDIA Isaac Sim 快 10-80 倍；GTX 1080 6GB 起就能跑（Ubuntu 台式机 RTX 2060 6GB 可用），MIT 开源免费，让数字孪生训练的门槛从 Isaac Sim 的 RTX 3090+ 降到几千元。
+**第二条：消费级物理仿真。** Genesis 是华人团队（CMU、MIT 等）开源的物理仿真引擎，RTX 4090 上 43M FPS，比 NVIDIA Isaac Gym 快 10-80 倍；GTX 1080 6GB 起就能跑（Ubuntu 台式机 RTX 2060 6GB 可用），MIT 开源免费，让数字孪生训练的门槛从 Isaac Gym 的 RTX 3090+ 降到几千元。
 
 **第三条：个人制造工具链。** 拓竹 H2C + Bambu Suite + Cyber Bricks，让一个人在家里就能完成从 3D 打印结构件到精密加工到运动控制的全流程。
 
@@ -1568,11 +1568,11 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 
 > **调研时间**：2026-03-22
 > **来源**：Genesis GitHub + 官方文档
-> **最新动态**：2026-03-21 仍有更新，GitHub Stars 28,318
+> **最新动态**：最新版本 v0.4.0（2026-02-17），GitHub Stars 28,318
 
-### Genesis vs Isaac Sim 完整对比
+### Genesis vs Isaac Gym 完整对比
 
-| 对比维度 | Genesis | Isaac Sim |
+| 对比维度 | Genesis | Isaac Gym |
 |----------|---------|-----------|
 | 定位 | 通用具身智能/生成式仿真 | 工业级数字孪生 |
 | 物理引擎 | 自研多求解器（刚体/MPM/SPH/FEM/PBD）| PhysX 5.1 (GPU) |
@@ -1582,13 +1582,13 @@ FastVLM 0.5B → 语义理解 → 贵庚大脑
 | 学习曲线 | **低**（pip 安装，Gym 风格 API）| 高（需掌握 USD/Omniverse）|
 | 速度 | **43M FPS**（RTX 4090）| 100+ 智能体并行 |
 
-> **对 0-1 的意义**：数字孪生训练的硬件门槛从 Isaac Sim 的 RTX 3090+ 降到 **GTX 1080 6GB**，现有台式机（RTX 2060 6GB）就能用。
+> **对 0-1 的意义**：数字孪生训练的硬件门槛从 Isaac Gym 的 RTX 3090+ 降到 **GTX 1080 6GB**，现有台式机（RTX 2060 6GB）就能用。
 
 ### Genesis 最新功能（2026年以来）
 
 | 日期 | 新增功能 |
 |------|---------|
-| 2026-03-21 | GitHub 持续活跃更新（28,318 Stars）|
+| 2026-02-17 | 最新版本 v0.4.0，GitHub 持续活跃更新（28,318 Stars）|
 | 2026-03-16 | ProximitySensor、TemperatureGridSensor、GPU碰撞检测提速30% |
 | 2026-03-13 | FOTS触觉传感器、异构机器人并行仿真 |
 | 2026-02-18 | **Quadrants编译器**正式迁移、AMD ROCm实验性支持 |
@@ -2091,10 +2091,10 @@ curl http://192.168.1.z/battery
 | **NemoClaw** | NVIDIA GTC 2026 发布，企业级安全沙箱 |
 | **A18 Pro** | NPU 量化分数 44,672，比 A17 Pro 高 33% |
 | **FastVLM** | 比 LLaVA-OneVision 快 85 倍 TTFT，0.5B 可本地运行 |
-| **Genesis** | 2026-03-21 仍有更新，GTX 1080 6GB 即可跑 |
+| **Genesis** | 最新版本 v0.4.0（2026-02-17），GTX 1080 6GB 即可跑 |
 | **Genesis vs Newton** | Newton（Disney+DeepMind+NVIDIA三巨头，Linux Foundation）需关注但为时尚早 |
 | **Jetson Thor Nano** | 仍然不存在，继续每月一次监控 |
-| **星闪设备** | BearPi-Pico H3863（海思Hi3863V100，40针GPIO）/ RK3506星闪板（59元核心板）；和ESP32对比：时延<20μs vs >10ms，并发4096 vs 7-20；但缺少"40针GPIO+星闪原生"标准品，需RISC-V开发板+星闪Dongle组合方案 |
+| **星闪设备** | BearPi-Pico H3863（海思Hi3863V100，17个GPIO，40针扩展排针座）/ RK3506星闪板（59元核心板）；和ESP32对比：时延<20μs vs >10ms，并发4096 vs 7-20；但缺少"40针GPIO+星闪原生"标准品，需RISC-V开发板+星闪Dongle组合方案 |
 
 ---
 
