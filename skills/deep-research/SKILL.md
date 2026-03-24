@@ -138,17 +138,28 @@ metadata:
 | `tavily-search` | 实时网络搜索，获取最新信息 |
 | `web_fetch` | 获取官方页面详细内容 |
 | `sessions_spawn` (subagent) | 并行搜索不同角度 |
-| `web_search` | 快速获取最新信息 |
+| `minimax search` | 网络搜索（替代 Brave Search） |
 | `browser` | 用 Chrome 搜索最新内容、处理复杂页面 |
 
 **并行调用原则（必须遵守）：**
 当用户说"调研"时，同时启动：
 1. `node zhiku-ask.js "[问题]"` — 五平台并行思考
-2. `tavily_search` — 实时搜索最新结果
+2. `tavily_search` / `minimax search` — 实时搜索最新结果
 3. `web_fetch` — 获取官方文档
 4. 派 3-5 个 subagent 从不同角度搜索
 
 总耗时 = 最慢工具的时间（约 30-60 秒），比串行快 5 倍。
+
+### 工具状态检查（调研前必须做）
+
+**详细规范见**：`~/.openclaw/workspace/.learnings/deep-research-usage-guide.md` 第一步
+
+**核心原则**：直接调用工具本身来验证可用性，不是用 Playwright 打开页面看能不能加载。
+
+```
+正确：doubao_doubao_chat("你好") → 能收到回复 ✅
+错误：Playwright 打开 doubao.com 看到页面 → 就算"检查通过" ❌
+```
 
 ---
 
