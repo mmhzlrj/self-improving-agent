@@ -19,6 +19,7 @@
 | 用 `textContent('body')` 搜索"登录"文字判断登录态 | 文字可能出现在无关位置，检测不准确 |
 | 只检查 Chrome CDP 能不能连，不检查每个 webauth 工具 | CDP 连通 ≠ 工具可用 |
 | 凭记忆说"工具都正常"而不实际调用 | Token 可能已过期，必须实际调用验证 |
+| 用 `thinking=false` 代替实际思考模式 | `thinking=true` 才能验证深度思考功能是否正常 |
 
 ---
 
@@ -50,12 +51,14 @@ curl -s --max-time 3 "http://127.0.0.1:9223/json/version"
 **5个工具的调用命令（串行或并行均可）：**
 
 ```
-1. doubao_doubao_chat(message="OK", thinking=false)
-2. kimi_kimi_chat(message="OK", thinking=false)
-3. glm_glm_chat(message="OK", thinking=false)
-4. qwen_qwen_chat(message="OK", thinking=false)
-5. deepseek_deepseek_chat(message="OK", thinking=false, search=false)
+1. doubao_doubao_chat(message="OK", thinking=true)
+2. kimi_kimi_chat(message="OK", thinking=true)
+3. glm_glm_chat(message="OK", thinking=true)
+4. qwen_qwen_chat(message="OK", thinking=true)
+5. deepseek_deepseek_chat(message="OK", thinking=true, search=false)
 ```
+
+**注意**：`thinking=true` 是为了验证平台深度思考功能正常。如果某个平台不支持 `thinking` 参数，忽略即可。
 
 **期望结果：** 每个工具在 30 秒内返回正常回复（非错误、非空）
 
@@ -138,13 +141,11 @@ sessions_spawn(
 
 | 平台 | 函数名 | 最小调用参数 |
 |------|--------|------------|
-| 豆包 | `doubao_doubao_chat` | `message="OK", thinking=false` |
-| Kimi | `kimi_kimi_chat` | `message="OK", thinking=false` |
-| 智谱 | `glm_glm_chat` | `message="OK", thinking=false` |
-| 千问 | `qwen_qwen_chat` | `message="OK", thinking=false` |
-| DeepSeek | `deepseek_deepseek_chat` | `message="OK", thinking=false, search=false` |
-
-**注意：** `thinking=false` 是为了减少 token 消耗和响应时间，适合状态检查。如果 `thinking` 参数不存在，忽略即可。
+| 豆包 | `doubao_doubao_chat` | `message="OK", thinking=true` |
+| Kimi | `kimi_kimi_chat` | `message="OK", thinking=true` |
+| 智谱 | `glm_glm_chat` | `message="OK", thinking=true` |
+| 千问 | `qwen_qwen_chat` | `message="OK", thinking=true` |
+| DeepSeek | `deepseek_deepseek_chat` | `message="OK", thinking=true, search=false` |
 
 ---
 
