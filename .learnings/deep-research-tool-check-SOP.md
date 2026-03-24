@@ -20,6 +20,8 @@
 | 只检查 Chrome CDP 能不能连，不检查每个 webauth 工具 | CDP 连通 ≠ 工具可用 |
 | 凭记忆说"工具都正常"而不实际调用 | Token 可能已过期，必须实际调用验证 |
 | 用 `thinking=false` 代替实际思考模式 | `thinking=true` 才能验证深度思考功能是否正常 |
+| 遇到报错就慌张反复重试 | 报错 ≠ 失败，应先验证（curl 测一下）再决定是否重试 |
+| mdview 端口占用时连续执行多次 | 可能第一次已经成功了，反复执行会打开多个重复标签页 |
 
 ---
 
@@ -146,6 +148,23 @@ sessions_spawn(
 | 智谱 | `glm_glm_chat` | `message="OK", thinking=true` |
 | 千问 | `qwen_qwen_chat` | `message="OK", thinking=true` |
 | DeepSeek | `deepseek_deepseek_chat` | `message="OK", thinking=true, search=false` |
+
+---
+
+### mdview.py 打开 SOP 文件的正确流程
+
+**当前 mdview 版本**（2026-03-24 CSS 修复后）：`~/.openclaw/workspace/tools/mdview.py`
+
+**正确操作流程：**
+1. 执行 `python3 ~/.openclaw/workspace/tools/mdview.py <文件路径>`
+2. 如果报错"端口占用"：
+   - **等 2 秒**
+   - `curl http://127.0.0.1:18999/` 验证是不是真的不行
+   - 确认不行再 `lsof -ti:18999` 查 PID，只 kill 那一个
+   - 再执行 mdview 命令
+3. 不要连续执行多次 mdview，会打开多个重复标签页
+
+**教训：** 报错不等于失败，验证后再行动。多次重复尝试往往比一次耐心理性排查更浪费时间。
 
 ---
 
