@@ -348,6 +348,67 @@ MD 内容格式：
 | YYYY-MM-DD | [主题] | XX | XX分钟 | XX分钟 | XX% |
 ```
 
+### mdview --review 联动流程（重要！）
+
+调研完成后，使用 mdview **审批模式**让用户逐条审批修改建议：
+
+#### Step A：生成汇总 MD
+调研完成后，生成汇总 MD 文件到 `.review/` 目录：
+```bash
+mkdir -p ~/.openclaw/workspace/.review
+# 汇总 MD 文件内容格式见上方模板
+```
+
+#### Step B：用 mdview 审批模式打开
+```bash
+python3 ~/.openclaw/workspace/tools/mdview.py ~/.openclaw/workspace/.review/YYYY-MM-DD-HHMM-review.md
+```
+
+#### Step C：用户逐条审批（mdview 审批模式操作说明）
+
+mdview 审批模式界面每个修改意见条目的操作：
+
+| 按钮 | 作用 |
+|------|------|
+| **✅ 采纳** | 标记该条修改为"采纳"，绿色高亮 |
+| **❌ 不采纳** | 标记该条修改为"不采纳"，红色高亮 |
+| **备注输入框** | 可填写不采纳的理由或补充说明 |
+
+底部工具栏按钮：
+
+| 按钮 | 作用 |
+|------|------|
+| **🍴 导出结果** | 导出 JSON 文件（包含所有条目的采纳状态和备注），保存到本地 |
+| **🔄 清空所有** | 重置所有审批状态（需二次确认）|
+
+审批结果保存在浏览器 **localStorage**，关闭页面后仍保留，重新打开文件可继续审批。
+
+#### Step D：读取审批结果，应用修改
+
+用户导出 JSON 后，将 JSON 文件路径告诉 AI，AI 执行：
+
+```bash
+# AI 读取审批结果
+python3 ~/.openclaw/workspace/tools/read-review-results.py <JSON文件路径>
+```
+
+脚本自动解析 JSON，对每条"采纳"的修改：
+1. 找到对应源文件
+2. 用 `edit` 工具应用修改
+3. 记录修改历史
+
+**注意**：只有在用户导出 JSON 并提供路径后，AI 才能读取结果。不要自己猜测用户的选择。
+
+#### Step E：commit（仅在用户确认后）
+所有修改应用完成后，汇报给用户，用户确认无误后再 commit。
+
+---
+
+**完整流程链：**
+```
+调研完成 → 生成汇总 MD → mdview --review 打开 → 用户逐条审批 → 导出 JSON → AI 读取结果 → 应用修改 → 汇报用户 → commit
+```
+
 ---
 
 ## 常见错误（避免重犯）
