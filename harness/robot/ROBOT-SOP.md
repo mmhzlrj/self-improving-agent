@@ -284,7 +284,7 @@ Jetson Nano(控制) → ESP32-Cam × 2 + Cyber Bricks
 | 协议 | 用途 | Jetson Nano | ESP32-Cam |
 |------|------|------------|-----------|
 | **UART** | 简单命令传递 | Pin 8(TX)/10(RX)，/dev/ttyTHS1 | GPIO1/3，波特率115200 |
-| **I2C** | 多设备总线 | Pin 3(SCL)/5(SDA)，速率10-400kHz | GPIO4/5，需要电平3.3V |
+| **I2C** | 多设备总线 | Pin 3(SDA)/5(SCL)，速率10-400kHz | GPIO4/5，需要电平3.3V |
 | **GPIO** | 应急停止信号 | Pin 29 等，/sys/class/gpio | 任意GPIO，硬件中断μs级 |
 
 > **关键洞察**：Jetson Nano 和 ESP32-Cam 都有 40 针 GPIO，这是有线控制的核心。有线应急停止 <1ms，无线 WiFi >100ms。
@@ -427,9 +427,9 @@ void loop() {
 sudo apt install -y ros-foxy-micro-ros-agent
 
 # WiFi 模式启动
-ros2 run micro_ros_agent micro_ros_agent wifi \
+ros2 run micro_ros_agent micro_ros_agent udp4 \
   --help  # 查看参数
-ros2 run micro_ros_agent micro_ros_agent wifi -h <agent-host> -p 8888
+ros2 run micro_ros_agent micro_ros_agent udp4 -h <agent-host> -p 8888
 ```
 
 #### 方案 2：micro-ROS + UART（低延迟，有线）
@@ -1667,7 +1667,7 @@ ollama run qwen2.5:7b-instruct-q4_K_M
 | **v0.14.0** | ✅ **推荐版本** | 官方 Docker 镜像/wheel，一键安装 |
 | v0.15.0+ | ✅ 持续优化 | 继续增强 RDNA 支持 |
 
-**推荐部署**：使用官方 Docker `vllm/vllm-openai-rocm:v0.14.0`
+**推荐部署**：使用官方 Docker `vllm/vllm-openai:v0.14.0-rocm`
 
 ### SGLang ROCm 支持
 
