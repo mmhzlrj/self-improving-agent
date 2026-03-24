@@ -67,11 +67,11 @@ curl -s --max-time 3 "http://127.0.0.1:9223/json/version"
 
 ```
 并行调用（同时发出，等待所有返回）：
-1. doubao_doubao_chat("你好，回复OK") → ✅/❌ + 响应时间
-2. kimi_kimi_chat("你好，回复OK") → ✅/❌ + 响应时间
-3. glm_glm_chat("你好，回复OK") → ✅/❌ + 响应时间
-4. qwen_qwen_chat("你好，回复OK") → ✅/❌ + 响应时间
-5. deepseek_deepseek_chat("你好，回复OK") → ✅/❌ + 响应时间
+1. doubao_doubao_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
+2. kimi_kimi_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
+3. glm_glm_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
+4. qwen_qwen_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
+5. deepseek_deepseek_chat("你好，回复OK", thinking=true, search=false) → ✅/❌ + 响应时间
 ```
 
 **判断标准**：
