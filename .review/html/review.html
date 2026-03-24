@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>📋 2026-03-24-1110-review</title>
+
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; background: #fff; }
+pre { background: #f6f8fa; padding: 16px; border-radius: 6px; overflow-x: auto; }
+code { background: #f6f8fa; padding: 2px 6px; border-radius: 3px; font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 85%; }
+pre code { background: none; padding: 0; }
+table { border-collapse: collapse; width: 100%; margin: 16px 0; }
+th, td { border: 1px solid #d0d7de; padding: 8px 12px; }
+th { background: #f6f8fa; }
+blockquote { border-left: 4px solid #d0d7de; margin: 0; padding-left: 16px; color: #57606a; }
+a { color: #0969da; }
+h1, h2, h3, h4, h5, h6 { border-bottom: 1px solid #d0d7de; padding-bottom: 0.3em; }
+.review-item { border: 2px solid #d0d7de; border-radius: 8px; padding: 16px; margin: 16px 0; transition: all 0.3s ease; background: #fff; }
+.review-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.review-item.approved { border-color: #1a7f37; background: #f0fdf4; }
+.review-item.rejected { border-color: #cf222e; background: #fef2f2; }
+.review-item.pending { border-color: #d29922; background: #fffdf0; }
+.review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+.review-title { font-size: 16px; font-weight: 600; margin: 0; }
+.review-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.review-actions button { padding: 6px 16px; border-radius: 6px; border: 1px solid #d0d7de; background: #f6f8fa; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+.review-actions button:hover { background: #eaeef2; }
+.review-actions .btn-approve { background: #dafbe1; border-color: #1a7f37; color: #1a7f37; }
+.review-actions .btn-approve:hover { background: #aff5b4; }
+.review-actions .btn-reject { background: #ffebe9; border-color: #cf222e; color: #cf222e; }
+.review-actions .btn-reject:hover { background: #ffcec8; }
+.review-note { width: 100%; margin-top: 8px; padding: 8px 12px; border: 1px solid #d0d7de; border-radius: 6px; font-size: 13px; resize: vertical; min-height: 36px; box-sizing: border-box; font-family: inherit; }
+.review-note::placeholder { color: #8b949e; }
+.review-diff .diff-old { background: #ffebe9; padding: 8px 12px; border-radius: 4px; border-left: 3px solid #cf222e; margin: 4px 0; font-size: 14px; }
+.review-diff .diff-new { background: #dafbe1; padding: 8px 12px; border-radius: 4px; border-left: 3px solid #1a7f37; margin: 4px 0; font-size: 14px; }
+.review-diff .diff-label { font-weight: 600; font-size: 12px; text-transform: uppercase; margin-bottom: 4px; }
+.review-status { font-size: 12px; padding: 2px 8px; border-radius: 12px; font-weight: 600; }
+.review-status.pending { background: #fff3cd; color: #856404; }
+.review-status.approved { background: #d4edda; color: #155724; }
+.review-status.rejected { background: #f8d7da; color: #721c24; }
+.review-toolbar { position: sticky; top: 0; background: #fff; border-bottom: 1px solid #d0d7de; padding: 12px 20px; margin: -20px -20px 20px -20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; flex-wrap: wrap; gap: 8px; }
+.review-stats { display: flex; gap: 16px; font-size: 14px; flex-wrap: wrap; }
+.toolbar-actions { display: flex; gap: 8px; }
+.toolbar-actions button { padding: 6px 16px; border-radius: 6px; border: 1px solid #d0d7de; background: #f6f8fa; cursor: pointer; font-size: 13px; }
+.toolbar-actions button:hover { background: #eaeef2; }
+.toolbar-actions .btn-primary { background: #0969da; border-color: #0969da; color: #fff; }
+.toolbar-actions .btn-primary:hover { background: #0757b3; }
+.review-bottom { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid #d0d7de; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; z-index: 100; }
+body { padding-bottom: 80px; }
+
+
+<script>
+const STORAGE_KEY = 'mdview_review_' + document.title;
+function getReviewState() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch { return {}; } }
+function saveReviewState(state) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+function updateStats() {
+    const state = getReviewState();
+    const items = document.querySelectorAll('.review-item');
+    let total = items.length, approved = 0, rejected = 0, pending = 0;
+    items.forEach(item => {
+        const id = item.dataset.id;
+        const s = state[id] || { status: 'pending' };
+        item.className = 'review-item ' + s.status;
+        const badge = item.querySelector('.review-status');
+        if (badge) { badge.className = 'review-status ' + s.status; badge.textContent = {pending:'⏳ 待审批',approved:'✅ 已采纳',rejected:'❌ 已拒绝'}[s.status]||'⏳ 待审批'; }
+        const note = item.querySelector('.review-note');
+        if (note && s.note) note.value = s.note;
+        if (s.status==='approved') approved++; else if (s.status==='rejected') rejected++; else pending++;
+    });
+    const statsEl = document.getElementById('review-stats');
+    if (statsEl) statsEl.innerHTML = '<span>📋 总计: '+total+'</span><span style="color:#1a7f37">✅ 采纳: '+approved+'</span><span style="color:#cf222e">❌ 拒绝: '+rejected+'</span><span style="color:#d29922">⏳ 待审: '+pending+'</span>';
+}
+function setReview(id, status) {
+    const state = getReviewState();
+    const note = document.querySelector('[data-id="'+id+'"] .review-note');
+    state[id] = { status, note: note?note.value:'', time: new Date().toISOString() };
+    saveReviewState(state); updateStats();
+}
+function saveNote(id) {
+    const state = getReviewState();
+    const note = document.querySelector('[data-id="'+id+'"] .review-note');
+    if (state[id]) state[id].note = note?note.value:''; else state[id] = {status:'pending',note:note?note.value:'',time:new Date().toISOString()};
+    saveReviewState(state);
+}
+function approveAll() { if (!confirm('确定全部采纳？')) return; const state=getReviewState(); document.querySelectorAll('.review-item').forEach(item=>{const id=item.dataset.id;const note=item.querySelector('.review-note');state[id]={status:'approved',note:note?note.value:'',time:new Date().toISOString()};}); saveReviewState(state); updateStats(); }
+function exportResults() { const state=getReviewState();const results=[];document.querySelectorAll('.review-item').forEach(item=>{const id=item.dataset.id;const title=item.querySelector('.review-title')?.textContent||'';const s=state[id]||{status:'pending',note:''};results.push({id,title,status:s.status,note:s.note,time:s.time});});const blob=new Blob([JSON.stringify(results,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='review-results-'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(url); }
+function clearAll() { if (!confirm('确定清空所有审批状态？')) return; localStorage.removeItem(STORAGE_KEY); updateStats(); }
+document.addEventListener('input', function(e){if(e.target.classList.contains('review-note')){const item=e.target.closest('.review-item');if(item)saveNote(item.dataset.id);}});
+document.addEventListener('DOMContentLoaded', updateStats);
+</script>
+
+</head><body>
+<div class="review-toolbar">
+    <div class="review-stats" id="review-stats"><span>📋 总计: 3</span><span style="color:#d29922">⏳ 待审: 3</span></div>
+    <div class="toolbar-actions">
+        <button onclick="approveAll()">✅ 全部采纳</button>
+        <button onclick="clearAll()">🔄 重置</button>
+        <button onclick="exportResults()">📤 导出结果</button>
+    </div>
+</div>
+<h1>调研汇总：ROBOT-SOP 第二章硬件体系</h1>
+<p><strong>调研时间</strong>：2026-03-24 11:10<br />
+<strong>耗时</strong>：25 分钟（预估 20 分钟）<br />
+<strong>验证问题数</strong>：6 个<br />
+<strong>建议修改数</strong>：3 个</p>
+<hr />
+<h2>修改意见清单</h2>
+
+<div class="review-item pending" data-id="item-1">
+    <div class="review-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <h3 class="review-title">#1 BearPi H3863 价格更新</h3>
+            <span class="review-status pending">⏳ 待审批</span>
+            <span style="font-size:12px">- **优先级**：🟡中</span>
+        </div>
+        <div class="review-actions">
+            <button class="btn-approve" onclick="setReview('item-1', 'approved')">✅ 采纳</button>
+            <button class="btn-reject" onclick="setReview('item-1', 'rejected')">❌ 拒绝</button>
+        </div>
+    </div>
+    <div class="review-diff"><div class="diff-old"><div class="diff-label">📄 原文</div>- **原文**：¥35-50/块</div>
+<div class="diff-new"><div class="diff-label">✏️ 建议</div>- **建议改为**：¥19.8（两边不带排针）/ ¥25.8（带排针）</div>
+</div>
+    <p>BearPi H3863 价格更新<br />
+- <strong>原文</strong>：¥35-50/块<br />
+- <strong>建议改为</strong>：¥19.8（两边不带排针）/ ¥25.8（带排针）<br />
+- <strong>来源</strong>：淘宝实时价格<br />
+- <strong>优先级</strong>：🟡中<br />
+- <strong>状态</strong>：⏳ 待审批</p>
+<blockquote>
+<p>实际淘宝成交价为 ¥19.8（无排针）和 ¥25.8（带排针），原文价格区间过大且不准确。</p>
+</blockquote>
+<hr />
+    <textarea class="review-note" placeholder="📝 备注说明（可选）..." oninput="saveNote('item-1')"></textarea>
+</div>
+
+<div class="review-item pending" data-id="item-2">
+    <div class="review-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <h3 class="review-title">#2 SSD 数据自毁方案补充</h3>
+            <span class="review-status pending">⏳ 待审批</span>
+            <span style="font-size:12px">- **优先级**：🔴高</span>
+        </div>
+        <div class="review-actions">
+            <button class="btn-approve" onclick="setReview('item-2', 'approved')">✅ 采纳</button>
+            <button class="btn-reject" onclick="setReview('item-2', 'rejected')">❌ 拒绝</button>
+        </div>
+    </div>
+    <div class="review-diff"><div class="diff-old"><div class="diff-label">📄 原文</div>- **原文**：`shred -n 3 -ruv` 用于数据自毁</div>
+<div class="diff-new"><div class="diff-label">✏️ 建议</div>- **建议改为**：增加 LUKS 全盘加密方案，失控时销毁密钥而非数据</div>
+</div>
+    <p>SSD 数据自毁方案补充<br />
+- <strong>原文</strong>：<code>shred -n 3 -ruv</code> 用于数据自毁<br />
+- <strong>建议改为</strong>：增加 LUKS 全盘加密方案，失控时销毁密钥而非数据<br />
+- <strong>来源</strong>：Linux 文档 + deepseek 调研<br />
+- <strong>优先级</strong>：🔴高<br />
+- <strong>状态</strong>：⏳ 待审批</p>
+<blockquote>
+<p><code>shred</code> 对 SSD/NVMe 效果有限（Wear Leveling 会分散数据），推荐 full disk encryption。</p>
+</blockquote>
+<hr />
+    <textarea class="review-note" placeholder="📝 备注说明（可选）..." oninput="saveNote('item-2')"></textarea>
+</div>
+
+<div class="review-item pending" data-id="item-3">
+    <div class="review-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <h3 class="review-title">#3 Jetson Thor Nano 期待价</h3>
+            <span class="review-status pending">⏳ 待审批</span>
+            <span style="font-size:12px">- **优先级**：🟢低</span>
+        </div>
+        <div class="review-actions">
+            <button class="btn-approve" onclick="setReview('item-3', 'approved')">✅ 采纳</button>
+            <button class="btn-reject" onclick="setReview('item-3', 'rejected')">❌ 拒绝</button>
+        </div>
+    </div>
+    <div class="review-diff"><div class="diff-old"><div class="diff-label">📄 原文</div>- **原文**：无</div>
+<div class="diff-new"><div class="diff-label">✏️ 建议</div>- **建议改为**：新增行"阶段一（备选）：Jetson Thor Nano ~2,000元（期待价，年底上市）"</div>
+</div>
+    <p>Jetson Thor Nano 期待价<br />
+- <strong>原文</strong>：无<br />
+- <strong>建议改为</strong>：新增行"阶段一（备选）：Jetson Thor Nano ~2,000元（期待价，年底上市）"<br />
+- <strong>来源</strong>：用户小道消息<br />
+- <strong>优先级</strong>：🟢低<br />
+- <strong>状态</strong>：⏳ 待审批</p>
+<blockquote>
+<p>用户根据 NVIDIA 产品规律判断 Thor Nano 会在 2026 年底上市，价格约 ¥2000，性价比优于 Orin Nano Super。</p>
+</blockquote>
+<hr />
+<h2>验证通过的内容</h2>
+<h3>ESP32-CAM OV2640 规格</h3>
+<p>✅ 来源：ESP32 官方文档</p>
+<h3>BearPi-Pico H3863 星闪参数</h3>
+<p>✅ 来源：BearPi 官方文档</p>
+<h3>Jetson Nano 2GB Maxwell 架构分析</h3>
+<p>✅ 来源：NVIDIA Jetson 文档</p>
+    <textarea class="review-note" placeholder="📝 备注说明（可选）..." oninput="saveNote('item-3')"></textarea>
+</div>
+
+<div class="review-bottom">
+    <div style="font-size:13px;color:#57606a;">💡 审批结果自动保存到浏览器本地存储</div>
+    <div class="toolbar-actions"><button onclick="exportResults()">📤 导出 JSON 结果</button></div>
+</div>
+</body></html>

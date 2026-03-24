@@ -27,7 +27,7 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-22 22:28
+# Last check: 2026-03-24 14:42
 # MiniMax 新年度套餐已激活，23个模型全部 600/600 满额度
 # 新Key: sk-cp-Zosvx8d6...（年度套餐）
 # 旧Key已过期（7天试用）

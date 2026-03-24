@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<title>Test Review</title>
+</head><body>
+<h1>调研汇总：ROBOT-SOP 第二章硬件体系</h1>
+<p><strong>调研时间</strong>：2026-03-24 11:10<br />
+<strong>耗时</strong>：25 分钟（预估 20 分钟）<br />
+<strong>验证问题数</strong>：6 个<br />
+<strong>建议修改数</strong>：3 个</p>
+<hr />
+<h2>修改意见清单</h2>
+<h3>1. BearPi H3863 价格更新</h3>
+<ul>
+<li><strong>原文</strong>：¥35-50/块</li>
+<li><strong>建议改为</strong>：¥19.8（两边不带排针）/ ¥25.8（带排针）</li>
+<li><strong>来源</strong>：淘宝实时价格</li>
+<li><strong>优先级</strong>：🟡中</li>
+<li><strong>状态</strong>：⏳ 待审批</li>
+</ul>
+<blockquote>
+<p>实际淘宝成交价为 ¥19.8（无排针）和 ¥25.8（带排针），原文价格区间过大且不准确。</p>
+</blockquote>
+<hr />
+<h3>2. SSD 数据自毁方案补充</h3>
+<ul>
+<li><strong>原文</strong>：<code>shred -n 3 -ruv</code> 用于数据自毁</li>
+<li><strong>建议改为</strong>：增加 LUKS 全盘加密方案，失控时销毁密钥而非数据</li>
+<li><strong>来源</strong>：Linux 文档 + deepseek 调研</li>
+<li><strong>优先级</strong>：🔴高</li>
+<li><strong>状态</strong>：⏳ 待审批</li>
+</ul>
+<blockquote>
+<p><code>shred</code> 对 SSD/NVMe 效果有限（Wear Leveling 会分散数据），推荐 full disk encryption。</p>
+</blockquote>
+<hr />
+<h3>3. Jetson Thor Nano 期待价</h3>
+<ul>
+<li><strong>原文</strong>：无</li>
+<li><strong>建议改为</strong>：新增行"阶段一（备选）：Jetson Thor Nano ~2,000元（期待价，年底上市）"</li>
+<li><strong>来源</strong>：用户小道消息</li>
+<li><strong>优先级</strong>：🟢低</li>
+<li><strong>状态</strong>：⏳ 待审批</li>
+</ul>
+<blockquote>
+<p>用户根据 NVIDIA 产品规律判断 Thor Nano 会在 2026 年底上市，价格约 ¥2000，性价比优于 Orin Nano Super。</p>
+</blockquote>
+<hr />
+<h2>验证通过的内容</h2>
+<h3>ESP32-CAM OV2640 规格</h3>
+<p>✅ 来源：ESP32 官方文档</p>
+<h3>BearPi-Pico H3863 星闪参数</h3>
+<p>✅ 来源：BearPi 官方文档</p>
+<h3>Jetson Nano 2GB Maxwell 架构分析</h3>
+<p>✅ 来源：NVIDIA Jetson 文档</p>
+</body></html>

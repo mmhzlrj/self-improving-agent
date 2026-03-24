@@ -1,0 +1,5910 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>ROBOT-SOP</title>
+    <style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    line-height: 1.7;
+    color: #1f2937;
+    background: #f3f4f6;
+}
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px;
+}
+a { color: #2563eb; text-decoration: none; }
+a:hover { text-decoration: underline; }
+code {
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SF Mono', 'Fira Code', 'JetBrains Mono', Consolas, monospace;
+    font-size: 0.85em;
+    color: #e11d48;
+}
+pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 12px 0;
+    font-size: 14px;
+}
+pre code {
+    background: none;
+    padding: 0;
+    color: inherit;
+    font-size: inherit;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 16px 0;
+    font-size: 14px;
+}
+th, td {
+    border: 1px solid #e5e7eb;
+    padding: 10px 14px;
+    text-align: left;
+}
+th {
+    background: #f9fafb;
+    font-weight: 600;
+    color: #374151;
+}
+blockquote {
+    border-left: 4px solid #3b82f6;
+    margin: 12px 0;
+    padding: 8px 16px;
+    color: #6b7280;
+    background: #eff6ff;
+    border-radius: 0 6px 6px 0;
+}
+img { max-width: 100%; height: auto; border-radius: 8px; }
+h1 { font-size: 1.8em; border-bottom: 2px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 16px; }
+h2 { font-size: 1.4em; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; margin: 24px 0 12px; }
+h3 { font-size: 1.2em; margin: 20px 0 10px; }
+hr { border: none; border-top: 1px solid #e5e7eb; margin: 24px 0; }
+ul, ol { padding-left: 24px; margin: 8px 0; }
+li { margin: 4px 0; }
+p { margin: 8px 0; }
+strong { color: #111827; }
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🤖 0-1 私人 AI 机器人完整实施指南</h1>
+<p><strong>项目名</strong>: 0-1（零杠一）<br />
+<strong>记忆系统</strong>: 贵庚<br />
+<strong>文档版本</strong>: v3.4（具身大脑版 + 全开源生态整合，优化版）<br />
+<strong>字数</strong>: 约 115200（字符）| 约 11490（词）<br />
+<strong>创建日期</strong>: 2026-03-07<br />
+<strong>更新日期</strong>: 2026-03-24</p>
+<hr />
+<blockquote>
+<p>📝 <strong>v3.4（本次优化）</strong>：修复目录层级（补全 §2.5 子章节）、拆分五条技术路线为独立标题、GR00T N1.6 移至 §5.4 合适位置；历史更新：电池换电/手部自由度/RoboGSim/稚晖君/GR00T/3DGS/Newton</p>
+</blockquote>
+<hr />
+<h1>目录</h1>
+<table>
+<thead>
+<tr>
+<th>章节</th>
+<th>标题</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>------</td>
+<td>------</td>
+</tr>
+<tr>
+<td>第一章</td>
+<td>概念与愿景</td>
+</tr>
+<tr>
+<td>第二章</td>
+<td>硬件体系</td>
+</tr>
+<tr>
+<td></td>
+<td>2.1 现有硬件</td>
+</tr>
+<tr>
+<td></td>
+<td>2.2 需要采购（阶段一 MVP）</td>
+</tr>
+<tr>
+<td></td>
+<td>2.3 电源方案</td>
+</tr>
+<tr>
+<td></td>
+<td>2.3.1 电池换电机制</td>
+</tr>
+<tr>
+<td></td>
+<td>2.4 梯度采购路线图</td>
+</tr>
+<tr>
+<td></td>
+<td>2.5 技术可行性：五条技术路线</td>
+</tr>
+<tr>
+<td></td>
+<td>2.6 Medusa Halo（移动 AI 工作站）</td>
+</tr>
+<tr>
+<td>第三章</td>
+<td>系统架构</td>
+</tr>
+<tr>
+<td>第四章</td>
+<td>实施阶段（Phase 0 → Phase 6）</td>
+</tr>
+<tr>
+<td>第五章</td>
+<td>AI 与感知</td>
+</tr>
+<tr>
+<td></td>
+<td>5.1 Jetson Nano 视觉感知</td>
+</tr>
+<tr>
+<td></td>
+<td>5.1.1 手部自由度与执行器设计</td>
+</tr>
+<tr>
+<td></td>
+<td>5.2 iPhone 感知前端</td>
+</tr>
+<tr>
+<td></td>
+<td>5.3 物理仿真引擎（Genesis + Newton）</td>
+</tr>
+<tr>
+<td></td>
+<td>5.4 具身大脑基模（RynnBrain + GR00T + 空间智能）</td>
+</tr>
+<tr>
+<td>第六章</td>
+<td>本地 LLM 推理</td>
+</tr>
+<tr>
+<td>第七章</td>
+<td>附录（工具链/代码/配置）</td>
+</tr>
+<tr>
+<td>第八章</td>
+<td>安全与维护</td>
+</tr>
+<tr>
+<td>第九章</td>
+<td>风险与合规</td>
+</tr>
+<tr>
+<td>第十章</td>
+<td>调研更新记录（按时间线）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1>第一章：概念与愿景</h1>
+<h2>1.1 项目愿景</h2>
+<p><strong>0-1</strong> —— 不是一台机器，是你人生的另一面。</p>
+<table>
+<thead>
+<tr>
+<th>层含义</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>机器层</strong></td>
+<td>二进制的起点，代表硅基生命的底层语言</td>
+</tr>
+<tr>
+<td><strong>制造层</strong></td>
+<td>第一次「从零到一」用 3D 打印制造一个完整的机器人</td>
+</tr>
+<tr>
+<td><strong>生命层</strong></td>
+<td>人一生的「0 到 1」——从出生到结束，机器的记忆就是我的人生存档</td>
+</tr>
+</tbody>
+</table>
+<p>0-1 不是一个固定的产品，而是一个会跟着 AI 能力一起长大的伙伴。10 年分五个阶段，每一年，期望和能力都在共同进化。</p>
+<blockquote>
+<p>「0-1」还很适合用来做机器人面部的默认表情，且名字简单易记，未来易拓展至「1-2」「2-3」等。</p>
+</blockquote>
+<hr />
+<h2>1.2 核心系统：贵庚</h2>
+<p><strong>贵庚</strong> 是 0-1 的记忆系统，专为保存一个人完整的一生而设计。</p>
+<ul>
+<li><strong>贵</strong> = 粤语里对他人的敬称，也暗含「珍贵」</li>
+<li><strong>庚</strong> = 天干第七位，对应时间、年龄、周期——记忆本质上就是时间的切片</li>
+<li><strong>贵庚</strong> 在粤语里是问老人家年龄的敬语，带着一种对岁月沉淀的敬畏</li>
+</ul>
+<blockquote>
+<p>贵庚存的不是数据，是一个人的年龄和尊严。</p>
+</blockquote>
+<h3>核心价值主张</h3>
+<table>
+<thead>
+<tr>
+<th>价值</th>
+<th>说明</th>
+<th>优先级</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>记忆延续（贵庚）</strong></td>
+<td>帮你记录身边发生的事情，随时回顾</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>陪伴对话</strong></td>
+<td>随时语音交流，有问必答</td>
+<td>P0</td>
+</tr>
+<tr>
+<td><strong>执行任务</strong></td>
+<td>帮你完成简单的物理任务</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>安全守护</strong></td>
+<td>身份认证、防抢防盗、紧急响应</td>
+<td>P1</td>
+</tr>
+<tr>
+<td><strong>数据隐私</strong></td>
+<td>所有数据本地处理，不传云端</td>
+<td>P0</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>1.3 核心陪伴理念：从「响应」到「懂你」</h2>
+<p>0-1 的终极目标不是执行指令，而是<strong>观察你、推理你、主动介入</strong>。</p>
+<div class="codehilite"><pre><span></span><code>观察层（摄像头/传感器）
+    ↓
+行为模式识别（贵庚）
+    ↓
+意图推理引擎
+    ↓
+主动执行 / 主动询问
+    ↓
+你的反馈 → 微调模型
+</code></pre></div>
+
+<h3>三个层次</h3>
+<table>
+<thead>
+<tr>
+<th>层次</th>
+<th>表现</th>
+<th>举例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>被动响应</strong></td>
+<td>你说/做，它执行</td>
+<td>"帮我回复微信"</td>
+</tr>
+<tr>
+<td><strong>主动提醒</strong></td>
+<td>它观察到了，提示你</td>
+<td>"你今天还没喝水"</td>
+</tr>
+<tr>
+<td><strong>主动执行</strong></td>
+<td>它推理出来了，直接做</td>
+<td>你拿起外套，它就知道你要出门 — 顺便帮你拿上没想起来带的东西，还贴心的远程自动开关门</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最难的其实是「不打扰」</strong>：主动推理最难的不是判断你要什么，而是<strong>判断什么时候不该出声</strong>。</p>
+<blockquote>
+<p>贵庚需要学的第一件事不是预测，是<strong>什么时候闭嘴</strong>。</p>
+</blockquote>
+<hr />
+<h2>1.4 10年五阶段路线图</h2>
+<h3>最终确认的五阶段</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>时间</th>
+<th>核心目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>阶段一</strong></td>
+<td>1-2年</td>
+<td>OpenClaw + Cyber Bricks 第一次结合，跑通"数字大脑→物理身体"链路</td>
+</tr>
+<tr>
+<td><strong>阶段二</strong></td>
+<td>3-4年</td>
+<td>贵庚 MVP + 本地小模型控制物理身体；数字孪生环境训练→现实校验</td>
+</tr>
+<tr>
+<td><strong>阶段三</strong></td>
+<td>5-6年</td>
+<td>身体+大脑进化，走出家门进入开放世界，互相守护</td>
+</tr>
+<tr>
+<td><strong>阶段四</strong></td>
+<td>7-8年</td>
+<td>多个专家分身融合（线上MoE），各司其职，有摩擦期</td>
+</tr>
+<tr>
+<td><strong>阶段五</strong></td>
+<td>9-10年</td>
+<td>线下专家替代线上MoE，经过长期磨合离线也能做好事情</td>
+</tr>
+</tbody>
+</table>
+<h3>Phase 编号与五阶段对应关系</h3>
+<blockquote>
+<p>说明：Phase 0-6 是实施步骤的编号，与10年五阶段不是一一对应。Phase 0 是前置准备工作，Phase 1-6 覆盖阶段一和阶段二的内容，阶段三至五属于远期规划。</p>
+</blockquote>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>实施内容</th>
+<th>对应年份</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Phase 0</td>
+<td>Ubuntu 台式机对接 Gateway</td>
+<td>阶段一前置</td>
+</tr>
+<tr>
+<td>Phase 1</td>
+<td>语音陪伴（OpenClaw + Cyber Bricks 首次联动）</td>
+<td>阶段一</td>
+</tr>
+<tr>
+<td>Phase 2</td>
+<td>视觉记录（ESP32-Cam + Jetson Nano）</td>
+<td>阶段一</td>
+</tr>
+<tr>
+<td>Phase 3</td>
+<td>面部表情系统</td>
+<td>阶段一</td>
+</tr>
+<tr>
+<td>Phase 4</td>
+<td>运动控制（Cyber Bricks + MQTT）</td>
+<td>阶段一</td>
+</tr>
+<tr>
+<td>Phase 5</td>
+<td>iPhone 感知前端接入（分布式感知网络）</td>
+<td>阶段二</td>
+</tr>
+<tr>
+<td>Phase 6</td>
+<td>室内移动 + 智能家居硬件拓展 kit</td>
+<td>阶段二</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键区分</strong>：<br />
+- 阶段四：多个分身依赖线上 MoE<br />
+- 阶段五：贵庚积累足够数据，线下专家替代线上 MoE</p>
+<hr />
+<h1>第二章：硬件体系</h1>
+<h2>2.1 现有硬件</h2>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>规格</th>
+<th>数量</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jetson Nano</td>
+<td><strong>2GB</strong>（量产模块，非4GB开发套件）</td>
+<td>1</td>
+<td>可用</td>
+</tr>
+<tr>
+<td>ESP32-Cam</td>
+<td>OV2640</td>
+<td>1</td>
+<td>可用</td>
+</tr>
+<tr>
+<td>Cyber Bricks</td>
+<td>ESP32-C3（XA003/XA004/XA005）+ 电机 + 舵机</td>
+<td>2</td>
+<td>已有（拓竹赠送）</td>
+</tr>
+<tr>
+<td>星闪设备</td>
+<td>BearPi-Pico H3863（海思 WS63 RISC-V，WiFi6+BLE+SLE三模，240MHz，40针Pico）</td>
+<td>2块（建议成对购买）</td>
+<td>✅ 推荐采购</td>
+</tr>
+<tr>
+<td>拓竹 H2C</td>
+<td>3D打印机</td>
+<td>1</td>
+<td>可用</td>
+</tr>
+<tr>
+<td>Ubuntu 台式机</td>
+<td>5600G+32G+RTX 2060</td>
+<td>1</td>
+<td>可用（待对接 Gateway）</td>
+</tr>
+<tr>
+<td>MacBook Pro</td>
+<td>OpenClaw Gateway</td>
+<td>1</td>
+<td>运行中</td>
+</tr>
+<tr>
+<td>iPhone 16 Pro</td>
+<td>A18 Pro + LiDAR + 4800万摄像</td>
+<td>1</td>
+<td>可用（待接入）</td>
+</tr>
+</tbody>
+</table>
+<h3>Jetson Nano 2GB 版本特别说明</h3>
+<blockquote>
+<p>⚠️ <strong>重要</strong>：你的 Jetson Nano 是 <strong>2GB 版本</strong>（量产模块），不是 4GB 开发套件。2GB 内存更小，跑 YOLO 更容易 OOM（内存溢出），优化方向完全不同。</p>
+</blockquote>
+<p>2GB 内存的关键限制：<br />
+- 跑 YOLO 更容易 OOM，必须开启 swap<br />
+- <strong>唯一有效的 GPU 加速是 FP16</strong>（Maxwell 架构不支持 INT8 推理加速）<br />
+- 必须同时开 swap 才能同时跑 MediaPipe + YOLO<br />
+- DeepStream 6.x 支持 2GB，但配置复杂</p>
+<hr />
+<h2>2.2 需要采购（阶段一 MVP）</h2>
+<table>
+<thead>
+<tr>
+<th>类别</th>
+<th>配件</th>
+<th>预算</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>语音套件</td>
+<td>蓝牙耳麦（ESP32-Cam 蓝牙音频）</td>
+<td>¥80~150</td>
+</tr>
+<tr>
+<td>运动套件</td>
+<td>舵机、电机、轮子等</td>
+<td>¥229</td>
+</tr>
+<tr>
+<td>传感器</td>
+<td>超声波、红外、蜂鸣器</td>
+<td>¥22</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>杜邦线、面包板、螺丝</td>
+<td>¥60</td>
+</tr>
+<tr>
+<td><strong>合计</strong></td>
+<td></td>
+<td><strong>¥391</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2.3 电源方案</h2>
+<table>
+<thead>
+<tr>
+<th>电源</th>
+<th>规格</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>拓竹 Cyber Tanks 内置电池</strong></td>
+<td>未知</td>
+<td>随 Cyber Tanks 套件赠送，优先使用</td>
+</tr>
+<tr>
+<td><strong>小米 20000mAh 充电宝</strong></td>
+<td>74Wh</td>
+<td>便携，支持快充，可作为移动供电</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ 扫地机器人电池已报废：进水腐蚀，无修复价值。</p>
+</blockquote>
+<p><strong>长期目标</strong>：固态户外移动电源，满电支持 ≥24 小时续航（覆盖白天+黑夜完整周期）。</p>
+<h3>2.3.1 电池换电机制（行业对标 &amp; 设计参考）</h3>
+<blockquote>
+<p>⚠️ <strong>0-1 当前状态</strong>：文档未描述电池换电机制，这是具身机器人连续作业的关键功能，必须补充。</p>
+</blockquote>
+<h4>行业现状</h4>
+<table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>产品</th>
+<th>换电方式</th>
+<th>续航</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Boston Dynamics</td>
+<td>Atlas（电动版）</td>
+<td><strong>自换电池（双电池仓）</strong></td>
+<td>4小时</td>
+<td>低电量自动导航到换电站，机械臂抓取电池插入</td>
+</tr>
+<tr>
+<td>Tesla</td>
+<td>Optimus Gen3</td>
+<td><strong>自主回充桩</strong></td>
+<td>10-12小时</td>
+<td>自动定位充电桩，精准插拔，支持夜间充</td>
+</tr>
+<tr>
+<td>优必选</td>
+<td>Walker S2</td>
+<td><strong>自主换电</strong></td>
+<td>未公开</td>
+<td>自动导航换电站，更换电池后继续任务</td>
+</tr>
+<tr>
+<td>Figure</td>
+<td>Figure 03</td>
+<td>无线感应充电</td>
+<td>5小时</td>
+<td>接触式充电，无机械插拔</td>
+</tr>
+</tbody>
+</table>
+<h4>核心设计原则</h4>
+<ol>
+<li><strong>双电池仓设计</strong>（参考 Atlas）</li>
+<li>主电池仓：供给运动 + AI 推理</li>
+<li>备用电池仓：低电量时无缝切换，不中断任务</li>
+<li>
+<p>换电时备用仓接管，机器人不停止</p>
+</li>
+<li>
+<p><strong>自主回充 vs 换电的选择</strong></p>
+</li>
+<li>家用场景（0-1 主要场景）：<strong>优先自主回充桩</strong><ul>
+<li>优势：成本低、安静、对电池损耗小</li>
+<li>充电桩造价：参考 Tesla Optimus 方案，约 ¥500-2000</li>
+<li>导航精度要求：±2cm（Optimus Gen3 已实现精准插拔）</li>
+</ul>
+</li>
+<li>
+<p>工业场景（Walker S2、Atlas）：<strong>换电为主，回充为辅</strong></p>
+<ul>
+<li>优势：换电仅需 3-5 分钟，回充需要 2 小时</li>
+</ul>
+</li>
+<li>
+<p><strong>0-1 推荐方案（家用版）</strong></p>
+</li>
+<li>采用<strong>自主回充桩</strong>方案（参考 Tesla Optimus）</li>
+<li>设计要点：<ul>
+<li>充电桩目标：低电量（&lt;20%）时自动返回，精准对准插入</li>
+<li>导航方案：视觉 QR 码辅助定位（比纯 SLAM 更便宜、更稳定）</li>
+<li>充电接口：参考机器人背部设计，充电触点在直立姿势下自然暴露</li>
+<li>续航目标：主电池 ≥8 小时（覆盖白天活动），夜间回充</li>
+</ul>
+</li>
+<li>
+<p>备选：双电池仓（发烧友版），成本约 +¥1500</p>
+</li>
+<li>
+<p><strong>续航 vs 作业时间的关系</strong></p>
+</li>
+<li>8-12 小时续航：覆盖白天活动，夜间充电（与人类作息同步）</li>
+<li>&lt;4 小时续航（Atlas）：必须支持换电，否则无法连续作业</li>
+<li>0-1 目标：主电池 ≥8 小时 + 自主回充桩 = 24 小时连续守护</li>
+</ol>
+<hr />
+<h2>2.4 梯度采购路线图</h2>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>设备</th>
+<th>理由</th>
+<th>价格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>2026-06</strong></td>
+<td>RTX 5050 9GB GDDR7（96-bit，336 GB/s）</td>
+<td>插入现有台式机，跑 Qwen3.5-4B/9B 4-bit</td>
+<td>~2,000元</td>
+</tr>
+<tr>
+<td><strong>Q2</strong></td>
+<td>AMD AI Halo 128GB</td>
+<td>跑 Qwen3.5-122B，本地训练贵庚，618 可能低于1万</td>
+<td>~10,000-15,000元</td>
+</tr>
+<tr>
+<td><strong>阶段一</strong></td>
+<td>Jetson AGX Thor</td>
+<td>替代 Nano 作为 0-1 主控</td>
+<td>~24,000元</td>
+</tr>
+<tr>
+<td><strong>阶段一（备选）</strong></td>
+<td>Jetson Thor Nano</td>
+<td>年底上市后替换，预计性价比最高</td>
+<td>~2,000元（期待价）</td>
+</tr>
+<tr>
+<td><strong>阶段一</strong></td>
+<td>全景摄像头</td>
+<td>360° 视觉冗余</td>
+<td>3,000元</td>
+</tr>
+<tr>
+<td><strong>阶段一</strong></td>
+<td>NAS</td>
+<td>本地备份贵庚所有 raw data</td>
+<td>3,000元</td>
+</tr>
+<tr>
+<td><strong>可选</strong></td>
+<td>DGX Spark</td>
+<td>NVIDIA 官方 OpenClaw 支持，NemoClaw 优化，2026年2月涨价</td>
+<td>~34,999元（京东自营）</td>
+</tr>
+<tr>
+<td><strong>充裕时</strong></td>
+<td>DGX Station GB300</td>
+<td>748GB 统一内存，20 PFLOPS</td>
+<td>~70万</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2.6 Medusa Halo：移动 AI 工作站（长期规划）</h2>
+<blockquote>
+<p><strong>定位</strong>：作为 0-1 的移动终端，与家中 AMD AI Halo（Ryzen AI Max+ 395，128GB）遥相呼应——外出时完整展示 0-1 AI 能力，不因移动而性能受限。</p>
+<p><strong>背景</strong>：2026年 CES 已发布 Strix Halo 新 SKU（Ryzen AI Max+ 392 等），Medusa Halo 为下一代迭代，2027-2028 年上市。</p>
+</blockquote>
+<h3>核心规格（爆料，非官方确认）</h3>
+<table>
+<thead>
+<tr>
+<th>规格</th>
+<th>Strix Halo（当前旗舰）</th>
+<th>Medusa Halo（预期）</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>CPU架构</strong></td>
+<td>Zen 5，16核</td>
+<td><strong>Zen 6，24+2核</strong></td>
+<td>架构换代，+50%核心</td>
+</tr>
+<tr>
+<td><strong>GPU架构</strong></td>
+<td>RDNA 3.5，40 CU</td>
+<td><strong>RDNA 5，48 CU</strong></td>
+<td>架构换代</td>
+</tr>
+<tr>
+<td><strong>AI算力</strong></td>
+<td>基准</td>
+<td><strong>4-10倍</strong></td>
+<td>RDNA 4/5矩阵增强</td>
+</tr>
+<tr>
+<td><strong>内存类型</strong></td>
+<td>LPDDR5X-8533</td>
+<td><strong>LPDDR6</strong></td>
+<td>换代升级</td>
+</tr>
+<tr>
+<td><strong>理论带宽</strong></td>
+<td>256 GB/s</td>
+<td><strong>460-691 GB/s</strong></td>
+<td>+80%~+170%</td>
+</tr>
+<tr>
+<td><strong>位宽</strong></td>
+<td>256-bit</td>
+<td><strong>256-bit → 384-bit</strong></td>
+<td>+50%</td>
+</tr>
+<tr>
+<td><strong>内存容量</strong></td>
+<td>128GB</td>
+<td><strong>256GB+</strong></td>
+<td>+1倍</td>
+</tr>
+<tr>
+<td><strong>制程</strong></td>
+<td>4nm/5nm</td>
+<td><strong>2nm N2P + 3nm N3P</strong></td>
+<td>大幅先进</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>来源</strong>：多源确认（Olrak29_@X、Tom's Hardware、TechPowerUp、Fudzilla），均为爆料非官方</p>
+</blockquote>
+<h3>LPDDR6 带宽对本地大模型的意义</h3>
+<p>Strix Halo 的 256 GB/s 带宽已可流畅跑 7B/13B 量化模型，但面对更大模型和更长上下文时带宽成为瓶颈。</p>
+<p>Medusa Halo 的 LPDDR6（预估 460-691 GB/s）：<br />
+- <strong>KV 缓存密集型场景</strong>：上下文越长，带宽优势越明显<br />
+- <strong>高位宽量化</strong>：可更稳地跑 FP8/INT8，精度不降<br />
+- <strong>tokens/s 吞吐</strong>：预估提升 2-3 倍</p>
+<h3>256GB+ 统一内存对 0-1 移动终端的意义</h3>
+<table>
+<thead>
+<tr>
+<th>可跑模型</th>
+<th>Strix Halo（128GB）</th>
+<th>Medusa Halo（256GB+）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qwen3-14B</td>
+<td>✅ FP16</td>
+<td>✅ FP16</td>
+</tr>
+<tr>
+<td>Qwen3.5-32B</td>
+<td>⚠️ 勉强</td>
+<td>✅ 流畅</td>
+</tr>
+<tr>
+<td>Qwen3.5-72B</td>
+<td>⚠️ 需 Q4 量化</td>
+<td>✅ FP16 全精度</td>
+</tr>
+<tr>
+<td>Qwen3.5-130B</td>
+<td>❌ 需 INT4</td>
+<td>✅ INT4/INT8 全量</td>
+</tr>
+<tr>
+<td>405B 级模型</td>
+<td>❌ 不可行</td>
+<td>⚠️ 可行（量化）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键优势</strong>：外出展示时，整个 0-1 系统（贵庚 + 语音 + 视觉 + 任务调度）可以完整跑在笔记本上，无需向云端妥协。</p>
+<h3>多 Agent 并行支持</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>Strix Halo</th>
+<th>Medusa Halo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>并行 Agent 数</td>
+<td>4-5个</td>
+<td><strong>8-12个</strong></td>
+</tr>
+<tr>
+<td>可同时跑</td>
+<td>单 Agent 大模型</td>
+<td><strong>多个 72B 模型并行</strong></td>
+</tr>
+<tr>
+<td>256K+ 上下文</td>
+<td>❌</td>
+<td>✅</td>
+</tr>
+<tr>
+<td>Agent 间通信延迟</td>
+<td>内存级</td>
+<td><strong>微秒级（统一内存）</strong></td>
+</tr>
+</tbody>
+</table>
+<p>典型并行场景：<br />
+- 文字 Agent（代码生成）+ 视觉 Agent（图像）+ 语音 Agent（实时）+ 规划 Agent（ReAct）</p>
+<h3>与家中 AI Halo 的性能对比</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>家中 AI Halo（Strix Halo 128GB）</th>
+<th>外出 Medusa Halo（256GB+）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>内存带宽</td>
+<td>256 GB/s</td>
+<td>460-691 GB/s（+80%~+170%）</td>
+</tr>
+<tr>
+<td>可跑模型大小</td>
+<td>72B 需量化</td>
+<td>130B 全精度</td>
+</tr>
+<tr>
+<td>多 Agent 并行</td>
+<td>4-5个</td>
+<td>8-12个</td>
+</tr>
+<tr>
+<td>长上下文</td>
+<td>~128K tokens</td>
+<td>512K+ tokens</td>
+</tr>
+<tr>
+<td>AI 推理吞吐</td>
+<td>一般</td>
+<td><strong>优秀（2-3倍）</strong></td>
+</tr>
+<tr>
+<td>离电移动</td>
+<td>✅ 可行</td>
+<td>✅ <strong>完整支撑</strong></td>
+</tr>
+</tbody>
+</table>
+<h3>结论</h3>
+<p>Medusa Halo 是 0-1 移动终端的完美选择：<br />
+- <strong>2027-2028年上市</strong>，需要等<br />
+- <strong>Strix Halo（如 Asus ProArt PX13）</strong> 是现在最近的选择，外出演示时模型需略微压缩<br />
+- 两者组合：家中固定算力 + 外出移动展示 = 完整不间断的 0-1 能力</p>
+<h3>当前可买的最近替代（过渡方案）</h3>
+<table>
+<thead>
+<tr>
+<th>产品</th>
+<th>规格</th>
+<th>价格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Asus ProArt PX13</td>
+<td>Ryzen AI Max+ 395，128GB LPDDR5X，256 GB/s</td>
+<td>$2,199+</td>
+</tr>
+<tr>
+<td>Asus ROG Flow Z13</td>
+<td>同上 APU，游戏二合一</td>
+<td>$2,499+</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>2.5 技术可行性：五条技术路线</h2>
+<blockquote>
+<p>这件事在 2024-2026 年变得真正可行，是因为五条技术路线同时成熟，每条均为独立技术栈，对应行业关键拐点。</p>
+</blockquote>
+<h3>技术路线一：开源 AI Agent 框架</h3>
+<p>OpenClaw 是全球最流行的开源 AI Agent 项目，被称为"个人 AI 的操作系统"。2026 年 GTC 上黄仁勋宣布 <em>"AI agents era has arrived"</em>，NVIDIA 官方推出 NemoClaw（集成 OpenShell 安全沙箱 + Nemotron 模型），AMD 推出 RyzenClaw / RadeonClaw 部署指南（128GB 统一内存跑 70B 模型），Intel 优化 OpenClaw 混合 AI 执行（本地 + 云端），腾讯推出 QClaw 深度集成微信/QQ 生态。Claw 已成为 AI Agent 领域的命名共识，各大厂商纷纷围绕 OpenClaw 构建自己的配套生态。0-1 基于 OpenClaw 构建，获得了整个行业生态的背书。</p>
+<h3>技术路线二：消费级物理仿真</h3>
+<p>Genesis 是华人团队（CMU、MIT 等）开源的物理仿真引擎，RTX 4090 上 43M FPS，比 NVIDIA Isaac Gym 快 10-80 倍；GTX 1080 6GB 起就能跑（Ubuntu 台式机 RTX 2060 6GB 可用），MIT 开源免费，让数字孪生训练的门槛从 Isaac Gym 的 RTX 3090+ 降到几千元。</p>
+<h3>技术路线三：个人制造工具链</h3>
+<p>拓竹 H2C + Bambu Suite + Cyber Bricks，让一个人在家里就能完成从 3D 打印结构件到精密加工到运动控制的全流程。</p>
+<h3>技术路线四：本地大模型推理</h3>
+<p>Ollama + GGUF (Q4_K_M) 让 7B 模型在现有台式机 RTX 2060 上跑；vLLM / LM Studio / SGLang 各有优势——Ollama 最易用、vLLM 吞吐最高、SGLang 支持复杂 Agent 任务；AMD AI Halo 128GB（618 可能低于 1 万）跑 Qwen3.5-122B。所有推理完全本地，贵庚的记忆系统可以完全本地化，隐私安全。</p>
+<h3>技术路线五：统一内存架构芯片走向成熟</h3>
+<p>苹果 M 系列、AMD AI Max 系列都采用 CPU/GPU/NPU 共享物理内存的统一内存架构，避免了传统 CPU 与独立显存之间的数据搬运开销——苹果 M5 带宽 153GB/s、MacBook 24GB 可跑 30B 模型（4-bit 量化），AMD AI Max+ 128GB 统一内存、256GB/s 带宽、可跑 70B 参数模型；英特尔 Lunar Lake 也尝试了封装内存设计，虽然已确认是短期尝试但说明行业方向一致。LPDDR5X / LPDDR6 等低电压、大容量、高带宽内存颗粒解决了传输瓶颈；PCIe 5.0 / 6.0 的高带宽打通了芯片与内存之间的最后一公里。这些技术同时成熟，让大模型本地化推理真正具备可行性。</p>
+<hr />
+<h1>第三章：系统架构</h1>
+<h2>3.1 整体架构</h2>
+<div class="codehilite"><pre><span></span><code>┌─────────────────────────────────────────┐
+│         Ubuntu 台式机 (GPU节点)           │
+│  • RTX 2060 GPU 加速                    │
+│  • 32GB RAM                            │
+└──────────────────┬──────────────────────┘
+                   │ openclaw node / WebSocket
+                   │ （有线千兆局域网）
+┌──────────────────▼──────────────────────┐
+│              家里 Gateway (MacBook)        │
+│        主 AI (贵庚大脑) + 任务调度         │
+└──────────────────┬──────────────────────┘
+                   │
+        ┌──────────┼──────────┐
+        ▼          ▼          ▼
+   ┌────────┐ ┌────────┐ ┌────────┐
+   │ Jetson │ │Cyber   │ │Cyber   │
+   │ Nano   │ │Brick 1 │ │Brick 2 │
+   │(感知+  │ │(执行)  │ │(备用)  │
+   │ 控制)  │ │        │ │        │
+   └────┬───┘ └────────┘ └────────┘
+        │              │
+        ▼              ▼
+   ┌────────┐    ┌──────────────────┐
+   │ ESP32- │    │   拓竹工具链      │
+   │ Cam×2  │    │ H2C 3D打印+制造  │
+   └────────┘    └──────────────────┘
+</code></pre></div>
+
+<h3>iPhone 接入后的完整拓扑</h3>
+<div class="codehilite"><pre><span></span><code>Gateway(MacBook)
+    ↓ WiFi/MQTT
+iPhone 16 Pro(感知前端) ← OpenClaw Node 协议
+    ↓ 有线 UART/I2C/GPIO
+Jetson Nano(控制) → ESP32-Cam × 2 + Cyber Bricks
+</code></pre></div>
+
+<hr />
+<h2>3.2 节点说明</h2>
+<table>
+<thead>
+<tr>
+<th>节点</th>
+<th>角色</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Mac Gateway</td>
+<td>主控</td>
+<td>AI大脑、贵庚记忆、任务调度</td>
+</tr>
+<tr>
+<td>Ubuntu 台式机</td>
+<td>GPU节点</td>
+<td>图像理解、GPU密集任务（RTX 2060）</td>
+</tr>
+<tr>
+<td>Jetson Nano</td>
+<td>边缘节点</td>
+<td>语音交互、视频处理、运动控制（2GB 限制）</td>
+</tr>
+<tr>
+<td>Cyber Bricks ×2</td>
+<td>运动节点</td>
+<td>电机控制、动作执行</td>
+</tr>
+<tr>
+<td>ESP32-Cam ×2</td>
+<td>视觉节点</td>
+<td>视频采集、室内建模</td>
+</tr>
+<tr>
+<td>iPhone 16 Pro</td>
+<td>无线前端</td>
+<td>高质量感知、LLM 辅助推理、LiDAR 建模</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3.3 通信协议</h2>
+<h3>设备内通信</h3>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>用途</th>
+<th>延迟</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MQTT</strong></td>
+<td>设备间命令传递</td>
+<td>&lt;50ms</td>
+<td>主协议，QoS 1 保证送达</td>
+</tr>
+<tr>
+<td><strong>WebSocket</strong></td>
+<td>Gateway ↔ 节点</td>
+<td>&lt;20ms</td>
+<td>实时双向，OpenClaw Node 协议</td>
+</tr>
+<tr>
+<td><strong>REST API</strong></td>
+<td>控制指令</td>
+<td>&lt;100ms</td>
+<td>简单场景，ESP32 有现成实现</td>
+</tr>
+</tbody>
+</table>
+<h3>有线通信（GPIO / UART / I2C）</h3>
+<table>
+<thead>
+<tr>
+<th>协议</th>
+<th>用途</th>
+<th>Jetson Nano</th>
+<th>ESP32-Cam</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>UART</strong></td>
+<td>简单命令传递</td>
+<td>Pin 8(TX)/10(RX)，/dev/ttyTHS1</td>
+<td>GPIO1/3，波特率115200</td>
+</tr>
+<tr>
+<td><strong>I2C</strong></td>
+<td>多设备总线</td>
+<td>Pin 3(SDA)/5(SCL)，速率10-400kHz</td>
+<td>GPIO4/5，需要电平3.3V</td>
+</tr>
+<tr>
+<td><strong>GPIO</strong></td>
+<td>应急停止信号</td>
+<td>Pin 29 等，/sys/class/gpio</td>
+<td>任意GPIO，硬件中断μs级</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>关键洞察</strong>：Jetson Nano 和 ESP32-Cam 都有 40 针 GPIO，这是有线控制的核心。有线应急停止 &lt;1ms，无线 WiFi &gt;100ms。</p>
+</blockquote>
+<h3>通信场景选择</h3>
+<table>
+<thead>
+<tr>
+<th>场景</th>
+<th>推荐协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>紧急停止</td>
+<td><strong>有线 GPIO</strong>（&lt;1ms，故障安全）</td>
+</tr>
+<tr>
+<td>启动/停止时序</td>
+<td><strong>有线 UART</strong>（115200波特率）</td>
+</tr>
+<tr>
+<td>多设备同步时钟</td>
+<td><strong>有线 I2C</strong>（TCA9548A多路复用）</td>
+</tr>
+<tr>
+<td>传感器数据采集</td>
+<td>无线 MQTT（Qos 1）</td>
+</tr>
+<tr>
+<td>视频流</td>
+<td>无线 WiFi（GStreamer RTSP）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>3.4 ROS 2 支持情况与替代框架</h2>
+<blockquote>
+<p>调研时间：2026-03-23，来源：豆包专家模式深度调研<br />
+<strong>结论：Jetson Nano 2GB 可完整跑 ROS 2；ESP32-CAM / H3863 / iPhone 需通过 micro-ROS / rosbridge 间接接入</strong></p>
+</blockquote>
+<h3>硬件 ROS 2 支持总览</h3>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>ROS 2 支持</th>
+<th>推荐方案</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Jetson Nano 2GB</strong></td>
+<td>✅ 完整支持</td>
+<td>ROS 2 Foxy + Ubuntu 18.04（仅装 ros-base）</td>
+<td>2GB 内存需精简，禁用 GUI</td>
+</tr>
+<tr>
+<td><strong>ESP32-CAM</strong></td>
+<td>⚠️ 间接支持</td>
+<td>micro-ROS + WiFi / UART</td>
+<td>520KB SRAM 限制，仅跑精简节点</td>
+</tr>
+<tr>
+<td><strong>BearPi Pico H3863</strong></td>
+<td>⚠️ 间接支持</td>
+<td>micro-ROS + 星闪 SLE / WiFi</td>
+<td>暂无官方包，需自行移植</td>
+</tr>
+<tr>
+<td><strong>iPhone 16 Pro</strong></td>
+<td>⚠️ 间接支持</td>
+<td>rosbridge (WebSocket) / Zenoh / MCP</td>
+<td>Swift + ARKit 是最佳原生感知方案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>3.4.1 Jetson Nano 2GB — 完整 ROS 2 方案</h3>
+<h4>推荐版本</h4>
+<table>
+<thead>
+<tr>
+<th>ROS 2 版本</th>
+<th>Ubuntu</th>
+<th>适配度</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Foxy Fitzroy</strong></td>
+<td>20.04 LTS</td>
+<td>✅ 最佳</td>
+<td>稳定、内存友好、生态成熟（LTS）</td>
+</tr>
+<tr>
+<td><strong>Humble Hawksbill</strong></td>
+<td>22.04 LTS</td>
+<td>⚠️ 可跑</td>
+<td>内存占用更高，需深度优化</td>
+</tr>
+<tr>
+<td>Galactic / Iron</td>
+<td>—</td>
+<td>❌ 不推荐</td>
+<td>非 LTS，维护周期短</td>
+</tr>
+</tbody>
+</table>
+<h4>安装步骤（Foxy + ros-base）</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 配置 locale</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>locales
+sudo<span class="w"> </span>locale-gen<span class="w"> </span>en_US.UTF-8
+<span class="nb">export</span><span class="w"> </span><span class="nv">LANG</span><span class="o">=</span>en_US.UTF-8
+
+<span class="c1"># 2. 添加 ROS 2 源</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>curl<span class="w"> </span>gnupg2<span class="w"> </span>lsb-release
+sudo<span class="w"> </span>curl<span class="w"> </span>-sSL<span class="w"> </span>https://raw.githubusercontent.com/ros/rosdistro/master/ros.key<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>/usr/share/keyrings/ros-archive-keyring.gpg
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [arch=</span><span class="k">$(</span>dpkg<span class="w"> </span>--print-architecture<span class="k">)</span><span class="s2"> signed-by=/usr/share/keyrings/ros-archive-keyring.gpg] \</span>
+<span class="s2">  http://packages.ros.org/ros2/ubuntu </span><span class="k">$(</span>.<span class="w"> </span>/etc/os-release<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$UBUNTU_CODENAME</span><span class="k">)</span><span class="s2"> main&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/ros2.list<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+
+<span class="c1"># 3. 安装（仅 ros-base，节省内存）</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ros-foxy-ros-base<span class="w"> </span>python3-argcomplete
+
+<span class="c1"># 4. 初始化</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>python3-rosdep
+sudo<span class="w"> </span>rosdep<span class="w"> </span>init
+rosdep<span class="w"> </span>update
+
+<span class="c1"># 5. 环境</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;source /opt/ros/foxy/setup.bash&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.bashrc
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+</code></pre></div>
+
+<h4>资源占用</h4>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>内存占用</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ROS 2 Foxy core</td>
+<td>~300-400MB</td>
+<td>仅核心，无 GUI</td>
+</tr>
+<tr>
+<td>rviz2</td>
+<td>~500MB</td>
+<td>可选，Nano 2GB 不建议跑</td>
+</tr>
+<tr>
+<td>完整 ros-base</td>
+<td>~600-800MB</td>
+<td>包含 rclcpp / rclpy / msgs</td>
+</tr>
+</tbody>
+</table>
+<p><strong>优化建议</strong>：永远只装 <code>ros-foxy-ros-base</code>，用远程 rviz2 或手机/平板做可视化。</p>
+<hr />
+<h3>3.4.2 ESP32-CAM — micro-ROS 接入方案</h3>
+<h4>核心限制</h4>
+<ul>
+<li><strong>520KB SRAM / 4MB Flash</strong>：无法跑完整 ROS 2 栈</li>
+<li>标准 ROS 2 依赖 POSIX 线程、动态内存，FreeRTOS 不满足</li>
+<li>OV2640 JPEG 压缩可发布，但高分辨率/高帧率会占满内存</li>
+</ul>
+<h4>方案 1：micro-ROS + WiFi（推荐）</h4>
+<div class="codehilite"><pre><span></span><code>ESP32-CAM (micro-ROS 节点)
+    ↓ WiFi UDP
+micro-ros-agent (运行在 Jetson Nano / PC)
+    ↓
+ROS 2 主节点
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1">// ESP32 端示例（Arduino + micro_ROS）</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;micro_ros_arduino.h&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;sensor_msgs/msg/compressed_image.h&gt;</span>
+
+<span class="n">rcl_node_t</span><span class="w"> </span><span class="n">node</span><span class="p">;</span>
+<span class="n">rcl_publisher_t</span><span class="w"> </span><span class="n">pub</span><span class="p">;</span>
+<span class="n">sensor_msgs__msg__CompressedImage</span><span class="w"> </span><span class="n">msg</span><span class="p">;</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">setup</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// WiFi 连接</span>
+<span class="w">  </span><span class="n">set_microros_wifi_transports</span><span class="p">(</span><span class="s">&quot;SSID&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;password&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;agent-ip&quot;</span><span class="p">,</span><span class="w"> </span><span class="mi">8888</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// 创建节点</span>
+<span class="w">  </span><span class="n">rclc_node_init_default</span><span class="p">(</span><span class="o">&amp;</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;esp32_cam&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">support</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// 创建发布者</span>
+<span class="w">  </span><span class="n">rclc_publisher_init_default</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pub</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">ROSIDL_GET_MSG_TYPE_SUPPORT</span><span class="p">(</span>
+<span class="w">    </span><span class="n">sensor_msgs</span><span class="p">,</span><span class="w"> </span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="n">CompressedImage</span><span class="p">),</span><span class="w"> </span><span class="s">&quot;/camera/image/compressed&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span><span class="w"> </span><span class="nf">loop</span><span class="p">()</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// 采集 OV2640 JPEG → 发布</span>
+<span class="w">  </span><span class="n">camera_fb_t</span><span class="w"> </span><span class="o">*</span><span class="n">fb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">esp_camera_fb_get</span><span class="p">();</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">fb</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">format</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="s">&quot;jpeg&quot;</span><span class="p">;</span>
+<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fb</span><span class="o">-&gt;</span><span class="n">buf</span><span class="p">;</span>
+<span class="w">    </span><span class="n">msg</span><span class="p">.</span><span class="n">data</span><span class="p">.</span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">fb</span><span class="o">-&gt;</span><span class="n">len</span><span class="p">;</span>
+<span class="w">    </span><span class="n">rcl_publish</span><span class="p">(</span><span class="o">&amp;</span><span class="n">pub</span><span class="p">,</span><span class="w"> </span><span class="o">&amp;</span><span class="n">msg</span><span class="p">,</span><span class="w"> </span><span class="nb">NULL</span><span class="p">);</span>
+<span class="w">    </span><span class="n">esp_camera_fb_return</span><span class="p">(</span><span class="n">fb</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="w">  </span><span class="n">delay</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w"> </span><span class="c1">// 10 FPS</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Jetson Nano 端启动代理</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 安装 micro-ROS agent</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>ros-foxy-micro-ros-agent
+
+<span class="c1"># WiFi 模式启动</span>
+ros2<span class="w"> </span>run<span class="w"> </span>micro_ros_agent<span class="w"> </span>micro_ros_agent<span class="w"> </span>udp4<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--help<span class="w">  </span><span class="c1"># 查看参数</span>
+ros2<span class="w"> </span>run<span class="w"> </span>micro_ros_agent<span class="w"> </span>micro_ros_agent<span class="w"> </span>udp4<span class="w"> </span>-h<span class="w"> </span>&lt;agent-host&gt;<span class="w"> </span>-p<span class="w"> </span><span class="m">8888</span>
+</code></pre></div>
+
+<h4>方案 2：micro-ROS + UART（低延迟，有线）</h4>
+<div class="codehilite"><pre><span></span><code>ESP32-CAM ← USB-TTL → Jetson Nano (micro-ros-agent)
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="c1"># Jetson Nano 端</span>
+ros2<span class="w"> </span>run<span class="w"> </span>micro_ros_agent<span class="w"> </span>micro_ros_agent<span class="w"> </span>serial<span class="w"> </span>--dev<span class="w"> </span>/dev/ttyUSB0<span class="w"> </span>-b<span class="w"> </span><span class="m">921600</span>
+</code></pre></div>
+
+<h4>方案 3：HTTP/MJPEG 流（最简，不跑 micro-ROS）</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Jetson Nano 拉取 ESP32-CAM MJPEG 流，转 ROS 2 Image</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">cv2</span><span class="o">,</span><span class="w"> </span><span class="nn">rclpy</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sensor_msgs.msg</span><span class="w"> </span><span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">cv_bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">CvBridge</span>
+
+<span class="n">cap</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">VideoCapture</span><span class="p">(</span><span class="s1">&#39;http://esp32-ip/stream&#39;</span><span class="p">)</span>
+<span class="n">bridge</span> <span class="o">=</span> <span class="n">CvBridge</span><span class="p">()</span>
+
+<span class="k">while</span> <span class="n">cap</span><span class="o">.</span><span class="n">isOpened</span><span class="p">():</span>
+    <span class="n">ret</span><span class="p">,</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">cap</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ret</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">bridge</span><span class="o">.</span><span class="n">cv2_to_imgmsg</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;bgr8&quot;</span><span class="p">)</span>
+        <span class="n">publisher</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>推荐配置</strong>：QVGA (320×240) / 5-10 FPS，避免 ESP32 内存溢出。</p>
+<hr />
+<h3>3.4.3 BearPi Pico H3863 — 移植方案</h3>
+<h4>现状</h4>
+<ul>
+<li>Hi3863（RISC-V 32bit，240MHz，4MB Flash）<strong>无 MMU，无法跑标准 Linux</strong></li>
+<li><strong>无官方 micro-ROS 包</strong>，需基于 FreeRTOS + RISC-V 工具链自行移植</li>
+<li>星闪 SLE / WiFi 6 / BLE 三模通信是 H3863 的独特优势</li>
+</ul>
+<h4>移植路径</h4>
+<div class="codehilite"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">搭建</span><span class="w"> </span><span class="n">Hi3863</span><span class="w"> </span><span class="n">开发环境</span><span class="err">（</span><span class="n">RISC</span><span class="o">-</span><span class="n">V</span><span class="w"> </span><span class="n">工具链</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">小熊派</span><span class="w"> </span><span class="n">SDK</span><span class="err">）</span>
+<span class="mf">2.</span><span class="w"> </span><span class="n">移植</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">ROS</span><span class="w"> </span><span class="n">核心</span><span class="err">（</span><span class="n">rcl</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">rclc</span><span class="err">，</span><span class="n">基于</span><span class="w"> </span><span class="nb">Fre</span><span class="n">eRTOS</span><span class="err">）</span>
+<span class="mf">3.</span><span class="w"> </span><span class="n">适配</span><span class="w"> </span><span class="n">Micro</span><span class="w"> </span><span class="n">XRCE</span><span class="o">-</span><span class="n">DDS</span><span class="w"> </span><span class="n">到</span><span class="w"> </span><span class="n">Hi3863</span><span class="w"> </span><span class="n">的</span><span class="w"> </span><span class="n">UART</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">SPI</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">WiFi</span><span class="w"> </span><span class="n">驱动</span>
+<span class="mf">4.</span><span class="w"> </span><span class="n">主机运行</span><span class="w"> </span><span class="n">micro</span><span class="o">-</span><span class="n">ros</span><span class="o">-</span><span class="n">agent</span><span class="err">，</span><span class="n">桥接到</span><span class="w"> </span><span class="n">ROS</span><span class="w"> </span><span class="mf">2</span>
+<span class="mf">5.</span><span class="w"> </span><span class="n">星闪</span><span class="w"> </span><span class="n">SLE</span><span class="w"> </span><span class="n">作为传输层</span><span class="err">（</span><span class="o">&lt;</span><span class="mf">5</span><span class="n">ms</span><span class="w"> </span><span class="n">延迟</span><span class="err">，</span><span class="n">适合实时控制</span><span class="err">）</span>
+</code></pre></div>
+
+<h4>星闪 SLE vs 其他无线方案对比</h4>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>延迟</th>
+<th>可靠性</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>星闪 SLE</strong></td>
+<td>&lt;5ms</td>
+<td>极高</td>
+<td>机器人实时控制（推荐）</td>
+</tr>
+<tr>
+<td>UWB</td>
+<td>&lt;1ms</td>
+<td>极高</td>
+<td>高精度定位 + 控制</td>
+</tr>
+<tr>
+<td>BLE 5.3</td>
+<td>10-20ms</td>
+<td>高</td>
+<td>低速关节、传感器</td>
+</tr>
+<tr>
+<td>WiFi 6</td>
+<td>10-30ms</td>
+<td>中</td>
+<td>高清图传、非实时</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>3.4.4 iPhone 16 Pro — rosbridge / MCP 方案</h3>
+<h4>架构</h4>
+<div class="codehilite"><pre><span></span><code>iPhone (Swift + ARKit)
+    ↓ WebSocket / MCP
+rosbridge_server (Jetson Nano / PC)
+    ↓
+ROS 2 主节点
+</code></pre></div>
+
+<h4>Swift + rosbridge 示例</h4>
+<div class="codehilite"><pre><span></span><code><span class="kd">import</span><span class="w"> </span><span class="nc">ARKit</span>
+<span class="kd">import</span><span class="w"> </span><span class="nc">Starscream</span><span class="w">  </span><span class="c1">// WebSocket 库</span>
+
+<span class="kd">class</span><span class="w"> </span><span class="nc">ROS2Bridge</span><span class="p">:</span><span class="w"> </span><span class="n">WebSocketDelegate</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">let</span><span class="w"> </span><span class="nv">socket</span><span class="p">:</span><span class="w"> </span><span class="n">WebSocket</span>
+
+<span class="w">    </span><span class="kd">init</span><span class="p">(</span><span class="n">agentHost</span><span class="p">:</span><span class="w"> </span><span class="nb">String</span><span class="p">,</span><span class="w"> </span><span class="n">port</span><span class="p">:</span><span class="w"> </span><span class="nb">Int</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">url</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">URL</span><span class="p">(</span><span class="n">string</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;ws://</span><span class="si">\(</span><span class="n">agentHost</span><span class="si">)</span><span class="s">:</span><span class="si">\(</span><span class="n">port</span><span class="si">)</span><span class="s">&quot;</span><span class="p">)</span><span class="o">!</span>
+<span class="w">        </span><span class="n">socket</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">WebSocket</span><span class="p">(</span><span class="n">request</span><span class="p">:</span><span class="w"> </span><span class="n">URLRequest</span><span class="p">(</span><span class="n">url</span><span class="p">:</span><span class="w"> </span><span class="n">url</span><span class="p">))</span>
+<span class="w">        </span><span class="n">socket</span><span class="p">.</span><span class="n">delegate</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="kc">self</span>
+<span class="w">        </span><span class="n">socket</span><span class="p">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="c1">// ARKit 每帧回调</span>
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">session</span><span class="p">(</span><span class="kc">_</span><span class="w"> </span><span class="n">session</span><span class="p">:</span><span class="w"> </span><span class="bp">ARSession</span><span class="p">,</span><span class="w"> </span><span class="n">didUpdate</span><span class="w"> </span><span class="n">frame</span><span class="p">:</span><span class="w"> </span><span class="bp">ARFrame</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 发布 Odometry（VIO 位姿）</span>
+<span class="w">        </span><span class="kd">let</span><span class="w"> </span><span class="nv">odom</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">]</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">            </span><span class="s">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;publish&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;topic&quot;</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;/iphone/odom&quot;</span><span class="p">,</span>
+<span class="w">            </span><span class="s">&quot;msg&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">                </span><span class="s">&quot;header&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;stamp&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;sec&quot;</span><span class="p">:</span><span class="w"> </span><span class="nb">Int64</span><span class="p">(</span><span class="n">Date</span><span class="p">().</span><span class="n">timeIntervalSince1970</span><span class="p">)]],</span>
+<span class="w">                </span><span class="s">&quot;pose&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;pose&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;position&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s">&quot;x&quot;</span><span class="p">:</span><span class="w"> </span><span class="n">frame</span><span class="p">.</span><span class="n">camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="mf">3.</span><span class="n">x</span><span class="p">,</span>
+<span class="w">                                               </span><span class="s">&quot;y&quot;</span><span class="p">:</span><span class="w"> </span><span class="n">frame</span><span class="p">.</span><span class="n">camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="mf">3.</span><span class="n">y</span><span class="p">,</span>
+<span class="w">                                               </span><span class="s">&quot;z&quot;</span><span class="p">:</span><span class="w"> </span><span class="n">frame</span><span class="p">.</span><span class="n">camera</span><span class="p">.</span><span class="n">transform</span><span class="p">.</span><span class="n">columns</span><span class="p">.</span><span class="mf">3.</span><span class="n">z</span><span class="p">]]</span>
+<span class="w">            </span><span class="p">]</span>
+<span class="w">        </span><span class="p">]</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">?</span><span class="w"> </span><span class="n">JSONSerialization</span><span class="p">.</span><span class="n">data</span><span class="p">(</span><span class="n">withJSONObject</span><span class="p">:</span><span class="w"> </span><span class="n">odom</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">socket</span><span class="p">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">:</span><span class="w"> </span><span class="n">data</span><span class="p">)</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+
+<span class="w">    </span><span class="kd">func</span><span class="w"> </span><span class="nf">didReceive</span><span class="p">(</span><span class="n">event</span><span class="p">:</span><span class="w"> </span><span class="n">WebSocketEvent</span><span class="p">,</span><span class="w"> </span><span class="n">client</span><span class="p">:</span><span class="w"> </span><span class="n">WebSocketClient</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// 接收 ROS 2 发来的控制指令</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="k">case</span><span class="w"> </span><span class="p">.</span><span class="n">text</span><span class="p">(</span><span class="kd">let</span><span class="w"> </span><span class="nv">str</span><span class="p">)</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">event</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="kd">let</span><span class="w"> </span><span class="nv">data</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="n">str</span><span class="p">.</span><span class="n">data</span><span class="p">(</span><span class="n">using</span><span class="p">:</span><span class="w"> </span><span class="p">.</span><span class="n">utf8</span><span class="p">),</span>
+<span class="w">               </span><span class="kd">let</span><span class="w"> </span><span class="nv">json</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="k">try</span><span class="p">?</span><span class="w"> </span><span class="n">JSONSerialization</span><span class="p">.</span><span class="n">jsonObject</span><span class="p">(</span><span class="n">with</span><span class="p">:</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="k">as</span><span class="p">?</span><span class="w"> </span><span class="p">[</span><span class="nb">String</span><span class="p">:</span><span class="w"> </span><span class="nb">Any</span><span class="p">],</span>
+<span class="w">               </span><span class="n">json</span><span class="p">[</span><span class="s">&quot;op&quot;</span><span class="p">]</span><span class="w"> </span><span class="k">as</span><span class="p">?</span><span class="w"> </span><span class="nb">String</span><span class="w"> </span><span class="p">==</span><span class="w"> </span><span class="s">&quot;publish&quot;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="c1">// 解析指令 → 执行动作</span>
+<span class="w">            </span><span class="p">}</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h4>替代方案对比</h4>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>rosbridge</strong></td>
+<td>成熟、JSON 易用、工具多</td>
+<td>额外序列化开销</td>
+</tr>
+<tr>
+<td><strong>Zenoh</strong></td>
+<td>更高效、支持 DDS 互通</td>
+<td>iOS 端库少</td>
+</tr>
+<tr>
+<td><strong>MCP (Model Context Protocol)</strong></td>
+<td>与 OpenClaw 原生集成</td>
+<td>需自行实现 Swift 端</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐</strong>：用 rosbridge 先跑通，后续可升级到 Zenoh 提升效率。</p>
+<hr />
+<h3>3.4.5 比 ROS 2 更好的替代框架</h3>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>优势</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Micro-ROS</strong></td>
+<td>极轻量、MCU 可跑、与 ROS 2 完全兼容</td>
+<td>ESP32、H3863 等嵌入式 MCU</td>
+</tr>
+<tr>
+<td><strong>ROS 1</strong></td>
+<td>生态最成熟、文档最多、简单场景首选</td>
+<td>简单机器人、无需新特性</td>
+</tr>
+<tr>
+<td><strong>SROS2</strong></td>
+<td>ROS 2 安全加固（TLS / DDS 加密）</td>
+<td>高安全场景</td>
+</tr>
+<tr>
+<td><strong>YUR</strong></td>
+<td>极轻量、Web 可视化、快速原型</td>
+<td>教学、Web 端监控</td>
+</tr>
+</tbody>
+</table>
+<p><strong>对于 0-1 项目的建议</strong>：<br />
+- <strong>Jetson Nano</strong>：ROS 2 Foxy，与 OpenClaw 通过 MQTT / WebSocket 桥接<br />
+- <strong>ESP32-CAM / H3863</strong>：micro-ROS，无缝接入 ROS 2 网络，星闪作为高速传输层<br />
+- <strong>iPhone</strong>：rosbridge，作为感知前端独立运行，不依赖 ROS 2 生态</p>
+<hr />
+<h1>第四章：实施阶段</h1>
+<h2>Phase 0：Ubuntu 台式机对接 Gateway</h2>
+<blockquote>
+<p>前置步骤，不占阶段编号。</p>
+</blockquote>
+<h3>目标</h3>
+<p>让 Ubuntu 台式机（5600G + 32GB + RTX 2060）作为 GPU 节点连接到 Mac Gateway，跑通节点发现→配对→执行链路。</p>
+<h3>硬件连接</h3>
+<ul>
+<li>有线千兆以太网（同一局域网，无需互联网）</li>
+<li>Mac Gateway IP：需确认（通常是 192.168.x.x）</li>
+</ul>
+<h3>配置步骤</h3>
+<p><strong>Step A: 获取 Gateway Token</strong><br />
+在 Mac 上执行：</p>
+<div class="codehilite"><pre><span></span><code>cat<span class="w"> </span>~/.openclaw/openclaw.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>python3<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;</span>
+<span class="s2">import json,sys</span>
+<span class="s2">d=json.load(sys.stdin)</span>
+<span class="s2">auth=d.get(&#39;auth&#39;,{})</span>
+<span class="s2">print(&#39;Token:&#39;, auth.get(&#39;token&#39;,&#39;NOT_FOUND&#39;))</span>
+<span class="s2">&quot;</span>
+</code></pre></div>
+
+<p>记下返回的 token。</p>
+<p><strong>Step B: 在 Ubuntu 上安装 OpenClaw 并启动 Node Host</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 安装 OpenClaw（如果尚未安装）</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://openclaw.ai/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+
+<span class="c1"># 启动 node，指向 Mac Gateway</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OPENCLAW_GATEWAY_TOKEN</span><span class="o">=</span><span class="s2">&quot;上面获取的token&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OPENCLAW_GATEWAY_URL</span><span class="o">=</span><span class="s2">&quot;http://192.168.x.x:18789&quot;</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--host<span class="w"> </span><span class="m">192</span>.168.x.x<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--display-name<span class="w"> </span><span class="s2">&quot;Ubuntu-GPU-Node&quot;</span>
+</code></pre></div>
+
+<p><strong>Step C: 在 Mac Gateway 上批准配对</strong></p>
+<div class="codehilite"><pre><span></span><code>openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 找到 Pending 的 Ubuntu 设备</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>approve<span class="w"> </span>&lt;requestId&gt;
+</code></pre></div>
+
+<p><strong>Step D: 验证节点在线</strong></p>
+<div class="codehilite"><pre><span></span><code>openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 应该显示 Ubuntu-GPU-Node 状态为 online</span>
+</code></pre></div>
+
+<p><strong>Step E: 配置 GPU 任务默认路由到该节点</strong></p>
+<div class="codehilite"><pre><span></span><code>openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>tools.exec.host<span class="w"> </span>node
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>tools.exec.node<span class="w"> </span><span class="s2">&quot;Ubuntu-GPU-Node&quot;</span>
+</code></pre></div>
+
+<hr />
+<h2>Phase 1：语音陪伴模块</h2>
+<h3>目标</h3>
+<p>实现基础语音交互：语音输入 → 文字 → AI 处理 → 语音输出。跑通"数字大脑→Cyber Bricks"的第一次物理输出。</p>
+<h3>硬件</h3>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>状态</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jetson Nano 2GB</td>
+<td>已有</td>
+<td>主控</td>
+</tr>
+<tr>
+<td>USB 耳机</td>
+<td>需采购</td>
+<td>Phase 2 一起买</td>
+</tr>
+<tr>
+<td>Cyber Bricks ×1</td>
+<td>已有</td>
+<td>第一个物理输出节点</td>
+</tr>
+</tbody>
+</table>
+<h3>软件架构</h3>
+<div class="codehilite"><pre><span></span><code>麦克风（USB耳机）
+    ↓
+Whisper（语音识别，jetson nano本地）
+    ↓
+OpenClaw Gateway（MacBook，贵庚大脑）
+    ↓
+Edge-TTS（语音合成，本地）
+    ↓
+扬声器（USB耳机）
+</code></pre></div>
+
+<h3>实施步骤</h3>
+<p><strong>Step 1: Jetson Nano 系统安装</strong></p>
+<ol>
+<li>下载 JetPack 5.x 镜像（NVIDIA 官网，L4T 35.x）</li>
+<li>用 balenaEtcher 烧录 SD 卡</li>
+<li>基础配置：</li>
+</ol>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 换阿里云源（加速）</span>
+sudo<span class="w"> </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s1">&#39;s/cn.archive.ubuntu.com/mirrors.aliyun.com/g&#39;</span><span class="w"> </span>/etc/apt/sources.list
+sudo<span class="w"> </span>apt<span class="w"> </span>update
+
+<span class="c1"># 开启 SSH</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>ssh
+sudo<span class="w"> </span>systemctl<span class="w"> </span>start<span class="w"> </span>ssh
+
+<span class="c1"># 记录 IP</span>
+hostname<span class="w"> </span>-I
+</code></pre></div>
+
+<p><strong>Step 2: 音频配置</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 查看设备</span>
+arecord<span class="w"> </span>-l<span class="w">      </span><span class="c1"># 列出录音设备</span>
+aplay<span class="w"> </span>-l<span class="w">        </span><span class="c1"># 列出播放设备</span>
+
+<span class="c1"># USB 耳机通常是 card 1</span>
+<span class="c1"># 创建 ~/.asoundrc 设为默认设备</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>~/.asoundrc<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">pcm.!default {</span>
+<span class="s">  type hw</span>
+<span class="s">  card 1</span>
+<span class="s">}</span>
+<span class="s">ctl.!default {</span>
+<span class="s">  type hw</span>
+<span class="s">  card 1</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+</code></pre></div>
+
+<p><strong>Step 3: 安装 Whisper 语音识别</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 克隆 whisper.cpp</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/ggerganov/whisper.cpp.git
+<span class="nb">cd</span><span class="w"> </span>whisper.cpp<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>make<span class="w"> </span>-j4
+
+<span class="c1"># 下载模型（base.en 最轻量，适合实时）</span>
+./models/download-ggml-model.sh<span class="w"> </span>base.en
+
+<span class="c1"># 测试</span>
+./bin/whisper-cli<span class="w"> </span>-m<span class="w"> </span>models/ggml-base.en.bin<span class="w"> </span>-f<span class="w"> </span>samples/jfk.wav
+</code></pre></div>
+
+<p><strong>Step 4: 安装 Edge-TTS 语音合成</strong></p>
+<div class="codehilite"><pre><span></span><code>pip3<span class="w"> </span>install<span class="w"> </span>edge-tts
+<span class="c1"># 测试</span>
+edge-tts<span class="w"> </span>--voice<span class="w"> </span>zh-CN-XiaoxiaoNeural<span class="w"> </span>--text<span class="w"> </span><span class="s2">&quot;你好，我是贵庚&quot;</span><span class="w"> </span>--write-media<span class="w"> </span>output.mp3
+</code></pre></div>
+
+<p><strong>Step 5: 编写语音对话程序</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;语音对话主程序 - Phase 1&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">edge_tts</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">queue</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="c1"># sys.path 需要加入 openclaw-bridge 路径</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/home/nvidia/openclaw-bridge&#39;</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">openclaw_bridge</span><span class="w"> </span><span class="kn">import</span> <span class="n">OpenClawBridge</span>
+
+<span class="n">bridge</span> <span class="o">=</span> <span class="n">OpenClawBridge</span><span class="p">(</span><span class="n">gateway_url</span><span class="o">=</span><span class="s2">&quot;http://192.168.x.x:18789&quot;</span><span class="p">)</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">synthesize_and_play</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;文字转语音并播放&quot;&quot;&quot;</span>
+    <span class="n">communicate</span> <span class="o">=</span> <span class="n">edge_tts</span><span class="o">.</span><span class="n">Communicate</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="s2">&quot;zh-CN-XiaoxiaoNeural&quot;</span><span class="p">)</span>
+    <span class="k">await</span> <span class="n">communicate</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;/tmp/tts_output.mp3&quot;</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;aplay&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/tts_output.mp3&quot;</span><span class="p">])</span>
+
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">main</span><span class="p">():</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># 录音 5 秒</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;正在听...&quot;</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
+            <span class="s2">&quot;arecord&quot;</span><span class="p">,</span> <span class="s2">&quot;-d&quot;</span><span class="p">,</span> <span class="s2">&quot;5&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;cd&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;-c&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;-r&quot;</span><span class="p">,</span> <span class="s2">&quot;16000&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/input.wav&quot;</span>
+        <span class="p">])</span>
+
+        <span class="c1"># Whisper 语音识别</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span>
+            <span class="s2">&quot;./whisper.cpp/bin/whisper-cli&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;-m&quot;</span><span class="p">,</span> <span class="s2">&quot;whisper.cpp/models/ggml-base.en.bin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;/tmp/input.wav&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--language&quot;</span><span class="p">,</span> <span class="s2">&quot;zh&quot;</span>
+        <span class="p">],</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">text</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;你说: </span><span class="si">{</span><span class="n">text</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 发给贵庚</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="k">await</span> <span class="n">bridge</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+
+        <span class="c1"># 回复语音</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;贵庚: </span><span class="si">{</span><span class="n">response</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">synthesize_and_play</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+
+<span class="n">asyncio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">main</span><span class="p">())</span>
+</code></pre></div>
+
+<hr />
+<h2>Phase 2：视觉记录模块</h2>
+<h3>目标</h3>
+<p>24小时视频记录，本地处理不传云端，AI 能理解画面内容。ESP32-Cam 采集 → Jetson Nano 处理。</p>
+<h3>硬件</h3>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>状态</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESP32-Cam ×1</td>
+<td>已有</td>
+<td>OV2640，RTSP 流</td>
+</tr>
+<tr>
+<td>Jetson Nano 2GB</td>
+<td>已有</td>
+<td>视频处理主控</td>
+</tr>
+</tbody>
+</table>
+<h3>ESP32-Cam 固件烧录</h3>
+<p><strong>硬件连接（USB转TTL）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>ESP32-Cam</th>
+<th>USB-TTL</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GND</td>
+<td>GND</td>
+</tr>
+<tr>
+<td>5V</td>
+<td>5V（注意：部分USB-TTL只有3.3V，需外接供电）</td>
+</tr>
+<tr>
+<td>U0R</td>
+<td>TX</td>
+</tr>
+<tr>
+<td>U0T</td>
+<td>RX</td>
+</tr>
+<tr>
+<td>GPIO0</td>
+<td>GND（烧录模式，进入后断开）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>烧录步骤</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 安装 esptool</span>
+pip3<span class="w"> </span>install<span class="w"> </span>esptool
+
+<span class="c1"># 擦除闪存</span>
+esptool.py<span class="w"> </span>--chip<span class="w"> </span>esp32<span class="w"> </span>--port<span class="w"> </span>/dev/ttyUSB0<span class="w"> </span>erase_flash
+
+<span class="c1"># 下载 CameraWebServer 固件</span>
+<span class="c1"># 从 Arduino IDE &gt; Tools &gt; ESP32 &gt; Camera &gt; AI Thinker Configuration</span>
+<span class="c1"># 或从 https://github.com/easytarget/esp32-cam-webserver 获取</span>
+
+<span class="c1"># 烧录</span>
+esptool.py<span class="w"> </span>--chip<span class="w"> </span>esp32<span class="w"> </span>--port<span class="w"> </span>/dev/ttyUSB0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>write_flash<span class="w"> </span>0x1000<span class="w"> </span>esp32-cam-webserver.bin
+</code></pre></div>
+
+<p><strong>配置静态 IP</strong>（在 ESP32-Cam 代码中修改）：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 在 camera_config_t 中设置 WiFi STA 模式 + 静态 IP</span>
+<span class="p">.</span><span class="n">wifi_mode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">WIFI_MODE_STA</span><span class="p">,</span>
+<span class="p">.</span><span class="n">wifi_sta</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">.</span><span class="n">ssid</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;YOUR_WIFI_SSID&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="p">.</span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;YOUR_WIFI_PASSWORD&quot;</span><span class="p">,</span>
+<span class="p">},</span>
+<span class="c1">// 在 dhcp_config 中设置静态 IP，例如：</span>
+<span class="p">.</span><span class="n">ip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{.</span><span class="n">ip</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{.</span><span class="n">addr</span><span class="w"> </span><span class="o">=</span><span class="n">esp_ip4_addr</span><span class="p">(</span><span class="mi">192</span><span class="p">,</span><span class="mi">168</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">99</span><span class="p">)}},</span>
+</code></pre></div>
+
+<h3>RTSP 接收（Jetson Nano）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 安装 GStreamer</span>
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>gstreamer1.0-tools<span class="w"> </span>gstreamer1.0-plugins-base<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>gstreamer1.0-plugins-good<span class="w"> </span>gstreamer1.0-plugins-bad
+
+<span class="c1"># 查看 RTSP 流（测试用）</span>
+ffplay<span class="w"> </span>rtsp://192.168.x.99:8554/stream
+
+<span class="c1"># GStreamer pipeline（更低延迟）</span>
+gst-launch-1.0<span class="w"> </span>rtspsrc<span class="w"> </span><span class="nv">location</span><span class="o">=</span>rtsp://192.168.x.99:8554/stream<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>!<span class="w"> </span>decodebin<span class="w"> </span>!<span class="w"> </span>videoconvert<span class="w"> </span>!<span class="w"> </span>autovideosink
+</code></pre></div>
+
+<hr />
+<h2>Phase 3：面部表情系统</h2>
+<h3>设计理念</h3>
+<p>0-1 的面部由「0」「-」「1」三个核心元素构成，动态显示 AI 状态。</p>
+<h3>系统组成</h3>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>形态</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>「0」</td>
+<td>LED 点阵/IPS 屏幕</td>
+<td>显示主眼睛，动态表情</td>
+</tr>
+<tr>
+<td>「-」</td>
+<td>线性灯光带（NeoPixel）</td>
+<td>情绪光效（颜色+呼吸节奏）</td>
+</tr>
+<tr>
+<td>「1」</td>
+<td>小型显示屏/LED</td>
+<td>辅助信息、状态指示</td>
+</tr>
+</tbody>
+</table>
+<h3>拓竹加工方案</h3>
+<table>
+<thead>
+<tr>
+<th>零件</th>
+<th>拓竹工具</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>外壳</td>
+<td>H2C + PLA</td>
+<td>面部支架，3D 打印</td>
+</tr>
+<tr>
+<td>眼睛屏幕支架</td>
+<td>H2C + PETG</td>
+<td>耐温</td>
+</tr>
+<tr>
+<td>透光板</td>
+<td>Bambu Suite 激光切割</td>
+<td>亚克力 3mm</td>
+</tr>
+<tr>
+<td>安装螺丝</td>
+<td>拓竹配套 M2/M3 螺丝</td>
+<td>标准件</td>
+</tr>
+</tbody>
+</table>
+<h3>控制代码</h3>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;0-1 面部表情控制 - Phase 3&quot;&quot;&quot;</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">neopixel</span><span class="w"> </span><span class="kn">import</span> <span class="n">NeoPixel</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pin</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+
+<span class="n">N</span> <span class="o">=</span> <span class="mi">12</span>  <span class="c1"># NeoPixel 灯珠数量</span>
+<span class="n">pin</span> <span class="o">=</span> <span class="n">Pin</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">OUT</span><span class="p">)</span>
+<span class="n">strip</span> <span class="o">=</span> <span class="n">NeoPixel</span><span class="p">(</span><span class="n">pin</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span>
+
+<span class="c1"># 表情定义（RGB 元组）</span>
+<span class="n">EXPRESSIONS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;idle&quot;</span><span class="p">:</span>     <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">100</span><span class="p">)],</span>     <span class="c1"># 淡蓝呼吸</span>
+    <span class="s2">&quot;thinking&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>       <span class="c1"># 淡黄</span>
+    <span class="s2">&quot;happy&quot;</span><span class="p">:</span>   <span class="p">[(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">50</span><span class="p">)],</span>      <span class="c1"># 绿色</span>
+    <span class="s2">&quot;sad&quot;</span><span class="p">:</span>     <span class="p">[(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">80</span><span class="p">)],</span>       <span class="c1"># 淡紫</span>
+    <span class="s2">&quot;alert&quot;</span><span class="p">:</span>   <span class="p">[(</span><span class="mi">100</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)],</span>       <span class="c1"># 红色闪烁</span>
+<span class="p">}</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">show_expression</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="mf">3.0</span><span class="p">):</span>
+    <span class="n">colors</span> <span class="o">=</span> <span class="n">EXPRESSIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">EXPRESSIONS</span><span class="p">[</span><span class="s2">&quot;idle&quot;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">duration</span> <span class="o">*</span> <span class="mi">10</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+            <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">i</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">colors</span><span class="p">)]</span>
+            <span class="n">strip</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="c1"># MQTT 接收表情指令</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">paho.mqtt.client</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mqtt</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span>
+    <span class="n">show_expression</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+
+<span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+<span class="n">client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">on_message</span>
+<span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;192.168.x.x&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;0-1/expression&quot;</span><span class="p">)</span>
+<span class="n">client</span><span class="o">.</span><span class="n">loop_start</span><span class="p">()</span>
+</code></pre></div>
+
+<hr />
+<h2>Phase 4：运动控制模块</h2>
+<h3>目标</h3>
+<p>OpenClaw 能通过 MQTT 发送指令到 Cyber Bricks，驱动电机/舵机执行物理动作。</p>
+<h3>通信架构</h3>
+<div class="codehilite"><pre><span></span><code>OpenClaw Gateway (MacBook)
+    ↓ MQTT (QoS 1)
+Jetson Nano (MQTT Broker + 指令解析)
+    ↓ 有线 UART (115200)
+Cyber Brick 1 (电机+舵机执行)
+    ↓ 有线 UART
+Cyber Brick 2 (备用)
+</code></pre></div>
+
+<h3>MicroPython 示例（Cyber Bricks 固件）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># CyberBrick 接收 MQTT 并执行 - Phase 4</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">network</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">paho.mqtt.client</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mqtt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">machine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pin</span><span class="p">,</span> <span class="n">PWM</span><span class="p">,</span> <span class="n">UART</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ujson</span>
+
+<span class="c1"># 初始化 UART（连接 Jetson Nano）</span>
+<span class="n">uart</span> <span class="o">=</span> <span class="n">UART</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">115200</span><span class="p">,</span> <span class="n">tx</span><span class="o">=</span><span class="n">Pin</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">rx</span><span class="o">=</span><span class="n">Pin</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># 初始化舵机</span>
+<span class="n">servo1</span> <span class="o">=</span> <span class="n">PWM</span><span class="p">(</span><span class="n">Pin</span><span class="p">(</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">servo1</span><span class="o">.</span><span class="n">freq</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="c1"># 初始化电机驱动</span>
+<span class="n">motor_in1</span> <span class="o">=</span> <span class="n">Pin</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">OUT</span><span class="p">)</span>
+<span class="n">motor_in2</span> <span class="o">=</span> <span class="n">Pin</span><span class="p">(</span><span class="mi">13</span><span class="p">,</span> <span class="n">Pin</span><span class="o">.</span><span class="n">OUT</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">set_servo</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;角度转舵机 PWM 占空比&quot;&quot;&quot;</span>
+    <span class="n">duty</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">40</span> <span class="o">+</span> <span class="n">angle</span> <span class="o">*</span> <span class="mi">95</span> <span class="o">/</span> <span class="mi">90</span><span class="p">)</span>  <span class="c1"># 0-90度</span>
+    <span class="n">servo1</span><span class="o">.</span><span class="n">duty</span><span class="p">(</span><span class="n">duty</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">set_motor</span><span class="p">(</span><span class="n">speed</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;速度 -100 到 100&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">speed</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">motor_in1</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">motor_in2</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">speed</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">motor_in1</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">motor_in2</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">motor_in1</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">motor_in2</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">on_message</span><span class="p">(</span><span class="n">topic</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">ujson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cmd</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;servo&#39;</span><span class="p">:</span>
+            <span class="n">set_servo</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="s1">&#39;angle&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">cmd</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;motor&#39;</span><span class="p">:</span>
+            <span class="n">set_motor</span><span class="p">(</span><span class="n">cmd</span><span class="p">[</span><span class="s1">&#39;speed&#39;</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">cmd</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;stop&#39;</span><span class="p">:</span>
+            <span class="n">set_motor</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">set_servo</span><span class="p">(</span><span class="mi">90</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mqtt_on_message</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">userdata</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+    <span class="n">on_message</span><span class="p">(</span><span class="n">msg</span><span class="o">.</span><span class="n">topic</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span>
+
+<span class="c1"># 连接 WiFi</span>
+<span class="n">sta</span> <span class="o">=</span> <span class="n">network</span><span class="o">.</span><span class="n">WLAN</span><span class="p">(</span><span class="n">network</span><span class="o">.</span><span class="n">STA_IF</span><span class="p">)</span>
+<span class="n">sta</span><span class="o">.</span><span class="n">active</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">sta</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s1">&#39;SSID&#39;</span><span class="p">,</span> <span class="s1">&#39;PASSWORD&#39;</span><span class="p">)</span>
+<span class="k">while</span> <span class="ow">not</span> <span class="n">sta</span><span class="o">.</span><span class="n">isconnected</span><span class="p">():</span>
+    <span class="k">pass</span>
+
+<span class="c1"># 连接 MQTT</span>
+<span class="n">mqtt_client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+<span class="n">mqtt_client</span><span class="o">.</span><span class="n">on_message</span> <span class="o">=</span> <span class="n">mqtt_on_message</span>
+<span class="n">mqtt_client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;192.168.x.x&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">)</span>
+<span class="n">mqtt_client</span><span class="o">.</span><span class="n">subscribe</span><span class="p">(</span><span class="s2">&quot;0-1/cyberbrick1&quot;</span><span class="p">)</span>
+<span class="n">mqtt_client</span><span class="o">.</span><span class="n">loop_start</span><span class="p">()</span>
+</code></pre></div>
+
+<h3>OpenClaw → Cyber Bricks 指令脚本</h3>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="sd">&quot;&quot;&quot;OpenClaw 指令到 Cyber Bricks - Phase 4&quot;&quot;&quot;</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">paho.mqtt.client</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mqtt</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
+
+<span class="n">MQTT_BROKER</span> <span class="o">=</span> <span class="s2">&quot;192.168.x.x&quot;</span>  <span class="c1"># Jetson Nano</span>
+<span class="n">TOPIC</span> <span class="o">=</span> <span class="s2">&quot;0-1/cyberbrick1&quot;</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">send_command</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="n">action</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">}</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">MQTT_BROKER</span><span class="p">,</span> <span class="mi">1883</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span><span class="n">TOPIC</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">disconnect</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;stop&quot;</span>
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;forward&quot;</span><span class="p">:</span>
+        <span class="n">send_command</span><span class="p">(</span><span class="s2">&quot;motor&quot;</span><span class="p">,</span> <span class="n">speed</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;backward&quot;</span><span class="p">:</span>
+        <span class="n">send_command</span><span class="p">(</span><span class="s2">&quot;motor&quot;</span><span class="p">,</span> <span class="n">speed</span><span class="o">=-</span><span class="mi">50</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;left&quot;</span><span class="p">:</span>
+        <span class="n">send_command</span><span class="p">(</span><span class="s2">&quot;servo&quot;</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;right&quot;</span><span class="p">:</span>
+        <span class="n">send_command</span><span class="p">(</span><span class="s2">&quot;servo&quot;</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">135</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s2">&quot;stop&quot;</span><span class="p">:</span>
+        <span class="n">send_command</span><span class="p">(</span><span class="s2">&quot;stop&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p>OpenClaw skill 示例（发送指令）：</p>
+<div class="codehilite"><pre><span></span><code>用户：&quot;让 Cyber Brick 往前走&quot;
+→ 调用 exec → python3 cyberbrick_control.py forward
+</code></pre></div>
+
+<h3>有线 GPIO 应急停止</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Jetson Nano 发送紧急停止信号（通过 UART 或直接 GPIO）</span>
+<span class="c1"># 方法1: UART 发送停止命令</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;stop&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/ttyTHS1
+
+<span class="c1"># 方法2: GPIO 硬件中断（Jetson Nano Pin 29）</span>
+<span class="nb">echo</span><span class="w"> </span><span class="m">29</span><span class="w"> </span>&gt;<span class="w"> </span>/sys/class/gpio/export
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;out&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/sys/class/gpio/gpio29/direction
+<span class="nb">echo</span><span class="w"> </span><span class="m">0</span><span class="w"> </span>&gt;<span class="w"> </span>/sys/class/gpio/gpio29/value<span class="w">  </span><span class="c1"># 继电器断开，所有电机断电</span>
+</code></pre></div>
+
+<hr />
+<h2>Phase 5：iPhone 感知前端</h2>
+<h3>目标</h3>
+<p>iPhone 16 Pro 通过 OpenClaw Node 协议接入 Gateway，成为分布式感知网络的一员，在家里移动时提供高质量视觉和传感器数据。</p>
+<h3>iPhone 接入架构</h3>
+<div class="codehilite"><pre><span></span><code>iPhone 16 Pro（OpenClaw App）
+    ↓ WiFi/MQTT
+Gateway（MacBook）
+    ↓
+OpenClaw Agent（贵庚大脑）
+    ↓
+控制指令 → Jetson Nano / ESP32-Cam / Cyber Bricks
+</code></pre></div>
+
+<h3>iPhone 感知分工（与 Jetson Nano 对比）</h3>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>iPhone 跑</th>
+<th>Jetson Nano 跑</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>实时物体检测（障碍物）</td>
+<td><strong>YOLOv11n Core ML</strong></td>
+<td>备用</td>
+<td>iPhone 节省 Jetson 算力</td>
+</tr>
+<tr>
+<td>人体检测/跟随</td>
+<td><strong>Vision Framework</strong></td>
+<td>—</td>
+<td>系统级，免费，极快</td>
+</tr>
+<tr>
+<td>手势指令识别</td>
+<td><strong>MediaPipe</strong></td>
+<td>—</td>
+<td>33关键点，秒级响应</td>
+</tr>
+<tr>
+<td>语义场景理解</td>
+<td><strong>FastVLM 0.5B</strong></td>
+<td>—</td>
+<td>本地 VLM，不占带宽</td>
+</tr>
+<tr>
+<td>室内3D建模</td>
+<td><strong>LiDAR + ARKit</strong></td>
+<td>可选</td>
+<td>iPhone 原生支持</td>
+</tr>
+<tr>
+<td>复杂推理/回答</td>
+<td>—</td>
+<td>✅</td>
+<td>非实时，延迟可接受</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>技术细节</strong>：详见第五章 5.2 节（Apple Vision / Core ML + YOLO / MediaPipe / FastVLM 完整技术方案）。</p>
+</blockquote>
+<hr />
+<h2>Phase 6：室内移动与智能家居硬件拓展</h2>
+<h3>目标</h3>
+<p>让 0-1 从「固定位置的机器人」变成「能在家里移动的陪伴者」，同时通过硬件拓展 kit 控制智能家居。</p>
+<h3>核心路线</h3>
+<p><strong>依赖拓竹生态 + OpenClaw，打造私人定制智能家居硬件拓展 kit。</strong></p>
+<h3>阶段一：IoT 控制现有设备（可立刻落地）</h3>
+<p>0-1 通过 WiFi/MQTT 接入现有智能家居生态（米家、涂鸦、HomeAssistant 等），实现对灯、门锁、空调等设备的语音和自动化控制。OpenClaw 作为大脑统一调度，Cyber Bricks 作为执行层。</p>
+<p><strong>具体实现</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># HomeAssistant MQTT 集成</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">paho.mqtt.client</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mqtt</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">turn_on_light</span><span class="p">(</span><span class="n">entity_id</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;发送 MQTT 命令到 HomeAssistant&quot;&quot;&quot;</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">mqtt</span><span class="o">.</span><span class="n">Client</span><span class="p">()</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="s2">&quot;homeassistant.local&quot;</span><span class="p">,</span> <span class="mi">1883</span><span class="p">)</span>
+    <span class="n">client</span><span class="o">.</span><span class="n">publish</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;homeassistant/light/</span><span class="si">{</span><span class="n">entity_id</span><span class="si">}</span><span class="s2">/set&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;{&quot;state&quot;:&quot;ON&quot;,&quot;brightness&quot;:255}&#39;</span>
+    <span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">auto_door_when_leaving</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;检测到主人离家，自动锁门+关灯&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">presence_detected</span><span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="n">lock_door</span><span class="p">()</span>
+        <span class="n">turn_off_all_lights</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">auto_door_when_arriving</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;检测到主人到家，自动开门+开灯&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">presence_detected</span><span class="p">(</span><span class="s2">&quot;anyone&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">unlock_door</span><span class="p">()</span>
+        <span class="n">turn_on_lights</span><span class="p">(</span><span class="s2">&quot;entrance&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<p><strong>支持的智能家居平台</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>接入方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>米家</td>
+<td>米家 MQTT Server / 小爱音箱</td>
+<td>需开启 LAN 控制</td>
+</tr>
+<tr>
+<td>涂鸦</td>
+<td>涂鸦 MQTT</td>
+<td>需要 Tuya Cloud 配置</td>
+</tr>
+<tr>
+<td>HomeAssistant</td>
+<td>原生 MQTT</td>
+<td>✅ 推荐，本地无需云端</td>
+</tr>
+<tr>
+<td>Aqara</td>
+<td>Zigbee2MQTT</td>
+<td>需要 Zigbee Hub</td>
+</tr>
+</tbody>
+</table>
+<h3>阶段二：私人定制硬件拓展 kit（Maker 方式打造）</h3>
+<p>随着需求明确，用拓竹生态自己设计并制造专属的硬件 kit：</p>
+<table>
+<thead>
+<tr>
+<th>kit</th>
+<th>拓竹工具</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>门锁控制模组</td>
+<td>H2C 3D打印 + Cyber Bricks</td>
+<td>替代购买第三方网关，直接 UART 控制</td>
+</tr>
+<tr>
+<td>红外/射频控制模组</td>
+<td>Bambu Suite 激光切割</td>
+<td>控制空调/电视等红外设备</td>
+</tr>
+<tr>
+<td>定制传感器阵列</td>
+<td>H2C + 杜邦线</td>
+<td>特定场景感知（如花盆土壤湿度）</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Maker 精神</strong>：不依赖购买成品，用标准件 + 3D 打印 + 模块化电子，自己做出需要的东西。这也是 0-1 整个项目的底层逻辑——用消费级工具完成过去需要工厂才能搞定的事情。</p>
+<hr />
+<h3>星闪通信模块：BearPi-Pico H3863 详细方案</h3>
+<blockquote>
+<p><strong>采购链接</strong>：https://item.taobao.com/item.htm?id=821386760379<br />
+<strong>星闪通信需双设备，建议成对购买</strong><br />
+<strong>参考价格</strong>：¥19.8（两边不带排针）/ ¥25.8（带排针）<br />
+<strong>官方文档</strong>：https://www.bearpi.cn/core_board/bearpi/pico/h3863/</p>
+</blockquote>
+<h4>核心规格</h4>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>主控芯片</td>
+<td>海思 WS63（RISC-V，240MHz，支持浮点/SWD）</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>606KB SRAM + 300KB ROM + 4MB Flash</td>
+</tr>
+<tr>
+<td>无线</td>
+<td>Wi-Fi 6（114.7Mbps）+ BLE 5.2（2Mbps）+ <strong>SLE 1.0（12Mbps）三模并发</strong></td>
+</tr>
+<tr>
+<td>接口</td>
+<td>GPIO×17、UART×3（最高4Mbps）、SPI×2、QSPI×1、PWM×8、ADC×6、I2S×1</td>
+</tr>
+<tr>
+<td>安全</td>
+<td>AES/SM2/SM3/SM4/TRNG 硬件加密</td>
+</tr>
+<tr>
+<td>温度</td>
+<td><strong>-40℃~+85℃</strong>（工业级宽温）</td>
+</tr>
+<tr>
+<td>供电</td>
+<td>USB-C 5V / 外部5V，3.3V MCU</td>
+</tr>
+<tr>
+<td>形态</td>
+<td><strong>40针 Pico 形态</strong>（兼容树莓派Pico扩展板）</td>
+</tr>
+</tbody>
+</table>
+<h4>为什么选择 H3863 而不是 ESP32-C6</h4>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>BearPi-Pico H3863</th>
+<th>ESP32-C6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>星闪 SLE</td>
+<td>✅ <strong>原生支持</strong>，20μs 时延</td>
+<td>❌ 不支持</td>
+</tr>
+<tr>
+<td>BLE 并发数</td>
+<td>4096 设备</td>
+<td>&lt;50</td>
+</tr>
+<tr>
+<td>空口速率 SLE</td>
+<td><strong>12Mbps</strong></td>
+<td>—</td>
+</tr>
+<tr>
+<td>国密算法</td>
+<td>✅ SM2/SM3/SM4 硬件支持</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>国产供应链</td>
+<td>✅ 全国产</td>
+<td>中等（乐鑫/台积电）</td>
+</tr>
+<tr>
+<td>开发难度</td>
+<td>较高（需熟悉 HiSpark/OpenHarmony）</td>
+<td>低（Arduino即插即用）</td>
+</tr>
+</tbody>
+</table>
+<h4>对 0-1 的核心价值</h4>
+<p><strong>1. 微秒级无线控制</strong>：SLE 时延 20μs（蓝牙10ms级），机器人遥控几乎无延迟，差速底盘/机械臂关节同步成为可能。</p>
+<p><strong>2. 三模合一</strong>：一块板同时提供：<br />
+- <strong>SLE</strong>：实时控制指令（20μs）<br />
+- <strong>WiFi6</strong>：高清图传/大数据回传（114.7Mbps）<br />
+- <strong>BLE</strong>：手机调试/低功耗状态上报</p>
+<p><strong>3. 国密安全</strong>：SM2/SM3/SM4 硬件加密，适合需要数据安全的场景。</p>
+<p><strong>4. 国产自主</strong>：星闪是中国自主短距无线标准，华为/荣耀手机+问界汽车已搭载，2026年进入工业标准。</p>
+<h4>与现有硬件的集成方案</h4>
+<p><strong>方案一：Jetson Nano + H3863 + ESP32-Cam（推荐）</strong></p>
+<div class="codehilite"><pre><span></span><code>Jetson Nano（视觉/规划）
+    ↓ UART（4Mbps）
+BearPi-Pico H3863（通信中枢）
+    ↓ SLE（20μs）  → 执行器/舵机/电机驱动
+    ↓ WiFi6       → 上位机/手机高清图传
+    ↓ BLE         → 手机调试/配网
+</code></pre></div>
+
+<p>接线：<br />
+- H3863 UART1 TX → Jetson Nano <code>/dev/ttyTHS1</code> RX<br />
+- H3863 UART1 RX → Jetson Nano <code>/dev/ttyTHS1</code> TX<br />
+- H3863 GND → Jetson Nano GND<br />
+- H3863 GPIO（PWM）→ 电机驱动板信号输入</p>
+<p><strong>方案二：Cyber Bricks 执行层 + H3863 通信层</strong></p>
+<p>Cyber Bricks 已有 ESP32-C3（WiFi+BLE），H3863 作为通信扩展模块叠加：<br />
+- H3863 通过 UART 与 Cyber Bricks 主控板通信<br />
+- H3863 通过 SLE 无线接收上位机指令<br />
+- Cyber Bricks 专注执行，H3863 专注通信</p>
+<p><strong>方案三：H3863 作为智能家居网关</strong></p>
+<p>H3863 作为 HomeAssistant 的本地无线网关：<br />
+- WiFi6 连接路由器（以太网回传）<br />
+- SLE 连接室内传感器节点（门锁/灯/温湿度）<br />
+- MQTT 协议与 OpenClaw Gateway 通信<br />
+- 支持国密，隐私数据不出家门</p>
+<h4>开发环境</h4>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SDK</td>
+<td>HiSpark Studio（Windows）/ 命令行编译链</td>
+</tr>
+<tr>
+<td>语言</td>
+<td>C/C++（主要）</td>
+</tr>
+<tr>
+<td>操作系统</td>
+<td>OpenHarmony / FreeRTOS / 裸机</td>
+</tr>
+<tr>
+<td>调试</td>
+<td>J-Link / 串口（OpenOCD）</td>
+</tr>
+<tr>
+<td>学习曲线</td>
+<td>中等（7/10，需适应鸿蒙生态）</td>
+</tr>
+</tbody>
+</table>
+<h4>落地步骤</h4>
+<table>
+<thead>
+<tr>
+<th>周</th>
+<th>任务</th>
+<th>目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第1周</td>
+<td>环境搭建 + 点灯</td>
+<td>编译-烧录-运行最小闭环</td>
+</tr>
+<tr>
+<td>第2周</td>
+<td>外设驱动 + OLED显示</td>
+<td>I2C点亮OLED，显示IP/状态</td>
+</tr>
+<tr>
+<td>第3周</td>
+<td>SLE串口透传测试</td>
+<td>两块H3863互发数据，测时延和稳定性</td>
+</tr>
+<tr>
+<td>第4周</td>
+<td>与 Jetson Nano UART 对接</td>
+<td>打通"大脑→执行器"链路</td>
+</tr>
+<tr>
+<td>第5周</td>
+<td>PWM驱动电机</td>
+<td>速度指令控制电机正反转</td>
+</tr>
+<tr>
+<td>第6周</td>
+<td>整机联调</td>
+<td>SLE无线遥控 + WiFi图传回显</td>
+</tr>
+</tbody>
+</table>
+<h4>采购建议</h4>
+<ul>
+<li><strong>数量</strong>：至少 <strong>2块</strong>（SLE收发测试需要，成对购买）</li>
+<li><strong>配套采购</strong>：USB转TTL调试器（串口日志）、SSD1306 OLED（状态可视化）</li>
+<li><strong>替代考虑</strong>：若开发周期紧，ESP32-C6（WiFi6+BLE5）可作为快速原型替代，但无法获得 SLE 超低时延</li>
+</ul>
+<h4>H3863 AI 推理能力分析（重要）</h4>
+<blockquote>
+<p>⚠️ <strong>核心结论</strong>：H3863 <strong>不适合跑 YOLO 目标检测</strong>，其价值在于<strong>感知前处理 + 低功耗值守 + 星闪网关</strong>。</p>
+</blockquote>
+<p><strong>硬件限制（硬数据）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>Hi3863V100</th>
+<th>参照对比</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU</td>
+<td>RISC-V 32bit，240MHz，<strong>无 NPU</strong></td>
+<td></td>
+</tr>
+<tr>
+<td>SRAM</td>
+<td><strong>606KB</strong>（极小）</td>
+<td>STM32H7（640KB）同级别</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>4MB Flash</td>
+<td></td>
+</tr>
+<tr>
+<td>算力</td>
+<td>~0.24 GFLOPS</td>
+<td>比 ESP32-S3 弱</td>
+</tr>
+</tbody>
+</table>
+<p><strong>YOLO 推理能力（MCUBench 实测数据）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>MCU</th>
+<th>频率/RAM</th>
+<th>可跑模型</th>
+<th>分辨率</th>
+<th>FPS</th>
+<th>mAP</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>STM32H573</td>
+<td>250MHz/640KB</td>
+<td>YOLOv6 d85w50</td>
+<td>128×128</td>
+<td><strong>3.8 FPS</strong></td>
+<td>0.07</td>
+</tr>
+<tr>
+<td>STM32F769</td>
+<td>216MHz/512KB</td>
+<td>YOLOv6 d85w50</td>
+<td>128×128</td>
+<td><strong>4.5 FPS</strong></td>
+<td>0.08</td>
+</tr>
+</tbody>
+</table>
+<p>H3863（240MHz/606KB）换算：~4 FPS，但 mAP 仅 0.07，检测能力极弱。</p>
+<p><strong>结论</strong>：<br />
+- ❌ 无法跑完整 YOLOv5n/v8n（需 100MB+，H3863 只能塞进几百 KB 模型）<br />
+- ❌ FPS 4 &lt;&lt; 实时要求 15fps<br />
+- ❌ 精度 mAP 0.07 无法用于实际目标检测</p>
+<p><strong>星闪 SLE 传输能力（实测）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数据</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>空口时延</td>
+<td>49μs/帧</td>
+</tr>
+<tr>
+<td>端到端延迟</td>
+<td><strong>≤1ms</strong></td>
+</tr>
+<tr>
+<td>有效带宽</td>
+<td>~6-8Mbps</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>传输内容</th>
+<th>大小</th>
+<th>传输时间 @ 8Mbps</th>
+<th>可行性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YOLO 检测结果（坐标+类别）</td>
+<td>~200B</td>
+<td><strong>&lt;1ms</strong></td>
+<td>✅ 完美</td>
+</tr>
+<tr>
+<td>ROI 小图（320×240 JPEG）</td>
+<td>~10KB</td>
+<td>~10ms</td>
+<td>⚠️ 可接受</td>
+</tr>
+<tr>
+<td>实时视频流</td>
+<td>—</td>
+<td>—</td>
+<td>❌ 带宽不足</td>
+</tr>
+</tbody>
+</table>
+<p><strong>协作架构建议（H3863 做前处理）：</strong></p>
+<div class="codehilite"><pre><span></span><code>摄像头 → H3863（帧差法/运动检测，30fps）→ 星闪传ROI → Nano YOLO精推理
+                              ↓ 无运动
+                          Nano 深度休眠
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>数值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H3863 粗筛延迟</td>
+<td>5-10ms</td>
+</tr>
+<tr>
+<td>星闪 ROI 传输</td>
+<td>&lt;1ms</td>
+</tr>
+<tr>
+<td>Nano 精推理（仅ROI）</td>
+<td>10-20ms</td>
+</tr>
+<tr>
+<td><strong>总延迟</strong></td>
+<td><strong>16-31ms（比 Nano 全量推理降低 30-40%）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>功耗与续航：</strong></p>
+<table>
+<thead>
+<tr>
+<th>设备</th>
+<th>算力任务</th>
+<th>值守/休眠</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jetson Nano 2GB</td>
+<td>10W</td>
+<td>5W（无法深度休眠）</td>
+</tr>
+<tr>
+<td>BearPi-Pico H3863</td>
+<td>0.5W</td>
+<td><strong>0.3W</strong></td>
+</tr>
+</tbody>
+</table>
+<p>假设 10,000mAh 3.7V（37Wh）电池：</p>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>平均功耗</th>
+<th>续航</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Nano 单独运行</td>
+<td>7.5W</td>
+<td><strong>4.9 小时</strong></td>
+</tr>
+<tr>
+<td>H3863 值守 + Nano 按需唤醒</td>
+<td>1.5W</td>
+<td><strong>~25 小时</strong></td>
+</tr>
+<tr>
+<td>续航提升</td>
+<td></td>
+<td><strong>~5 倍</strong> ✅</td>
+</tr>
+</tbody>
+</table>
+<p><strong>任务分配（H3863 vs Nano）：</strong></p>
+<table>
+<thead>
+<tr>
+<th>✅ H3863 适合</th>
+<th>❌ 必须留在 Nano</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>图像预处理（缩放、灰度、二值化）</td>
+<td>YOLO 目标检测（全量推理）</td>
+</tr>
+<tr>
+<td>运动检测触发（帧差法，30fps）</td>
+<td>MediaPipe 人体姿态</td>
+</tr>
+<tr>
+<td>传感器聚合（I2C/SPI：电池、IMU、温湿度）</td>
+<td>SLAM 视觉里程计</td>
+</tr>
+<tr>
+<td>语音 VAD（关键词唤醒）</td>
+<td>神经网络语音降噪</td>
+</tr>
+<tr>
+<td>星闪高速回传（检测结果，&lt;1ms）</td>
+<td>复杂多目标跟踪</td>
+</tr>
+<tr>
+<td>电机 PWM 预控制</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>最终定位</strong>：H3863 = <strong>感知前处理器 + 低功耗传感 hub + 星闪网关</strong>（不是 AI 推理节点）</p>
+<p><strong>最佳协同</strong>：H3863 负责值守（0.3W）+ 运动触发 + 传感采集；Nano 负责视觉 AI 推理（按需唤醒）。续航提升 5 倍，OOM 大幅缓解。</p>
+</blockquote>
+<hr />
+<h1>第五章：AI 与感知</h1>
+<h2>5.1 Jetson Nano 视觉感知</h2>
+<blockquote>
+<p>⚠️ <strong>Jetson Nano 2GB 版本特别说明</strong>：与 4GB 不同，2GB 必须开启 swap 才能同时跑 YOLO + MediaPipe，且 GPU 加速仅支持 FP16（Maxwell 不支持 INT8）。</p>
+</blockquote>
+<h3>5.1.1 手部自由度与执行器设计（行业对标 &amp; 规格参考）</h3>
+<blockquote>
+<p>⚠️ <strong>0-1 当前状态</strong>：文档只写了"灵巧手"三字，无具体参数。本节参考竞品给出具体设计参考。</p>
+</blockquote>
+<h4>行业现状</h4>
+<table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>产品</th>
+<th>手部 DOF</th>
+<th>指尖力矩/力反馈</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tesla</td>
+<td>Optimus Gen3</td>
+<td><strong>22 DOF × 2（单手）</strong></td>
+<td>触觉传感器（指尖力反馈）</td>
+<td>人类约27-28 DOF，Tesla已做到81%</td>
+</tr>
+<tr>
+<td>Boston Dynamics</td>
+<td>Atlas</td>
+<td>全身56 DOF</td>
+<td>全身触觉感知</td>
+<td>全关节连续旋转，可做复杂体操动作</td>
+</tr>
+<tr>
+<td>宇树</td>
+<td>G1</td>
+<td>23-34 关节</td>
+<td>未公开</td>
+<td>展示过捏鸡蛋、拧螺丝等精细操作</td>
+</tr>
+<tr>
+<td>Figure</td>
+<td>Figure 03</td>
+<td>未公开</td>
+<td>多维力矩传感器</td>
+<td>执行器速度2倍于上代</td>
+</tr>
+</tbody>
+</table>
+<h4>自由度（Degrees of Freedom, DOF）说明</h4>
+<p>DOF = 独立控制的旋转/平移轴数量。人类单手约 27 DOF：<br />
+- 大拇指：5 DOF（2个关节 + 腕掌关节）<br />
+- 食指：4 DOF<br />
+- 中指/无名指/小指：各 4 DOF<br />
+- 腕部：3 DOF<br />
+- 总计：约 27-28 DOF</p>
+<h4>手部设计的三个关键参数</h4>
+<table>
+<thead>
+<tr>
+<th>参数</th>
+<th>说明</th>
+<th>0-1 设计目标</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>关节数（DOF）</strong></td>
+<td>决定能做什么动作</td>
+<td>单手 ≥12 DOF（基础），≥20 DOF（进阶）</td>
+</tr>
+<tr>
+<td><strong>指尖力矩</strong></td>
+<td>决定能抓多重的东西</td>
+<td>持续抓取 ≥5kg（基础），≥20kg（进阶）</td>
+</tr>
+<tr>
+<td><strong>触觉传感器</strong></td>
+<td>决定精细操作能力</td>
+<td>指尖压力传感（基础），多维力矩（进阶）</td>
+</tr>
+</tbody>
+</table>
+<h4>0-1 推荐方案（分阶段）</h4>
+<p><strong>阶段一（基础版）</strong>：<br />
+- 使用 Cyber Bricks 现有舵机，12 DOF 单手<br />
+- 成本：~¥200/手<br />
+- 限制：无法做精细操作（捏鸡蛋等）<br />
+- 参考：宇树 G1 早期版本</p>
+<p><strong>阶段二（进阶版）</strong>：<br />
+- 目标：单手 16-22 DOF + 指尖压力传感<br />
+- 方案：LD-2209 伺服舵机（20kg/cm 扭矩）× 12个 + 薄膜压力传感器<br />
+- 成本：~¥800/手<br />
+- 可实现：捏鸡蛋（需触觉反馈）、穿针、拧螺丝<br />
+- 参考：Tesla Optimus Gen2（11 DOF → Gen3 22 DOF 路线）</p>
+<p><strong>阶段三（发烧友版）</strong>：<br />
+- 单手 22 DOF + 多维力矩传感器 + 腱绳驱动（Tendon-driven）<br />
+- 成本：~¥2000/手<br />
+- 参考：Tesla Optimus Gen3 执行器设计（腱绳驱动，前臂执行器）</p>
+<h4>腱绳驱动（Tendon-driven）参考</h4>
+<p>Tesla Optimus 的执行器设计关键：<br />
+- 执行器放在前臂而非手心（可制造性优先）<br />
+- 通过腱绳（tendon）传递力量到手部关节<br />
+- 优势：手部轻薄、关节密度高<br />
+- 挑战：腱绳磨损、张力控制</p>
+<h4>触觉传感器选型</h4>
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>价格</th>
+<th>精度</th>
+<th>适用场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>薄膜压力传感器</strong>（压敏电阻）</td>
+<td>¥5-20/个</td>
+<td>低</td>
+<td>抓取检测（有没有碰到）</td>
+</tr>
+<tr>
+<td><strong>FSR402</strong>（力敏电阻）</td>
+<td>¥30-50/个</td>
+<td>中</td>
+<td>力度控制（抓多紧）</td>
+</tr>
+<tr>
+<td><strong>HT201 压力传感阵列</strong></td>
+<td>¥200/个</td>
+<td>高</td>
+<td>精细操作（捏鸡蛋）</td>
+</tr>
+<tr>
+<td><strong>ATI 多维力矩传感器</strong></td>
+<td>¥5000+/个</td>
+<td>极高</td>
+<td>工业级精密操作</td>
+</tr>
+</tbody>
+</table>
+<p>0-1 阶段二推荐：薄膜压力传感器（¥5-20）× 8个 + FSR402 × 4个</p>
+<h3>工具选择</h3>
+<table>
+<thead>
+<tr>
+<th>工具</th>
+<th>功能</th>
+<th>适用场景</th>
+<th>Nano 2GB 适配</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>MediaPipe</strong></td>
+<td>人体姿态、手势、面部网格</td>
+<td>识别人、表情、手势指令</td>
+<td>⚠️ GPU 加速不成熟，CPU版可用但慢</td>
+</tr>
+<tr>
+<td><strong>GStreamer</strong></td>
+<td>视频流传输</td>
+<td>实时视频流</td>
+<td>✅ 原生支持</td>
+</tr>
+<tr>
+<td><strong>YOLOv5n/v8n</strong></td>
+<td>通用物体检测</td>
+<td>环境感知、导航</td>
+<td>✅ TensorRT FP16 最优</td>
+</tr>
+<tr>
+<td><strong>OpenCV</strong></td>
+<td>图像预处理、SLAM 前期</td>
+<td>相机标定、畸变校正</td>
+<td>✅ 原生支持</td>
+</tr>
+<tr>
+<td><strong>TensorRT FP16</strong></td>
+<td>YOLO 模型推理加速</td>
+<td>所有 YOLO 部署</td>
+<td>✅ 唯一有效加速</td>
+</tr>
+<tr>
+<td><strong>DeepStream</strong></td>
+<td>YOLO 集成框架</td>
+<td>生产级视频分析</td>
+<td>⚠️ 6.x 支持 2GB，配置复杂</td>
+</tr>
+</tbody>
+</table>
+<h3>YOLO + TensorRT FP16 部署（Nano 2GB 必读）</h3>
+<p><strong>Step A: 基础优化（必须开）</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 最大性能模式</span>
+sudo<span class="w"> </span>nvpmodel<span class="w"> </span>-m<span class="w"> </span><span class="m">0</span>
+sudo<span class="w"> </span>jetson_clocks
+
+<span class="c1"># 添加 swap（防止 OOM）</span>
+sudo<span class="w"> </span>fallocate<span class="w"> </span>-l<span class="w"> </span>4G<span class="w"> </span>/swapfile
+sudo<span class="w"> </span>chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>/swapfile
+sudo<span class="w"> </span>mkswap<span class="w"> </span>/swapfile
+sudo<span class="w"> </span>swapon<span class="w"> </span>/swapfile
+
+<span class="c1"># 降低输入分辨率：320x320 而非 640x640</span>
+</code></pre></div>
+
+<p><strong>Step B: DeepStream 配置（2GB 极限优化）</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># /etc/deepstream-7.0/sources/configs/deepstream-app/config.txt</span>
+<span class="k">[property]</span>
+<span class="na">gpu-id</span><span class="o">=</span><span class="s">0</span>
+<span class="na">network-mode</span><span class="o">=</span><span class="s">2</span><span class="w">              </span><span class="c1"># FP16（2GB唯一选择，INT8无加速）</span>
+<span class="na">batch-size</span><span class="o">=</span><span class="s">1</span><span class="w">                 </span><span class="c1"># 内存最小</span>
+<span class="na">batched-push-timeout</span><span class="o">=</span><span class="s">40000</span><span class="w">   </span><span class="c1"># 25fps</span>
+<span class="na">sync</span><span class="o">=</span><span class="s">0</span><span class="w">                       </span><span class="c1"># 关闭显示器同步</span>
+<span class="na">live-source</span><span class="o">=</span><span class="s">1</span><span class="w">                </span><span class="c1"># RTSP实时流必须</span>
+<span class="na">maintain-aspect-ratio</span><span class="o">=</span><span class="s">1</span>
+<span class="na">symmetric-padding</span><span class="o">=</span><span class="s">1</span>
+
+<span class="k">[source0]</span>
+<span class="na">enabled</span><span class="o">=</span><span class="s">1</span>
+<span class="na">uri</span><span class="o">=</span><span class="s">rtsp://192.168.x.99:8554/stream</span>
+<span class="na">type</span><span class="o">=</span><span class="s">4</span><span class="w">  </span><span class="c1"># RTSP</span>
+</code></pre></div>
+
+<h3>实测 FPS（完整 pipeline，含前后处理）</h3>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>输入分辨率</th>
+<th>FPS</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YOLOv8n</td>
+<td>640x640</td>
+<td>~13-16</td>
+<td>推理~19FPS</td>
+</tr>
+<tr>
+<td>YOLOv8n</td>
+<td>416x416</td>
+<td>~20-25</td>
+<td>降分辨率换速度</td>
+</tr>
+<tr>
+<td>YOLOv8n</td>
+<td>320x320</td>
+<td>~35-45</td>
+<td>极端优化</td>
+</tr>
+<tr>
+<td>YOLOv11n</td>
+<td>416x416</td>
+<td>~25-35</td>
+<td>最新模型</td>
+</tr>
+<tr>
+<td>YOLOv11n</td>
+<td>320x320</td>
+<td>~50+</td>
+<td>极限值</td>
+</tr>
+<tr>
+<td>YOLOv4-tiny</td>
+<td>416x416</td>
+<td>YOLOv4-tiny</td>
+<td>416x416</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>INT4 在 Nano 2GB 上不可用</strong>（Maxwell 架构不支持 INT8 推理加速）。<strong>FP16 是唯一有效加速</strong>。</p>
+</blockquote>
+<h3>MediaPipe on Jetson Nano 2GB</h3>
+<p><strong>结论：GPU 加速方案不成熟，不推荐在 Nano 上跑 MediaPipe GPU。</strong></p>
+<ul>
+<li>Jetson Orin Nano 上 MediaPipe 手势也只有 ~5 FPS</li>
+<li>替代方案：用 <strong>TensorRT</strong> 替代（ncnn + Vulkan 后端可用）</li>
+<li>推荐：Pose/手势用 MobileNet + TensorRT FP16 替代 MediaPipe</li>
+</ul>
+<h3>YOLO + MediaPipe 共存方案</h3>
+<table>
+<thead>
+<tr>
+<th>配置</th>
+<th>FPS</th>
+<th>内存占用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MediaPipe Pose（GPU）</td>
+<td>~20 FPS</td>
+<td>~500-800 MB</td>
+</tr>
+<tr>
+<td>YOLOv5n + TensorRT FP16</td>
+<td>~15-20 FPS</td>
+<td>~1-1.5 GB</td>
+</tr>
+<tr>
+<td><strong>两者同时跑</strong></td>
+<td><strong>约 10-15 FPS</strong></td>
+<td><strong>~2.5 GB（需开swap）</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐串联架构</strong>：</p>
+<div class="codehilite"><pre><span></span><code>输入帧 → YOLOv5n 检测人体区域 → MediaPipe Pose 姿态估计
+</code></pre></div>
+
+<hr />
+<h2>5.2 iPhone 感知前端技术方案</h2>
+<blockquote>
+<p><strong>调研时间</strong>：2026-03-22<br />
+<strong>A18 Pro NPU 基准</strong>：Geekbench AI 量化分数 <strong>44,672</strong>（比 A17 Pro 高 33%）<br />
+<strong>技术细节来源</strong>：zhiku(DeepSeek) + subagent × 2 + web search</p>
+</blockquote>
+<h3>iPhone 作为 OpenClaw Node 的能力</h3>
+<table>
+<thead>
+<tr>
+<th>iPhone 能力</th>
+<th>通过 OpenClaw 暴露为</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>摄像头（4800万主摄）</td>
+<td><code>camera</code> 节点</td>
+<td>实时视频流</td>
+</tr>
+<tr>
+<td>LiDAR 深度数据</td>
+<td><code>camera.depth</code> 节点</td>
+<td>室内3D建模、避障</td>
+</tr>
+<tr>
+<td>四麦克风阵列</td>
+<td><code>audio</code> 节点</td>
+<td>远场语音采集</td>
+</tr>
+<tr>
+<td>A18 Pro NPU</td>
+<td>本地 LLM 推理节点</td>
+<td>Core ML 模型</td>
+</tr>
+<tr>
+<td>IMU 姿态</td>
+<td><code>sensor.imu</code> 节点</td>
+<td>6轴惯性测量</td>
+</tr>
+<tr>
+<td>UWB 定位</td>
+<td><code>sensor.position</code> 节点</td>
+<td>室内10-30cm精度</td>
+</tr>
+</tbody>
+</table>
+<h3>四平台完整对比</h3>
+<table>
+<thead>
+<tr>
+<th>平台</th>
+<th>iPhone 视觉方案</th>
+<th>可用性</th>
+<th>推荐指数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Apple Vision</strong></td>
+<td><code>VNDetectObjectsRequest</code></td>
+<td>✅ 最佳</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>Core ML + YOLO</strong></td>
+<td>Ultralytics 导出 Core ML</td>
+<td>✅ 最佳</td>
+<td>⭐⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>MediaPipe</strong></td>
+<td>谷歌全链路框架</td>
+<td>✅ 推荐</td>
+<td>⭐⭐⭐⭐</td>
+</tr>
+<tr>
+<td><strong>FastVLM（苹果官方）</strong></td>
+<td>FastViTHD 视觉编码器</td>
+<td>✅ 新发现</td>
+<td>⭐⭐⭐</td>
+</tr>
+</tbody>
+</table>
+<h3>A18 Pro vs A17 Pro</h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>A18 Pro</th>
+<th>A17 Pro</th>
+<th>提升</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NPU 量化分数</td>
+<td><strong>44,672</strong></td>
+<td>33,479</td>
+<td>+33%</td>
+</tr>
+<tr>
+<td>CPU 单核</td>
+<td><strong>3376</strong></td>
+<td>2842</td>
+<td>+19%</td>
+</tr>
+<tr>
+<td>CPU 多核</td>
+<td><strong>8219</strong></td>
+<td>7020</td>
+<td>+17%</td>
+</tr>
+</tbody>
+</table>
+<h3>三大主力方案详解</h3>
+<h4>① Apple Vision Framework（原生免费）</h4>
+<table>
+<thead>
+<tr>
+<th>API</th>
+<th>功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>VNDetectHumanRectanglesRequest</code></td>
+<td>人体检测</td>
+</tr>
+<tr>
+<td><code>VNDetectFaceRectanglesRequest</code></td>
+<td>人脸检测</td>
+</tr>
+<tr>
+<td><code>VNDetectBarcodesRequest</code></td>
+<td>条码/二维码</td>
+</tr>
+<tr>
+<td><code>VNRecognizeTextRequest</code></td>
+<td>文字识别 OCR</td>
+</tr>
+<tr>
+<td><code>VNRecognizeObjectsRequest</code></td>
+<td>通用物体检测（4000+类）</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 最简人体检测代码</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">request</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">VNDetectHumanRectanglesRequest</span><span class="p">()</span>
+<span class="kd">let</span><span class="w"> </span><span class="nv">handler</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="bp">VNImageRequestHandler</span><span class="p">(</span><span class="n">cvPixelBuffer</span><span class="p">:</span><span class="w"> </span><span class="n">pixelBuffer</span><span class="p">)</span>
+<span class="k">try</span><span class="w"> </span><span class="n">handler</span><span class="p">.</span><span class="n">perform</span><span class="p">([</span><span class="n">request</span><span class="p">])</span>
+</code></pre></div>
+
+<h4>② Core ML + YOLO（通用物体检测首选）</h4>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>A18 Pro 预估 FPS</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YOLOv11n</td>
+<td><strong>40-60 FPS</strong></td>
+<td>实时检测首选</td>
+</tr>
+<tr>
+<td>YOLOv8n</td>
+<td><strong>35-50 FPS</strong></td>
+<td>成熟稳定</td>
+</tr>
+<tr>
+<td>YOLOv8s</td>
+<td><strong>25-40 FPS</strong></td>
+<td>速度精度平衡</td>
+</tr>
+</tbody>
+</table>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 一键导出 Core ML（Ultralytics 官方支持）</span>
+yolo<span class="w"> </span><span class="nb">export</span><span class="w"> </span><span class="nv">model</span><span class="o">=</span>yolov11n.pt<span class="w"> </span><span class="nv">format</span><span class="o">=</span>coreml<span class="w"> </span><span class="nv">nms</span><span class="o">=</span>True<span class="w"> </span><span class="nv">imgsz</span><span class="o">=</span><span class="m">800</span>
+</code></pre></div>
+
+<h4>③ MediaPipe（功能最全）</h4>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>推理速度</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>物体检测</td>
+<td>~0.81ms</td>
+</tr>
+<tr>
+<td>手势识别</td>
+<td>~2ms（33个关键点）</td>
+</tr>
+<tr>
+<td>全身姿态</td>
+<td>~5ms（33个关键点）</td>
+</tr>
+</tbody>
+</table>
+<h4>④ Apple FastVLM（本地 VLM）</h4>
+<p>苹果官方开源，专为 iPhone 端侧 VLM 设计：<br />
+- <strong>0.5B 版本</strong> 可直接在 iPhone 本地运行，无需联网<br />
+- 首字延迟比 LLaVA-OneVision <strong>快 85 倍</strong>（FastViTHD 视觉编码器）<br />
+- MLX 缓存：重复图像延迟从 21.7秒 → 0.78秒（28倍加速）<br />
+- Safari 网页版 Demo：实时摄像头画面 + AI 即时描述</p>
+<h3>VLM vs YOLO：怎么选</h3>
+<table>
+<thead>
+<tr>
+<th>维度</th>
+<th>YOLO（目标检测）</th>
+<th>VLM（视觉语言模型）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>输出</td>
+<td>边界框 + 类别</td>
+<td>文字描述</td>
+</tr>
+<tr>
+<td>速度</td>
+<td>⚡ 毫秒级（40-60 FPS）</td>
+<td>秒级（TTFT 1秒）</td>
+</tr>
+<tr>
+<td>精度定位</td>
+<td>✅ 高精度边界框</td>
+<td>❌ 无法输出精确坐标</td>
+</tr>
+<tr>
+<td>泛化能力</td>
+<td>受限训练集</td>
+<td>理解任意场景</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐分层架构</strong>：</p>
+<div class="codehilite"><pre><span></span><code>iPhone 摄像头
+    ↓
+YOLOv11n（Core ML）→ 实时物体检测 → Jetson Nano 运动控制
+    ↓
+FastVLM 0.5B → 语义理解 → 贵庚大脑
+</code></pre></div>
+
+<h3>Camera Control 按钮可行性</h3>
+<table>
+<thead>
+<tr>
+<th>交互</th>
+<th>可行性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>短按触发拍照</td>
+<td>✅ 可行</td>
+<td>通过 AssistiveTouch 映射</td>
+</tr>
+<tr>
+<td>长按持续录制</td>
+<td>✅ 可行</td>
+<td>BLE 通知触发</td>
+</tr>
+<tr>
+<td>滑动调节速度</td>
+<td>✅ 可行</td>
+<td>电容感应可区分按压面积</td>
+</tr>
+<tr>
+<td>深度 API 控制</td>
+<td>❌ 受限</td>
+<td>Apple 未开放硬件级 API</td>
+</tr>
+</tbody>
+</table>
+<h3>LiDAR 导航：ARKit vs 传统 SLAM</h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>适合场景</th>
+<th>iPhone 接口</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ARKit 路径记忆</td>
+<td>室内固定路线</td>
+<td>直接用</td>
+</tr>
+<tr>
+<td>RoomPlan API</td>
+<td>自动生成 3D 房间模型</td>
+<td>CAD 导出</td>
+</tr>
+<tr>
+<td>RTAB-Map</td>
+<td>室内建图+导航</td>
+<td>iOS 端口可用</td>
+</tr>
+<tr>
+<td>ORB-SLAM3</td>
+<td>室外/室内通用</td>
+<td>有 iOS 版本</td>
+</tr>
+</tbody>
+</table>
+<p><strong>最佳实践</strong>：iPhone 做感知前端（摄像头/LiDAR/IMU）→ WiFi 传输数据 → Jetson 跑 SLAM 算法。</p>
+<hr />
+<h2>5.3 物理仿真引擎：Genesis 与 Newton</h2>
+<blockquote>
+<p>⚠️ <strong>名称区分</strong>：<br />
+- <strong>Genesis</strong> = Apple 团队开源的独立物理引擎（2025-02），GTX 1080 6GB 可跑<br />
+- <strong>Newton</strong> = NVIDIA + DeepMind + Disney 联合开发的另一套引擎（2025-03 GTC），GPU 加速，与 Isaac Lab 官方生态集成<br />
+- 两者是<strong>不同的独立项目</strong>，本节分别说明。</p>
+</blockquote>
+<h3>Genesis 物理引擎（Apple 开源，2025-02）</h3>
+<blockquote>
+<p><strong>调研时间</strong>：2026-03-22<br />
+<strong>来源</strong>：Genesis GitHub + 官方文档<br />
+<strong>最新动态</strong>：最新版本 v0.4.0（2026-02-17），GitHub Stars 28,318</p>
+</blockquote>
+<h3>Genesis vs Isaac Gym 完整对比</h3>
+<table>
+<thead>
+<tr>
+<th>对比维度</th>
+<th>Genesis</th>
+<th>Isaac Gym</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定位</td>
+<td>通用具身智能/生成式仿真</td>
+<td>工业级数字孪生</td>
+</tr>
+<tr>
+<td>物理引擎</td>
+<td>自研多求解器（刚体/MPM/SPH/FEM/PBD）</td>
+<td>PhysX 5.1 (GPU)</td>
+</tr>
+<tr>
+<td>渲染</td>
+<td>光线追踪 + 光栅化</td>
+<td>RTX 光线追踪（Omniverse USD）</td>
+</tr>
+<tr>
+<td>GPU要求</td>
+<td><strong>GTX 1080 6GB 起</strong>，支持 AMD/Apple Metal/CPU</td>
+<td>必须 NVIDIA RTX 8GB+</td>
+</tr>
+<tr>
+<td>ROS支持</td>
+<td>❌ 无原生集成</td>
+<td>✅ ROS2 Bridge 开箱即用</td>
+</tr>
+<tr>
+<td>学习曲线</td>
+<td><strong>低</strong>（pip 安装，Gym 风格 API）</td>
+<td>高（需掌握 USD/Omniverse）</td>
+</tr>
+<tr>
+<td>速度</td>
+<td><strong>43M FPS</strong>（RTX 4090）</td>
+<td>100+ 智能体并行</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>对 0-1 的意义</strong>：数字孪生训练的硬件门槛从 Isaac Gym 的 RTX 3090+ 降到 <strong>GTX 1080 6GB</strong>，现有台式机（RTX 2060 6GB）就能用。</p>
+</blockquote>
+<h3>Genesis 最新功能（2026年以来）</h3>
+<table>
+<thead>
+<tr>
+<th>日期</th>
+<th>新增功能</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2026-02-17</td>
+<td>最新版本 v0.4.0，GitHub 持续活跃更新（28,318 Stars）</td>
+</tr>
+<tr>
+<td>2026-03-16</td>
+<td>ProximitySensor、TemperatureGridSensor、GPU碰撞检测提速30%</td>
+</tr>
+<tr>
+<td>2026-03-13</td>
+<td>FOTS触觉传感器、异构机器人并行仿真</td>
+</tr>
+<tr>
+<td>2026-02-18</td>
+<td><strong>Quadrants编译器</strong>正式迁移、AMD ROCm实验性支持</td>
+</tr>
+<tr>
+<td>2026-02-10</td>
+<td>交互查看器插件机制、glTF/USD支持</td>
+</tr>
+</tbody>
+</table>
+<h3>Genesis 快速入门</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">genesis</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">gs</span>
+
+<span class="c1"># 创建仿真环境</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">gym</span><span class="o">.</span><span class="n">create_env</span><span class="p">()</span>
+<span class="n">robot</span> <span class="o">=</span> <span class="n">gs</span><span class="o">.</span><span class="n">robot</span><span class="o">.</span><span class="n">Robot</span><span class="p">(</span><span class="s2">&quot;/path/to/robot.urdf&quot;</span><span class="p">)</span>
+
+<span class="c1"># 强化学习训练循环</span>
+<span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">):</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">policy</span><span class="p">(</span><span class="n">robot</span><span class="o">.</span><span class="n">get_state</span><span class="p">())</span>
+    <span class="n">robot</span><span class="o">.</span><span class="n">set_control</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Step </span><span class="si">{</span><span class="n">step</span><span class="si">}</span><span class="s2">, Reward: </span><span class="si">{</span><span class="n">reward</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<h3>Newton 物理引擎（NVIDIA + DeepMind + Disney，2025-03 GTC）⭐⭐⭐⭐⭐</h3>
+<p><strong>发布时间</strong>：2025-03-18（NVIDIA GTC）<br />
+<strong>合作方</strong>：NVIDIA + Google DeepMind + Disney Research，Linux Foundation 管理<br />
+<strong>GitHub</strong>：https://github.com/newton-physics/newton<br />
+<strong>集成</strong>：已集成至 NVIDIA Isaac Lab</p>
+<h4>技术架构</h4>
+<table>
+<thead>
+<tr>
+<th>底层技术</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>NVIDIA Warp</strong></td>
+<td>Python 框架，构建和加速仿真/空间计算，CUDA 级别性能</td>
+</tr>
+<tr>
+<td><strong>OpenUSD</strong></td>
+<td>聚合机器人及环境数据的描述框架</td>
+</tr>
+<tr>
+<td><strong>MuJoCo Warp</strong></td>
+<td>NVIDIA GPU 优化版 MuJoCo，Newton 核心求解器</td>
+</tr>
+<tr>
+<td><strong>Disney 引擎技术</strong></td>
+<td>针对机器人学习优化的物理引擎技术</td>
+</tr>
+</tbody>
+</table>
+<h4>关键特性</h4>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GPU 加速</strong></td>
+<td>CUDA 级别性能，无需底层编码，仿真从"天"加速到"分钟"</td>
+</tr>
+<tr>
+<td><strong>可微分</strong></td>
+<td>支持梯度计算，加速训练、设计优化、系统识别</td>
+</tr>
+<tr>
+<td><strong>可扩展</strong></td>
+<td>通过插件支持多物理场仿真</td>
+</tr>
+<tr>
+<td><strong>与 Isaac Lab 兼容</strong></td>
+<td>可直接替换 Isaac Sim 中的仿真后端</td>
+</tr>
+<tr>
+<td><strong>与 MuJoCo Playground 兼容</strong></td>
+<td>DeepMind 的 MuJoCo 强化学习环境可直接使用</td>
+</tr>
+</tbody>
+</table>
+<h4>Genesis vs Newton 怎么选</h4>
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th><strong>Genesis</strong>（Apple）</th>
+<th><strong>Newton</strong>（NVIDIA）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>发布时间</td>
+<td>2025-02</td>
+<td>2025-03 GTC</td>
+</tr>
+<tr>
+<td>资源需求</td>
+<td>GTX 1080 6GB</td>
+<td>RTX 3060+</td>
+</tr>
+<tr>
+<td>GPU 加速</td>
+<td>有</td>
+<td>有（CUDA 级别）</td>
+</tr>
+<tr>
+<td>生态集成</td>
+<td>独立开源</td>
+<td>Isaac Lab 官方集成</td>
+</tr>
+<tr>
+<td>适用场景</td>
+<td>入门、低成本</td>
+<td>高精度工业仿真</td>
+</tr>
+</tbody>
+</table>
+<h4>对 0-1 的建议</h4>
+<div class="codehilite"><pre><span></span><code>阶段一（Genesis）：低成本入门，GTX 1080/RTX 2060 可跑
+阶段二（Newton）：高精度仿真，与 Isaac Lab / GR00T 生态集成
+</code></pre></div>
+
+<hr />
+<h2>5.4 具身大脑基模：RynnBrain 与空间智能</h2>
+<blockquote>
+<p><strong>调研时间</strong>：2026-03-24 | 来源：阿里巴巴达摩院官方 + 多源搜索验证</p>
+<p><strong>背景</strong>：0-1 的"大脑"不仅需要语言理解和记忆，还需要<strong>理解物理空间、执行长时序任务</strong>。两个 2026 年最新开源成果直接解决这两个问题。</p>
+</blockquote>
+<h3>RynnBrain（阿里巴巴达摩院，2026-02-10 开源）</h3>
+<p><strong>官网</strong>：<code>alibaba-damo-academy.github.io/RynnBrain.github.io/</code><br />
+<strong>开源协议</strong>：Apache 2.0（可商用）</p>
+<h4>发布模型（全系列）</h4>
+<table>
+<thead>
+<tr>
+<th>模型</th>
+<th>规格</th>
+<th>核心用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RynnBrain-2B</td>
+<td>密集，2B 参数</td>
+<td>轻量具身推理</td>
+</tr>
+<tr>
+<td>RynnBrain-8B</td>
+<td>密集，8B 参数</td>
+<td>中等任务</td>
+</tr>
+<tr>
+<td><strong>RynnBrain-30B MoE</strong></td>
+<td>总30B，激活约3B</td>
+<td>复杂任务（主力）</td>
+</tr>
+<tr>
+<td><strong>RynnBrain-Plan</strong></td>
+<td>专用</td>
+<td>机械臂操作规划</td>
+</tr>
+<tr>
+<td><strong>RynnBrain-Nav</strong></td>
+<td>专用</td>
+<td>室内导航（自然语言指令）</td>
+</tr>
+<tr>
+<td><strong>RynnBrain-CoP</strong></td>
+<td>专用</td>
+<td>空间推理</td>
+</tr>
+</tbody>
+</table>
+<h4>核心能力（官方 Demo 验证）</h4>
+<table>
+<thead>
+<tr>
+<th>能力</th>
+<th>说明</th>
+<th>对 0-1 的价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>时空记忆</strong></td>
+<td>记住物体在全局历史中的位置和轨迹，支持回溯</td>
+<td>✅ 解决"转身就忘"的痛点</td>
+</tr>
+<tr>
+<td><strong>物理空间推理</strong></td>
+<td>文本+空间坐标交织，减少幻觉</td>
+<td>✅ 动作规划更贴合实际</td>
+</tr>
+<tr>
+<td><strong>Affordance 感知</strong></td>
+<td>理解物体"可以用来做什么"</td>
+<td>✅ 提升操作成功率</td>
+</tr>
+<tr>
+<td><strong>长时序规划</strong></td>
+<td>100步+任务完成率 88%</td>
+<td>✅ 复杂家务不中断</td>
+</tr>
+<tr>
+<td><strong>零样本适配</strong></td>
+<td>未知环境成功率 94%</td>
+<td>✅ 新家庭开箱即用</td>
+</tr>
+<tr>
+<td><strong>INT4 量化</strong></td>
+<td>边缘硬件可跑</td>
+<td>✅ Jetson Orin NX 实时推理</td>
+</tr>
+</tbody>
+</table>
+<h4>端侧部署实测</h4>
+<ul>
+<li><strong>Jetson Orin NX</strong>：推理延迟 &lt;20ms（INT4 量化）</li>
+<li><strong>Benchmark</strong>：16项具身榜单 SOTA，超越谷歌 Gemini Robotics ER 1.5 + NVIDIA Cosmos-Reason2</li>
+<li><strong>落地数据</strong>：5000+ 家庭部署，任务切换效率 +65%，异常处理成功率 92%</li>
+</ul>
+<h4>对 0-1 的直接价值</h4>
+<div class="codehilite"><pre><span></span><code><span class="mf">0</span><span class="o">-</span><span class="mf">1</span><span class="w"> </span><span class="n">大脑架构建议</span><span class="err">（</span><span class="n">整合</span><span class="w"> </span><span class="n">RynnBrain</span><span class="err">）：</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">贵庚</span><span class="err">（</span><span class="n">记忆</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">对话</span><span class="err">）</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">RynnBrain</span><span class="o">-</span><span class="mf">30</span><span class="n">B</span><span class="w"> </span><span class="n">MoE</span><span class="err">（</span><span class="n">任务规划</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">物体记忆</span><span class="err">）</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">RynnBrain</span><span class="o">-</span><span class="n">Nav</span><span class="err">（</span><span class="n">室内导航</span><span class="err">）</span>
+<span class="err">└─</span><span class="w"> </span><span class="n">RynnBrain</span><span class="o">-</span><span class="n">Plan</span><span class="err">（</span><span class="n">操作序列生成</span><span class="err">）</span>
+</code></pre></div>
+
+<hr />
+<h3>李飞飞空间智能（World Labs）</h3>
+<p><strong>公司</strong>：World Labs（2024年创办，a16z 领投 $230M，估值超 $1B）<br />
+<strong>官网</strong>：<code>www.worldlabs.ai</code></p>
+<h4>核心研究方向</h4>
+<table>
+<thead>
+<tr>
+<th>成果</th>
+<th>技术</th>
+<th>对 0-1 的价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>3D 世界生成</strong></td>
+<td>单图生成可交互 3D 场景（NeRF/3DGS）</td>
+<td>新家庭快速建图</td>
+</tr>
+<tr>
+<td><strong>PointWorld</strong></td>
+<td>单 RGB-D → 模拟 10 步关节动作</td>
+<td>无需预训练即可操作新物体</td>
+</tr>
+<tr>
+<td><strong>Physical AI</strong></td>
+<td>物体运动学/碰撞/轨迹定量推理</td>
+<td>预判动作后果，避免打碎物品</td>
+</tr>
+<tr>
+<td><strong>BRS 家机器</strong></td>
+<td>成本 &lt;$500 双臂机器人</td>
+<td>低成本硬件参考</td>
+</tr>
+</tbody>
+</table>
+<h4>3D Gaussian Splatting（3DGS）：空间智能的重建底座 ⭐⭐⭐⭐⭐</h4>
+<blockquote>
+<p><strong>补充时间</strong>：2026-03-24 | <strong>来源</strong>：arXiv + GitHub + 多源搜索验证</p>
+<p>World Labs 的 3D 世界生成底层依赖 3DGS（3D Gaussian Splatting）技术。3DGS 自 SIGGRAPH 2023 提出后，在机器人领域快速拓展，<strong>对 0-1 的价值超出预期</strong>。</p>
+</blockquote>
+<p><strong>核心原理</strong>：用数百万个 3D 高斯椭球表示空间，每个高斯含位置/形状/颜色/不透明度，通过可微分光栅化渲染，比 NeRF 快 100 倍以上（1080p @ 100+ FPS）。</p>
+<h5>核心优势对比</h5>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>NeRF</th>
+<th><strong>3DGS</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>训练时间</td>
+<td>数小时~数天</td>
+<td><strong>35-45 分钟</strong></td>
+</tr>
+<tr>
+<td>1080p 渲染</td>
+<td>~10 FPS</td>
+<td><strong>100+ FPS</strong></td>
+</tr>
+<tr>
+<td>场景表示</td>
+<td>隐式（神经网络）</td>
+<td><strong>显式（高斯点云）</strong></td>
+</tr>
+<tr>
+<td>编辑/控制</td>
+<td>困难</td>
+<td><strong>容易</strong>（可编辑单个高斯）</td>
+</tr>
+</tbody>
+</table>
+<h5>主要应用方向</h5>
+<p><strong>① 实时高保真 3D 建图（LangSplat）</strong> ⭐⭐⭐⭐⭐</p>
+<p>GitHub：https://github.com/minghanqin/LangSplat（CVPR 2024 Highlight）</p>
+<p>将 CLIP 视觉语言特征注入 3DGS，实现<strong>开放词汇语义查询</strong>：</p>
+<div class="codehilite"><pre><span></span><code>用户语音：&quot;去沙发旁边那个小边几上拿我的药&quot;
+↓
+LangSplat 自然语言查询：&quot;沙发&quot; + &quot;边几&quot; + &quot;药&quot; → 3D 坐标
+↓
+0-1 导航到该位置 → 抓取
+</code></pre></div>
+
+<p>优势：不需要预定义物体类别，直接用自然语言搜索任意物体。</p>
+<p><strong>② Real2Sim 仿真训练（RoboGSim）</strong> ⭐⭐⭐⭐⭐</p>
+<p>论文：arXiv:2411.11839，https://robogsim.github.io/</p>
+<p>Pipeline：</p>
+<div class="codehilite"><pre><span></span><code>① 手机拍摄机器人工作区 → 3DGS 高保真重建
+② 数字孪生构建（Scene Composer 编辑场景）
+③ 在仿真中批量生成合成数据（1000+ 条）
+④ 训练机械臂策略 → 零样本迁移到真实机器人
+</code></pre></div>
+
+<p>关键结果：在仿真数据上训练的模型，新场景下<strong>优于真实数据训练的模型</strong>，解决真实数据采集成本高、场景单一的问题。</p>
+<p><strong>③ 物理仿真 + 精细操作（Physical AI）</strong></p>
+<p>3DGS 高斯可绑定物理引擎参数（摩擦力、形变阈值），实现：<br />
+- 机械臂抓取路径仿真（精度 0.1mm）<br />
+- 软体操作（收拾衣物、整理桌面）<br />
+- 仿真中测试 100 种抓取路径 → 选择最优下发执行</p>
+<h5>关键开源项目</h5>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>链接</th>
+<th>算力需求</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangSplat</strong></td>
+<td>https://github.com/minghanqin/LangSplat</td>
+<td>RTX 3060+</td>
+<td>⭐⭐⭐⭐⭐ 语义建图</td>
+</tr>
+<tr>
+<td><strong>RoboGSim</strong></td>
+<td>https://robogsim.github.io/</td>
+<td>RTX 4090（训练）</td>
+<td>⭐⭐⭐⭐⭐ Real2Sim 仿真</td>
+</tr>
+<tr>
+<td><strong>MonoGS</strong></td>
+<td>https://github.com/muskie82/MonoGS</td>
+<td>RTX 3060+</td>
+<td>⭐⭐⭐ 单目 SLAM</td>
+</tr>
+<tr>
+<td><strong>SplaTAM</strong></td>
+<td>https://github.com/spla-tam/SplaTAM</td>
+<td>RTX 4090</td>
+<td>⭐⭐⭐ RGB-D SLAM</td>
+</tr>
+</tbody>
+</table>
+<h5>硬件算力门槛（对 0-1 的意义）</h5>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>算力需求</th>
+<th>0-1 当前硬件</th>
+<th>可行性</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>3DGS 场景重建</strong>（训练）</td>
+<td>RTX 3060+（30 分钟）</td>
+<td>台式机 RTX 2060 ✅</td>
+<td>✅ <strong>完全可以</strong></td>
+</tr>
+<tr>
+<td><strong>LangSplat 语义查询</strong></td>
+<td>RTX 3060+</td>
+<td>台式机 RTX 2060 ✅</td>
+<td>✅ 可行</td>
+</tr>
+<tr>
+<td><strong>RoboGSim 仿真训练</strong></td>
+<td>RTX 4090（最佳）</td>
+<td>RTX 2060 ⚠️</td>
+<td>⚠️ 可行但慢</td>
+</tr>
+<tr>
+<td><strong>3DGS 实时 SLAM</strong></td>
+<td>Jetson Orin NX+</td>
+<td>Jetson Nano 2GB ❌</td>
+<td>❌ 算力不足</td>
+</tr>
+</tbody>
+</table>
+<p>结论：<strong>场景重建和语义建图在台式机 RTX 2060 上完全可行</strong>，实时 SLAM 需要 AGX Thor 级别。</p>
+<h5>3DGS 与 PointWorld / Genesis 的分工</h5>
+<table>
+<thead>
+<tr>
+<th>技术</th>
+<th>角色</th>
+<th>输入</th>
+<th>输出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>3DGS</strong></td>
+<td>场景重建（真实纹理）</td>
+<td>手机绕拍视频</td>
+<td>高保真 3D 点云</td>
+</tr>
+<tr>
+<td><strong>PointWorld</strong></td>
+<td>物理预测（物体运动）</td>
+<td>RGB-D + 动作序列</td>
+<td>动作效果预测</td>
+</tr>
+<tr>
+<td><strong>Genesis</strong></td>
+<td>物理引擎（无纹理仿真）</td>
+<td>物理参数</td>
+<td>碰撞/动力学结果</td>
+</tr>
+</tbody>
+</table>
+<p>三者互补关系：</p>
+<div class="codehilite"><pre><span></span><code>PointWorld（预测）+ Genesis（物理）→ 机器人动作规划
+3DGS（重建）→ 真实环境数字孪生
+PointWorld + 3DGS → 在真实场景中做动作预测
+</code></pre></div>
+
+<h4>对 0-1 的中期价值</h4>
+<ul>
+<li><strong>3D 空间建模</strong>：让机器人在进入新家庭时，用单张 RGB-D 快速构建 3D 语义地图，无需预训练</li>
+<li><strong>物理推理预演</strong>：执行"拿起水杯"前，先在数字孪生中模拟轨迹，避免碰倒花瓶</li>
+<li><strong>低成本感知</strong>：单 RGB-D 相机（ESP32-Cam 可用）即可实现 3D 感知，降低硬件成本</li>
+</ul>
+<hr />
+<h3>技术路线建议（0-1 如何整合）</h3>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>行动</th>
+<th>技术来源</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>现在</strong></td>
+<td>接入 RynnBrain-30B-MoE 作为任务规划核心</td>
+<td>RynnBrain 开源</td>
+</tr>
+<tr>
+<td><strong>现在</strong></td>
+<td>用 RynnBrain-Nav 替代/补充现有导航方案</td>
+<td>RynnBrain 开源</td>
+</tr>
+<tr>
+<td><strong>中期</strong></td>
+<td>引入 PointWorld 做新环境零样本建图</td>
+<td>World Labs</td>
+</tr>
+<tr>
+<td><strong>中期</strong></td>
+<td>接入 3D 世界模型做物理推理预演</td>
+<td>World Labs</td>
+</tr>
+<tr>
+<td><strong>长期</strong></td>
+<td>自有数据积累后，微调 RynnBrain 基座</td>
+<td>RynnBrain Apache 2.0</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3>Isaac GR00T N1.6：NVIDIA 视觉-语言-动作基础模型 ⭐⭐⭐⭐⭐</h3>
+<blockquote>
+<p><strong>补充时间</strong>：2026-03-24 | <strong>来源</strong>：NVIDIA 官方 + Hugging Face</p>
+<p>GR00T N1.6 是 NVIDIA 官方开源的<strong>具身机器人 VLA（Vision-Language-Action）基础模型</strong>，在宇树 G1 等真实机器人上验证过，与 0-1 的 Cyber Bricks 潜在兼容。</p>
+</blockquote>
+<p><strong>开源</strong>：Hugging Face（已上线 <code>nvidia/GR00T-N1.6-3B</code>）<br />
+<strong>GitHub</strong>：https://github.com/NVIDIA/Isaac-GR00T</p>
+<h4>模型架构</h4>
+<table>
+<thead>
+<tr>
+<th>组件</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Base VLM</strong></td>
+<td>NVIDIA Cosmos-2B 变体，支持灵活分辨率，原生长宽比无 padding</td>
+</tr>
+<tr>
+<td><strong>DiT</strong></td>
+<td>32 层（比 N1.5 的 16 层大一倍）</td>
+</tr>
+<tr>
+<td><strong>动作预测</strong></td>
+<td>状态相对动作分块（state-relative action chunk），而非绝对关节角度</td>
+</tr>
+</tbody>
+</table>
+<h4>预训练数据（关键！）</h4>
+<p>GR00T N1.6 预训练数据新增包含以下真实机器人数据：<br />
+- <strong>宇树 G1 全身运动操作数据</strong>（✅ 已在真实机器人验证）<br />
+- 智元机器人 AgiBot Genie-1 双手操作数据<br />
+- Bimanual YAM 双臂遥操作数据</p>
+<h4>对 0-1 的关键价值</h4>
+<p><strong>GR00T N1.6 已在宇树 G1 上验证</strong> → Cyber Bricks 作为宇树同源架构，动作空间<strong>可能兼容</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">0</span><span class="o">-</span><span class="mf">1</span><span class="w"> </span><span class="n">建议架构</span><span class="err">（</span><span class="n">整合</span><span class="w"> </span><span class="n">GR00T</span><span class="err">）：</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">GR00T</span><span class="w"> </span><span class="n">N1</span><span class="mf">.6</span><span class="err">（</span><span class="n">任务规划</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">视觉理解</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">全身协调</span><span class="err">）</span>
+<span class="err">├─</span><span class="w"> </span><span class="n">Cyber</span><span class="w"> </span><span class="n">Bricks</span><span class="err">（</span><span class="n">执行层</span><span class="err">，</span><span class="n">电机控制</span><span class="err">）</span>
+<span class="err">└─</span><span class="w"> </span><span class="n">RynnBrain</span><span class="o">-</span><span class="mf">30</span><span class="n">B</span><span class="err">（</span><span class="n">记忆</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">对话管理</span><span class="err">）</span>
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>对比项</th>
+<th>RynnBrain</th>
+<th>GR00T N1.6</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>定位</td>
+<td>任务规划 + 导航 + 物体记忆</td>
+<td>视觉-语言-动作统一模型</td>
+</tr>
+<tr>
+<td>硬件验证</td>
+<td>Jetson Orin NX</td>
+<td><strong>宇树 G1 真实机器人</strong> ✅</td>
+</tr>
+<tr>
+<td>动作输出</td>
+<td>生成操作序列</td>
+<td>直接输出关节动作</td>
+</tr>
+<tr>
+<td>数据来源</td>
+<td>阿里达摩院</td>
+<td>NVIDIA + 多家机器人公司</td>
+</tr>
+</tbody>
+</table>
+<p><strong>硬件需求</strong>：预训练需要高端 GPU，但微调和推理可在 <strong>AGX Orin 64G</strong> 上进行。</p>
+<hr />
+<h1>第六章：本地 LLM 推理</h1>
+<h2>6.1 推理框架对比</h2>
+<table>
+<thead>
+<tr>
+<th>框架</th>
+<th>RTX 2060 (Turing)</th>
+<th>AMD AI Halo (Strix Halo)</th>
+<th>OpenClaw 支持</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>vLLM</strong></td>
+<td>✅ 支持，AWQ/GPTQ 量化</td>
+<td>✅ ROCm v0.14.0+ 一等公民</td>
+<td>✅ OpenAI-compatible API</td>
+</tr>
+<tr>
+<td><strong>TensorRT-LLM</strong></td>
+<td>✅ 支持，INT4/INT8（复杂）</td>
+<td>❌ NVIDIA 专有</td>
+<td>❌ 不支持</td>
+</tr>
+<tr>
+<td><strong>Ollama</strong></td>
+<td>✅ 推荐，Q4_K_M 最优</td>
+<td>✅ ROCm/Vulkan</td>
+<td>✅ 原生集成（推荐）</td>
+</tr>
+<tr>
+<td><strong>LM Studio</strong></td>
+<td>✅ CUDA</td>
+<td>✅ ROCm</td>
+<td>✅ <strong>AMD 官方推荐</strong></td>
+</tr>
+<tr>
+<td><strong>SGLang</strong></td>
+<td>❌ 不推荐</td>
+<td>✅ ROCm 原生，复杂 Agent 任务</td>
+<td>✅ OpenAI-compatible API</td>
+</tr>
+<tr>
+<td><strong>AMD Quark</strong></td>
+<td>❌ 不适用</td>
+<td>✅ 官方量化工具</td>
+<td>❌ 不支持</td>
+</tr>
+<tr>
+<td><strong>RyzenClaw/RadeonClaw</strong></td>
+<td>❌ 不适用</td>
+<td>✅ <strong>AMD 官方方案</strong></td>
+<td>✅ 官方适配</td>
+</tr>
+</tbody>
+</table>
+<h3>RTX 2060 量化方案</h3>
+<table>
+<thead>
+<tr>
+<th>量化级别</th>
+<th>7B-8B 模型显存占用</th>
+<th>推荐度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Q4_K_M</strong></td>
+<td><strong>~4.5 GB</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>首选，精度/速度/显存最佳平衡</td>
+</tr>
+<tr>
+<td>Q5_K_M</td>
+<td>~5.5 GB</td>
+<td>⭐⭐⭐⭐</td>
+<td>精度更高，显存接近极限</td>
+</tr>
+<tr>
+<td>Q8_0</td>
+<td>~7.5 GB</td>
+<td>❌</td>
+<td>超出 6GB，无法纯 GPU 运行</td>
+</tr>
+<tr>
+<td>FP16</td>
+<td>~16 GB</td>
+<td>❌</td>
+<td>无法运行</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐组合</strong>：Ollama + GGUF (Q4_K_M) + Qwen2.5-7B/Instruct</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 一键安装</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://ollama.com/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+<span class="c1"># 运行量化模型</span>
+ollama<span class="w"> </span>run<span class="w"> </span>qwen2.5:7b-instruct-q4_K_M
+</code></pre></div>
+
+<h3>ROCm 对 AMD AI Halo 128GB 的支持</h3>
+<table>
+<thead>
+<tr>
+<th>ROCm 版本</th>
+<th>支持状态</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ROCm 6.x</td>
+<td>❌ <strong>不支持</strong></td>
+<td>gfx1151 (RDNA 3.5) 不在 6.x 官方支持列表</td>
+</tr>
+<tr>
+<td><strong>ROCm 7.0+</strong></td>
+<td>✅ <strong>官方支持</strong></td>
+<td>正式支持 Strix Halo (gfx1151)，集成 rocWMMA</td>
+</tr>
+<tr>
+<td><strong>ROCm 7.2.2</strong></td>
+<td>✅ <strong>推荐版本</strong></td>
+<td>CES 2026 发布，Day-0 优化支持</td>
+</tr>
+<tr>
+<td>ROCm 7.9 (nightly)</td>
+<td>✅ 实验性</td>
+<td>897 tokens/s (Qwen3-30B 提示词处理)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>性能数据</strong>（llama.cpp, Qwen3-30B, 2048 tokens 上下文）：<br />
+- Vulkan 后端：~412 tokens/s<br />
+- ROCm 7.0.2 + ROCm 后端：<strong>876.9 tokens/s</strong> (+112%)</p>
+<h3>vLLM ROCm 支持（v0.14.0+）</h3>
+<table>
+<thead>
+<tr>
+<th>vLLM 版本</th>
+<th>ROCm 支持</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>v0.12.0 / v0.13.0</td>
+<td>✅ 一等公民</td>
+<td>AITER 内核、FP8 量化、DeepSeek MoE 优化</td>
+</tr>
+<tr>
+<td><strong>v0.14.0</strong></td>
+<td>✅ <strong>推荐版本</strong></td>
+<td>官方 Docker 镜像/wheel，一键安装</td>
+</tr>
+<tr>
+<td>v0.15.0+</td>
+<td>✅ 持续优化</td>
+<td>继续增强 RDNA 支持</td>
+</tr>
+</tbody>
+</table>
+<p><strong>推荐部署</strong>：使用官方 Docker <code>vllm/vllm-openai:v0.14.0-rocm</code></p>
+<h3>SGLang ROCm 支持</h3>
+<ul>
+<li>原生支持 AMD Instinct MI300X/MI355X，RDNA 系列通过标准 ROCm 栈运行</li>
+<li>支持 FP8、AWQ 量化（通过 Triton/AITER 加速）</li>
+<li>适合复杂 Agent 任务（结构化输出、多轮对话）</li>
+</ul>
+<p><strong>启动示例</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">SGLANG_USE_AITER</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>python3<span class="w"> </span>-m<span class="w"> </span>sglang.launch_server<span class="w"> </span>--model<span class="w"> </span>&lt;model&gt;<span class="w"> </span>--quantization<span class="w"> </span>awq
+</code></pre></div>
+
+<hr />
+<h2>6.2 NemoClaw — NVIDIA 官方 OpenClaw 优化</h2>
+<p><strong>NemoClaw</strong> 是 NVIDIA GTC 2026 为 OpenClaw 定制的官方软件栈（黄仁勋发布）：</p>
+<table>
+<thead>
+<tr>
+<th>特性</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenShell</strong></td>
+<td>安全沙箱，限制 AI 权限（防恶意操作）</td>
+</tr>
+<tr>
+<td><strong>隐私路由器</strong></td>
+<td>敏感数据本地处理，按需调用云端</td>
+</tr>
+<tr>
+<td><strong>安全护栏</strong></td>
+<td>企业级合规性，AI 无法同时上网+读写文件+执行代码</td>
+</tr>
+<tr>
+<td><strong>一键安装</strong></td>
+<td>简化 OpenClaw 部署</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>对贵庚的影响</strong>：企业级安全护栏 → OpenClaw 可进入生产环境</p>
+</blockquote>
+<hr />
+<h2>6.3 AMD 官方 OpenClaw 方案</h2>
+<blockquote>
+<p><strong>来源</strong>：AMD 官方技术博客（2026-03-13）<br />
+<strong>链接</strong>：<a href="https://www.amd.com/en/resources/articles/run-openclaw-locally-on-amd-ryzen-ai-max-and-radeon-gpus.html">Run OpenClaw Locally On AMD Ryzen AI Max+ Processors and Radeon GPUs</a></p>
+</blockquote>
+<h3>RyzenClaw &amp; RadeonClaw 硬件对比</h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>RyzenClaw</th>
+<th>RadeonClaw</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>硬件</strong></td>
+<td>AMD Ryzen AI Max+ 395</td>
+<td>AMD Radeon AI PRO R9700</td>
+</tr>
+<tr>
+<td><strong>形态</strong></td>
+<td>笔记本/迷你主机（FP11）</td>
+<td>桌面独立显卡</td>
+</tr>
+<tr>
+<td><strong>GPU</strong></td>
+<td>40 CU RDNA 3.5</td>
+<td>32GB GDDR6</td>
+</tr>
+<tr>
+<td><strong>统一内存/显存</strong></td>
+<td>128GB LPDDR5X（可划96GB为VRAM）</td>
+<td>32GB GDDR6</td>
+</tr>
+<tr>
+<td><strong>NPU 算力</strong></td>
+<td><strong>50 TOPS</strong>（XDNA 2）</td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>内存带宽</strong></td>
+<td>256 GB/s</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h3>Ryzen AI Max+ 395 完整规格</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>规格</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>核心/线程</td>
+<td>16核 / 32线程（Zen 5，4nm）</td>
+</tr>
+<tr>
+<td>频率</td>
+<td>基准 3.0GHz / 加速 5.1GHz</td>
+</tr>
+<tr>
+<td>缓存</td>
+<td>L2 16MB + L3 64MB = <strong>80MB</strong></td>
+</tr>
+<tr>
+<td>TDP</td>
+<td>55W（cTDP 45-120W）</td>
+</tr>
+</tbody>
+</table>
+<h3>性能数据（Qwen 3.5 35B A3B 模型）</h3>
+<table>
+<thead>
+<tr>
+<th>性能指标</th>
+<th>RyzenClaw</th>
+<th>RadeonClaw</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>生成速度</strong></td>
+<td>45 tokens/s</td>
+<td>120 tokens/s</td>
+</tr>
+<tr>
+<td><strong>最大上下文</strong></td>
+<td><strong>260K tokens</strong></td>
+<td>190K tokens</td>
+</tr>
+<tr>
+<td><strong>并发智能体</strong></td>
+<td><strong>6 个</strong></td>
+<td>2 个</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6.4 各硬件能跑的模型</h2>
+<table>
+<thead>
+<tr>
+<th>硬件</th>
+<th>能跑的模型</th>
+<th>量化方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RTX 2060 6GB</td>
+<td>Qwen2.5-7B Q4_K_M / Qwen3.5-4B Q4_K_M</td>
+<td>GGUF Q4_K_M（~4.5GB）</td>
+</tr>
+<tr>
+<td>RTX 2060 6GB</td>
+<td>Gemma 2B / YOLO 系列</td>
+<td>FP16</td>
+</tr>
+<tr>
+<td>AMD AI Halo 128GB</td>
+<td>Qwen3.5-122B（4-bit 需 ~70GB）</td>
+<td>AWQ/GPTQ</td>
+</tr>
+<tr>
+<td>AMD AI Halo 128GB</td>
+<td>LLaMA 70B / Mistral 70B</td>
+<td>FP16 直接跑</td>
+</tr>
+<tr>
+<td>DGX Spark 128GB</td>
+<td>200B 参数模型（统一内存）</td>
+<td>FP16</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>6.5 机器人技能训练：从模仿学习到自主泛化</h2>
+<blockquote>
+<p>⚠️ <strong>0-1 当前状态</strong>：文档完全没有描述"如何让机器人学会新任务"。这是具身智能的核心能力，必须补充。</p>
+</blockquote>
+<h4>行业现状</h4>
+<table>
+<thead>
+<tr>
+<th>厂商</th>
+<th>训练方式</th>
+<th>特点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tesla</td>
+<td><strong>模仿学习 + 端到端 FSD</strong></td>
+<td>看人类演示15分钟即可学会新任务，复用 FSD 神经网络</td>
+</tr>
+<tr>
+<td>Boston Dynamics</td>
+<td><strong>Orbit 平台一键部署</strong></td>
+<td>单机学会新技能后，一键同步到整个 fleet</td>
+</tr>
+<tr>
+<td>Figure AI</td>
+<td><strong>端到端神经网络</strong></td>
+<td>完全自主，不依赖预编程</td>
+</tr>
+<tr>
+<td>智元机器人</td>
+<td><strong>GO-1 通用具身基座模型</strong></td>
+<td>跨场景多任务执行，开源</td>
+</tr>
+<tr>
+<td>宇树</td>
+<td><strong>强化学习（RL）</strong></td>
+<td>强化学习驱动程序，后空翻、侧空翻等高难度动作</td>
+</tr>
+</tbody>
+</table>
+<h4>三种主要训练范式</h4>
+<p><strong>1. 模仿学习（Imitation Learning）</strong>——最适合 0-1 阶段一</p>
+<p>原理：人类通过 VR 手柄/外骨骼/视觉示范动作，机器人观察学习。</p>
+<div class="codehilite"><pre><span></span><code>人类示范（VR手柄/动作捕捉）→ 机器人观察 → 神经网络学习映射 → 机器人复制动作
+</code></pre></div>
+
+<p>优点：样本效率高（15-30分钟学会新任务），不需要从头强化学习<br />
+缺点：泛化能力有限，新场景需要额外数据</p>
+<p>工具：<br />
+- <strong>Rematrix VR 手柄</strong>（参考方案）：¥200-500，通过 VR 手柄记录6DOF姿态<br />
+- <strong>Kinect / iPhone LiDAR</strong>：捕捉人体姿态，成本极低<br />
+- <strong>遥操作演示</strong>：直接用键盘/手柄控制机器人，记录动作序列</p>
+<p><strong>2. 强化学习（Reinforcement Learning）</strong>——适合运动技能</p>
+<p>原理：在仿真环境（isaac sim / PyBullet）中训练，迁移到真实机器人。</p>
+<div class="codehilite"><pre><span></span><code>仿真环境（数字孪生）→ 强化学习训练 → sim-to-real 迁移 → 真实机器人部署
+</code></pre></div>
+
+<p>优点：可探索极端动作（空翻、跌倒恢复），安全无风险<br />
+缺点：sim-to-real 差距大，需要大量工程调参<br />
+适用场景：运动技能（行走、跑步、翻身）</p>
+<p>工具：<br />
+- <strong>NVIDIA Isaac Gym</strong>（参考）：GPU 加速 RL 训练，宇树等厂商使用<br />
+- <strong>PyBullet</strong>（开源）：入门级仿真环境<br />
+- <strong>MJX（MuJoCo）</strong>：学术界标准，刚被 DeepMind 开源</p>
+<p><strong>3. 端到端神经网络（End-to-End）</strong>——Tesla/Figure 路线</p>
+<p>原理：直接从传感器（摄像头/触觉）到动作输出，不用中间表示。</p>
+<div class="codehilite"><pre><span></span><code>视觉输入 → 端到端 NN → 动作输出（关节扭矩/位置）
+</code></pre></div>
+
+<p>优点：无需手工设计特征，泛化能力强<br />
+缺点：需要海量数据（Tesla 用 FSD 数据飞轮），算力要求极高<br />
+适用场景：通用家庭机器人（Figure 03、Tesla Optimus）</p>
+<p><strong>4. 3DGS 仿真数据生成（RoboGSim）</strong>——解决数据不足的关键方案</p>
+<p>原理：用 3D Gaussian Splatting 重建真实场景，在仿真中批量生成合成动作数据。</p>
+<div class="codehilite"><pre><span></span><code>① 手机拍摄任务场景 → 3DGS 高保真数字孪生
+② 在仿真中添加/删除/移动物体，修改光照
+③ 批量生成 1000+ 条合成动作数据
+④ 在仿真中训练机器人策略
+⑤ sim-to-real 迁移到真实 Cyber Bricks
+</code></pre></div>
+
+<p>优点：<br />
+- 数据量可无限扩展（不受真实采集成本限制）<br />
+- 可控制场景变量（光照/物体材质/遮挡程度）<br />
+- 在仿真中训练的模型，新场景下表现<strong>优于真实数据训练的模型</strong><br />
+- 解决 0-1 最大痛点：Cyber Bricks 真实数据采集成本高</p>
+<p>缺点：<br />
+- 需要 RTX 4090 最佳（RTX 2060 凑合但慢）<br />
+- sim-to-real 纹理迁移仍有少量差距</p>
+<p>关键项目：<br />
+- <strong>RoboGSim</strong>（https://robogsim.github.io/）：完整 Real2Sim2Real Pipeline，arXiv:2411.11839</p>
+<h4>0-1 分阶段训练方案</h4>
+<p><strong>阶段一（模仿学习为主）</strong></p>
+<p>目标：让机器人学会日常任务（递东西、倒水、收拾桌面）</p>
+<p>工具链：<br />
+1. 用键盘/手柄遥操作记录动作序列（成本 ¥0）<br />
+2. 用 Python 脚本将动作序列转为标准化格式<br />
+3. 用小模型（如 Qwen2.5-7B）做动作理解 + 规划<br />
+4. 通过 MQTT 下发动作指令到 Cyber Bricks</p>
+<p>关键限制：Cyber Bricks 只有基础舵机，无触觉传感，精细操作受限</p>
+<p><strong>阶段二（强化学习补充）</strong></p>
+<p>目标：学会运动技能（行走恢复、跌倒站起、上下楼梯）</p>
+<p>工具链：<br />
+1. 在 PyBullet/MJX 中建立 Cyber Bricks 仿真模型<br />
+2. 用 PPO 算法训练运动策略<br />
+3. Sim-to-real 迁移（可能需要 domain randomization）<br />
+4. 部署到真实 Cyber Bricks</p>
+<p><strong>阶段三（端到端 AI）</strong></p>
+<p>目标：通用家庭服务能力（类 Figure 03 / Optimus）</p>
+<p>工具链：<br />
+1. 收集家庭场景真实数据（视觉 + 动作配对）<br />
+2. 用多模态大模型（如 LLaVA/Qwen-VL）做视觉-语言-动作对齐<br />
+3. 部署到 AGX Thor 或 AI Halo（算力要求高）</p>
+<h4>关键问题：数据从哪来？</h4>
+<table>
+<thead>
+<tr>
+<th>数据来源</th>
+<th>方式</th>
+<th>成本</th>
+<th>质量</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>遥操作演示</strong></td>
+<td>人工控制，记录动作</td>
+<td>¥0</td>
+<td>高（人工筛选）</td>
+</tr>
+<tr>
+<td><strong>视频数据</strong></td>
+<td>YouTube/互联网大规模视频</td>
+<td>低</td>
+<td>中（需要过滤）</td>
+</tr>
+<tr>
+<td><strong>仿真生成</strong></td>
+<td>NVIDIA Isaac Gym / Genesis</td>
+<td>高（GPU 算力）</td>
+<td>中（sim-to-real 差距）</td>
+</tr>
+<tr>
+<td><strong>3DGS 仿真数据</strong></td>
+<td>RoboGSim 手机拍摄 → 数字孪生 → 批量生成</td>
+<td>中（¥0 硬件）</td>
+<td>高（真实纹理）</td>
+</tr>
+<tr>
+<td><strong>Cosmos 合成数据</strong></td>
+<td>NVIDIA Cosmos Predict 2.5 生成无限合成动作视频</td>
+<td>中（GPU 算力）</td>
+<td>中（需要 sim-to-real 校准）</td>
+</tr>
+<tr>
+<td><strong>15TB 物理 AI 数据集</strong></td>
+<td>NVIDIA 开源 32 万条机器人轨迹 + 1000+ OpenUSD 场景</td>
+<td><strong>免费</strong></td>
+<td>高（真实+仿真混合）</td>
+</tr>
+<tr>
+<td><strong>真实机器人采集</strong></td>
+<td>在家中边用边采集</td>
+<td>中</td>
+<td>高（真实场景）</td>
+</tr>
+</tbody>
+</table>
+<p>0-1 推荐：<strong>遥操作 + RoboGSim 3DGS + Cosmos（远期）+ 15TB 数据集预训练 + 阶段三积累真实数据</strong></p>
+<blockquote>
+<p>💡 <strong>15TB 物理 AI 数据集（NVIDIA，Hugging Face）</strong>：<br />
+- 32 万条机器人轨迹，15TB 总规模<br />
+- Hugging Face 下载量 480 万次<br />
+- 宇树 G1 数据在预训练中 → Cyber Bricks 可受益<br />
+- 下载：https://huggingface.co/collections/nvidia/physical-ai-67c643edbb024053dcbcd6d8</p>
+</blockquote>
+<h4>参考项目</h4>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>链接</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>RoboGSim</strong></td>
+<td>https://robogsim.github.io/</td>
+<td>Real2Sim2Real 仿真训练，3DGS + 物理引擎</td>
+</tr>
+<tr>
+<td><strong>LangSplat</strong></td>
+<td>https://github.com/minghanqin/LangSplat</td>
+<td>3DGS 语义建图，自然语言查询物体</td>
+</tr>
+<tr>
+<td><strong>MonoGS</strong></td>
+<td>https://github.com/muskie82/MonoGS</td>
+<td>3DGS 单目 SLAM，CVPR 2024</td>
+</tr>
+<tr>
+<td><strong>Genesis</strong></td>
+<td>https://github.com/applecartn/genesis</td>
+<td>物理引擎，GTX 1080 6GB 可跑</td>
+</tr>
+<tr>
+<td><strong>智元 GO-1</strong></td>
+<td>GitHub: open-agibot/go1-sim</td>
+<td>通用具身基座模型，Apache 2.0</td>
+</tr>
+<tr>
+<td><strong>ALOHA</strong></td>
+<td>斯坦福开源</td>
+<td>低成本遥操作硬件（¥2000），模仿学习</td>
+</tr>
+<tr>
+<td><strong>DexCap</strong></td>
+<td>斯坦福开源</td>
+<td>SLAM-cap 数据采集手套，精细操作数据</td>
+</tr>
+<tr>
+<td><strong>RT-1</strong></td>
+<td>Google Robotics</td>
+<td>视觉-语言-动作端到端模型</td>
+</tr>
+<tr>
+<td><strong>Octo</strong></td>
+<td>伯克利开源</td>
+<td>开源机械臂基础模型</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1>第七章：附录</h1>
+<h2>A.X 关键开源项目参考</h2>
+<blockquote>
+<p>本节汇总与 0-1 直接相关的开源硬件/软件项目，供快速查找。优先使用国产精品。</p>
+</blockquote>
+<h3>机器人硬件</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+<th>GitHub / 链接</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dummy-Robot</strong>（稚晖君）</td>
+<td>迷你机械臂，CAN 总线 + 正逆解 + 三指令模式 + 上位机全开源</td>
+<td>https://github.com/peng-zhihui/Dummy-Robot</td>
+<td>⭐⭐⭐⭐⭐ 最高优先级，CAN 总线方案可直接借鉴</td>
+</tr>
+<tr>
+<td><strong>CycloidAcuratorNano</strong>（稚晖君）</td>
+<td>自制摆线针轮减速器，3D 打印即可制作</td>
+<td>https://github.com/peng-zhihui/CycloidAcuratorNano</td>
+<td>⭐⭐⭐⭐ 低成本高精度关节，Cyber Bricks 升级路径</td>
+</tr>
+<tr>
+<td><strong>XDrive</strong>（unlir）</td>
+<td>开源步进电机闭环驱动，STM32 + CAN，支持力矩/速度/位置</td>
+<td>https://github.com/unlir/XDrive</td>
+<td>⭐⭐⭐⭐ Dummy 机械臂同款驱动，可直接使用</td>
+</tr>
+<tr>
+<td><strong>哪吒机器人</strong>（稚晖君）</td>
+<td>双足机器人，49 DOF，12 DOF 手部</td>
+<td>—</td>
+<td>⭐⭐⭐ DOF 分配参考</td>
+</tr>
+<tr>
+<td><strong>启元 Q1</strong>（智元机器人）</td>
+<td>全球首款全身力控小尺寸人形机器人</td>
+<td>—</td>
+<td>⭐⭐⭐ 小型人形参考，"探索者计划"可加入</td>
+</tr>
+<tr>
+<td><strong>Cyber Bricks</strong>（拓竹）</td>
+<td>四足 + 机械臂套件，ESP32 + 电机</td>
+<td>拓竹官方</td>
+<td>✅ 0-1 当前执行器基础</td>
+</tr>
+<tr>
+<td><strong>Cyber Tank</strong>（拓竹）</td>
+<td>坦克底盘，Cyber Bricks 升级版</td>
+<td>拓竹官方</td>
+<td>⭐⭐ 移动底盘备选</td>
+</tr>
+</tbody>
+</table>
+<h3>机器人软件</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+<th>GitHub / 链接</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>AgiBot World</strong>（智元）</td>
+<td>百万真机数据集，覆盖 5 大场景，比 Open X-Embodiment 大 10 倍</td>
+<td>https://opendatalab.com/OpenDriveLab/AgiBot-World/download</td>
+<td>⭐⭐⭐⭐⭐ 预训练数据来源</td>
+</tr>
+<tr>
+<td><strong>GO-1</strong>（智元）</td>
+<td>通用具身基座模型，跨场景多任务，Apache 2.0</td>
+<td>GitHub: open-agibot/go1-sim</td>
+<td>⭐⭐⭐⭐ 具身智能基座模型</td>
+</tr>
+<tr>
+<td><strong>AimRT</strong>（智元）</td>
+<td>高性能机器人中间件，比 ROS2 更轻量</td>
+<td>GitHub: Agibot/AimRT</td>
+<td>⭐⭐⭐⭐ AGX Thor / AI Halo 部署时替代 ROS2</td>
+</tr>
+<tr>
+<td><strong>Genesis</strong></td>
+<td>物理引擎，GTX 1080 6GB 可跑，比 Isaac Sim 快 10-80 倍</td>
+<td>https://github.com/applecartn/genesis</td>
+<td>⭐⭐⭐⭐⭐ 仿真训练</td>
+</tr>
+<tr>
+<td><strong>Octo</strong>（伯克利）</td>
+<td>开源机械臂基础模型</td>
+<td>https://github.com/octo-octo/octo-model</td>
+<td>⭐⭐⭐ 机械臂基础模型</td>
+</tr>
+<tr>
+<td><strong>ALOHA</strong>（斯坦福）</td>
+<td>低成本遥操作硬件（¥2000），模仿学习</td>
+<td>—</td>
+<td>⭐⭐⭐ 遥操作训练参考</td>
+</tr>
+<tr>
+<td><strong>RT-1</strong>（Google）</td>
+<td>视觉-语言-动作端到端模型</td>
+<td>—</td>
+<td>⭐⭐⭐ 端到端参考</td>
+</tr>
+<tr>
+<td><strong>RynnBrain</strong>（阿里）</td>
+<td>30B MoE + Plan/Nav/CoP，Apache 2.0</td>
+<td>—</td>
+<td>⭐⭐⭐ 任务规划大脑</td>
+</tr>
+</tbody>
+</table>
+<h3>固件 / 驱动</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+<th>GitHub / 链接</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Dummy 固件</strong>（稚晖君）</td>
+<td>FreeRTOS + C++11，CAN 通信，3 种指令模式，零点校准算法</td>
+<td>https://github.com/peng-zhihui/Dummy-Robot</td>
+<td>⭐⭐⭐⭐⭐ CAN 通信和运动学算法可直接移植</td>
+</tr>
+<tr>
+<td><strong>ESP32-RACING</strong></td>
+<td>ESP32 电机驱动固件，CAN 总线</td>
+<td>—</td>
+<td>⭐⭐⭐ Cyber Bricks 固件参考</td>
+</tr>
+<tr>
+<td><strong>FreeRTOS</strong></td>
+<td>实时操作系统，Dummy 机械臂同款</td>
+<td>https://github.com/FreeRTOS</td>
+<td>✅ 嵌入式实时控制标配</td>
+</tr>
+</tbody>
+</table>
+<h3>电机驱动参考</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+<th>GitHub / 链接</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ODrive</strong></td>
+<td>高性能无刷电机驱动</td>
+<td>https://github.com/odriverobotics/ODrive</td>
+<td>⭐⭐⭐ 无刷电机驱动参考</td>
+</tr>
+<tr>
+<td><strong>XDrive</strong>（Dummy 同款）</td>
+<td>闭环步进驱动，支持 CAN</td>
+<td>https://github.com/unlir/XDrive</td>
+<td>⭐⭐⭐⭐⭐ Dummy 机械臂同款，直接可用</td>
+</tr>
+</tbody>
+</table>
+<h3>其他相关</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+<th>链接</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>立创开源硬件平台</strong></td>
+<td>稚晖君 Dummy 硬件设计文件</td>
+<td>https://oshwhub.com/NURI/ji-xie-bei-ji-qi-zhi-hui-jun</td>
+<td>⭐⭐⭐⭐ 机器手 3D 模型和 PCB 文件</td>
+</tr>
+<tr>
+<td><strong>OpenClaw</strong></td>
+<td>分布式 AI 助理框架</td>
+<td>https://github.com/openclaw/openclaw</td>
+<td>⭐⭐⭐⭐⭐ 0-1 的核心软件平台</td>
+</tr>
+<tr>
+<td><strong>NemoClaw</strong></td>
+<td>NVIDIA 官方 OpenClaw 优化栈</td>
+<td>—</td>
+<td>⭐⭐⭐⭐ NVIDIA 官方背书，DGX Spark 原生支持</td>
+</tr>
+</tbody>
+</table>
+<h3>NVIDIA 机器人开源生态（2025-03 GTC 新增）</h3>
+<table>
+<thead>
+<tr>
+<th>项目</th>
+<th>描述</th>
+<th>链接</th>
+<th>对 0-1 价值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Isaac GR00T N1.6</strong></td>
+<td>VLA 视觉-语言-动作模型，宇树 G1 已验证，Cyber Bricks 潜在兼容</td>
+<td>https://huggingface.co/nvidia/GR00T-N1.6-3B</td>
+<td>⭐⭐⭐⭐⭐ 任务规划大脑</td>
+</tr>
+<tr>
+<td><strong>Newton 物理引擎</strong></td>
+<td>NVIDIA+DeepMind+Disney 联合开发，GPU 加速，与 Isaac Lab 集成</td>
+<td>https://github.com/newton-physics/newton</td>
+<td>⭐⭐⭐⭐⭐ 高精度物理仿真</td>
+</tr>
+<tr>
+<td><strong>Cosmos Predict 2.5</strong></td>
+<td>世界基础模型，生成无限合成动作数据，体积缩小至 1/3.5</td>
+<td>https://huggingface.co/blog/nvidia/cosmos-predict-and-transfer2-5</td>
+<td>⭐⭐⭐⭐ 仿真数据生成</td>
+</tr>
+<tr>
+<td><strong>物理 AI 数据集</strong></td>
+<td>15TB，32 万条机器人轨迹，1000+ OpenUSD 场景，Hugging Face 下载 480 万次</td>
+<td>https://huggingface.co/collections/nvidia/physical-ai-67c643edbb024053dcbcd6d8</td>
+<td>⭐⭐⭐⭐⭐ 预训练首选数据</td>
+</tr>
+<tr>
+<td><strong>Isaac Lab-Arena</strong></td>
+<td>仿真评估框架，GPU 加速，与 LeRobot/Hugging Face 集成</td>
+<td>https://developer.nvidia.com/blog/simplify-generalist-robot-policy-evaluation-in-simulation-with-nvidia-isaac-lab-arena/</td>
+<td>⭐⭐⭐⭐ 策略评估</td>
+</tr>
+<tr>
+<td><strong>Isaac Lab</strong></td>
+<td>Isaac Sim 官方机器人学习框架，Newton 集成</td>
+<td>https://developer.nvidia.com/isaac/lab</td>
+<td>⭐⭐⭐⭐ 仿真训练</td>
+</tr>
+<tr>
+<td><strong>LeRobot</strong>（Hugging Face）</td>
+<td>开源机器人框架，标准化数据集格式，GR00T 微调支持</td>
+<td>https://github.com/huggingface/lerobot</td>
+<td>⭐⭐⭐⭐ 训练生态</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>💡 <strong>GR00T N1.6 微调硬件需求</strong>：预训练需要高端 GPU，但微调可在 <strong>AGX Orin 64G</strong> 上进行。0-1 的 AGX Thor 目标机可满足。</p>
+</blockquote>
+<hr />
+<h2>A.1 语音交互模块</h2>
+<h3>TTS 推荐（本地离线）</h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>优势</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>VITS</strong></td>
+<td>~0.83 RTF（1.2倍实时），最轻量</td>
+<td>✅ 机器人首选</td>
+</tr>
+<tr>
+<td><strong>Cosyvoice2-0.5B</strong></td>
+<td>阿里出品，高自然度，多语言</td>
+<td>产品级，稳定优先</td>
+</tr>
+<tr>
+<td><strong>GPT-SoVITS v4</strong></td>
+<td>5秒音频克隆，1分钟微调</td>
+<td>个性化声音</td>
+</tr>
+</tbody>
+</table>
+<h3>语音唤醒方案</h3>
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>推荐度</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>OpenWakeWord</strong></td>
+<td>⭐⭐⭐⭐⭐</td>
+<td>完全开源，可自定义唤醒词</td>
+</tr>
+<tr>
+<td>Porcupine</td>
+<td>⭐⭐⭐</td>
+<td>轻量，25-50ms 延迟</td>
+</tr>
+<tr>
+<td>Picovoice</td>
+<td>⭐⭐⭐</td>
+<td>可考虑，商业友好</td>
+</tr>
+</tbody>
+</table>
+<h3>降噪链路（最佳实践）</h3>
+<div class="codehilite"><pre><span></span><code>音频输入 → WebRTC AEC（回声消除）→ RNNoise（降噪）→ VAD检测 → 唤醒词引擎
+</code></pre></div>
+
+<table>
+<thead>
+<tr>
+<th>方案</th>
+<th>延迟</th>
+<th>CPU占用</th>
+<th>核心能力</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RNNoise</td>
+<td><strong>10ms</strong></td>
+<td><strong>3.2%</strong></td>
+<td>降噪（PESQ 3.8）</td>
+</tr>
+<tr>
+<td>WebRTC AEC3</td>
+<td>20-60ms</td>
+<td>8.7%</td>
+<td>回声消除</td>
+</tr>
+<tr>
+<td>顺序</td>
+<td>先 AEC 后 RNNoise</td>
+<td>—</td>
+<td>互补非替代</td>
+</tr>
+</tbody>
+</table>
+<h3>Whisper 优化（Jetson Nano）</h3>
+<ul>
+<li>模型：<code>base.en</code>（139MB），可达 1倍实时</li>
+<li>TensorRT INT8 量化：速度提升 40%+，内存减半</li>
+<li>推荐路径：<code>whisper-edge</code> + ONNX 导出 + TensorRT</li>
+</ul>
+<hr />
+<h2>A.2 ESP32-Cam 有线通信</h2>
+<h3>ESP32-Cam 最新固件（2025年推荐）</h3>
+<p><strong>推荐方案</strong>：Arduino ESP32 v3.0.7 + CameraWebServer</p>
+<p>关键改进：<br />
+- Wi-Fi 自动重连机制完善<br />
+- 看门狗复位大幅减少<br />
+- 分区表优化支持更大 ota_0</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// 稳定初始化（2025年推荐）</span>
+<span class="n">rtc_clk_cpu_freq_set</span><span class="p">(</span><span class="n">RTC_CPU_FREQ_240M</span><span class="p">);</span><span class="w"> </span><span class="c1">// 降频减少发热</span>
+<span class="c1">// 使用 SVGA 而非 UXGA，减少内存压力</span>
+</code></pre></div>
+
+<h3>UART 通信（Jetson Nano ↔ ESP32-Cam）</h3>
+<ul>
+<li>电平：双方都是 3.3V TTL，<strong>直接互连不需要电平转换</strong></li>
+<li>端口：Jetson Nano 用 <code>/dev/ttyTHS1</code>（40-pin GPIO 8/10）</li>
+<li>波特率：115200（最佳性价比）</li>
+</ul>
+<h3>I2C 总线注意事项</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>解决方案</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>地址检测不到</td>
+<td>降低频率至 10-50kHz</td>
+</tr>
+<tr>
+<td>地址冲突</td>
+<td>使用 TCA9548A I2C 多路复用器</td>
+</tr>
+<tr>
+<td>数据错误</td>
+<td>绞线+屏蔽或换用 UART</td>
+</tr>
+</tbody>
+</table>
+<h3>GPIO 应急停止（推荐电路）</h3>
+<p><strong>双继电器急停电路（物理+软件双保险）</strong>：<br />
+- 急停必须物理断开电机电源回路<br />
+- 双继电器冗余防止单点故障<br />
+- 常闭触点设计：断电 = 停机（故障安全）<br />
+- ESP32 端用硬件中断（μs 级响应）</p>
+<hr />
+<h2>A.3 拓竹软件生态</h2>
+<table>
+<thead>
+<tr>
+<th>软件</th>
+<th>平台</th>
+<th>核心作用</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bambu Studio</strong></td>
+<td>Win/Mac/Linux</td>
+<td>切片引擎，多色/多材料打印</td>
+</tr>
+<tr>
+<td><strong>Bambu Suite</strong></td>
+<td>桌面端</td>
+<td>激光雕刻/切割/画笔/刀切，多工艺串联</td>
+</tr>
+<tr>
+<td><strong>Bambu Handy</strong></td>
+<td>iOS/Android</td>
+<td>移动端监控，AMS 耗材管理</td>
+</tr>
+<tr>
+<td><strong>拓竹农场管家</strong></td>
+<td>Windows</td>
+<td>多机本地化集群管理，数据不上云</td>
+</tr>
+<tr>
+<td><strong>Bambu Connect</strong></td>
+<td>Win/Mac</td>
+<td>第三方切片→打印机授权</td>
+</tr>
+<tr>
+<td><strong>CyberBrick</strong></td>
+<td>桌面+移动</td>
+<td>机器人调试，MicroPython 可视化</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1>第八章：安全与维护</h1>
+<h2>8.1 声纹识别</h2>
+<h3>目标</h3>
+<p>通过声纹识别确认用户身份，只有授权用户的声音才能触发关键操作。</p>
+<h3>实现方式</h3>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_voice_embedding</span><span class="p">(</span><span class="n">audio_path</span><span class="p">):</span>
+    <span class="n">y</span><span class="p">,</span> <span class="n">sr</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="mi">16000</span><span class="p">)</span>
+    <span class="n">mfccs</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">feature</span><span class="o">.</span><span class="n">mfcc</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span> <span class="n">n_mfcc</span><span class="o">=</span><span class="mi">40</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">mfccs</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">verify_speaker</span><span class="p">(</span><span class="n">test_audio</span><span class="p">,</span> <span class="n">enrolled_audio</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.85</span><span class="p">):</span>
+    <span class="n">test_emb</span> <span class="o">=</span> <span class="n">extract_voice_embedding</span><span class="p">(</span><span class="n">test_audio</span><span class="p">)</span>
+    <span class="n">enrolled_emb</span> <span class="o">=</span> <span class="n">extract_voice_embedding</span><span class="p">(</span><span class="n">enrolled_audio</span><span class="p">)</span>
+    <span class="n">similarity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">test_emb</span><span class="p">,</span> <span class="n">enrolled_emb</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">test_emb</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">enrolled_emb</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">similarity</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+</code></pre></div>
+
+<h3>声纹注册流程</h3>
+<table>
+<thead>
+<tr>
+<th>步骤</th>
+<th>操作</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>用户说3-5个不同句子</td>
+<td>收集多样本</td>
+</tr>
+<tr>
+<td>2</td>
+<td>提取每句的声纹向量</td>
+<td>10-15秒音频</td>
+</tr>
+<tr>
+<td>3</td>
+<td>平均后存储</td>
+<td>存入本地数据库</td>
+</tr>
+<tr>
+<td>4</td>
+<td>验证时比对</td>
+<td>余弦相似度 &gt;0.85 通过</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8.2 异常检测</h2>
+<h3>目标</h3>
+<p>实时监控 Jetson Nano / ESP32-Cam 运行状态，发现异常立即告警。</p>
+<h3>监控指标</h3>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>正常范围</th>
+<th>异常阈值</th>
+<th>处理</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CPU 温度</td>
+<td>&lt; 80C</td>
+<td>&gt; 85C</td>
+<td>降频/停机</td>
+</tr>
+<tr>
+<td>CPU 使用率</td>
+<td>&lt; 90%</td>
+<td>&gt; 95% 持续5分钟</td>
+<td>重启进程</td>
+</tr>
+<tr>
+<td>内存使用</td>
+<td>&lt; 80%</td>
+<td>&gt; 90%</td>
+<td>清理缓存</td>
+</tr>
+<tr>
+<td>网络延迟</td>
+<td>&lt; 100ms</td>
+<td>&gt; 500ms</td>
+<td>切换网络</td>
+</tr>
+<tr>
+<td>ESP32-Cam FPS</td>
+<td>&gt; 15 FPS</td>
+<td>&lt; 10 FPS</td>
+<td>重启固件</td>
+</tr>
+</tbody>
+</table>
+<h3>监控脚本</h3>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">psutil</span><span class="o">,</span><span class="w"> </span><span class="nn">subprocess</span><span class="o">,</span><span class="w"> </span><span class="nn">time</span><span class="o">,</span><span class="w"> </span><span class="nn">requests</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cpu_temp</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;/sys/class/thermal/thermal_zone0/temp&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span> <span class="o">/</span> <span class="mi">1000</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">check_system</span><span class="p">():</span>
+    <span class="n">warnings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">get_cpu_temp</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">temp</span> <span class="o">&gt;</span> <span class="mi">85</span><span class="p">:</span> <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CPU温度过高: </span><span class="si">{</span><span class="n">temp</span><span class="si">}</span><span class="s2">C&quot;</span><span class="p">)</span>
+    <span class="n">mem</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">virtual_memory</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">mem</span><span class="o">.</span><span class="n">percent</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">:</span> <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;内存不足: </span><span class="si">{</span><span class="n">mem</span><span class="o">.</span><span class="n">percent</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="n">cpu</span> <span class="o">=</span> <span class="n">psutil</span><span class="o">.</span><span class="n">cpu_percent</span><span class="p">(</span><span class="n">interval</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cpu</span> <span class="o">&gt;</span> <span class="mi">95</span><span class="p">:</span> <span class="n">warnings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;CPU过载: </span><span class="si">{</span><span class="n">cpu</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">warnings</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">send_alert</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="s2">&quot;http://192.168.1.x:3000/api/alert&quot;</span><span class="p">,</span>
+            <span class="n">json</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;system_warning&quot;</span><span class="p">,</span> <span class="s2">&quot;message&quot;</span><span class="p">:</span> <span class="n">message</span><span class="p">},</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+
+<span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="n">warnings</span> <span class="o">=</span> <span class="n">check_system</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">warnings</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WARNING: </span><span class="si">{</span><span class="n">w</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">send_alert</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
+    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">60</span><span class="p">)</span>
+</code></pre></div>
+
+<hr />
+<h2>8.3 数据自毁</h2>
+<h3>目标</h3>
+<p>在物理被盗或被强制夺取时，自动销毁贵庚的核心数据。</p>
+<h3>触发条件</h3>
+<table>
+<thead>
+<tr>
+<th>触发方式</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>物理按钮</td>
+<td>机器人被夺走时按下</td>
+</tr>
+<tr>
+<td>遥控指令</td>
+<td>发送销毁信号</td>
+</tr>
+<tr>
+<td>异常检测</td>
+<td>检测到被拆解（加速度计异常）</td>
+</tr>
+<tr>
+<td>超时未认证</td>
+<td>超过设定时间未声纹验证</td>
+</tr>
+</tbody>
+</table>
+<h3>销毁流程</h3>
+<div class="codehilite"><pre><span></span><code><span class="ch">#!/usr/bin/env python3</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">destroy_all_data</span><span class="p">():</span>
+    <span class="kn">import</span><span class="w"> </span><span class="nn">os</span><span class="o">,</span><span class="w"> </span><span class="nn">subprocess</span>
+    <span class="n">DATA_DIRS</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="s2">&quot;/home/nvidia/guigeng/memory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;/home/nvidia/guigeng/videos&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;/home/nvidia/guigeng/audio&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;WARNING: 触发数据自毁程序&quot;</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;pkill&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;robot-voice&quot;</span><span class="p">])</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;pkill&quot;</span><span class="p">,</span> <span class="s2">&quot;-f&quot;</span><span class="p">,</span> <span class="s2">&quot;robot-video&quot;</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">dir_path</span> <span class="ow">in</span> <span class="n">DATA_DIRS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
+            <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">([</span><span class="s2">&quot;shred&quot;</span><span class="p">,</span> <span class="s2">&quot;-n&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;-ruv&quot;</span><span class="p">,</span> <span class="n">dir_path</span><span class="p">])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;OK: 数据自毁完成&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+<blockquote>
+<p>WARNING: 数据自毁后不可恢复。重要数据应定期备份到 NAS。<br />
+⚠️ <strong>SSD/NVMe 限制</strong>：<code>shred -n 3</code> 对 SSD/NVMe 效果有限（ Wear Leveling 会分散数据），推荐方案：全程使用 <strong>full disk encryption（LUKS）</strong>，失控时直接销毁密钥而非数据本身。</p>
+</blockquote>
+<hr />
+<h2>8.4 日常维护</h2>
+<h3>每日检查</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 检查节点在线状态</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+
+<span class="c1"># 2. 检查 Jetson Nano 温度</span>
+ssh<span class="w"> </span>nvidia@192.168.1.x<span class="w"> </span><span class="s2">&quot;cat /sys/class/thermal/thermal_zone0/temp&quot;</span>
+
+<span class="c1"># 3. 检查 ESP32-Cam 视频流</span>
+ffplay<span class="w"> </span>rtsp://192.168.1.y/stream
+
+<span class="c1"># 4. 检查 Cyber Bricks 电池</span>
+curl<span class="w"> </span>http://192.168.1.z/battery
+</code></pre></div>
+
+<h3>每周维护</h3>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>操作</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>日志清理</td>
+<td>journalctl --vacuum-time=7d</td>
+<td>删除7天前日志</td>
+</tr>
+<tr>
+<td>缓存清理</td>
+<td>rm -rf ~/.cache/*</td>
+<td>清理临时文件</td>
+</tr>
+<tr>
+<td>固件检查</td>
+<td>检查 ESP32-Cam 新固件</td>
+<td>提升稳定性</td>
+</tr>
+<tr>
+<td>备份</td>
+<td>rsync 到 NAS</td>
+<td>贵庚数据双备份</td>
+</tr>
+</tbody>
+</table>
+<h3>每月维护</h3>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>操作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>系统更新</td>
+<td>sudo apt update &amp;&amp; sudo apt upgrade -y</td>
+</tr>
+<tr>
+<td>磁盘检查</td>
+<td>df -h 确认存储充足</td>
+</tr>
+<tr>
+<td>证书更新</td>
+<td>检查 OpenClaw Gateway 证书</td>
+</tr>
+<tr>
+<td>硬件检查</td>
+<td>检查所有接线、供电、散热</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>8.5 常见问题排查</h2>
+<h3>Jetson Nano 问题</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>开机黑屏</td>
+<td>电源不足</td>
+<td>使用 5V/4A 电源适配器</td>
+</tr>
+<tr>
+<td>WiFi 断开</td>
+<td>驱动问题</td>
+<td>sudo apt install linux-firmware</td>
+</tr>
+<tr>
+<td>USB 不识别</td>
+<td>供电不足</td>
+<td>接外接供电 USB Hub</td>
+</tr>
+<tr>
+<td>温度过高</td>
+<td>散热不足</td>
+<td>清理风扇、安装散热片</td>
+</tr>
+</tbody>
+</table>
+<h3>ESP32-Cam 问题</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>无法连接</td>
+<td>IP 变更</td>
+<td>重新扫描或设置静态 IP</td>
+</tr>
+<tr>
+<td>视频花屏</td>
+<td>供电不足</td>
+<td>使用 5V/2A 电源</td>
+</tr>
+<tr>
+<td>RTSP 延迟大</td>
+<td>WiFi 信号弱</td>
+<td>靠近路由器或用有线</td>
+</tr>
+<tr>
+<td>固件崩溃</td>
+<td>内存泄漏</td>
+<td>重刷固件</td>
+</tr>
+</tbody>
+</table>
+<h3>Cyber Bricks 问题</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>电机不转</td>
+<td>电池没电</td>
+<td>充电或换电池</td>
+</tr>
+<tr>
+<td>舵机抖转</td>
+<td>信号干扰</td>
+<td>检查接线、加屏蔽</td>
+</tr>
+<tr>
+<td>WiFi 断开</td>
+<td>信号弱</td>
+<td>调整天线位置</td>
+</tr>
+</tbody>
+</table>
+<h3>OpenClaw 问题</h3>
+<table>
+<thead>
+<tr>
+<th>问题</th>
+<th>原因</th>
+<th>解决</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Node 不在线</td>
+<td>网络不通</td>
+<td>ping 192.168.1.x 检查</td>
+</tr>
+<tr>
+<td>exec 超时</td>
+<td>节点负载高</td>
+<td>等几秒重试</td>
+</tr>
+<tr>
+<td>配对失败</td>
+<td>Token 错误</td>
+<td>重新获取 Token</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h1>第九章：风险与合规</h1>
+<h2>9.1 技术风险</h2>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>影响</th>
+<th>缓解措施</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Jetson Nano 烧毁</td>
+<td>机器人瘫痪</td>
+<td>稳压电源、温度监控</td>
+</tr>
+<tr>
+<td>数据丢失</td>
+<td>贵庚记忆损坏</td>
+<td>每日 rsync 备份到 NAS</td>
+</tr>
+<tr>
+<td>WiFi 被劫持</td>
+<td>控制权丧失</td>
+<td>启用 WPA3、关闭 WPS</td>
+</tr>
+<tr>
+<td>ESP32-Cam 被破解</td>
+<td>隐私泄露</td>
+<td>修改默认密码、禁用Telnet</td>
+</tr>
+<tr>
+<td>Cyber Bricks 失控</td>
+<td>物理损坏</td>
+<td>有线 GPIO 应急停止</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>9.2 法规风险</h2>
+<table>
+<thead>
+<tr>
+<th>风险</th>
+<th>说明</th>
+<th>合规建议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>隐私合规</td>
+<td>24小时录像涉及隐私</td>
+<td>明确告知、录像本地存储、不上云</td>
+</tr>
+<tr>
+<td>室内录音</td>
+<td>未授权录音可能违法</td>
+<td>仅在授权用户声纹验证后启用</td>
+</tr>
+<tr>
+<td>机器人伤人</td>
+<td>Cyber Bricks 动作幅度大</td>
+<td>设置动作限位、接触停止</td>
+</tr>
+<tr>
+<td>无线电频谱</td>
+<td>ESP32-Cam WiFi 需合规</td>
+<td>使用已认证设备</td>
+</tr>
+<tr>
+<td>机器人人行道通行</td>
+<td>人行道属于公共道路，目前无明确准入标准</td>
+<td>重点关注：低速（&lt;5km/h）、有紧急停止装置、不影响行人；建议提前了解当地交管部门要求</td>
+</tr>
+<tr>
+<td>国标参考</td>
+<td>暂无强制准入标准</td>
+<td>参考 GB/T 40013-2021《家用和类似用途服务机器人》（推荐性国标，非强制）</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ 本文档不构成法律建议。具体合规要求请咨询专业律师。</p>
+</blockquote>
+<hr />
+<h1>第十章：调研更新记录</h1>
+<blockquote>
+<p>按时间线记录历次调研的重要发现，供快速查阅。</p>
+</blockquote>
+<h2>调研记录：2026-03-22</h2>
+<blockquote>
+<p>调研工具：zhiku(DeepSeek) + web_fetch(AMD 官方博客) + vLLM/SGLang 官方文档</p>
+</blockquote>
+<h3>新增内容</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>关键发现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>ROCm 7.x</strong></td>
+<td>gfx1151 (RDNA 3.5) 必须用 ROCm 7.0+，6.x 不支持</td>
+</tr>
+<tr>
+<td><strong>vLLM ROCm</strong></td>
+<td>v0.14.0 官方 Docker，一键安装，CI 通过率 93%</td>
+</tr>
+<tr>
+<td><strong>SGLang ROCm</strong></td>
+<td>AMD MI300X/MI355X 原生，FP8/AWQ 支持，适合复杂 Agent</td>
+</tr>
+<tr>
+<td><strong>RTX 2060 量化</strong></td>
+<td>Q4_K_M 是最佳平衡点，TensorRT-LLM 不推荐</td>
+</tr>
+<tr>
+<td><strong>NemoClaw</strong></td>
+<td>NVIDIA GTC 2026 发布，企业级安全沙箱</td>
+</tr>
+<tr>
+<td><strong>A18 Pro</strong></td>
+<td>NPU 量化分数 44,672，比 A17 Pro 高 33%</td>
+</tr>
+<tr>
+<td><strong>FastVLM</strong></td>
+<td>比 LLaVA-OneVision 快 85 倍 TTFT，0.5B 可本地运行</td>
+</tr>
+<tr>
+<td><strong>Genesis</strong></td>
+<td>最新版本 v0.4.0（2026-02-17），GTX 1080 6GB 即可跑</td>
+</tr>
+<tr>
+<td><strong>Genesis vs Newton</strong></td>
+<td>Newton（Disney+DeepMind+NVIDIA三巨头，Linux Foundation）需关注但为时尚早</td>
+</tr>
+<tr>
+<td><strong>Jetson Thor Nano</strong></td>
+<td>仍然不存在，继续每月一次监控</td>
+</tr>
+<tr>
+<td><strong>星闪设备</strong></td>
+<td>BearPi-Pico H3863（海思Hi3863V100，17个GPIO，40针扩展排针座）/ RK3506星闪板（59元核心板）；和ESP32对比：时延&lt;20μs vs &gt;10ms，并发4096 vs 7-20；但缺少"40针GPIO+星闪原生"标准品，需RISC-V开发板+星闪Dongle组合方案</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>调研记录：2026-03-21 深夜</h2>
+<blockquote>
+<p>调研工具：deepseek_deepseek_chat + 4x sessions_spawn 子Agent + web_fetch</p>
+</blockquote>
+<h3>新增内容</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>关键发现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Genesis 物理引擎</strong></td>
+<td>GTX 1080 6GB 起，RTX 2060 可用，比 Isaac Sim 快 10-80 倍</td>
+</tr>
+<tr>
+<td><strong>YOLO Nano 2GB</strong></td>
+<td>DeepStream-Yolo 最新支持 YOLOv13/YOLOv12/YOLO11/26，支持 FP16</td>
+</tr>
+<tr>
+<td><strong>MediaPipe on Nano</strong></td>
+<td>GPU 加速不成熟，不推荐，替代方案 TensorRT</td>
+</tr>
+<tr>
+<td><strong>iPhone 感知</strong></td>
+<td>Apple Vision / Core ML + YOLO / MediaPipe / FastVLM 完整方案</td>
+</tr>
+<tr>
+<td><strong>语音升级</strong></td>
+<td>VITS / CosyVoice2 / GPT-SoVITS v4 推荐，WebRTC AEC + RNNoise 降噪链路</td>
+</tr>
+<tr>
+<td><strong>OpenClaw 限制</strong></td>
+<td>无专用机器人节点类型，GPIO/串口/电机控制无内置支持</td>
+</tr>
+<tr>
+<td><strong>ESP32-Cam 固件</strong></td>
+<td>Arduino ESP32 v3.0.7 + CameraWebServer 推荐</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>调研记录：2026-03-24 傍晚</h2>
+<blockquote>
+<p>调研原因：B站稚晖君"钢铁侠迷你机械臂"视频（BV12341117rG）<br />
+调研工具：minimax search + tavily search + web_fetch(GitHub)</p>
+</blockquote>
+<h3>稚晖君（彭志辉）开源项目对 0-1 的价值</h3>
+<p><strong>稚晖君简介</strong>：前华为"天才少年"，现智元机器人（AgiBot）联合创始人兼 CTO。B站"野生钢铁侠"，GitHub: peng-zhihui，60 个公开仓库。</p>
+<h4>① Dummy-Robot 机械臂 ⭐⭐⭐⭐⭐（最高优先级）</h4>
+<p><strong>视频</strong>：BV12341117rG（【自制】我造了一台钢铁侠的迷你机械臂！【硬核】）<br />
+<strong>GitHub</strong>：https://github.com/peng-zhihui/Dummy-Robot</p>
+<p><strong>已开源内容</strong>：3D 模型（SolidWorks）+ 底座控制器（STM32F4）+ 步进电机驱动（CAN 总线）+ Peak 示教器 + 上位机 DummyStudio + 完整固件（FreeRTOS + C++11）</p>
+<p><strong>对 0-1 的高价值点</strong>：</p>
+<p><strong>CAN 总线通信（可直接替代 Cyber Bricks PWM）</strong>：<br />
+- 4 根线（电源 × 2 + CAN H/L）串联所有关节<br />
+- 每个电机有独立 ID，支持广播同步信号<br />
+- 支持力矩/速度/位置/轨迹 4 种模式<br />
+- 0-1 现状：Cyber Bricks PWM 走线杂乱 → 升级目标</p>
+<p><strong>三种指令模式（运动控制层参考）</strong>：</p>
+<table>
+<thead>
+<tr>
+<th>模式</th>
+<th>特点</th>
+<th>适合场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SEQ（顺序指令）</td>
+<td>FIFO 队列，依次执行</td>
+<td>视觉抓取、码垛</td>
+</tr>
+<tr>
+<td>INT（实时指令）</td>
+<td>新指令覆盖旧指令，立即响应</td>
+<td>动作同步、遥操作</td>
+</tr>
+<tr>
+<td>TRJ（轨迹跟踪）</td>
+<td>200Hz 插值，精确轨迹</td>
+<td>3D 打印、绘画、雕刻</td>
+</tr>
+</tbody>
+</table>
+<p><strong>零点校准方法（无硬件成本，直接可实现）</strong>：<br />
+上电后电流环低力矩定向运动 → 碰机械限位确认粗零点 → 单圈绝对值编码器精调<br />
+结果：精度等同于编码器精度，不受加工误差影响，无需限位开关</p>
+<p><strong>逆运动学算法（已开源）</strong>：<br />
+- 标准 DH 参数建模，逆解 8 组 → 选最小转角组合<br />
+- 梯形加减速曲线进行速度位置规划</p>
+<p><strong>"青春版"低成本复刻方案（对 0-1 最实用）</strong>：<br />
+- 3D 打印结构（替代 CNC，¥2000 以内）<br />
+- 自制摆线针轮减速器（替代谐波减速器，¥600 → ¥100）<br />
+- 配套保姆级视频教程（待发布）<br />
+- <strong>GitHub</strong>：https://github.com/peng-zhihui/CycloidAcuratorNano</p>
+<h4>② AgiBot World 百万真机数据集 ⭐⭐⭐⭐⭐</h4>
+<p><strong>发布</strong>：2024-12-30，智元机器人开源<br />
+<strong>规模</strong>：百万级真机数据，覆盖 5 大核心场景，比 Open X-Embodiment 大 10 倍<br />
+<strong>平台</strong>：8 摄像头 + 6 自由度灵巧手<br />
+<strong>下载</strong>：https://opendatalab.com/OpenDriveLab/AgiBot-World/download</p>
+<p><strong>对 0-1 的价值</strong>：<br />
+- 0-1 训练数据来源之一（预训练 + 微调）<br />
+- 8 摄像头 + 6DOF 灵巧手 = 完整人形硬件规格参考</p>
+<h4>③ AimRT 机器人中间件 ⭐⭐⭐⭐</h4>
+<p><strong>发布</strong>：2024 年底，智元机器人开源<br />
+<strong>定位</strong>：高性能机器人通信中间件，类似 ROS2，但性能更优、资源占用更小<br />
+<strong>对 0-1 的价值</strong>：在 AGX Thor / AI Halo 上部署时，可替代 ROS2</p>
+<h4>④ XUAN-Bike "大脑 + 小脑"架构 ⭐⭐⭐</h4>
+<p><strong>架构</strong>：<br />
+- 大脑：昇腾 310 AI 芯片（昇腾），负责思考/规划<br />
+- 小脑：STM32 单片机，负责运动控制/实时响应</p>
+<p><strong>对 0-1 的价值</strong>：与 0-1 的架构高度吻合——Gateway = 大脑，Nano = 小脑，这是稚晖君 2021 年就验证过的方案</p>
+<h4>⑤ 哪吒双足机器人 ⭐⭐⭐</h4>
+<p><strong>发布时间</strong>：2024 年 4 月<br />
+<strong>关键参数</strong>：超过 <strong>49 个自由度</strong>，手部 12 DOF<br />
+<strong>对 0-1 的参考</strong>：49 DOF 的关节分配方式；手部 12 DOF 是入门级灵巧手参考</p>
+<h4>⑥ 启元 Q1 ⭐⭐⭐</h4>
+<p><strong>发布时间</strong>：2026 年 1 月 1 日<br />
+<strong>定位</strong>：全球首款全身力控小尺寸人形机器人，小到能塞进书包<br />
+<strong>"探索者计划"</strong>：个人开发者共创，0-1 可考虑加入</p>
+<h4>关键链接汇总</h4>
+<table>
+<thead>
+<tr>
+<th>资源</th>
+<th>链接</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dummy-Robot GitHub</td>
+<td>https://github.com/peng-zhihui/Dummy-Robot</td>
+</tr>
+<tr>
+<td>B站"钢铁侠机械臂"</td>
+<td>https://www.bilibili.com/video/BV12341117rG</td>
+</tr>
+<tr>
+<td>CycloidAcuratorNano</td>
+<td>https://github.com/peng-zhihui/CycloidAcuratorNano</td>
+</tr>
+<tr>
+<td>稚晖君 GitHub 主页</td>
+<td>https://github.com/peng-zhihui</td>
+</tr>
+<tr>
+<td>AgiBot World 数据集</td>
+<td>https://opendatalab.com/OpenDriveLab/AgiBot-World/download</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>调研记录：2026-03-24 下午（续）</h2>
+<h3>RynnBrain + 空间智能新增</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>关键发现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>RynnBrain</td>
+<td>阿里巴巴达摩院 2026-02-10 开源，30B MoE + 3个专用模型（Plan/Nav/CoP），时空记忆+物理推理，Apache 2.0 可商用</td>
+</tr>
+<tr>
+<td>RynnBrain 落地</td>
+<td>Jetson Orin NX 可跑（INT4），16项 SOTA，5000+ 家庭已部署</td>
+</tr>
+<tr>
+<td>李飞飞 World Labs</td>
+<td>3D 世界生成 + PointWorld + Physical AI，$230M 融资</td>
+</tr>
+<tr>
+<td>对 0-1 价值</td>
+<td>RynnBrain-30B MoE 可作任务大脑 + 导航 + 操作规划；空间智能做新环境零样本建图</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>调研工具：5平台 webauth + 2轮 subagent 搜索 + minimax + tavily + web_fetch</p>
+</blockquote>
+<h3>Medusa Halo 新增</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>关键发现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Medusa Halo 定位</td>
+<td>AMD 下一代 APU 代号，对应 Ryzen AI MAX 500 系列，不是整机产品名</td>
+</tr>
+<tr>
+<td>核心规格</td>
+<td>Zen 6（24+2核）+ RDNA 5（48 CU）+ LPDDR6（460-691 GB/s）+ 256GB+</td>
+</tr>
+<tr>
+<td>上市时间</td>
+<td>2027年下半年~2028年</td>
+</tr>
+<tr>
+<td>移动终端价值</td>
+<td>外出完整跑 0-1（130B量化 + 8-12 Agent + 256K上下文），与家中 AI Halo 遥相呼应</td>
+</tr>
+<tr>
+<td>当前过渡</td>
+<td>Asus ProArt PX13 / ROG Flow Z13（Strix Halo，128GB）</td>
+</tr>
+</tbody>
+</table>
+<h3>核查结果汇总</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>结果</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NemoClaw GTC 2026</td>
+<td>✅ 官方确认（2026-03-16）</td>
+</tr>
+<tr>
+<td>Jetson Thor Nano</td>
+<td>✅ 确认不存在</td>
+</tr>
+<tr>
+<td>RTX 5050 9GB/96-bit/336GB/s</td>
+<td>✅ 准确，补充位宽</td>
+</tr>
+<tr>
+<td>RTX 5050 ~2099元</td>
+<td>✅ 准确</td>
+</tr>
+<tr>
+<td>DGX Spark 价格</td>
+<td>⚠️ 修正：$4,699/34,999元（2月涨价，京东自营）</td>
+</tr>
+<tr>
+<td>DGX Station 70万</td>
+<td>⚠️ 规格准确，价格无据可查，保留</td>
+</tr>
+<tr>
+<td>BearPi H3863 GPIO</td>
+<td>⚠️ 修正：17个GPIO（非40针GPIO）</td>
+</tr>
+<tr>
+<td>Genesis vs Isaac Gym</td>
+<td>⚠️ 修正：应为 Isaac Gym 非 Isaac Sim</td>
+</tr>
+<tr>
+<td>Genesis v0.4.0 日期</td>
+<td>⚠️ 修正：最新2026-02-17</td>
+</tr>
+<tr>
+<td>AMD AI Halo 128GB</td>
+<td>⚠️ AMD未公布价格，整机参考价17,999元</td>
+</tr>
+<tr>
+<td>Jetson Nano I2C 引脚</td>
+<td>⚠️ 修正：Pin 3(SDA)/5(SCL)</td>
+</tr>
+<tr>
+<td>vLLM ROCm Docker</td>
+<td>⚠️ 修正：镜像名 <code>vllm/vllm-openai:v0.14.0-rocm</code></td>
+</tr>
+<tr>
+<td>micro-ROS agent</td>
+<td>⚠️ 修正：传输类型 <code>udp4</code> 非 <code>wifi</code></td>
+</tr>
+<tr>
+<td>GB/T 40013-2021 国标</td>
+<td>💡 新发现：补充家用服务机器人推荐性国标</td>
+</tr>
+</tbody>
+</table>
+<h3>新增内容</h3>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>关键发现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>NemoClaw</td>
+<td>NVIDIA GTC 2026-03-16 官方发布，含 OpenShell + Nemotron</td>
+</tr>
+<tr>
+<td>DGX Spark 涨价</td>
+<td>2026年2月底从 $3,999 涨至 $4,699</td>
+</tr>
+<tr>
+<td>BearPi GPIO</td>
+<td>17个GPIO（40针排针座含电源/地）</td>
+</tr>
+<tr>
+<td>Genesis v0.4.0</td>
+<td>2026-02-17 最新版本</td>
+</tr>
+<tr>
+<td>GB/T 40013-2021</td>
+<td>家用服务机器人推荐性国标（非强制）</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>调研记录：2026-03-24 晚间</h2>
+<blockquote>
+<p>调研原因：用户转发 NVIDIA 2025-03 GTC 机器人开源核心技术汇总<br />
+调研工具：minimax search + tavily search + web_fetch(NVIDIA/Hugging Face/GitHub)</p>
+</blockquote>
+<h3>NVIDIA 机器人开源核心技术对 0-1 的价值</h3>
+<p><strong>来源</strong>：NVIDIA GTC 2025-03 发布，官方博客 + Hugging Face + GitHub 验证</p>
+<table>
+<thead>
+<tr>
+<th>主题</th>
+<th>关键发现</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Newton ≠ Genesis</strong></td>
+<td>Newton 是 NVIDIA+DeepMind+Disney 的另一套引擎（非 Genesis 替代），已集成 Isaac Lab</td>
+</tr>
+<tr>
+<td><strong>GR00T N1.6</strong></td>
+<td>VLA 模型，宇树 G1 已在预训练中验证；Cyber Bricks 潜在兼容</td>
+</tr>
+<tr>
+<td><strong>物理 AI 数据集</strong></td>
+<td>15TB，32 万条机器人轨迹，开源 Hugging Face，下载量 480 万次</td>
+</tr>
+<tr>
+<td><strong>Cosmos Predict 2.5</strong></td>
+<td>世界模型，体积缩小至 1/3.5，与 RoboGSim 协同可生成无限合成数据</td>
+</tr>
+<tr>
+<td><strong>Isaac Lab-Arena</strong></td>
+<td>仿真评估框架，与 LeRobot/Hugging Face 集成</td>
+</tr>
+</tbody>
+</table>
+<h3>对 0-1 的整合建议</h3>
+<table>
+<thead>
+<tr>
+<th>阶段</th>
+<th>技术</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>阶段一</td>
+<td>Genesis</td>
+<td>低成本入门仿真</td>
+</tr>
+<tr>
+<td>阶段二</td>
+<td>Newton + GR00T N1.6</td>
+<td>高精度仿真 + VLA 任务规划</td>
+</tr>
+<tr>
+<td>数据</td>
+<td>15TB 数据集 + AgiBot World</td>
+<td>双源预训练数据</td>
+</tr>
+<tr>
+<td>合成数据</td>
+<td>Cosmos + RoboGSim</td>
+<td>真实纹理 + 无限变体</td>
+</tr>
+</tbody>
+</table>
+<h3>重要纠正</h3>
+<ul>
+<li>Genesis（Apple）≠ Newton（NVIDIA）：两个完全不同的独立开源项目，需区分</li>
+</ul>
+<hr />
+<p><strong>0-1</strong> —— 不是一台机器，是你人生的另一面。</p>
+<p><em>文档版本：v3.4（具身大脑版 + 全开源生态整合，优化版）| 字数：115200字符/11490词| 更新：2026-03-24</em></p>
+</div>
+</body>
+</html>
