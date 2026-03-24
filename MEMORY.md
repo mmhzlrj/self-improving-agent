@@ -436,3 +436,24 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 ### 经验文档
 - `.learnings/LEARNINGS.md` — 详细修复过程
 - `.learnings/ERRORS.md` — 错误记录
+
+---
+
+## MiniMax Coding Plan 使用规范（2026-03-24）
+
+### 计费方式
+- **按调用次数**（600次/5小时），不按 tokens
+- subagent 用 MiniMax 可以减少我（GLM）的 tokens 花销
+
+### 高峰时段限流（重要）
+- **高峰时段**：15:00-20:00（UTC+8），根据集群负载动态调整
+- **Starter 套餐**：高峰期仅支持 **1 个 Agent 并发调用**
+- 同时派多个 MiniMax subagent → 限流排队/超时/卡死
+- **Max 套餐**：2 个 Agent 并发；**Ultra**：4 个 Agent 并发
+
+### Subagent 策略
+- 高峰时段：最多 1 个 MiniMax subagent 并发
+- 非高峰时段：可适当并行
+- 额度 100% 时等重置再派
+- timeout 设 5 分钟，别卡到自然超时浪费调用次数
+- 刚才教训：3 个 subagent 同时跑文件编辑 → 全部超时卡死，浪费约 226k tokens 的调用
