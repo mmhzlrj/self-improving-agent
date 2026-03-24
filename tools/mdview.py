@@ -370,16 +370,19 @@ class UTF8HTTPRequestHandler(SimpleHTTPRequestHandler):
         pass  # 静默日志
 
 
-def start_server(directory):
-    """启动 HTTP 服务器"""
+def start_server(directory, ready_event=None):
+    """启动 HTTP 服务器。通过 ready_event 通知主线程启动状态。"""
     os.chdir(directory)
     try:
         server = HTTPServer(('127.0.0.1', PORT), UTF8HTTPRequestHandler)
         server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if ready_event:
+            ready_event.set()  # 通知主线程：服务器启动成功
         server.serve_forever()
-    except OSError:
-        print(f"\u274c \u670d\u52a1\u5668\u542f\u52a8\u5931\u8d25\uff0c\u7aef\u53e3 {PORT} \u88ab\u5360\u7528")
-        sys.exit(1)
+    except OSError as e:
+        print(f"\u274c \u670d\u52a1\u5668\u542f\u52a8\u5931\u8d25\uff1a{e}")
+        if ready_event:
+            ready_event.set()  # 通知主线程：尝试完毕（失败）
 
 
 def generate_normal_html(filepath):
@@ -561,11 +564,20 @@ def main():
         return  # 直接退出，不启动新服务器
 
     # 没有已有进程，启动新服务器
-    server_thread = threading.Thread(target=start_server, args=(out_dir,), daemon=True)
+    ready = threading.Event()
+    server_thread = threading.Thread(target=start_server, args=(out_dir, ready))
+    server_thread.daemon = False
     server_thread.start()
-    time.sleep(0.5)
+    ready.wait(timeout=5)
 
-    # Open browser
+    # 验证服务器是否真正在监听
+    try:
+        import urllib.request
+        conn = urllib.request.urlopen(f'http://127.0.0.1:{PORT}/index.html', timeout=2)
+        conn.close()
+    except Exception:
+        print(f"\u274c \u670d\u52a1\u5668\u672a\u6210\u529f\u542f\u52a8")
+        os._exit(1)  # 强制退出整个进程，防止僵尸
     webbrowser.open(f'http://127.0.0.1:{PORT}/index.html')
 
     filename = os.path.basename(filepath)
