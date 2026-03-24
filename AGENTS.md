@@ -338,6 +338,27 @@ browser(action=open, profile="chrome", url="https://www.doubao.com/chat/")
 - ❌ "其他步骤同上"
 - ❌ "类似操作"
 
+## 🔍 Deep Research 工具检查规范（重要）
+
+**每次执行 deep-research 调研前，必须先确认所有工具状态：**
+
+1. **web_search / web_fetch** — 检查网络是否正常
+2. **5平台 webauth 工具**（doubao/kimi/glm/qwen/deepseek）— 检查是否可用
+3. **tavily_search** — 检查是否配置
+4. **sessions_spawn** — 检查 subagent 是否可用
+
+**发现工具不可用时的处理流程：**
+- 如果是本次调研的核心工具 → 先问用户"XXX 工具不可用，要先去修复还是直接用能用的工具继续？"
+- 如果不是核心工具 → 用其他可用工具替代，继续执行
+
+**记录到文件：**
+每次 deep-research 开始前，在 HEARTBEAT.md 或 memory/YYYY-MM-DD.md 里记录工具检查结果。
+
+**这条规则由 2026-03-24 的教训总结而来：**
+subagent 做 NemoClaw 调研时未充分使用工具，导致漏掉了官方文档。
+
+---
+
 ## Make It Yours
 
 This is a starting point. Add your own conventions, style, and rules as you figure out what works.
