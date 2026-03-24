@@ -15,6 +15,8 @@ import datetime
 import argparse
 import re
 import markdown
+import socket
+import subprocess
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 import threading
 import webbrowser
@@ -371,8 +373,13 @@ class UTF8HTTPRequestHandler(SimpleHTTPRequestHandler):
 def start_server(directory):
     """启动 HTTP 服务器"""
     os.chdir(directory)
-    server = HTTPServer(('127.0.0.1', PORT), UTF8HTTPRequestHandler)
-    server.serve_forever()
+    try:
+        server = HTTPServer(('127.0.0.1', PORT), UTF8HTTPRequestHandler)
+        server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.serve_forever()
+    except OSError:
+        print(f"\u274c \u670d\u52a1\u5668\u542f\u52a8\u5931\u8d25\uff0c\u7aef\u53e3 {PORT} \u88ab\u5360\u7528")
+        sys.exit(1)
 
 
 def generate_normal_html(filepath):
@@ -530,7 +537,30 @@ def main():
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    # Start HTTP server in background thread
+    # 检查是否已有 mdview 进程在运行
+    existing_pids = []
+    try:
+        result = subprocess.run(['ps', 'aux'], capture_output=True, text=True, timeout=5)
+        for line in result.stdout.splitlines():
+            if 'mdview.py' in line and 'grep' not in line:
+                parts = line.split()
+                if len(parts) >= 2:
+                    pid = int(parts[1])
+                    if pid != os.getpid():
+                        existing_pids.append(pid)
+    except Exception:
+        pass
+
+    if existing_pids:
+        # 已有 mdview 进程在运行，直接打开 URL（HTML 文件已更新）
+        webbrowser.open(f'http://127.0.0.1:{PORT}/index.html')
+        filename = os.path.basename(filepath)
+        print(f"\u2705 \u5df2\u6253\u5f00\uff08{mode_label}\uff09: {filename}")
+        print(f"   URL: http://127.0.0.1:{PORT}/index.html")
+        print(f"   \u2139\ufe0f  \u590d\u7528\u5df2\u6709\u670d\u52a1\u5668\uff0c\u672a\u542f\u52a8\u65b0\u8fdb\u7a0b")
+        return  # 直接退出，不启动新服务器
+
+    # 没有已有进程，启动新服务器
     server_thread = threading.Thread(target=start_server, args=(out_dir,), daemon=True)
     server_thread.start()
     time.sleep(0.5)
