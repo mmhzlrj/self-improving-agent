@@ -28,14 +28,15 @@
 | | 2.5 梯度采购路线图 |
 | | 2.6 星闪通信模块：BearPi-Pico H3863 详细方案 |
 | | 2.7 Medusa Halo（移动 AI 工作站）|
+| | 2.8 手部与执行器设计 |
 | 第三章 | 系统架构 |
 | 第四章 | 实施阶段（Phase 0 → Phase 6）|
 | 第五章 | AI 与感知 |
 | | 5.1 Jetson Nano 视觉感知 |
-| | 5.1.1 手部自由度与执行器设计 |
 | | 5.2 iPhone 感知前端 |
 | | 5.3 物理仿真引擎（Genesis + Newton）|
 | | 5.4 具身大脑基模（RynnBrain + GR00T + 空间智能）|
+| | 5.6 机器人技能训练 |
 | 第六章 | 本地 LLM 推理 |
 | 第七章 | 附录（工具链/代码/配置）|
 | 第八章 | 安全与维护 |
@@ -2113,138 +2114,7 @@ GR00T N1.6 预训练数据新增包含以下真实机器人数据：
 
 ---
 
-
-# 第六章：本地 LLM 推理
-
-## 6.1 推理框架对比
-
-| 框架 | RTX 2060 (Turing) | AMD AI Halo (Strix Halo) | OpenClaw 支持 |
-|------|-------------------|--------------------------|---------------|
-| **vLLM** | ✅ 支持，AWQ/GPTQ 量化 | ✅ ROCm v0.14.0+ 一等公民 | ✅ OpenAI-compatible API |
-| **TensorRT-LLM** | ✅ 支持，INT4/INT8（复杂）| ❌ NVIDIA 专有 | ❌ 不支持 |
-| **Ollama** | ✅ 推荐，Q4_K_M 最优 | ✅ ROCm/Vulkan | ✅ 原生集成（推荐）|
-| **LM Studio** | ✅ CUDA | ✅ ROCm | ✅ **AMD 官方推荐** |
-| **SGLang** | ❌ 不推荐 | ✅ ROCm 原生，复杂 Agent 任务 | ✅ OpenAI-compatible API |
-| **AMD Quark** | ❌ 不适用 | ✅ 官方量化工具 | ❌ 不支持 |
-| **RyzenClaw/RadeonClaw** | ❌ 不适用 | ✅ **AMD 官方方案** | ✅ 官方适配 |
-
-### RTX 2060 量化方案
-
-| 量化级别 | 7B-8B 模型显存占用 | 推荐度 | 说明 |
-|---------|-----------------|-------|------|
-| **Q4_K_M** | **~4.5 GB** | ⭐⭐⭐⭐⭐ | 首选，精度/速度/显存最佳平衡 |
-| Q5_K_M | ~5.5 GB | ⭐⭐⭐⭐ | 精度更高，显存接近极限 |
-| Q8_0 | ~7.5 GB | ❌ | 超出 6GB，无法纯 GPU 运行 |
-| FP16 | ~16 GB | ❌ | 无法运行 |
-
-**推荐组合**：Ollama + GGUF (Q4_K_M) + Qwen2.5-7B/Instruct
-
-```bash
-# 一键安装
-curl -fsSL https://ollama.com/install.sh | sh
-# 运行量化模型
-ollama run qwen2.5:7b-instruct-q4_K_M
-```
-
-### ROCm 对 AMD AI Halo 128GB 的支持
-
-| ROCm 版本 | 支持状态 | 说明 |
-|-----------|---------|------|
-| ROCm 6.x | ❌ **不支持** | gfx1151 (RDNA 3.5) 不在 6.x 官方支持列表 |
-| **ROCm 7.0+** | ✅ **官方支持** | 正式支持 Strix Halo (gfx1151)，集成 rocWMMA |
-| **ROCm 7.2.2** | ✅ **推荐版本** | CES 2026 发布，Day-0 优化支持 |
-| ROCm 7.9 (nightly) | ✅ 实验性 | 897 tokens/s (Qwen3-30B 提示词处理) |
-
-**性能数据**（llama.cpp, Qwen3-30B, 2048 tokens 上下文）：
-- Vulkan 后端：~412 tokens/s
-- ROCm 7.0.2 + ROCm 后端：**876.9 tokens/s** (+112%)
-
-### vLLM ROCm 支持（v0.14.0+）
-
-| vLLM 版本 | ROCm 支持 | 说明 |
-|-----------|----------|------|
-| v0.12.0 / v0.13.0 | ✅ 一等公民 | AITER 内核、FP8 量化、DeepSeek MoE 优化 |
-| **v0.14.0** | ✅ **推荐版本** | 官方 Docker 镜像/wheel，一键安装 |
-| v0.15.0+ | ✅ 持续优化 | 继续增强 RDNA 支持 |
-
-**推荐部署**：使用官方 Docker `vllm/vllm-openai:v0.14.0-rocm`
-
-### SGLang ROCm 支持
-
-- 原生支持 AMD Instinct MI300X/MI355X，RDNA 系列通过标准 ROCm 栈运行
-- 支持 FP8、AWQ 量化（通过 Triton/AITER 加速）
-- 适合复杂 Agent 任务（结构化输出、多轮对话）
-
-**启动示例**：
-```bash
-SGLANG_USE_AITER=1 python3 -m sglang.launch_server --model <model> --quantization awq
-```
-
----
-
-## 6.2 NemoClaw — NVIDIA 官方 OpenClaw 优化
-
-**NemoClaw** 是 NVIDIA GTC 2026 为 OpenClaw 定制的官方软件栈（黄仁勋发布）：
-
-| 特性 | 说明 |
-|------|------|
-| **OpenShell** | 安全沙箱，限制 AI 权限（防恶意操作）|
-| **隐私路由器** | 敏感数据本地处理，按需调用云端 |
-| **安全护栏** | 企业级合规性，AI 无法同时上网+读写文件+执行代码 |
-| **一键安装** | 简化 OpenClaw 部署 |
-
-> **对贵庚的影响**：企业级安全护栏 → OpenClaw 可进入生产环境
-
----
-
-## 6.3 AMD 官方 OpenClaw 方案
-
-> **来源**：AMD 官方技术博客（2026-03-13）
-> **链接**：[Run OpenClaw Locally On AMD Ryzen AI Max+ Processors and Radeon GPUs](https://www.amd.com/en/resources/articles/run-openclaw-locally-on-amd-ryzen-ai-max-and-radeon-gpus.html)
-
-### RyzenClaw & RadeonClaw 硬件对比
-
-| 方案 | RyzenClaw | RadeonClaw |
-|------|-----------|------------|
-| **硬件** | AMD Ryzen AI Max+ 395 | AMD Radeon AI PRO R9700 |
-| **形态** | 笔记本/迷你主机（FP11） | 桌面独立显卡 |
-| **GPU** | 40 CU RDNA 3.5 | 32GB GDDR6 |
-| **统一内存/显存** | 128GB LPDDR5X（可划96GB为VRAM）| 32GB GDDR6 |
-| **NPU 算力** | **50 TOPS**（XDNA 2）| — |
-| **内存带宽** | 256 GB/s | — |
-
-### Ryzen AI Max+ 395 完整规格
-
-| 项目 | 规格 |
-|------|------|
-| 核心/线程 | 16核 / 32线程（Zen 5，4nm）|
-| 频率 | 基准 3.0GHz / 加速 5.1GHz |
-| 缓存 | L2 16MB + L3 64MB = **80MB** |
-| TDP | 55W（cTDP 45-120W）|
-
-### 性能数据（Qwen 3.5 35B A3B 模型）
-
-| 性能指标 | RyzenClaw | RadeonClaw |
-|-----------|-----------|------------|
-| **生成速度** | 45 tokens/s | 120 tokens/s |
-| **最大上下文** | **260K tokens** | 190K tokens |
-| **并发智能体** | **6 个** | 2 个 |
-
----
-
-## 6.4 各硬件能跑的模型
-
-| 硬件 | 能跑的模型 | 量化方案 |
-|------|---------|---------|
-| RTX 2060 6GB | Qwen2.5-7B Q4_K_M / Qwen3.5-4B Q4_K_M | GGUF Q4_K_M（~4.5GB）|
-| RTX 2060 6GB | Gemma 2B / YOLO 系列 | FP16 |
-| AMD AI Halo 128GB | Qwen3.5-122B（4-bit 需 ~70GB）| AWQ/GPTQ |
-| AMD AI Halo 128GB | LLaMA 70B / Mistral 70B | FP16 直接跑 |
-| DGX Spark 128GB | 200B 参数模型（统一内存）| FP16 |
-
----
-
-## 6.5 机器人技能训练：从模仿学习到自主泛化
+## 5.6 机器人技能训练：从模仿学习到自主泛化
 
 > ⚠️ **0-1 当前状态**：文档完全没有描述"如何让机器人学会新任务"。这是具身智能的核心能力，必须补充。
 
@@ -2399,9 +2269,140 @@ SGLANG_USE_AITER=1 python3 -m sglang.launch_server --model <model> --quantizatio
 
 ---
 
+
+# 第六章：本地 LLM 推理
+
+## 6.1 推理框架对比
+
+| 框架 | RTX 2060 (Turing) | AMD AI Halo (Strix Halo) | OpenClaw 支持 |
+|------|-------------------|--------------------------|---------------|
+| **vLLM** | ✅ 支持，AWQ/GPTQ 量化 | ✅ ROCm v0.14.0+ 一等公民 | ✅ OpenAI-compatible API |
+| **TensorRT-LLM** | ✅ 支持，INT4/INT8（复杂）| ❌ NVIDIA 专有 | ❌ 不支持 |
+| **Ollama** | ✅ 推荐，Q4_K_M 最优 | ✅ ROCm/Vulkan | ✅ 原生集成（推荐）|
+| **LM Studio** | ✅ CUDA | ✅ ROCm | ✅ **AMD 官方推荐** |
+| **SGLang** | ❌ 不推荐 | ✅ ROCm 原生，复杂 Agent 任务 | ✅ OpenAI-compatible API |
+| **AMD Quark** | ❌ 不适用 | ✅ 官方量化工具 | ❌ 不支持 |
+| **RyzenClaw/RadeonClaw** | ❌ 不适用 | ✅ **AMD 官方方案** | ✅ 官方适配 |
+
+### RTX 2060 量化方案
+
+| 量化级别 | 7B-8B 模型显存占用 | 推荐度 | 说明 |
+|---------|-----------------|-------|------|
+| **Q4_K_M** | **~4.5 GB** | ⭐⭐⭐⭐⭐ | 首选，精度/速度/显存最佳平衡 |
+| Q5_K_M | ~5.5 GB | ⭐⭐⭐⭐ | 精度更高，显存接近极限 |
+| Q8_0 | ~7.5 GB | ❌ | 超出 6GB，无法纯 GPU 运行 |
+| FP16 | ~16 GB | ❌ | 无法运行 |
+
+**推荐组合**：Ollama + GGUF (Q4_K_M) + Qwen2.5-7B/Instruct
+
+```bash
+# 一键安装
+curl -fsSL https://ollama.com/install.sh | sh
+# 运行量化模型
+ollama run qwen2.5:7b-instruct-q4_K_M
+```
+
+### ROCm 对 AMD AI Halo 128GB 的支持
+
+| ROCm 版本 | 支持状态 | 说明 |
+|-----------|---------|------|
+| ROCm 6.x | ❌ **不支持** | gfx1151 (RDNA 3.5) 不在 6.x 官方支持列表 |
+| **ROCm 7.0+** | ✅ **官方支持** | 正式支持 Strix Halo (gfx1151)，集成 rocWMMA |
+| **ROCm 7.2.2** | ✅ **推荐版本** | CES 2026 发布，Day-0 优化支持 |
+| ROCm 7.9 (nightly) | ✅ 实验性 | 897 tokens/s (Qwen3-30B 提示词处理) |
+
+**性能数据**（llama.cpp, Qwen3-30B, 2048 tokens 上下文）：
+- Vulkan 后端：~412 tokens/s
+- ROCm 7.0.2 + ROCm 后端：**876.9 tokens/s** (+112%)
+
+### vLLM ROCm 支持（v0.14.0+）
+
+| vLLM 版本 | ROCm 支持 | 说明 |
+|-----------|----------|------|
+| v0.12.0 / v0.13.0 | ✅ 一等公民 | AITER 内核、FP8 量化、DeepSeek MoE 优化 |
+| **v0.14.0** | ✅ **推荐版本** | 官方 Docker 镜像/wheel，一键安装 |
+| v0.15.0+ | ✅ 持续优化 | 继续增强 RDNA 支持 |
+
+**推荐部署**：使用官方 Docker `vllm/vllm-openai:v0.14.0-rocm`
+
+### SGLang ROCm 支持
+
+- 原生支持 AMD Instinct MI300X/MI355X，RDNA 系列通过标准 ROCm 栈运行
+- 支持 FP8、AWQ 量化（通过 Triton/AITER 加速）
+- 适合复杂 Agent 任务（结构化输出、多轮对话）
+
+**启动示例**：
+```bash
+SGLANG_USE_AITER=1 python3 -m sglang.launch_server --model <model> --quantization awq
+```
+
+---
+
+## 6.2 NemoClaw — NVIDIA 官方 OpenClaw 优化
+
+**NemoClaw** 是 NVIDIA GTC 2026 为 OpenClaw 定制的官方软件栈（黄仁勋发布）：
+
+| 特性 | 说明 |
+|------|------|
+| **OpenShell** | 安全沙箱，限制 AI 权限（防恶意操作）|
+| **隐私路由器** | 敏感数据本地处理，按需调用云端 |
+| **安全护栏** | 企业级合规性，AI 无法同时上网+读写文件+执行代码 |
+| **一键安装** | 简化 OpenClaw 部署 |
+
+> **对贵庚的影响**：企业级安全护栏 → OpenClaw 可进入生产环境
+
+---
+
+## 6.3 AMD 官方 OpenClaw 方案
+
+> **来源**：AMD 官方技术博客（2026-03-13）
+> **链接**：[Run OpenClaw Locally On AMD Ryzen AI Max+ Processors and Radeon GPUs](https://www.amd.com/en/resources/articles/run-openclaw-locally-on-amd-ryzen-ai-max-and-radeon-gpus.html)
+
+### RyzenClaw & RadeonClaw 硬件对比
+
+| 方案 | RyzenClaw | RadeonClaw |
+|------|-----------|------------|
+| **硬件** | AMD Ryzen AI Max+ 395 | AMD Radeon AI PRO R9700 |
+| **形态** | 笔记本/迷你主机（FP11） | 桌面独立显卡 |
+| **GPU** | 40 CU RDNA 3.5 | 32GB GDDR6 |
+| **统一内存/显存** | 128GB LPDDR5X（可划96GB为VRAM）| 32GB GDDR6 |
+| **NPU 算力** | **50 TOPS**（XDNA 2）| — |
+| **内存带宽** | 256 GB/s | — |
+
+### Ryzen AI Max+ 395 完整规格
+
+| 项目 | 规格 |
+|------|------|
+| 核心/线程 | 16核 / 32线程（Zen 5，4nm）|
+| 频率 | 基准 3.0GHz / 加速 5.1GHz |
+| 缓存 | L2 16MB + L3 64MB = **80MB** |
+| TDP | 55W（cTDP 45-120W）|
+
+### 性能数据（Qwen 3.5 35B A3B 模型）
+
+| 性能指标 | RyzenClaw | RadeonClaw |
+|-----------|-----------|------------|
+| **生成速度** | 45 tokens/s | 120 tokens/s |
+| **最大上下文** | **260K tokens** | 190K tokens |
+| **并发智能体** | **6 个** | 2 个 |
+
+---
+
+## 6.4 各硬件能跑的模型
+
+| 硬件 | 能跑的模型 | 量化方案 |
+|------|---------|---------|
+| RTX 2060 6GB | Qwen2.5-7B Q4_K_M / Qwen3.5-4B Q4_K_M | GGUF Q4_K_M（~4.5GB）|
+| RTX 2060 6GB | Gemma 2B / YOLO 系列 | FP16 |
+| AMD AI Halo 128GB | Qwen3.5-122B（4-bit 需 ~70GB）| AWQ/GPTQ |
+| AMD AI Halo 128GB | LLaMA 70B / Mistral 70B | FP16 直接跑 |
+| DGX Spark 128GB | 200B 参数模型（统一内存）| FP16 |
+
+---
+
 # 第七章：附录
 
-## A.X 关键开源项目参考
+## A.4 关键开源项目参考
 
 > 本节汇总与 0-1 直接相关的开源硬件/软件项目，供快速查找。优先使用国产精品。
 
@@ -3000,27 +3001,89 @@ curl http://192.168.1.z/battery
 
 | 主题 | 关键发现 |
 |------|---------|
-| **Newton ≠ Genesis** | Newton 是 NVIDIA+DeepMind+Disney 的另一套引擎（非 Genesis 替代），已集成 Isaac Lab |
-| **GR00T N1.6** | VLA 模型，宇树 G1 已在预训练中验证；Cyber Bricks 潜在兼容 |
+| **Newton ≠ Genesis** | Newton（NVIDIA+DeepMind+Disney）已集成 Isaac Lab，与 Genesis（Apple）是两套独立引擎 → 详见 §5.3 |
+| **GR00T N1.6** | VLA 模型，宇树 G1 已验证；Cyber Bricks 潜在兼容 → 详见 §5.4 |
 | **物理 AI 数据集** | 15TB，32 万条机器人轨迹，开源 Hugging Face，下载量 480 万次 |
-| **Cosmos Predict 2.5** | 世界模型，体积缩小至 1/3.5，与 RoboGSim 协同可生成无限合成数据 |
+| **Cosmos Predict 2.5** | 世界模型，体积缩小至 1/3.5，与 RoboGSim 协同可生成无限合成数据 → 详见 §5.4 |
 | **Isaac Lab-Arena** | 仿真评估框架，与 LeRobot/Hugging Face 集成 |
 
 ### 对 0-1 的整合建议
 
 | 阶段 | 技术 | 说明 |
 |------|------|------|
-| 阶段一 | Genesis | 低成本入门仿真 |
-| 阶段二 | Newton + GR00T N1.6 | 高精度仿真 + VLA 任务规划 |
-| 数据 | 15TB 数据集 + AgiBot World | 双源预训练数据 |
-| 合成数据 | Cosmos + RoboGSim | 真实纹理 + 无限变体 |
+| 数据 | 15TB 物理AI数据集 + AgiBot World | 双源预训练数据 → 详见 §5.4 |
+| 合成数据 | Cosmos Predict 2.5 + RoboGSim | 真实纹理 + 无限变体 → 详见 §5.4 |
 
 ### 重要纠正
 
-- Genesis（Apple）≠ Newton（NVIDIA）：两个完全不同的独立开源项目，需区分
+- Genesis（Apple）≠ Newton（NVIDIA）：两套独立开源引擎，详见 §5.3
 
 ---
 
 **0-1** —— 不是一台机器，是你人生的另一面。
 
-*文档版本：v3.4（具身大脑版 + 全开源生态整合，优化版）| 字数：115200字符/11490词| 更新：2026-03-24*
+---
+
+# 术语表（Glossary）
+
+| 缩写 | 全称 | 说明 |
+|------|------|------|
+| DOF | Degrees of Freedom | 自由度，独立运动的轴数量 |
+| MoE | Mixture of Experts | 混合专家模型，只激活部分参数 |
+| VLA | Vision-Language-Action | 视觉-语言-动作统一模型 |
+| SLE | SparkLink Extension | 星闪低时延通信协议 |
+| ROS | Robot Operating System | 机器人操作系统框架 |
+| ROS 2 | Robot Operating System 2 | ROS 第二代，改进实时性和安全性 |
+| MQTT | Message Queuing Telemetry Transport | 轻量级消息协议，适合 IoT |
+| RL | Reinforcement Learning | 强化学习，通过奖励信号训练策略 |
+| sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
+| LLM | Large Language Model | 大语言模型 |
+| TTS | Text-to-Speech | 文字转语音 |
+| ASR | Automatic Speech Recognition | 自动语音识别 |
+| VAD | Voice Activity Detection | 语音活动检测，判断是否有人说话 |
+| AEC | Acoustic Echo Cancellation | 回声消除，防止扬声器声音干扰麦克风 |
+| NPU | Neural Processing Unit | 神经网络处理单元，AI 专用加速芯片 |
+| GPU | Graphics Processing Unit | 图形处理器 |
+| RTX | Ray Tracing Texel eXtreme | NVIDIA 光追显卡系列 |
+| GR00T | Generalist Robot 00 Technology | NVIDIA 具身机器人基础模型 |
+| 3DGS | 3D Gaussian Splatting | 3D 高斯泼溅，实时 3D 场景重建技术 |
+| NeRF | Neural Radiance Fields | 神经辐射场，用神经网络表示 3D 场景 |
+| SLAM | Simultaneous Localization and Mapping | 同步定位与建图 |
+| LiDAR | Light Detection and Ranging | 激光雷达，精确测距和 3D 建模 |
+| IMU | Inertial Measurement Unit | 惯性测量单元（加速度+陀螺仪）|
+| YOLO | You Only Look Once | 单次前向传播的目标检测算法 |
+| TensorRT | NVIDIA TensorRT | NVIDIA 推理优化引擎 |
+| GGUF | GPT-Generated Unified Format | 量化模型文件格式（Ollama 使用）|
+| ROCm | Radeon Open Compute | AMD GPU 开源计算平台 |
+| UART | Universal Asynchronous Receiver/Transmitter | 通用异步收发器（串口通信）|
+| I2C | Inter-Integrated Circuit | 内部集成电路总线（两线制）|
+| GPIO | General-Purpose Input/Output | 通用输入输出引脚 |
+| CAN | Controller Area Network | 控制器局域网总线（工业/汽车）|
+| PWM | Pulse Width Modulation | 脉冲宽度调制（控制电机/LED 亮度）|
+| FP16 | Half-Precision Floating Point | 半精度浮点数（16位）|
+| INT8 / INT4 | 8-bit / 4-bit Integer | 低精度整数量化 |
+| Q4_K_M | GGUF 量化级别 | 4-bit K-Quant Medium，精度/大小最佳平衡 |
+| AWQ | Activation-aware Weight Quantization | 激活感知权重量化方法 |
+| GPTQ | GPT Quantization | GPT 后训练量化方法 |
+| KV cache | Key-Value Cache | 注意力机制的键值缓存 |
+| mAP | Mean Average Precision | 平均精度均值（目标检测指标）|
+| FPS | Frames Per Second | 每秒帧数 |
+| RTF | Real-Time Factor | 实时因子（语音处理速度比）|
+| SRAM | Static Random-Access Memory | 静态随机存取存储器（极快但贵）|
+| Flash | NAND Flash Memory | 闪存（嵌入式设备常用存储）|
+| OTA | Over-The-Air | 空中升级（远程固件更新）|
+| OOM | Out of Memory | 内存不足 |
+| RISC-V | Reduced Instruction Set Computer V | 开源指令集架构 |
+| BLE | Bluetooth Low Energy | 低功耗蓝牙 |
+| SLE | SparkLink Extension | 星闪短距无线通信（华为主导）|
+| LUKS | Linux Unified Key Setup | Linux 全盘加密方案 |
+| SSD / NVMe | Solid State Drive / NVM Express | 固态硬盘 / 高速存储接口 |
+| NAS | Network Attached Storage | 网络附加存储 |
+| micro-ROS | Micro Robot Operating System | 微控制器版 ROS 2 |
+| ReAct | Reasoning + Acting | 推理+行动的 Agent 框架 |
+| PPO | Proximal Policy Optimization | 近端策略优化（强化学习算法）|
+| DH 参数 | Denavit-Hartenberg Parameters | 机器人关节连杆参数化方法 |
+| CAN 总线 | Controller Area Network Bus | 多设备串联通信总线 |
+| MJX | MuJoCo XLA | DeepMind 开源的 GPU 加速 MuJoCo |
+
+*文档版本：v3.5（结构优化：章节重编号 + 去重 + 交叉引用 + 术语表）| 字数：约115000字符| 更新：2026-03-24*
