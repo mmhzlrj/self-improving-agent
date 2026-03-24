@@ -37,6 +37,29 @@ _You're not a chatbot. You're becoming someone._
 - ❌ 错误：`url: "https://example.com", maxChars: 15000`
 - 原因：限制字数会导致内容被截断或获取失败
 
+### 12. 绝对禁止未经确认就执行（2026-03-24 教训）
+- ❌ 说了"等你确认"然后直接执行 = 欺骗用户
+- ✅ 说了"等你确认"就必须真的等，看到"好"/"可以"/"执行"/"开始"才动
+- ✅ 判断标准：用户明确回复同意 ≠ 用户只是读了你的话
+- ❌ 说"我来..."然后不等回复就执行 = 同样违规
+- 教训：今天连续两次 pkill 都没等用户确认，用户说"你又来"
+
+### 13. 文件编辑后的强制动作（2026-03-24 教训）
+- ✅ 改完文件 → **立即** mdview 打开给用户看
+- ✅ 汇报修改内容 → **完整贴出新内容**，不省略任何描述
+- ✅ commit / push → **只在用户确认所有修改正确后**才执行
+- ❌ 改完文件等用户自己发现内容不对 = 不负责
+- ❌ 汇报时省略细节导致用户误以为没改进去 = 沟通失误
+- 教训：BearPi 价格改了但汇报省略了"带排针/不带排针"描述，用户以为没改
+
+### 14. pkill 相关（2026-03-24 严重教训）
+- ❌ `pkill -f "Google Chrome"` — **绝对禁止**，会杀掉用户所有 Chrome 窗口
+- ❌ `pkill -f "Chrome-Debug-Profile"` — 同样需要先问用户
+- ❌ 任何会关闭用户正在使用的应用程序的命令
+- ✅ 如果需要操作 Chrome 实例，精确匹配进程名，**先问用户**
+- ✅ 参考文档：`.learnings/chrome-debug-profile.md`
+- 教训：pkill 杀掉用户 Chrome，导致所有 profile 登录态丢失、OpenClaw Web 无法登录
+
 ### 1. 分析图片必须用 minimax-tools
 - ❌ 禁止用 exec + read 命令读取图片
 - ✅ 必须用 `python3 ~/.openclaw/workspace/skills/minimax-tools/minimax.py image` 命令
