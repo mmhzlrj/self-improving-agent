@@ -3,7 +3,7 @@
 **项目名**: 0-1（零杠一）
 **记忆系统**: 贵庚
 **文档版本**: v3.29（Phase 3/4/5 顺序调整）
-**字数**: 约 207000（字符）| 约 20700（词）
+**字数**: 约 213000（字符）| 约 21300（词）
 **创建日期**: 2026-03-07
 **更新日期**: 2026-03-25
 
@@ -3059,72 +3059,40 @@ gst-launch-1.0 rtspsrc location=rtsp://192.168.x.99:8554/stream \
 
 ---
 
-## Phase 5：面部表情系统
+## Phase 3：iPhone 感知前端
 
-### 设计理念
-0-1 的面部由「0」「-」「1」三个核心元素构成，动态显示 AI 状态。
+> 涉及技术：iPhone 感知方案（§5.2）、Apple Vision / Core ML / MediaPipe / FastVLM、OpenClaw Node 协议（§3.2）
 
-### 系统组成
+### 目标
+iPhone 16 Pro 通过 OpenClaw Node 协议接入 Gateway，成为分布式感知网络的一员，在家里移动时提供高质量视觉和传感器数据。
 
-| 组件 | 形态 | 功能 |
-|------|------|------|
-| 「0」| LED 点阵/IPS 屏幕 | 显示主眼睛，动态表情 |
-| 「-」| 线性灯光带（NeoPixel）| 情绪光效（颜色+呼吸节奏）|
-| 「1」| 小型显示屏/LED | 辅助信息、状态指示 |
+### iPhone 接入架构
 
-### 拓竹加工方案
-
-| 零件 | 拓竹工具 | 说明 |
-|------|---------|------|
-| 外壳 | H2C + PLA | 面部支架，3D 打印 |
-| 眼睛屏幕支架 | H2C + PETG | 耐温 |
-| 透光板 | Bambu Suite 激光切割 | 亚克力 3mm |
-| 安装螺丝 | 拓竹配套 M2/M3 螺丝 | 标准件 |
-
-### 控制代码
-
-```python
-#!/usr/bin/env python3
-"""0-1 面部表情控制 - Phase 5"""
-from neopixel import NeoPixel
-from machine import Pin
-import time
-
-N = 12  # NeoPixel 灯珠数量
-pin = Pin(15, Pin.OUT)
-strip = NeoPixel(pin, N)
-
-# 表情定义（RGB 元组）
-EXPRESSIONS = {
-    "idle":     [(0, 50, 100)],     # 淡蓝呼吸
-    "thinking": [(50, 50, 0)],       # 淡黄
-    "happy":   [(0, 100, 50)],      # 绿色
-    "sad":     [(30, 0, 80)],       # 淡紫
-    "alert":   [(100, 0, 0)],       # 红色闪烁
-}
-
-def show_expression(name, duration=3.0):
-    colors = EXPRESSIONS.get(name, EXPRESSIONS["idle"])
-    for _ in range(int(duration * 10)):
-        for i in range(N):
-            color = colors[i % len(colors)]
-            strip[i] = color
-        strip.write()
-        time.sleep(0.1)
-
-# MQTT 接收表情指令
-import paho.mqtt.client as mqtt
-
-def on_message(client, userdata, msg):
-    expr = msg.payload.decode()
-    show_expression(expr)
-
-client = mqtt.Client()
-client.on_message = on_message
-client.connect("192.168.x.x", 1883, 60)
-client.subscribe("0-1/expression")
-client.loop_start()
 ```
+iPhone 16 Pro（OpenClaw App）
+    ↓ WiFi/MQTT
+Gateway（MacBook）
+    ↓
+OpenClaw Agent（贵庚大脑）
+    ↓
+控制指令 → Jetson Nano / ESP32-Cam / Cyber Bricks
+```
+
+### iPhone 感知分工（与 Jetson Nano 对比）
+
+| 任务 | iPhone 跑 | Jetson Nano 跑 | 说明 |
+|------|-----------|--------------|------|
+| 实时物体检测（障碍物）| **YOLOv11n Core ML** | 备用 | iPhone 节省 Jetson 算力 |
+| 人体检测/跟随 | **Vision Framework** | — | 系统级，免费，极快 |
+| 手势指令识别 | **MediaPipe** | — | 33关键点，秒级响应 |
+| 语义场景理解 | **FastVLM 0.5B** | — | 本地 VLM，不占带宽 |
+| 室内3D建模 | **LiDAR + ARKit** | 可选 | iPhone 原生支持 |
+| 复杂推理/回答 | — | ✅ | 非实时，延迟可接受 |
+
+> **技术细节**：详见第五章 5.2 节（Apple Vision / Core ML + YOLO / MediaPipe / FastVLM 完整技术方案）。
+
+---
+
 
 ---
 
@@ -3268,39 +3236,78 @@ echo 0 > /sys/class/gpio/gpio29/value  # 继电器断开，所有电机断电
 
 ---
 
-## Phase 3：iPhone 感知前端
-
-> 涉及技术：iPhone 感知方案（§5.2）、Apple Vision / Core ML / MediaPipe / FastVLM、OpenClaw Node 协议（§3.2）
-
-### 目标
-iPhone 16 Pro 通过 OpenClaw Node 协议接入 Gateway，成为分布式感知网络的一员，在家里移动时提供高质量视觉和传感器数据。
-
-### iPhone 接入架构
-
-```
-iPhone 16 Pro（OpenClaw App）
-    ↓ WiFi/MQTT
-Gateway（MacBook）
-    ↓
-OpenClaw Agent（贵庚大脑）
-    ↓
-控制指令 → Jetson Nano / ESP32-Cam / Cyber Bricks
-```
-
-### iPhone 感知分工（与 Jetson Nano 对比）
-
-| 任务 | iPhone 跑 | Jetson Nano 跑 | 说明 |
-|------|-----------|--------------|------|
-| 实时物体检测（障碍物）| **YOLOv11n Core ML** | 备用 | iPhone 节省 Jetson 算力 |
-| 人体检测/跟随 | **Vision Framework** | — | 系统级，免费，极快 |
-| 手势指令识别 | **MediaPipe** | — | 33关键点，秒级响应 |
-| 语义场景理解 | **FastVLM 0.5B** | — | 本地 VLM，不占带宽 |
-| 室内3D建模 | **LiDAR + ARKit** | 可选 | iPhone 原生支持 |
-| 复杂推理/回答 | — | ✅ | 非实时，延迟可接受 |
-
-> **技术细节**：详见第五章 5.2 节（Apple Vision / Core ML + YOLO / MediaPipe / FastVLM 完整技术方案）。
 
 ---
+
+## Phase 5：面部表情系统
+
+### 设计理念
+0-1 的面部由「0」「-」「1」三个核心元素构成，动态显示 AI 状态。
+
+### 系统组成
+
+| 组件 | 形态 | 功能 |
+|------|------|------|
+| 「0」| LED 点阵/IPS 屏幕 | 显示主眼睛，动态表情 |
+| 「-」| 线性灯光带（NeoPixel）| 情绪光效（颜色+呼吸节奏）|
+| 「1」| 小型显示屏/LED | 辅助信息、状态指示 |
+
+### 拓竹加工方案
+
+| 零件 | 拓竹工具 | 说明 |
+|------|---------|------|
+| 外壳 | H2C + PLA | 面部支架，3D 打印 |
+| 眼睛屏幕支架 | H2C + PETG | 耐温 |
+| 透光板 | Bambu Suite 激光切割 | 亚克力 3mm |
+| 安装螺丝 | 拓竹配套 M2/M3 螺丝 | 标准件 |
+
+### 控制代码
+
+```python
+#!/usr/bin/env python3
+"""0-1 面部表情控制 - Phase 5"""
+from neopixel import NeoPixel
+from machine import Pin
+import time
+
+N = 12  # NeoPixel 灯珠数量
+pin = Pin(15, Pin.OUT)
+strip = NeoPixel(pin, N)
+
+# 表情定义（RGB 元组）
+EXPRESSIONS = {
+    "idle":     [(0, 50, 100)],     # 淡蓝呼吸
+    "thinking": [(50, 50, 0)],       # 淡黄
+    "happy":   [(0, 100, 50)],      # 绿色
+    "sad":     [(30, 0, 80)],       # 淡紫
+    "alert":   [(100, 0, 0)],       # 红色闪烁
+}
+
+def show_expression(name, duration=3.0):
+    colors = EXPRESSIONS.get(name, EXPRESSIONS["idle"])
+    for _ in range(int(duration * 10)):
+        for i in range(N):
+            color = colors[i % len(colors)]
+            strip[i] = color
+        strip.write()
+        time.sleep(0.1)
+
+# MQTT 接收表情指令
+import paho.mqtt.client as mqtt
+
+def on_message(client, userdata, msg):
+    expr = msg.payload.decode()
+    show_expression(expr)
+
+client = mqtt.Client()
+client.on_message = on_message
+client.connect("192.168.x.x", 1883, 60)
+client.subscribe("0-1/expression")
+client.loop_start()
+```
+
+---
+
 
 ## Phase 6：室内移动与智能家居硬件拓展
 
@@ -4907,4 +4914,4 @@ curl http://192.168.1.z/battery
 | **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案） |
 | sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
 
-*文档版本：v3.29（Phase 3/4/5 顺序调整）| 字数：约207000字符| 更新：2026-03-25*
+*文档版本：v3.29（Phase 3/4/5 顺序调整）| 字数：约213000字符| 更新：2026-03-25*
