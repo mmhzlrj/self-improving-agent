@@ -101,6 +101,11 @@ ul, ol { padding-left: 24px; margin: 8px 0; }
 li { margin: 4px 0; }
 p { margin: 8px 0; }
 strong { color: #111827; }
+
+/* 目录表格专用样式 */
+table.toc-table { border: none; margin: 12px 0; }
+table.toc-table th, table.toc-table td { border: none; padding: 4px 10px; }
+table.toc-table tr.toc-chapter td { border-top: 1px solid #e5e7eb; padding-top: 10px; }
 """
 
 # ============ 审批模式 CSS ============
@@ -385,11 +390,126 @@ def start_server(directory, ready_event=None):
             ready_event.set()  # 通知主线程：尝试完毕（失败）
 
 
+def preprocess_toc(md_content):
+    """预处理目录表格：把整个目录表格转成 HTML 表格
+    
+    markdown.tables 扩展会把 | | | content | 解析成 3+ 列，
+    但表格只有 2 列，导致三级标题内容丢失。
+    
+    策略：检测 | 章节 | 标题 | 格式的目录表格，整体转为 HTML <table>。
+    根据连续空单元格数量自动判断层级，用 CSS padding 实现缩进。
+    """
+    lines = md_content.split('\n')
+    result = []
+    in_toc_table = False
+    table_rows = []
+    
+    for i, line in enumerate(lines):
+        stripped = line.strip()
+        
+        # 检测目录表格开始
+        if re.match(r'^\|\s*章节\s*\|\s*标题\s*\|', stripped):
+            in_toc_table = True
+            result.append(line)  # 先放表头行占位
+            continue
+        
+        if in_toc_table:
+            # 检查表格结束
+            if not stripped.startswith('|'):
+                in_toc_table = False
+                # 把收集到的行转成 HTML 表格，替换掉占位行
+                if table_rows:
+                    result = result[:-1]  # 移除表头占位行
+                    html_table = build_toc_html_table(table_rows)
+                    result.append(html_table)
+                result.append(line)
+                continue
+            
+            # 跳过分隔行
+            if re.match(r'^\|[\s\-:|]+\|$', stripped):
+                continue
+            
+            # 收集表格数据行
+            cells = stripped.split('|')
+            if cells and cells[0] == '':
+                cells = cells[1:]
+            if cells and cells[-1] == '':
+                cells = cells[:-1]
+            
+            non_empty = [c.strip() for c in cells if c.strip()]
+            if not non_empty:
+                continue  # 跳过全空行
+            
+            # 计算前导空单元格数量（= 层级深度）
+            leading_empty = 0
+            for c in cells:
+                if c.strip() == '':
+                    leading_empty += 1
+                else:
+                    break
+            
+            table_rows.append({
+                'leading_empty': leading_empty,
+                'cells': cells,
+                'content': non_empty,
+            })
+            continue
+        
+        result.append(line)
+    
+    # 文件末尾处理
+    if in_toc_table and table_rows:
+        result = result[:-1]
+        html_table = build_toc_html_table(table_rows)
+        result.append(html_table)
+    
+    return '\n'.join(result)
+
+
+def build_toc_html_table(rows):
+    """把目录行列表转成 HTML 表格"""
+    html_parts = ['<table class="toc-table">']
+    
+    for row in rows:
+        depth = row['leading_empty']
+        content = row['content']
+        
+        if depth == 0:
+            # 章节标题（第零层）
+            ch = content[0] if len(content) > 0 else ''
+            title = content[1] if len(content) > 1 else ''
+            html_parts.append(
+                f'<tr class="toc-chapter"><td><strong>{ch}</strong></td>'
+                f'<td><strong>{title}</strong></td></tr>'
+            )
+        elif depth == 1:
+            # 二级标题
+            text = content[-1] if content else ''
+            html_parts.append(
+                f'<tr class="toc-l2"><td></td><td>{text}</td></tr>'
+            )
+        else:
+            # 三级及以上标题
+            text = content[-1] if content else ''
+            indent = (depth - 1) * 20  # 每层 20px
+            html_parts.append(
+                f'<tr class="toc-l3"><td></td>'
+                f'<td style="padding-left: {indent}px; font-size: 0.88em; color: #6b7280;">'
+                f'{text}</td></tr>'
+            )
+    
+    html_parts.append('</table>')
+    return '\n'.join(html_parts)
+
+
 def generate_normal_html(filepath):
     """普通预览模式"""
     with open(filepath, 'r', encoding='utf-8') as f:
         md_content = f.read()
 
+    # 预处理目录表格
+    md_content = preprocess_toc(md_content)
+    
     html_body = markdown.markdown(md_content, extensions=MD_EXTENSIONS)
     filename = os.path.basename(filepath)
     title = os.path.splitext(filename)[0]
@@ -446,6 +566,8 @@ def generate_review_html(filepath):
                 old_text = re.sub(r'^\*\*原文\*\*[：:]\s*', '', line)
             elif '修正方案' in line:
                 new_text = re.sub(r'^\*\*修正方案\*\*[：:]\s*', '', line)
+            elif '修正' in line and '修正方案' not in line:
+                new_text = re.sub(r'^\*\*(修正(方案)?)\*\*[：:]\s*', '', line)
             elif '来源' in line:
                 source = re.sub(r'^\*\*来源\*\*[：:]\s*', '', line)
             elif '优先级' in line:
@@ -479,7 +601,7 @@ def generate_review_html(filepath):
         </div>
     </div>
     <div class="review-diff">{diff_html}</div>
-    {item['content_html'] if item['old_text'] or item['new_text'] else ''}
+    {item['content_html']}
     <textarea class="review-note" placeholder="\U0001f4dd \u5907\u6ce8\u8bf4\u660e\uff08\u53ef\u9009\uff09..." oninput="saveNote('{item['id']}')"></textarea>
 </div>
 """

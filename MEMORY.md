@@ -445,6 +445,12 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - **按调用次数**（600次/5小时），不按 tokens
 - subagent 用 MiniMax 可以减少我（GLM）的 tokens 花销
 
+### Subagent 超时机制（重要，2026-03-25 发现）
+- **MiniMax subagent 有 10 分钟硬性超时**，超时后任务直接中断
+- 大文件（10万+字符）的多处 edit 任务容易超时——read 本身就耗时间
+- **对策**：大文件任务拆成多个 subagent，每个只做一部分；评估任务量再设 timeoutSeconds
+- 教训来源：ROBOT-SOP 目录补全任务，第一个 subagent 9m59s 超时只完成了一半
+
 ### 高峰时段限流（重要）
 - **高峰时段**：15:00-20:00（UTC+8），根据集群负载动态调整
 - **Starter 套餐**：高峰期仅支持 **1 个 Agent 并发调用**

@@ -71,7 +71,7 @@ curl -s --max-time 3 "http://127.0.0.1:9223/json/version"
 2. kimi_kimi_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
 3. glm_glm_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
 4. qwen_qwen_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
-5. deepseek_deepseek_chat("你好，回复OK", thinking=true, search=false) → ✅/❌ + 响应时间
+5. deepseek_deepseek_chat("你好，回复OK", thinking=true, search=true) → ✅/❌ + 响应时间
 ```
 
 **判断标准**：

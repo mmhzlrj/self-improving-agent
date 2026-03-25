@@ -27,8 +27,8 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-25 23:21 UTC (07:21 CST)
-# MiniMax 套餐状态：周期（05:00-10:00），已用 3.2%，剩余 581次，重置 2小时38分钟后
+# Last check: 2026-03-25 14:22 CST (06:22 UTC)
+# MiniMax 套餐状态：周期（10:00-15:00），已用 68.5%，剩余 189次，重置 37分钟后
 # 阈值状态：无触发
 # 阈值状态：无触发（距80%阈值还远）
 # MiniMax 新年度套餐已激活，23个模型全部 600/600 满额度
