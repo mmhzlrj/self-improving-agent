@@ -2,8 +2,8 @@
 
 **项目名**: 0-1（零杠一）
 **记忆系统**: 贵庚
-**文档版本**: v3.26（目录补全版）
-**字数**: 约 205000（字符）| 约 20500（词）
+**文档版本**: v3.29（Phase 3/4/5 顺序调整）
+**字数**: 约 207000（字符）| 约 20700（词）
 **创建日期**: 2026-03-07
 **更新日期**: 2026-03-25
 
@@ -82,21 +82,21 @@
 | | | 硬件 |
 | | | ESP32-Cam 固件烧录 |
 | | | RTSP 接收（Jetson Nano） |
-| | Phase 3：面部表情系统 |
-| | | 设计理念 |
-| | | 系统组成 |
-| | | 拓竹加工方案 |
-| | | 控制代码 |
+| | Phase 3：iPhone 感知前端 |
+| | | 目标 |
+| | | iPhone 接入架构 |
+| | | iPhone 感知分工（与 Jetson Nano 对比） |
 | | Phase 4：运动控制模块 |
 | | | 目标 |
 | | | 通信架构 |
 | | | MicroPython 示例（Cyber Bricks 固件） |
 | | | OpenClaw → Cyber Bricks 指令脚本 |
 | | | 有线 GPIO 应急停止 |
-| | Phase 5：iPhone 感知前端 |
-| | | 目标 |
-| | | iPhone 接入架构 |
-| | | iPhone 感知分工（与 Jetson Nano 对比） |
+| | Phase 5：面部表情系统 |
+| | | 设计理念 |
+| | | 系统组成 |
+| | | 拓竹加工方案 |
+| | | 控制代码 |
 | | Phase 6：室内移动与智能家居硬件拓展 |
 | | | 目标 |
 | | | 核心路线 |
@@ -1825,9 +1825,9 @@ NAS_Offline（NAS_3, 冻层 + 异地备份）
 | Phase 0 | Ubuntu 台式机对接 Gateway | 阶段一前置 |
 | Phase 1 | 语音陪伴（OpenClaw + Cyber Bricks 首次联动）| 阶段一 |
 | Phase 2 | 视觉记录（ESP32-Cam + Jetson Nano）| 阶段一 |
-| Phase 3 | 面部表情系统 | 阶段一 |
+| Phase 3 | iPhone 感知前端接入（分布式感知网络）| 阶段二 |
 | Phase 4 | 运动控制（Cyber Bricks + MQTT）| 阶段一 |
-| Phase 5 | iPhone 感知前端接入（分布式感知网络）| 阶段二 |
+| Phase 5 | 面部表情系统 | 阶段一 |
 | Phase 6 | 室内移动 + 智能家居硬件拓展 kit | 阶段二 |
 
 **关键区分**：
@@ -3059,7 +3059,7 @@ gst-launch-1.0 rtspsrc location=rtsp://192.168.x.99:8554/stream \
 
 ---
 
-## Phase 3：面部表情系统
+## Phase 5：面部表情系统
 
 ### 设计理念
 0-1 的面部由「0」「-」「1」三个核心元素构成，动态显示 AI 状态。
@@ -3085,7 +3085,7 @@ gst-launch-1.0 rtspsrc location=rtsp://192.168.x.99:8554/stream \
 
 ```python
 #!/usr/bin/env python3
-"""0-1 面部表情控制 - Phase 3"""
+"""0-1 面部表情控制 - Phase 5"""
 from neopixel import NeoPixel
 from machine import Pin
 import time
@@ -3268,7 +3268,7 @@ echo 0 > /sys/class/gpio/gpio29/value  # 继电器断开，所有电机断电
 
 ---
 
-## Phase 5：iPhone 感知前端
+## Phase 3：iPhone 感知前端
 
 > 涉及技术：iPhone 感知方案（§5.2）、Apple Vision / Core ML / MediaPipe / FastVLM、OpenClaw Node 协议（§3.2）
 
@@ -4907,4 +4907,4 @@ curl http://192.168.1.z/battery
 | **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案） |
 | sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
 
-*文档版本：v3.28（去重+架构图补NAS）| 字数：约207000字符| 更新：2026-03-25*
+*文档版本：v3.29（Phase 3/4/5 顺序调整）| 字数：约207000字符| 更新：2026-03-25*
