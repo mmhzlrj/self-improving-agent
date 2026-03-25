@@ -1,7 +1,7 @@
 # 第一轮核查报告：SOP v3.12-v3.20 新增内容
 
 **调研时间**：2026-03-24 22:35-22:40
-**调研方式**：3 个 subagent 并发，web_search + web_fetch 验证
+**调研方式**：3 个 subagent 并行，web_search + web_fetch 验证
 **限速情况**：未触发
 
 ---
@@ -28,36 +28,111 @@
 
 ## 🟡 中优先级修正
 
-| # | 问题 | 修正建议 | 来源 |
-|---|------|---------|------|
-| 3 | 星闪"三模"不准确 | 改为"SLE+SLB 双模式"或"某些模组同时集成 BLE+星闪+WiFi 三芯片" | Agent 2 |
-| 4 | Jetson "2070 TFLOPS" | 改为"INT8 TOPS（稀疏算力）"或直接写"TOPS"而非"TFLOPS" | Agent 2 |
-| 5 | SSD 2280 16TB | 改为"工业级 15.36TB"并注明消费级基本不存在 | Agent 2 |
-| 6 | Project Silica 100GB/片 | 改为"实验室最新 7TB（2023年），100GB 为 2022 POC 早期数据" | Agent 1 |
-| 7 | screenray.exe | 改为"Snapshot Service"（微软官方名称） | Agent 1 |
-| 8 | Recall 用 Faiss | 改为"推测使用 DiskANN（微软自研），待核实" | Agent 1 |
-| 9 | Recall Phi-3.5-mini 未确认 | 改为"使用轻量级交叉编码器"（不指定型号） | Agent 3 |
-| 10 | RynnBrain GRPO β=0.02 | 删除此参数，来源无法核实 | Agent 1 |
-| 11 | RynnBrain 94% 保留率 | 删除此数据，来源无法核实 | Agent 1 |
-| 12 | Neo4j TimeTree 插件状态 | 改为"可用 Neo4j 内置时间属性替代，TimeTree 插件状态待确认" | Agent 3 |
+### 3. 星闪"三模"不准确
+**问题**：SOP 称星闪为"三模"，不够准确。
+
+**修正方案**：改为"SLE+SLB 双模式"或"某些模组同时集成 BLE+星闪+WiFi 三芯片"。
+
+**来源**：Agent 2
+
+---
+
+### 4. Jetson "2070 TFLOPS" 单位错误
+**问题**：Jetson "2070 TFLOPS" 实际是 INT8 TOPS，不是 TFLOPS。
+
+**修正方案**：改为"INT8 TOPS（稀疏算力）"或直接写"TOPS"而非"TFLOPS"。
+
+**来源**：Agent 2
+
+---
+
+### 5. SSD 2280 16TB 不存在
+**问题**：消费级 2280 16TB SSD 基本不存在。
+
+**修正方案**：改为"工业级 15.36TB"并注明消费级基本不存在。
+
+**来源**：Agent 2
+
+---
+
+### 6. Project Silica 容量数据过时
+**问题**：SOP 写 100GB/片，为 2022 POC 早期数据；2023年已达 7TB。
+
+**修正方案**：改为"实验室最新 7TB（2023年），100GB 为 2022 POC 早期数据"。
+
+**来源**：Agent 1
+
+---
+
+### 7. screenray.exe 名称不准确
+**问题**：SOP 写 screenray.exe，实际应为 Snapshot Service（微软官方名称）。
+
+**修正方案**：改为"Snapshot Service"（微软官方名称）。
+
+**来源**：Agent 1
+
+---
+
+### 8. Recall 向量引擎推测错误
+**问题**：SOP 称 Recall 使用 Faiss，实际可能使用微软自研 DiskANN。
+
+**修正方案**：改为"推测使用 DiskANN（微软自研），待核实"。
+
+**来源**：Agent 1
+
+---
+
+### 9. Recall Phi-3.5-mini 型号未确认
+**问题**：SOP 指定了 Phi-3.5-mini，但该型号未被官方确认。
+
+**修正方案**：改为"使用轻量级交叉编码器"（不指定型号）。
+
+**来源**：Agent 3
+
+---
+
+### 10. RynnBrain GRPO β=0.02 参数无法核实
+**问题**：该参数来源无法核实。
+
+**修正方案**：删除此参数。
+
+**来源**：Agent 1
+
+---
+
+### 11. RynnBrain 94% 保留率数据无法核实
+**问题**：该数据来源无法核实。
+
+**修正方案**：删除此数据。
+
+**来源**：Agent 1
+
+---
+
+### 12. Neo4j TimeTree 插件状态待确认
+**问题**：TimeTree 插件状态待官方确认。
+
+**修正方案**：改为"可用 Neo4j 内置时间属性替代，TimeTree 插件状态待确认"。
+
+**来源**：Agent 3
 
 ---
 
 ## ✅ 确认无误
 
-| 技术点 | 确认结果 |
-|--------|---------|
-| RynnBrain 存在、2B/8B/30B 版本、Apache 2.0 | ✅ |
-| RynnBrain 基于 Qwen3-VL、CoP 推理机制 | ✅ |
-| Mem0 Graph+Vector 支持、本地部署 | ✅ |
-| Windows Recall VBS Enclave + TPM 架构 | ✅ |
-| OpenClaw RL 真实存在、GRPO/OPD/Combination 三方法 | ✅ |
-| Whisper large-v3、支持中文方言 | ✅ |
-| H.266 比 H.265 省 20-50% 码率 | ✅ |
-| Project Silica 石英玻璃、300年+ 存储年限 | ✅ |
-| Qwen3-VL 开源、Apache 2.0 | ✅ |
-| Jetson AGX Thor $3,499、Blackwell 架构 | ✅ |
-| 星闪 SLE 2Mbps、低延迟 <20μs | ✅ |
+以下技术点经核查属实，无需修改：
+
+- RynnBrain 存在、2B/8B/30B 版本、Apache 2.0
+- RynnBrain 基于 Qwen3-VL、CoP 推理机制
+- Mem0 Graph+Vector 支持、本地部署
+- Windows Recall VBS Enclave + TPM 架构
+- OpenClaw RL 真实存在、GRPO/OPD/Combination 三方法
+- Whisper large-v3、支持中文方言
+- H.266 比 H.265 省 20-50% 码率
+- Project Silica 石英玻璃、300年+ 存储年限
+- Qwen3-VL 开源、Apache 2.0
+- Jetson AGX Thor $3,499、Blackwell 架构
+- 星闪 SLE 2Mbps、低延迟 <20μs
 
 ---
 
