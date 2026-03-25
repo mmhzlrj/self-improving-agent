@@ -278,7 +278,7 @@ RynnBrain 推理：
 |------|------|-----------|---------|
 | **Layer 1** | 向量索引（语义检索）| "有没有说过类似的话" | Chroma / PGVector |
 | **Layer 2** | 知识图谱（实体关系）| "提到了哪些人/地点/概念" | Mem0 / Neo4j |
-| **Layer 3** | 时序索引（时间线）| "上次是什么时候" | Neo4j TimeTree / PostgreSQL |
+| **Layer 3** | 时序索引（时间线）| "上次是什么时候" | Neo4j 原生时间函数 / PostgreSQL |
 
 **每个记忆条目必须包含的基础字段**：
 
@@ -303,7 +303,7 @@ RynnBrain 推理：
 
 | 检索维度 | 实现方式 | 示例查询 |
 |---------|---------|---------|
-| **按时间** | `timestamp` + TimeTree | "上周说过什么？" |
+| **按时间** | `timestamp` + Neo4j 原生时间函数/APOC | "上周说过什么？" |
 | **按人物** | NER 提取 → 实体节点边 | "关于XXX上次说了什么" |
 | **按地点** | NER 提取 → Location 实体 | "我在家里提过这件事吗" |
 | **按语义** | embedding 余弦相似度 | "有没有说过类似的" |
@@ -405,7 +405,7 @@ RynnBrain 推理：
 | TrOCR OCR 引擎（100+语言）| Whisper 做语音转文本 | Whisper 已支持多语言 |
 | Snapshot Service 后台处理管道 | 贵庚标注 pipeline | 含 AI 辅助标注 |
 | Phi-3.5-mini (4B) 交叉编码器 | Qwen2.5-1.5B 重排序 | 阶段一可跳过，阶段二引入 |
-| Faiss IVF+PQ 向量索引 | Chroma/PGVector HNSW | HNSW 无需 PQ 压缩 |
+| Faiss 或 DiskANN（微软自研）向量索引，待核实 | Chroma/PGVector HNSW | HNSW 无需 PQ 压缩 |
 | VBS Enclave + TPM 密钥保护 | NAS LUKS 全盘加密 | 密钥管理待设计 ⚠️ |
 
 **回答"上次是什么时候"的核心**：查询时 `ORDER BY timestamp DESC LIMIT 1`，结合 `last_accessed` 追踪记忆被调用频率，自动提升高频调用的重要性权重。
@@ -415,7 +415,7 @@ RynnBrain 推理：
 | 工具 | 角色 | 说明 |
 |------|------|------|
 | **Mem0** | Graph + Vector 核心引擎 | 专为 AI Agent 设计，支持本地部署，实体关系自动提取 |
-| **Neo4j** | 图关系 + 时序引擎 | TimeTree 插件支持时间线查询，HNSW 向量索引 |
+| **Neo4j** | 图关系 + 时序引擎 | TimeTree 已退役（RETIRED，2021年5月归档），推荐使用原生 Cypher 时间函数 + APOC 扩展，HNSW 向量索引 |
 | **PostgreSQL + PGVector** | 轻量替代方案 | 单一数据库，`tstzrange` 时序 + `pg_embedding` 向量 |
 
 **阶段一路线（轻量 MVP）**：
@@ -886,9 +886,9 @@ Mac（Gateway）—即使 Mac 不在同一网络也能通过云端转发
 
 iPhone 在这里是**网络桥梁**，不是计算节点。0-1 的感知和推理仍在 Nano 上跑，只是借 iPhone 的流量来维持和 Mac Gateway 的连接。
 
-**补充：星闪三模通讯网络（多节点冗余）**
+**补充：星闪通讯网络（多节点冗余）**
 
-用户已有两块星闪模块，未来可以扩展到更多。星闪支持多模通讯（BLE + SLE + WiFi），可以在设备之间形成自愈网络：
+用户已有两块星闪模块（小熊派WS63星闪开发板BearPi-Pico H3863 芯片WiFi6 BLE SLE模组），未来可扩展到更多。该模组集成 WiFi6 + BLE + SLE 三种无线协议，可在设备之间形成自愈网络：
 
 ```
 星闪节点 A（0-1 本体）
