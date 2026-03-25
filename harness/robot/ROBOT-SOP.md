@@ -4683,5 +4683,25 @@ curl http://192.168.1.z/battery
 | DH 参数 | Denavit-Hartenberg Parameters | 机器人关节连杆参数化方法 |
 | CAN 总线 | Controller Area Network Bus | 多设备串联通信总线 |
 | MJX | MuJoCo XLA | DeepMind 开源的 GPU 加速 MuJoCo |
+| **SGLang** | Structured Generation Language | 大模型推理框架，支持长上下文和 Agent 任务（配合 RynnBrain 使用）|
+| **Core ML** | Core Machine Learning | Apple 端侧机器学习框架，A18 Pro NPU 原生支持 |
+| **MediaPipe** | MediaPipe | Google 多模态 ML 框架，支持手势/姿态/人脸检测（iPhone/Jetson 通用）|
+| **FastVLM** | Fast Vision Language Model | Apple 本地 VLM 模型（FastViTHD 编码器），iPhone 离线语义理解 |
+| **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案）|
+| **MCP** | Model Context Protocol | OpenClaw 原生集成的节点通信协议 |
+| **Genesis** | Genesis Physics Engine | Apple 团队开源（2025-02），Mac RTX 4090 上 43M FPS，比 Isaac Gym 快 10-80 倍 |
+| **Newton** | Newton Physics Engine | NVIDIA+DeepMind+Disney 联合开发（2025-03 GTC），物理仿真引擎 |
+| **RynnBrain** | RynnBrain | 阿里巴巴达摩院开源（2026-02）具身大脑模型，30B MoE，时空记忆+空间推理 |
+| **Cosmos Predict 2.5** | Cosmos Prediction Model 2.5 | NVIDIA 世界基础模型，视频预测和物理推理 |
+| **GR00T N1.6** | Generalist Robot 00 Technology N1.6 | NVIDIA 具身机器人 VLA 模型（2026），宇树 G1 真实机器人验证 |
+| **AGX Orin** | Jetson AGX Orin | NVIDIA 嵌入式 AI 计算机（已量产），128GB LPDDR5X，INT8 275 TOPS |
+| **AGX Thor** | Jetson AGX Thor | NVIDIA Blackwell 架构旗舰（预发布），FP4 稀疏 2070 TFLOPS，INT8 稀疏 1035 TOPS |
+| **Jetson Nano** | Jetson Nano | NVIDIA 低成本嵌入式 AI 计算机（2GB/4GB/8GB 版本）|
+| **Cyber Bricks** | Cyber Bricks | 拓竹（Bambu Lab）积木机器人品牌，ESP32+双电机+舵机，WiFi 控制 |
+| **LPDDR6** | Low Power DDR6 | 第六代低功耗内存，Medusa Halo 等新一代设备采用 |
+| **FPGA** | Field Programmable Gate Array | 现场可编程门阵列，可编程硬件加速 |
+| **DSP** | Digital Signal Processor | 数字信号处理器，专用于实时信号处理 |
+| **Edge-TTS** | Edge Text-to-Speech | 微软 Edge 浏览器的本地离线 TTS，延迟极低（已在 §A.2 语音交互中推荐）|
+| **AGBIC** | Algorithmic Bit-Interleaved Caching | RynnBrain 的注意力缓存优化，降低长视频序列的显存占用 |
 
 *文档版本：v3.25（结构优化版）| 字数：约203000字符| 更新：2026-03-25*
