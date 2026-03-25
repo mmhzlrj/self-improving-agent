@@ -2,14 +2,14 @@
 
 **项目名**: 0-1（零杠一）
 **记忆系统**: 贵庚
-**文档版本**: v3.20（网络韧性完整版）
-**字数**: 约 184000（字符）| 约 18400（词）
+**文档版本**: v3.21（聚类算法+Embedding分层调研版）
+**字数**: 约 188000（字符）| 约 18800（词）
 **创建日期**: 2026-03-07
-**更新日期**: 2026-03-24
+**更新日期**: 2026-03-25
 
 ---
 
-> 📝 **v3.5（本次优化）**：第二章重新编号（技术路线→2.4，梯度采购→2.5，星闪模块→2.6，Medusa Halo→2.7）；历史更新：电池换电/手部自由度/RoboGSim/稚晖君/GR00T/3DGS/Newton；新增 §1.2 贵庚记忆系统技术架构（阶段路线/边权重模型/RAG过渡/OpenClaw RL）；新增贵庚索引架构（三层索引/多维度检索/开源标注工具链）；新增自训练标注模型（Few-Shot主动学习循环）；新增存储层级与过期策略（热/温/冷/冻四层+NAS分区设计）；新增分布式NAS架构（深圳/云南/陕西区域节点+跨区域冗余备份）；新增Windows Recall调研参考（检索架构+延迟分析+隐私隔离机制）；新增隐私架构四层设计（iPhone Secure Enclave+单一用户+继承机制+第四层置信度优势）；新增第四层——单一用户识别置信度优势（声纹/面部/步态/行为多模态锚点）；新增24小时连续感知（体重/步态/跌倒/异常事件+基准偏差检测）；新增RynnBrain与贵庚记忆系统的接入阶段分析（最佳接入点=阶段二Layer2感知增强引擎）；新增访客场景处理原则（原生数据完整记录/训练前清洗）；新增记忆版本控制（Ground Truth归用户/原始数据为最终仲裁）；新增检索质量反馈闭环（自我提升机制）；新增紧急检测实时性架构（NAS不在紧急路径）；新增星闪穿戴式传感器（IMU跌倒检测/心率/体温）；新增0-1剪辑中枢+多设备冗余备份五层策略；新增跨代际兼容性（光学玻璃冻层/硬件可维护性）；新增降级预案三级（格式转录→AI特征压缩→语义抽象）；新增贵庚守陵人哲学（遵遗嘱传递/宁毁不屈）；新增网络断连分级应对（4级场景分析/fallback小模型保基础陪伴/失联自毁倒计时）
+> 📝 **v3.6（本次优化）**：聚类算法选型新增完整调研报告（7种组合对比/论文引用/4条Pipeline推荐）；**新增 Embedding 模型分层层级完整调研**（MCU级→边缘AI级→高端手机级/MRL多维度截断技术/Benchmark来源/设备矩阵数据流）；版本记录同步更新
 
 ---
 
@@ -535,6 +535,116 @@ RynnBrain 推理（SGLang / Transformers 本地调用）：
 | 后期 | 全类型 | Label Studio | 重要性权重、实体关系、因果标注 |
 
 > **核心原则**：原始数据（视频 raw 文件、音频 raw 文件）永远以最完整形态保存，只读写的标注结果作为索引辅助层。这样无论未来工具如何变化，原始数据始终可重新标注。
+
+#### Embedding 模型分层层级（完整调研，2026-03-25）
+
+> 2026-03-25 调研新增。聚类的前提是 embedding 生成，本节覆盖设备矩阵中所有层级的 embedding 模型选型。
+
+**设备分层总览**：
+
+| 设备层级 | 代表设备 | 核心约束 | 推荐 embedding 模型 | 推理框架 | 实际维度 | 实测延迟 |
+|:---|:---|:---|:---|:---|:---|:---|
+| **MCU 级** | Pico H3863、ESP32-Cam | SRAM < 2MB，无 GPU | 张量列分解（TTD）压缩 | TFLite Micro、CMSIS-NN | 64-256 维 | 百毫秒级（预期） |
+| **边缘 AI 级** | Jetson Nano 2GB | 4GB LPDDR4，Maxwell 128-core | **EmbeddingGemma**（GGUF 量化）| **TensorRT**、ONNX Runtime | 768 维（可截断 128/256）| < 100ms |
+| **高端手机级** | iPhone 16 Pro | A18 Pro 16-core Neural Engine，8GB | **EmbeddingGemma**、openPangu-1B | **Core ML**、llama.cpp、MLX | 768 维（MRL 自适应）| < 15ms |
+
+**推荐方案详解**：
+
+> **MCU 级（数据采集端）**
+- **定位**：不做 embedding 计算，仅做数据采集和简单事件检测
+- **模型**：张量列分解（Tensor-Train Decomposition，TTD）将 embedding 层压缩 2 倍，Raspberry Pi 上能耗减半（TensorSLM，ICML 2025）
+- **现实评估**：Pico H3863 / ESP32-Cam 跑不了真正的 Transformer embedding，公开 benchmark 极少
+- **推荐做法**：这些设备只负责"听到唤醒词"或"检测到运动"，然后把原始数据上传给上层 Jetson 或 iPhone 做 embedding
+- **框架**：TFLite Micro / CMSIS-NN / STM32Cube.AI
+- **参考论文**：TensorSLM (ICML Workshop 2025) — 张量列分解压缩 embedding 层
+
+> **Jetson Nano 2GB（本地 embedding 计算主力）**
+- **定位**：本地 embedding 计算核心节点
+- **首选模型**：**EmbeddingGemma**（Google 2025 开源）
+  - 308M 参数，量化后 < 200MB
+  - 支持 GGUF 格式，原生对接 llama.cpp
+  - 支持 **MRL（Matryoshka Representation Learning）**：不重训模型即可截断为 768/512/256/128 维
+- **推理框架**：**TensorRT**（首选）+ ONNX Runtime（备选）
+  - FP16 量化：ResNet-50 实测 30ms（vs FP32 59ms，翻倍加速）
+  - 层融合（Layer Fusion）进一步减少显存访问
+- **Benchmark**（来源：MMDeploy Jetson Nano 2GB 实测）：
+  - ResNet-50 224×224 FP16：30ms
+  - RetinaNet 800×1344 FP16：23ms
+  - EmbeddingGemma 预期 < 100ms（768 维全精度）
+- **聚类衔接**：embedding 完成后立即走 **PCA + BIRCH** 实时聚类 pipeline（见 §聚类算法选型）
+
+> **iPhone 16 Pro（离线 RAG + 长期记忆备份）**
+- **定位**：用户随身设备，隐私敏感数据不出本机
+- **首选模型**：**EmbeddingGemma**（同上，Core ML 量化版本）
+  - **Core ML** 充分利用 A18 Pro Neural Engine，硬件利用率最高
+  - EdgeTPU 同等硬件上 embedding 延迟 < 15ms
+- **备选模型**：**openPangu Embedded-1B**（华为）
+  - 首 token 1.8 秒，生成每 token 0.156 秒
+  - 昇腾 Atlas 200I A2 实测（接近 iPhone NPU 定位）
+- **跨平台**：llama.cpp / MLX 同样支持 iOS 部署
+- **隐私优势**：所有 embedding 计算在本地完成，数据不经过第三方服务器
+
+**MRL 多维度截断技术（核心）**：
+
+> EmbeddingGemma 支持的 Matryoshka Representation Learning 是本系统的关键技术：
+- **一套模型，多个维度**：768 / 512 / 256 / 128 维，按需使用
+- **快速匹配用低维**（128 维）：延迟最低，过筛子用
+- **精确检索用高维**（768 维）：最终匹配，精调用
+- **不重训，不重新生成 embedding**：现有向量随时截断使用
+- **适用场景**：
+  - 128 维：实时流式过滤、边缘设备快速初筛
+  - 256 维：日常对话意图分类
+  - 512 维：普通检索任务
+  - 768 维：高精度记忆匹配
+
+**Benchmark 数据来源**：
+
+| 来源 | 内容 |
+|:---|:---|
+| **MMDeploy** | Jetson Nano 2GB 实测 ResNet/YOLO 等模型延迟 |
+| **MLPerf Tiny** | MCU 级别推理基准测试 |
+| **TensorSLM (ICML 2025)** | RPi 上张量列分解压缩 embedding 能耗与延迟 |
+| **Google EmbeddingGemma** | EdgeTPU 上 benchmark 数据（< 15ms embedding）|
+| **华为 openPangu 技术报告** | 昇腾 Atlas 端侧硬件推理延迟对比 |
+| **MLino Bench (Elsevier)** | 边缘设备轻量级模型评估工具 |
+
+**设备矩阵与记忆系统数据流**：
+
+```
+Pico H3863 / ESP32-Cam（采集端）
+  └─ 麦克风唤醒 / 运动检测
+  └─ 原始音频/视频流 → 上传
+
+      ↓
+
+Jetson Nano 2GB（本地计算主力）
+  └─ 接收原始数据流
+  └─ EmbeddingGemma ONNX + TensorRT FP16 → 768 维向量
+  └─ PCA + BIRCH 实时聚类
+  └─ 冷数据归档 NAS
+
+      ↓
+
+iPhone 16 Pro（离线 RAG + 备份）
+  └─ Core ML EmbeddingGemma → 本地向量检索
+  └─ Secure Enclave 生物认证
+  └─ 用户主动查询 / 紧急调用
+```
+
+**SOP 原聚类流程中① embedding 生成步骤补充说明**：
+
+```
+① Embedding 生成（按设备层级）
+├─ MCU 级：不做 embedding，上传原始数据
+├─ Jetson Nano：EmbeddingGemma + TensorRT FP16 → 768 维
+└─ iPhone：EmbeddingGemma + Core ML → 768/256/128 维（MRL）
+        ↓
+② 降维（PCA 降至 32-128 维）← 见 §聚类算法选型
+        ↓
+③ 聚类（PCA + BIRCH 实时方案）← 今日新增本节
+        ↓
+④ 后续步骤不变...
+```
 
 #### 自训练标注模型：Few-Shot 主动学习循环
 
