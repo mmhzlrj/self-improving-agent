@@ -609,8 +609,6 @@ RynnBrain 推理（SGLang / Transformers 本地调用）：
 | Windows Semantic Index（语义索引）将图像和文本转换为向量，架构类型待核实（官方未披露双塔/交叉编码器） | Chroma/PGVector HNSW | HNSW 无需 PQ 压缩 |
 | VBS Enclave + TPM 密钥保护 | NAS LUKS 全盘加密 | 密钥管理待设计 ⚠️ |
 
-**回答"上次是什么时候"的核心**：查询时 `ORDER BY timestamp DESC LIMIT 1`，结合 `last_accessed` 追踪记忆被调用频率，自动提升高频调用的重要性权重。
-
 **工具推荐**：
 
 | 工具 | 角色 | 说明 |
@@ -2434,6 +2432,12 @@ Ollama + GGUF (Q4_K_M) 让 7B 模型在现有台式机 RTX 2060 上跑；vLLM / 
    │ ESP32- │    │   拓竹工具链      │
    │ Cam×2  │    │ H2C 3D打印+制造  │
    └────────┘    └──────────────────┘
+
+                   ┌──────────────────┐
+                   │   NAS（贵庚存储）  │
+                   │  Hot/Warm/Cold/   │
+                   │  Frozen 四层架构   │
+                   └──────────────────┘
 ```
 
 ### iPhone 接入后的完整拓扑
@@ -4903,4 +4907,4 @@ curl http://192.168.1.z/battery
 | **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案） |
 | sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
 
-*文档版本：v3.27（GLM审查反馈补充）| 字数：约207000字符| 更新：2026-03-25*
+*文档版本：v3.28（去重+架构图补NAS）| 字数：约207000字符| 更新：2026-03-25*
