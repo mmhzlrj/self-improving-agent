@@ -722,3 +722,70 @@ minimax search 的优势：
 ### Metadata
 - Source: workflow
 - Tags: robot-sop, research, daily-log
+
+## [LRN-20260325-001] mdview --review 解析规则 & 浏览器缓存问题
+
+**Logged**: 2026-03-25T08:54:00+08:00
+**Priority**: high
+**Status**: resolved
+**Area**: tools
+
+### Summary
+mdview review 解析器按 `### N.` 标题分割条目，列表项（`- **N**.`）会被完全忽略。HTML 更新后浏览器会显示缓存版本。
+
+### Details
+**解析规则：**
+- mdview review 解析器按 `### N.` 标题分割条目（正则：`\n###\s*(\d+)\.\s*`）
+- 每个 `### N.` 标题 + 下面内容 = 一条 review 条目
+- **列表项（`- **N**.`）不会被解析**，会被完全忽略
+- 条目编号必须连续
+
+**浏览器缓存问题：**
+- HTML 文件更新后，浏览器可能显示缓存的老版本
+- 每次用 --review 模式打开文件时，**必须告知用户 Cmd+Shift+R 刷新**
+- 不要只说"已刷新"/"已更新"，要明确提示强制刷新
+
+### Suggested Action
+1. mdview review 文件必须用 `### N.` 标题格式，不能用列表
+2. 每次打开 review 文件后，明确告知用户："请 Cmd+Shift+R 强制刷新"
+3. 记录到 TOOLS.md 的 mdview 章节
+
+### Metadata
+- Source: bug_fix
+- Related Files: tools/mdview.py
+- Tags: mdview, review, cache, browser
+
+## [LRN-20260325-002] mdview review HTML 解析深度 bug 修复
+
+**Logged**: 2026-03-25T09:05:00+08:00
+**Priority**: critical
+**Status**: fixed
+**Area**: tools
+
+### Bug 1: 正则表达式在 raw string 中不解释 \u 转义
+- **症状**：review 条目里"问题/修正方案/来源"全部不显示
+- **根因**：mdview.py 第 438-443 行用了 `r'^\*\*\u539f\u6587\*\*[：:]\s*'` 这样的 raw string，但 raw string 里 `\u` **不被解释为 Unicode 转义**，所以匹配永远失败
+- **修复**：把正则改为直接写中文 `r'^\*\*原文\*\*[：:]\s*'`，不用 `\uXXXX` 转义
+- **涉及行**：438-443 行（mdview.py）
+
+### Bug 2: section header 被错误包裹进 item div
+- **症状**：item-2 的备注框跑到 🟡 中优先级修正标题下面去了
+- **根因**：按 `### N.` 分割后，`rest_html = markdown.markdown('\n'.join(lines))` 把 item 内容之后、下一个 `##` 之前的所有东西都包进来了，包括 `## 🟡 中优先级修正`
+- **修复**：在分割 lines 时，遇到 `^##\s` 就停止，不把它纳入 item content
+- **涉及行**：434-448 行（分割逻辑 + rest_html 生成）
+
+### Bug 3: mdview review 解析器只识别 ### 标题
+- **症状**：文件里用列表 `- **3**.**` 的条目全部被忽略
+- **根因**：正则 `\n###\s*(\d+)\.\s*` 只能匹配 `### N.` 格式，不匹配列表项
+- **修复**：把所有条目改成 `### N.` 标题格式
+
+### Suggested Action
+1. mdview review 文件必须用 `### N.` 标题格式，禁止列表格式
+2. mdview review 解析器修复后要验证：检查 HTML 中 diff-new/diff-old 是否非空
+3. 每次用 --review 模式打开文件时，明确告知用户 Cmd+Shift+R 强制刷新
+4. 不要用 `\uXXXX` 在 raw string 里写中文 Unicode，用直接中文更安全
+
+### Metadata
+- Source: bug_fix
+- Related Files: tools/mdview.py, harness/robot/review/round1-review.md
+- Tags: mdview, review, regex, raw-string, unicode

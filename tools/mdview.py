@@ -434,17 +434,24 @@ def generate_review_html(filepath):
         old_text = new_text = source = ""
         priority = "\U0001f7e1\u4e2d"
 
+        # Split lines at ## headers — section headers belong to header_html, not item content
+        body_lines = []
         for line in lines:
-            if '\u539f\u6587' in line and '\u5efa\u8bae\u6539\u4e3a' not in line:
-                old_text = re.sub(r'^\*\*\u539f\u6587\*\*[：:]\s*', '', line)
-            elif '\u5efa\u8bae\u6539\u4e3a' in line:
-                new_text = re.sub(r'^\*\*\u5efa\u8bae\u6539\u4e3a\*\*[：:]\s*', '', line)
-            elif '\u6765\u6e90' in line:
-                source = re.sub(r'^\*\*\u6765\u6e90\*\*[：:]\s*', '', line)
-            elif '\u4f18\u5148\u7ea7' in line:
-                priority = re.sub(r'^\*\*\u4f18\u5148\u7ea7\*\*[：:]\s*', '', line)
+            if re.match(r'^##\s', line):
+                break
+            body_lines.append(line)
 
-        rest_html = markdown.markdown('\n'.join(lines), extensions=MD_EXTENSIONS)
+        for line in body_lines:
+            if '原文' in line and '修正方案' not in line:
+                old_text = re.sub(r'^\*\*原文\*\*[：:]\s*', '', line)
+            elif '修正方案' in line:
+                new_text = re.sub(r'^\*\*修正方案\*\*[：:]\s*', '', line)
+            elif '来源' in line:
+                source = re.sub(r'^\*\*来源\*\*[：:]\s*', '', line)
+            elif '优先级' in line:
+                priority = re.sub(r'^\*\*优先级\*\*[：:]\s*', '', line)
+
+        rest_html = markdown.markdown('\n'.join(body_lines), extensions=MD_EXTENSIONS)
         items.append({
             'id': item_id, 'num': item_num, 'title': item_title,
             'old_text': old_text, 'new_text': new_text,
