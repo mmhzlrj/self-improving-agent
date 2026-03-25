@@ -403,7 +403,7 @@ RynnBrain 推理：
 | JPEG XR 截图压缩（200KB-1MB/张）| 视频关键帧抽取 + HEVC 压缩 | 阶段二才全量视频存档 |
 | SQLite WAL 模式存储元数据 | PostgreSQL + PGVector | 结构更复杂但支持并发 |
 | TrOCR OCR 引擎（100+语言）| Whisper 做语音转文本 | Whisper 已支持多语言 |
-| screenray.exe 后台处理管道 | 贵庚标注 pipeline | 含 AI 辅助标注 |
+| Snapshot Service 后台处理管道 | 贵庚标注 pipeline | 含 AI 辅助标注 |
 | Phi-3.5-mini (4B) 交叉编码器 | Qwen2.5-1.5B 重排序 | 阶段一可跳过，阶段二引入 |
 | Faiss IVF+PQ 向量索引 | Chroma/PGVector HNSW | HNSW 无需 PQ 压缩 |
 | VBS Enclave + TPM 密钥保护 | NAS LUKS 全盘加密 | 密钥管理待设计 ⚠️ |
