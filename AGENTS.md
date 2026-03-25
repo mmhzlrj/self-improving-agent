@@ -357,6 +357,14 @@ browser(action=open, profile="chrome", url="https://www.doubao.com/chat/")
 **这条规则由 2026-03-24 的教训总结而来：**
 subagent 做 NemoClaw 调研时未充分使用工具，导致漏掉了官方文档。
 
+### Subagent 任务评估原则
+- **MiniMax subagent 硬性 10 分钟超时**，超时后任务直接中断
+- 分配任务时评估：文件大小 × 操作复杂度 < 10 分钟？
+- 大文件（20 万字符+）的 read + 多处 edit 操作远超 10 分钟预估
+- **大文件章节移动**必须用 python 脚本物理操作，不能只改标题编号（edit 工具只能改文本，不能剪切粘贴段落）
+- 大文件任务尽量**拆分多个 subagent**，每个只做一部分
+- **2026-03-25 教训**：subagent 被要求"调整 Phase 顺序"，只改了编号但没有移动章节物理位置
+
 ---
 
 ## Make It Yours
