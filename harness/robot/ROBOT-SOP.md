@@ -4625,83 +4625,81 @@ curl http://192.168.1.z/battery
 # 术语表（Glossary）
 
 | 缩写 | 全称 | 说明 |
-|------|------|------|
-| DOF | Degrees of Freedom | 自由度，独立运动的轴数量 |
-| MoE | Mixture of Experts | 混合专家模型，只激活部分参数 |
-| VLA | Vision-Language-Action | 视觉-语言-动作统一模型 |
-| SLE | SparkLink Extension | 星闪低时延通信协议 |
-| ROS | Robot Operating System | 机器人操作系统框架 |
-| ROS 2 | Robot Operating System 2 | ROS 第二代，改进实时性和安全性 |
-| MQTT | Message Queuing Telemetry Transport | 轻量级消息协议，适合 IoT |
-| RL | Reinforcement Learning | 强化学习，通过奖励信号训练策略 |
-| sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
-| LLM | Large Language Model | 大语言模型 |
-| TTS | Text-to-Speech | 文字转语音 |
-| ASR | Automatic Speech Recognition | 自动语音识别 |
-| VAD | Voice Activity Detection | 语音活动检测，判断是否有人说话 |
 | AEC | Acoustic Echo Cancellation | 回声消除，防止扬声器声音干扰麦克风 |
-| NPU | Neural Processing Unit | 神经网络处理单元，AI 专用加速芯片 |
-| GPU | Graphics Processing Unit | 图形处理器 |
-| RTX | Ray Tracing Texel eXtreme | NVIDIA 光追显卡系列 |
-| GR00T | Generalist Robot 00 Technology | NVIDIA 具身机器人基础模型 |
-| 3DGS | 3D Gaussian Splatting | 3D 高斯泼溅，实时 3D 场景重建技术 |
-| NeRF | Neural Radiance Fields | 神经辐射场，用神经网络表示 3D 场景 |
-| SLAM | Simultaneous Localization and Mapping | 同步定位与建图 |
-| LiDAR | Light Detection and Ranging | 激光雷达，精确测距和 3D 建模 |
-| IMU | Inertial Measurement Unit | 惯性测量单元（加速度+陀螺仪）|
-| YOLO | You Only Look Once | 单次前向传播的目标检测算法 |
-| TensorRT | NVIDIA TensorRT | NVIDIA 推理优化引擎 |
-| GGUF | GPT-Generated Unified Format | 量化模型文件格式（Ollama 使用）|
-| ROCm | Radeon Open Compute | AMD GPU 开源计算平台 |
-| UART | Universal Asynchronous Receiver/Transmitter | 通用异步收发器（串口通信）|
-| I2C | Inter-Integrated Circuit | 内部集成电路总线（两线制）|
-| GPIO | General-Purpose Input/Output | 通用输入输出引脚 |
-| CAN | Controller Area Network | 控制器局域网总线（工业/汽车）|
-| PWM | Pulse Width Modulation | 脉冲宽度调制（控制电机/LED 亮度）|
-| FP16 | Half-Precision Floating Point | 半精度浮点数（16位）|
-| INT8 / INT4 | 8-bit / 4-bit Integer | 低精度整数量化 |
-| Q4_K_M | GGUF 量化级别 | 4-bit K-Quant Medium，精度/大小最佳平衡 |
-| AWQ | Activation-aware Weight Quantization | 激活感知权重量化方法 |
-| GPTQ | GPT Quantization | GPT 后训练量化方法 |
-| KV cache | Key-Value Cache | 注意力机制的键值缓存 |
-| mAP | Mean Average Precision | 平均精度均值（目标检测指标）|
-| FPS | Frames Per Second | 每秒帧数 |
-| RTF | Real-Time Factor | 实时因子（语音处理速度比）|
-| SRAM | Static Random-Access Memory | 静态随机存取存储器（极快但贵）|
-| Flash | NAND Flash Memory | 闪存（嵌入式设备常用存储）|
-| OTA | Over-The-Air | 空中升级（远程固件更新）|
-| OOM | Out of Memory | 内存不足 |
-| RISC-V | Reduced Instruction Set Computer V | 开源指令集架构 |
-| BLE | Bluetooth Low Energy | 低功耗蓝牙 |
-| SLE | SparkLink Extension | 星闪短距无线通信（华为主导）|
-| LUKS | Linux Unified Key Setup | Linux 全盘加密方案 |
-| SSD / NVMe | Solid State Drive / NVM Express | 固态硬盘 / 高速存储接口 |
-| NAS | Network Attached Storage | 网络附加存储 |
-| micro-ROS | Micro Robot Operating System | 微控制器版 ROS 2 |
-| ReAct | Reasoning + Acting | 推理+行动的 Agent 框架 |
-| PPO | Proximal Policy Optimization | 近端策略优化（强化学习算法）|
-| DH 参数 | Denavit-Hartenberg Parameters | 机器人关节连杆参数化方法 |
-| CAN 总线 | Controller Area Network Bus | 多设备串联通信总线 |
-| MJX | MuJoCo XLA | DeepMind 开源的 GPU 加速 MuJoCo |
-| **SGLang** | Structured Generation Language | 大模型推理框架，支持长上下文和 Agent 任务（配合 RynnBrain 使用）|
-| **Core ML** | Core Machine Learning | Apple 端侧机器学习框架，A18 Pro NPU 原生支持 |
-| **MediaPipe** | MediaPipe | Google 多模态 ML 框架，支持手势/姿态/人脸检测（iPhone/Jetson 通用）|
-| **FastVLM** | Fast Vision Language Model | Apple 本地 VLM 模型（FastViTHD 编码器），iPhone 离线语义理解 |
-| **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案）|
-| **MCP** | Model Context Protocol | OpenClaw 原生集成的节点通信协议 |
-| **Genesis** | Genesis Physics Engine | Apple 团队开源（2025-02），Mac RTX 4090 上 43M FPS，比 Isaac Gym 快 10-80 倍 |
-| **Newton** | Newton Physics Engine | NVIDIA+DeepMind+Disney 联合开发（2025-03 GTC），物理仿真引擎 |
-| **RynnBrain** | RynnBrain | 阿里巴巴达摩院开源（2026-02）具身大脑模型，30B MoE，时空记忆+空间推理 |
-| **Cosmos Predict 2.5** | Cosmos Prediction Model 2.5 | NVIDIA 世界基础模型，视频预测和物理推理 |
-| **GR00T N1.6** | Generalist Robot 00 Technology N1.6 | NVIDIA 具身机器人 VLA 模型（2026），宇树 G1 真实机器人验证 |
+| **AGBIC** | Algorithmic Bit-Interleaved Caching | RynnBrain 的注意力缓存优化，降低长视频序列的显存占用 |
 | **AGX Orin** | Jetson AGX Orin | NVIDIA 嵌入式 AI 计算机（已量产），128GB LPDDR5X，INT8 275 TOPS |
 | **AGX Thor** | Jetson AGX Thor | NVIDIA Blackwell 架构旗舰（预发布），FP4 稀疏 2070 TFLOPS，INT8 稀疏 1035 TOPS |
-| **Jetson Nano** | Jetson Nano | NVIDIA 低成本嵌入式 AI 计算机（2GB/4GB/8GB 版本）|
+| ASR | Automatic Speech Recognition | 自动语音识别 |
+| AWQ | Activation-aware Weight Quantization | 激活感知权重量化方法 |
+| BLE | Bluetooth Low Energy | 低功耗蓝牙 |
+| CAN | Controller Area Network | 控制器局域网总线（工业/汽车） |
+| CAN 总线 | Controller Area Network Bus | 多设备串联通信总线 |
+| **Core ML** | Core Machine Learning | Apple 端侧机器学习框架，A18 Pro NPU 原生支持 |
+| **Cosmos Predict 2.5** | Cosmos Prediction Model 2.5 | NVIDIA 世界基础模型，视频预测和物理推理 |
 | **Cyber Bricks** | Cyber Bricks | 拓竹（Bambu Lab）积木机器人品牌，ESP32+双电机+舵机，WiFi 控制 |
-| **LPDDR6** | Low Power DDR6 | 第六代低功耗内存，Medusa Halo 等新一代设备采用 |
-| **FPGA** | Field Programmable Gate Array | 现场可编程门阵列，可编程硬件加速 |
+| DH 参数 | Denavit-Hartenberg Parameters | 机器人关节连杆参数化方法 |
+| DOF | Degrees of Freedom | 自由度，独立运动的轴数量 |
 | **DSP** | Digital Signal Processor | 数字信号处理器，专用于实时信号处理 |
-| **Edge-TTS** | Edge Text-to-Speech | 微软 Edge 浏览器的本地离线 TTS，延迟极低（已在 §A.2 语音交互中推荐）|
-| **AGBIC** | Algorithmic Bit-Interleaved Caching | RynnBrain 的注意力缓存优化，降低长视频序列的显存占用 |
+| **Edge-TTS** | Edge Text-to-Speech | 微软 Edge 浏览器的本地离线 TTS，延迟极低（已在 §A.2 语音交互中推荐） |
+| **FastVLM** | Fast Vision Language Model | Apple 本地 VLM 模型（FastViTHD 编码器），iPhone 离线语义理解 |
+| Flash | NAND Flash Memory | 闪存（嵌入式设备常用存储） |
+| FP16 | Half-Precision Floating Point | 半精度浮点数（16位） |
+| **FPGA** | Field Programmable Gate Array | 现场可编程门阵列，可编程硬件加速 |
+| FPS | Frames Per Second | 每秒帧数 |
+| **Genesis** | Genesis Physics Engine | Apple 团队开源（2025-02），Mac RTX 4090 上 43M FPS，比 Isaac Gym 快 10-80 倍 |
+| GGUF | GPT-Generated Unified Format | 量化模型文件格式（Ollama 使用） |
+| GPIO | General-Purpose Input/Output | 通用输入输出引脚 |
+| GPTQ | GPT Quantization | GPT 后训练量化方法 |
+| GPU | Graphics Processing Unit | 图形处理器 |
+| GR00T | Generalist Robot 00 Technology | NVIDIA 具身机器人基础模型 |
+| **GR00T N1.6** | Generalist Robot 00 Technology N1.6 | NVIDIA 具身机器人 VLA 模型（2026），宇树 G1 真实机器人验证 |
+| I2C | Inter-Integrated Circuit | 内部集成电路总线（两线制） |
+| IMU | Inertial Measurement Unit | 惯性测量单元（加速度+陀螺仪） |
+| INT8 / INT4 | 8-bit / 4-bit Integer | 低精度整数量化 |
+| **Jetson Nano** | Jetson Nano | NVIDIA 低成本嵌入式 AI 计算机（2GB/4GB/8GB 版本） |
+| KV cache | Key-Value Cache | 注意力机制的键值缓存 |
+| LiDAR | Light Detection and Ranging | 激光雷达，精确测距和 3D 建模 |
+| LLM | Large Language Model | 大语言模型 |
+| **LPDDR6** | Low Power DDR6 | 第六代低功耗内存，Medusa Halo 等新一代设备采用 |
+| LUKS | Linux Unified Key Setup | Linux 全盘加密方案 |
+| mAP | Mean Average Precision | 平均精度均值（目标检测指标） |
+| **MCP** | Model Context Protocol | OpenClaw 原生集成的节点通信协议 |
+| **MediaPipe** | MediaPipe | Google 多模态 ML 框架，支持手势/姿态/人脸检测（iPhone/Jetson 通用） |
+| micro-ROS | Micro Robot Operating System | 微控制器版 ROS 2 |
+| MJX | MuJoCo XLA | DeepMind 开源的 GPU 加速 MuJoCo |
+| MoE | Mixture of Experts | 混合专家模型，只激活部分参数 |
+| MQTT | Message Queuing Telemetry Transport | 轻量级消息协议，适合 IoT |
+| NAS | Network Attached Storage | 网络附加存储 |
+| NeRF | Neural Radiance Fields | 神经辐射场，用神经网络表示 3D 场景 |
+| **Newton** | Newton Physics Engine | NVIDIA+DeepMind+Disney 联合开发（2025-03 GTC），物理仿真引擎 |
+| NPU | Neural Processing Unit | 神经网络处理单元，AI 专用加速芯片 |
+| OOM | Out of Memory | 内存不足 |
+| OTA | Over-The-Air | 空中升级（远程固件更新） |
+| PPO | Proximal Policy Optimization | 近端策略优化（强化学习算法） |
+| PWM | Pulse Width Modulation | 脉冲宽度调制（控制电机/LED 亮度） |
+| Q4_K_M | GGUF 量化级别 | 4-bit K-Quant Medium，精度/大小最佳平衡 |
+| ReAct | Reasoning + Acting | 推理+行动的 Agent 框架 |
+| RISC-V | Reduced Instruction Set Computer V | 开源指令集架构 |
+| RL | Reinforcement Learning | 强化学习，通过奖励信号训练策略 |
+| ROCm | Radeon Open Compute | AMD GPU 开源计算平台 |
+| ROS | Robot Operating System | 机器人操作系统框架 |
+| ROS 2 | Robot Operating System 2 | ROS 第二代，改进实时性和安全性 |
+| **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案） |
+| RTF | Real-Time Factor | 实时因子（语音处理速度比） |
+| RTX | Ray Tracing Texel eXtreme | NVIDIA 光追显卡系列 |
+| **RynnBrain** | RynnBrain | 阿里巴巴达摩院开源（2026-02）具身大脑模型，30B MoE，时空记忆+空间推理 |
+| **SGLang** | Structured Generation Language | 大模型推理框架，支持长上下文和 Agent 任务（配合 RynnBrain 使用） |
+| sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
+| SLAM | Simultaneous Localization and Mapping | 同步定位与建图 |
+| SLE | SparkLink Extension | 星闪低时延通信协议 |
+| SRAM | Static Random-Access Memory | 静态随机存取存储器（极快但贵） |
+| SSD / NVMe | Solid State Drive / NVM Express | 固态硬盘 / 高速存储接口 |
+| TensorRT | NVIDIA TensorRT | NVIDIA 推理优化引擎 |
+| TTS | Text-to-Speech | 文字转语音 |
+| UART | Universal Asynchronous Receiver/Transmitter | 通用异步收发器（串口通信） |
+| VAD | Voice Activity Detection | 语音活动检测，判断是否有人说话 |
+| VLA | Vision-Language-Action | 视觉-语言-动作统一模型 |
+| YOLO | You Only Look Once | 单次前向传播的目标检测算法 |
+| 3DGS | 3D Gaussian Splatting | 3D 高斯泼溅，实时 3D 场景重建技术 |
 
 *文档版本：v3.25（结构优化版）| 字数：约205000字符| 更新：2026-03-25*
