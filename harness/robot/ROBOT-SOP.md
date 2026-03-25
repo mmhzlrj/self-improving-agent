@@ -328,8 +328,8 @@ RynnBrain 推理（SGLang / Transformers 本地调用）：
 | 层级 | 类型 | 解决的问题 | 工具选型 |
 |------|------|-----------|---------|
 | **Layer 1** | 向量索引（语义检索）| "有没有说过类似的话" | Chroma / PGVector |
-| **Layer 2** | 知识图谱（实体关系）| "提到了哪些人/地点/概念" | Mem0 / Neo4j（TimeTree 已退役，用原生 Cypher + APOC） |
-| **Layer 3** | 时序索引（时间线）| "上次是什么时候" | Neo4j 原生时间函数 / PostgreSQL |
+| **Layer 2** | 知识图谱（实体关系）| "提到了哪些人/地点/概念" | **Mem0 OSS + Neo4j 5.x**（Mem0 自动抽取实体关系写入 Neo4j，互补非竞争；TimeTree 已退役） |
+| **Layer 3** | 时序索引（时间线）| "上次是什么时候" | **Neo4j 5.x + APOC**（预计算时间字段 + B+ 树索引，替代 TimeTree；备选：原生 datetime + WHERE 范围查询） |
 
 **每个记忆条目必须包含的基础字段**：
 
@@ -442,8 +442,8 @@ RynnBrain 推理（SGLang / Transformers 本地调用）：
 
 | 工具 | 角色 | 说明 |
 |------|------|------|
-| **Mem0** | Graph + Vector 核心引擎 | 专为 AI Agent 设计，支持本地部署，实体关系自动提取 |
-| **Neo4j** | 图关系 + 时序引擎 | TimeTree 已退役（2021年5月正式 RETIRED，GitHub 2020年12月最后 commit，不再兼容 Neo4j 4.x/5.x）；Neo4j 5.x 推荐使用原生 Cypher 时间函数（`datetime`/`date`/`duration`） + APOC 扩展 + HNSW 向量索引 |
+| **Mem0** | Graph + Vector 核心引擎（应用层） | 专为 AI Agent 设计，LLM 自动抽取实体关系，支持 Neo4j 作为图后端；Mem0 负责"记什么"，Neo4j 负责"怎么存怎么查"，互补非竞争 |
+| **Neo4j** | 图关系 + 时序引擎（存储层）| TimeTree 已退役（2021年5月正式 RETIRED，GitHub 2020年12月最后 commit）；Neo4j 5.x + APOC 替代方案：写入时预计算 `year`/`month`/`date`/`yearMonth` 四个字段 + B+ 树索引（覆盖 90% 时序查询）；复杂聚合用 `apoc.date.fields()` + `apoc.temporal.round()` |
 | **PostgreSQL + PGVector** | 轻量替代方案 | 单一数据库，`tstzrange` 时序 + `pg_embedding` 向量 |
 
 **阶段一路线（轻量 MVP）**：
