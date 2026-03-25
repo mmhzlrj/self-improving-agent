@@ -542,8 +542,77 @@ RynnBrain 推理（SGLang / Transformers 本地调用）：
 
 **核心流程（主动学习闭环）**：
 
+#### 聚类算法选型（完整调研报告，2026-03-25）
+
+> ⚠️ SOP 原写法"① 聚类（UMAP 降维 + HDBSCAN 密度聚类）"仅为其中一种方案，边缘设备适用性受限。以下为完整算法对比和推荐 pipeline。
+
+**场景约束**：
+- 数据：高维文本 embedding（768-1536 维）
+- 设备：Jetson Nano 级别（算力/内存受限）
+- 需求：支持主动学习闭环，实时增量优先
+
+**算法对比总表**：
+
+| 算法组合 | 时间复杂度 | 内存 | 边缘设备 | 适合规模 | 推荐场景 |
+|:---|:---|:---|:---|:---|:---|
+| **UMAP + HDBSCAN** | O(N²) | 中高 | ⚠️ 离线可用 | N<2000 | 质量最优，离线批处理 |
+| **PCA + BIRCH** | O(N) | 极低 | ✅ 最优 | 10w+ | 实时/增量/流式 |
+| **PCA + K-means** | O(N·K·T) | 极低 | ✅ 最推荐 | 无限制 | 日常批次，简单可靠 |
+| **PCA + GMM** | O(N·K·d²) | 中 | ✅ 可用 | 中等 | 需概率输出的主动学习 |
+| **t-SNE** | O(N²) | 高 | ❌ 不可用 | N<1000 | 仅可视化 |
+| **OPTICS** | O(N²) | 中 | ⚠️ 小批量 | N<2000 | 多密度簇 |
+| **谱聚类** | O(N³) | 极高 | ❌ 不可用 | N<500 | 高质量离线（服务器） |
+
+**算法论文引用**：
+
+| 算法 | 论文 | 作者 | 年份 |
+|:---|:---|:---|:---|
+| **UMAP** | *UMAP: Uniform Manifold Approximation and Projection* | McInnes, Healy, Melville | 2018, JOSS |
+| **HDBSCAN** | *HDBSCAN: Efficient Density-Based Clustering of Arbitrary Shaped Clusters* | Campello, Moulavi, Sander | 2013/2015 |
+| **BIRCH** | *BIRCH: An Efficient Data Clustering Method for Large Databases* | Zhang, Ramakrishnan, Livny | 1996, ACM SIGMOD |
+| **UMAP 提升聚类质量** | *Considerably Improving Clustering Algorithms Using UMAP* | — | 2019, Springer |
+| **PCA** | 理论经典（主成分分析） | Pearson / Hotelling | 1901/1933 |
+
+**推荐 Pipeline（面向边缘设备 + 主动学习）**：
+
+> **Pipeline 1（主推荐）：PCA + BIRCH** — 实时/增量首选
+- PCA 降至 32-128 维 → BIRCH 聚类
+- 复杂度 O(N)，内存极低，支持增量更新
+- 新增记忆条目随时入簇，无需全量重跑
+- 适合：日常批次聚类、实时样本归类
+- 论文：Zhang et al. (1996)
+
+> **Pipeline 2（日常批处理）：PCA + K-means** — 最简可靠
+- PCA 降至 64-128 维 → K-means（预设 K 或用肘部法则估计）
+- 实现最简单，速度最快，边缘端最稳定
+- 需预设 K 值，对球形簇效果较好
+- 适合：日终批次整理、意图快速归类
+- 注意：不支持增量，可选 MiniBatch K-means 近似
+
+> **Pipeline 3（质量优先离线）：UMAP + HDBSCAN** — SOP 原方案
+- UMAP 降至 5-50 维 + HDBSCAN
+- 语义一致性最高，自动发现簇数量，噪声鲁棒
+- O(N²) 复杂度，Jetson Nano 上仅适合 N<2000 离线批处理
+- 适合：定期（如每周）高质量整理，不适合实时
+- 论文：McInnes & Healy (2018) + Campello et al. (2013)
+
+> **Pipeline 4（主动学习专用）：PCA + GMM** — 不确定性采样
+- PCA 降至 64 维 → GMM 软聚类
+- 输出样本属于各簇的概率，可做不确定性采样选优先标注样本
+- 比硬聚类更贴合主动学习需求
+- 适合：主动学习样本选择（选最不确定的样本优先标注）
+
+**SOP 原方案（UMAP + HDBSCAN）的局限性**：
+- O(N²) 复杂度，N>5000 时内存压力大
+- 无增量模式，有新数据需全量重跑
+- Jetson Nano 上仅适合小批量离线聚类
+
+**推荐结论**：日常运行时用 **PCA + BIRCH**，定期质量整理用 **UMAP + HDBSCAN**，主动学习专用选 **PCA + GMM**。
+
+---
+
 ```
-① 聚类（UMAP 降维 + HDBSCAN 密度聚类）
+① 聚类（PCA + BIRCH 实时方案；UMAP + HDBSCAN 定期质量整理）
 相似数据通过算法（embedding 相似度 / 时序邻近 / 人物关联）自动聚集
         ↓
 ② Few-Shot 种子注入
