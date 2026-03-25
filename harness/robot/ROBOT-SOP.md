@@ -4625,6 +4625,8 @@ curl http://192.168.1.z/battery
 # 术语表（Glossary）
 
 | 缩写 | 全称 | 说明 |
+|------|------|------|
+| 3DGS | 3D Gaussian Splatting | 3D 高斯泼溅，实时 3D 场景重建技术 |
 | AEC | Acoustic Echo Cancellation | 回声消除，防止扬声器声音干扰麦克风 |
 | **AGBIC** | Algorithmic Bit-Interleaved Caching | RynnBrain 的注意力缓存优化，降低长视频序列的显存占用 |
 | **AGX Orin** | Jetson AGX Orin | NVIDIA 嵌入式 AI 计算机（已量产），128GB LPDDR5X，INT8 275 TOPS |
@@ -4662,10 +4664,8 @@ curl http://192.168.1.z/battery
 | LLM | Large Language Model | 大语言模型 |
 | **LPDDR6** | Low Power DDR6 | 第六代低功耗内存，Medusa Halo 等新一代设备采用 |
 | LUKS | Linux Unified Key Setup | Linux 全盘加密方案 |
-| mAP | Mean Average Precision | 平均精度均值（目标检测指标） |
 | **MCP** | Model Context Protocol | OpenClaw 原生集成的节点通信协议 |
 | **MediaPipe** | MediaPipe | Google 多模态 ML 框架，支持手势/姿态/人脸检测（iPhone/Jetson 通用） |
-| micro-ROS | Micro Robot Operating System | 微控制器版 ROS 2 |
 | MJX | MuJoCo XLA | DeepMind 开源的 GPU 加速 MuJoCo |
 | MoE | Mixture of Experts | 混合专家模型，只激活部分参数 |
 | MQTT | Message Queuing Telemetry Transport | 轻量级消息协议，适合 IoT |
@@ -4684,12 +4684,10 @@ curl http://192.168.1.z/battery
 | ROCm | Radeon Open Compute | AMD GPU 开源计算平台 |
 | ROS | Robot Operating System | 机器人操作系统框架 |
 | ROS 2 | Robot Operating System 2 | ROS 第二代，改进实时性和安全性 |
-| **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案） |
 | RTF | Real-Time Factor | 实时因子（语音处理速度比） |
 | RTX | Ray Tracing Texel eXtreme | NVIDIA 光追显卡系列 |
 | **RynnBrain** | RynnBrain | 阿里巴巴达摩院开源（2026-02）具身大脑模型，30B MoE，时空记忆+空间推理 |
 | **SGLang** | Structured Generation Language | 大模型推理框架，支持长上下文和 Agent 任务（配合 RynnBrain 使用） |
-| sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
 | SLAM | Simultaneous Localization and Mapping | 同步定位与建图 |
 | SLE | SparkLink Extension | 星闪低时延通信协议 |
 | SRAM | Static Random-Access Memory | 静态随机存取存储器（极快但贵） |
@@ -4700,6 +4698,9 @@ curl http://192.168.1.z/battery
 | VAD | Voice Activity Detection | 语音活动检测，判断是否有人说话 |
 | VLA | Vision-Language-Action | 视觉-语言-动作统一模型 |
 | YOLO | You Only Look Once | 单次前向传播的目标检测算法 |
-| 3DGS | 3D Gaussian Splatting | 3D 高斯泼溅，实时 3D 场景重建技术 |
+| mAP | Mean Average Precision | 平均精度均值（目标检测指标） |
+| micro-ROS | Micro Robot Operating System | 微控制器版 ROS 2 |
+| **rosbridge** | ROS Bridge | ROS 与非 ROS 系统的 WebSocket 桥接协议（iPhone → Nano 连接方案） |
+| sim-to-real | Simulation to Reality | 从仿真环境迁移到真实机器人 |
 
 *文档版本：v3.25（结构优化版）| 字数：约205000字符| 更新：2026-03-25*
