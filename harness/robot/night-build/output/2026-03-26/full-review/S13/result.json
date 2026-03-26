@@ -1,0 +1,39 @@
+{
+  "task_id": "S13",
+  "name": "§5.1-5.2 感知",
+  "line_range": "3242-3472",
+  "total_lines": 231,
+  "issues_found": 5,
+  "issues": [
+    {
+      "type": "格式问题",
+      "line_approx": 3449,
+      "description": "实测FPS表中 YOLOv4-tiny 行格式损坏，应为5列实际出现7列：`| YOLOv4-tiny | 416x416| YOLOv4-tiny | 416x416 | ~20-30 | 轻量老模型 |`，模型名和分辨率被重复填入，导致表格渲染错误",
+      "severity": "high"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 3334,
+      "description": "Phase 6智能家居代码中调用了 `presence_detected()` 函数，但该函数在任何代码示例中均未定义，导致 `auto_door_when_leaving()` 和 `auto_door_when_arriving()` 无法实际运行",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 3377,
+      "description": "Phase 6末尾仅有一句「星闪通信模块详见 §2.5」，没有实际内容，是一个悬空交叉引用",
+      "severity": "medium"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 3428,
+      "description": "DeepStream配置文件路径 `/etc/deepstream-7.0/sources/configs/deepstream-app/config.txt` 仅展示路径，没有说明如何编辑此文件、如何启动验证或排查错误",
+      "severity": "low"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 3295,
+      "description": "Phase 5 MQTT on_message 回调函数中，`msg.payload.decode()` 缺少异常处理（未处理 decode 失败、非法 payload 等情况），与 Phase 6 的 HomeAssistant MQTT 示例一样无重连逻辑，不适合直接落地",
+      "severity": "low"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "timestamp": "2026-03-26T11:16:22+0800",
+  "phase": "ab-test-night-1",
+  "check_sop": {
+    "reference": {
+      "path": "night-build/reference/ROBOT-SOP.md",
+      "mtime": 1774494707,
+      "size": 213168
+    },
+    "source": {
+      "path": "harness/robot/ROBOT-SOP.md",
+      "mtime": 1774435141,
+      "size": 213168
+    },
+    "action": "no_copy_needed",
+    "note": "same size, reference is newer - already up to date"
+  },
+  "task_queue": {
+    "version": 1,
+    "date": "2026-03-26",
+    "total_tasks": 13,
+    "tasks": [
+      {"id": "T-01-A01", "group": "A", "status": "pending"},
+      {"id": "T-01-A02", "group": "A", "status": "pending"},
+      {"id": "T-01-A03", "group": "A", "status": "pending"},
+      {"id": "T-01-A04", "group": "A", "status": "pending"},
+      {"id": "T-01-A05", "group": "A", "status": "pending"},
+      {"id": "T-01-A06", "group": "A", "status": "pending"},
+      {"id": "T-01-A07", "group": "A", "status": "pending"},
+      {"id": "T-01-A08", "group": "A", "status": "pending"},
+      {"id": "T-01-A09", "group": "A", "status": "pending"},
+      {"id": "T-01-A10", "group": "A", "status": "pending"},
+      {"id": "T-01-B01", "group": "B", "status": "pending"},
+      {"id": "T-01-B02", "group": "B", "status": "pending"},
+      {"id": "T-01-B03", "group": "B", "status": "pending"}
+    ],
+    "execution_plan": [
+      {"slot": "00:00-02:00", "parallel": true, "tasks": ["T-01-A01", "T-01-A02", "T-01-A03", "T-01-A04", "T-01-A05", "T-01-B01"]},
+      {"slot": "02:00-04:00", "parallel": true, "tasks": ["T-01-A06", "T-01-A07", "T-01-A08", "T-01-A09", "T-01-A10", "T-01-B02"]},
+      {"slot": "04:00-06:00", "parallel": false, "tasks": ["T-01-B03"]},
+      {"slot": "09:50", "type": "morning-summary", "tasks": ["SUMMARY"]}
+    ]
+  },
+  "minimax_quota": {
+    "MiniMax-M*": {
+      "interval_used": "597/600 (99.5%)",
+      "interval_remaining_seconds": 13427096,
+      "interval_remaining_hours": 3.73,
+      "weekly_remaining_seconds": 305027096,
+      "weekly_remaining_hours": 84.73,
+      "status": "CRITICAL - daily limit nearly exhausted"
+    },
+    "other_models": ["speech-hd", "MiniMax-Hailuo-2.3-Fast-6s-768p", "MiniMax-Hailuo-2.3-6s-768p", "music-2.5", "image-01"],
+    "note": "All other models show 45827096s remaining in current interval"
+  },
+  "startup_status": "completed",
+  "issues": [
+    {
+      "severity": "HIGH",
+      "issue": "MiniMax-M* daily quota at 99.5% (597/600)",
+      "impact": "Night build tasks likely to fail due to quota exhaustion",
+      "recommendation": "Wait for daily reset (~3.7 hours) or upgrade plan"
+    },
+    {
+      "severity": "LOW",
+      "issue": "Current time is 11:16 AM - first execution slot (00:00-02:00) already passed",
+      "impact": "Tasks may have already been attempted earlier",
+      "recommendation": "Check output directory for any completed runs"
+    }
+  ]
+}

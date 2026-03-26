@@ -1,0 +1,162 @@
+[
+  {
+    "id": "S01",
+    "line_start": 1,
+    "line_end": 223,
+    "name": "元数据+§1.1",
+    "lines": 223,
+    "status": "pending"
+  },
+  {
+    "id": "S02",
+    "line_start": 224,
+    "line_end": 523,
+    "name": "§1.2 贵庚-1",
+    "lines": 300,
+    "status": "pending"
+  },
+  {
+    "id": "S03",
+    "line_start": 524,
+    "line_end": 776,
+    "name": "§1.2 贵庚-2",
+    "lines": 253,
+    "status": "pending"
+  },
+  {
+    "id": "S04",
+    "line_start": 777,
+    "line_end": 1276,
+    "name": "§1.2 贵庚-3",
+    "lines": 500,
+    "status": "pending"
+  },
+  {
+    "id": "S05",
+    "line_start": 1277,
+    "line_end": 1776,
+    "name": "§1.2 贵庚-4",
+    "lines": 500,
+    "status": "pending"
+  },
+  {
+    "id": "S06",
+    "line_start": 1777,
+    "line_end": 1840,
+    "name": "§1.3+1.4 理念+路线",
+    "lines": 64,
+    "status": "pending"
+  },
+  {
+    "id": "S07",
+    "line_start": 1841,
+    "line_end": 2004,
+    "name": "§2.1-2.4 硬件",
+    "lines": 164,
+    "status": "pending"
+  },
+  {
+    "id": "S08",
+    "line_start": 2005,
+    "line_end": 2282,
+    "name": "§2.5-2.6 星闪+Halo",
+    "lines": 278,
+    "status": "pending"
+  },
+  {
+    "id": "S09",
+    "line_start": 2283,
+    "line_end": 2499,
+    "name": "§2.7-2.8+§3.1-3.3",
+    "lines": 217,
+    "status": "pending"
+  },
+  {
+    "id": "S10",
+    "line_start": 2500,
+    "line_end": 2780,
+    "name": "§3.4 ROS2",
+    "lines": 281,
+    "status": "pending"
+  },
+  {
+    "id": "S11",
+    "line_start": 2781,
+    "line_end": 2989,
+    "name": "Phase 0-2",
+    "lines": 209,
+    "status": "pending"
+  },
+  {
+    "id": "S12",
+    "line_start": 2990,
+    "line_end": 3241,
+    "name": "Phase 3-6+§5.1",
+    "lines": 252,
+    "status": "pending"
+  },
+  {
+    "id": "S13",
+    "line_start": 3242,
+    "line_end": 3472,
+    "name": "§5.1-5.2 感知",
+    "lines": 231,
+    "status": "pending"
+  },
+  {
+    "id": "S14",
+    "line_start": 3473,
+    "line_end": 3695,
+    "name": "§5.3-5.4 仿真+基模",
+    "lines": 223,
+    "status": "pending"
+  },
+  {
+    "id": "S15",
+    "line_start": 3696,
+    "line_end": 3917,
+    "name": "§5.5+§6.1 训练+推理",
+    "lines": 222,
+    "status": "pending"
+  },
+  {
+    "id": "S16",
+    "line_start": 3918,
+    "line_end": 4077,
+    "name": "§6.1-6.3 推理+Nemo",
+    "lines": 160,
+    "status": "pending"
+  },
+  {
+    "id": "S17",
+    "line_start": 4078,
+    "line_end": 4199,
+    "name": "§6.4+附录A",
+    "lines": 122,
+    "status": "pending"
+  },
+  {
+    "id": "S18",
+    "line_start": 4200,
+    "line_end": 4464,
+    "name": "§8.x 维护+风险",
+    "lines": 265,
+    "status": "pending"
+  },
+  {
+    "id": "S19",
+    "line_start": 4465,
+    "line_end": 4690,
+    "name": "§8.4-9.2 风险",
+    "lines": 226,
+    "status": "pending"
+  },
+  {
+    "id": "S20",
+    "line_start": 4691,
+    "line_end": 4917,
+    "name": "调研记录+术语表",
+    "lines": 227,
+    "status": "pending"
+  }
+]

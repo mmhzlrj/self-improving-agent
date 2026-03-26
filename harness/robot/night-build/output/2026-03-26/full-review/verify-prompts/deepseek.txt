@@ -1,0 +1,34 @@
+你是事实核查员。请联网搜索验证以下 30 个声明。
+裁决: verified=文档有问题 / false_alarm=审核误报 / needs_attention=部分正确 / inconclusive=无法确定
+格式: 编号.[裁决] 证据简述
+
+1. v3.23 版本说明列出「RynnBrain GRPO β=0.02 适用范围澄清+完整参数表」为已完成项，但未记录澄清后的具体结论是什么（β=0.02 的适用范围边界在哪里），读者无法从文档本身判断核实结果
+2. 声称 EmbeddingGemma 有「308M 参数，量化后 < 200MB」——Google 官方发布的 EmbeddingGemma 模型实际参数量为 278M，而非 308M。数字差异虽小但属于具体事实错误。
+3. 声称「EdgeTPU 同等硬件上 embedding 延迟 < 15ms」，但该数据没有标注具体来源（benchmark 链接、官方文档或实测）。同段落内其他数据如 openPangu 的首 token 1.8s 同样无来源标注，整体 benchmark 数据缺乏可追溯性。
+4. Benchmark 数据来源表中「MLPerf Tiny」标注为「MCU 级别推理基准测试」，但 MLPerf Tiny 的官方 target 分类（MCU / M4 / HiWi）主要针对 ARM Cortex-M 级微控制器，与 Jetson Nano（边缘计算设备，GPU/NPU 算力远超 MCU）不在同一级别。表格中将其与 Jetson Nano 实测数据并列引用，适用范围不匹配，应补充说...
+5. Google EmbeddingGemma 的 EdgeTPU benchmark 数据（< 15ms embedding）标注为数据来源，但没有提供具体报告名称、版本号或链接，无法溯源此数据的具体出处。15ms 这一具体数值的可信度无法评估。
+6. 访客数据保留说明中提到「未来新的分割模型可能出现，可以重新从 raw data 中提取访客信息」，但未说明如果该分割模型始终未出现、或开发方停止维护的情况下，访客 raw data 的保留策略是否有所不同。访客数据同样适用「永不删除原始数据」原则，但与用户本人数据不同，访客 raw data 的长期保留法律风险（如 GDPR 类法规）和存储成本未被讨论。建议补充：若访客数据长期（约定期限，如 3-...
+7. 硬件选型表格中 NAS_3 冻层一行的「设备」列完全空白，配置建议列却有内容，表格信息不完整。
+8. 「AI算力」行「4-10倍」提升区间跨度过大（200-500 TOPS 范围），无具体数值也无来源说明。Strix Halo NPU 为 50 TOPS，4倍=200 TOPS，10倍=500 TOPS，相差一倍以上，对于评估「能否跑 405B 模型」的结论影响重大，应给出更精确的预估或说明不确定性。
+9. Jetson Nano 2GB 同时承载「语音交互+视频处理+运动控制」不现实。视频处理+语音交互+运动控制三者并发 RAM 需求远超 2GB，容易 OOM。这是架构设计层面的可行性隐患。
+10. NVIDIA NemoClaw 描述中「集成 OpenShell 安全沙箱 + Nemotron 模型」—— OpenShell（安全沙箱）与 OpenClaw（AI Agent 框架）是两个不同项目，描述将两者混用，且无 NVIDIA 官方产品页面或 GTC 公告链接。
+11. MacBook Gateway 标注「主 AI（贵庚大脑）」，而 Ubuntu 台式机标注「GPU节点：图像理解、GPU密集任务」，两台机器的 AI 角色分工描述不清。如果 Ubuntu 承担 GPU 密集推理，MacBook 是否也跑 LLM？主 AI 到底在哪台机器上？
+12. Step 3 下载 Whisper 模型为「base.en」（英文专用），但 Step 5 用「--language zh」做中文识别。base.en 只在英文数据上训练，用于中文识别效果极差。应该用多语言模型如 base、small 或 medium。
+13. Step 3 中「cd whisper.cpp && make -j4」后，工作目录在 whisper.cpp 内，模型下载到相对路径「models/ggml-base.en.bin」。但 Step 5 脚本使用「./whisper.cpp/bin/whisper-cli」和「whisper.cpp/models/ggml-base.en.bin」，这是相对于脚本工作目录（如 /home/nvid...
+14. 架构图和代码中多次出现「贵庚大脑」「贵庚」，但整个文档中没有定义这是什么（项目代号？AI模型？），读者无法理解其含义。
+15. 硬件表格写「Jetson Nano 2GB」，未注明具体型号变体（是 Jetson Nano B01 还是早期版本），不同变体硬件配置可能不同。
+16. §5.1 Jetson Nano 视觉感知 位于第3382行，完全在行范围 2990-3241 之外，未被审核。
+17. 任务描述称本区间包含「§5.3 仿真+§5.4 基模」，但实际内容为：3473-3594 属于 §5.2（iPhone 感知前端）末尾，3595-3695 属于 §5.3（物理仿真引擎），§5.4（基模）从 3696 行才开始，完全不在本区间内。本区间实际上不包含 §5.4。
+18. 行范围 3696-3917 被标注为「§5.5 训练+§6.1 推理框架」，但实际内容 99% 属于 §5.4（具身大脑基模：RynnBrain 与空间智能），仅最后一行（3917）是 §5.5 的章节标题。实际内容与任务描述严重不符。
+19. GR00T N1.6 预训练数据声称包含「宇树 G1 全身运动操作数据」「智元机器人 AgiBot Genie-1 双手操作数据」「Bimanual YAM 双臂遥操作数据」，但整段无任何 arXiv/GitHub/HuggingFace 来源链接。
+20. GR00T N1.6 架构描述「NVIDIA Cosmos-2B 变体」——NVIDIA Cosmos 官方模型名为「Cosmos-2B」，但 Cosmos 是否已发布面向机器人定制微调的变体版本、GR00T N1.6 具体使用哪个 Cosmos 微调版本，未找到明确来源。
+21. 任务描述称本段落为「§6.1-6.3 推理+NemoClaw」，但实际内容（行 3918-4075）为第五章第 5.5 节「机器人技能训练：从模仿学习到自主泛化」，行 4076 仅为第六章标题「本地 LLM 推理」，真正的 §6.1-6.3（推理框架对比、NemoClaw、AMD 方案）从行 4078 开始，不在审核范围内。任务描述与实际内容不符。
+22. 任务描述要求审核「§6.4 模型+附录A」，但实际提取的第4078-4199行内容为§6.1（推理框架对比）、§6.2（NemoClaw）、§6.3（AMD官方方案）三个小节，§6.4从第4200行才开始。附录A不在此范围内。
+23. ROCm 7.9 nightly「897 tokens/s (Qwen3-30B 提示词处理)」性能数据无任何来源引用。表格中其他ROCm数据均有版本对应关系，唯独此项缺少来源、测试硬件配置及具体条件。
+24. 性能比较「ROCm 7.0.2 + ROCm后端：876.9 tokens/s (+112%)」——基准 Vulkan后端的412 tokens/s已在上下文中，但缺少测试硬件配置的一致性说明（两者的GPU型号、batch size、量化方式是否相同）。
+25. vLLM版本表（4087-4091行）未说明测试GPU型号。ROCm支持表跨越多个vLLM版本但缺少具体测试硬件环境（是AMD AI Halo还是其他RDNA GPU？），导致版本演进的有效性无法独立验证。
+26. 「RTX 2060 6GB」行中出现「Qwen3.5-4B」——Qwen 系列官方发布历史上从未有「3.5」版本；直接从 Qwen2.5 跳到 QwQ 系列。Qwen3.5-4B 为未发布/虚构模型。
+27. 「AMD AI Halo 128GB」行中出现「Qwen3.5-122B（4-bit 需 ~70GB）」——Qwen 官方系列最大参数为 Qwen2.5-72B，不存在 122B 参数版本；Qwen3.5 根本不存在。此为虚构数据。
+28. Cosmos Predict 2.5 的 HuggingFace URL 结尾为「/cosmos-predict-and-transfer2-5」，多出一个横杠，应为「...cosmos-predict-and-transfer-2-5」或正确路径。
+29. Isaac Lab-Arena 链接指向 NVIDIA Developer Blog 文章页（blog.nvidia.com/...isaac-lab-arena/），而非 GitHub 仓库或官方文档页，链接类型不符合其他行使用 GitHub/HuggingFace 仓库的规范。
+30. 「Jetson Nano」术语定义仅有「NVIDIA 低成本嵌入式 AI 计算机」，2GB/4GB/8GB 版本区别未提及，而前文调研记录已确认各版本存在差异

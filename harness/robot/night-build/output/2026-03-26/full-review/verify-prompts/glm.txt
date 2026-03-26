@@ -1,0 +1,9 @@
+你是事实核查员。请联网搜索验证以下 5 个声明。
+裁决: verified=文档有问题 / false_alarm=审核误报 / needs_attention=部分正确 / inconclusive=无法确定
+格式: 编号.[裁决] 证据简述
+
+1. 表格中声称「Windows Semantic Index（语义索引）将图像和文本转换为向量，架构类型待核实（官方未披露双塔/交叉编码器）」——双塔（bi-encoder）和交叉编码器（cross-encoder）是两种不同架构，前者分别编码query和document，后者联合编码。将「待核实」的架构猜测直接写入对比表，逻辑不严谨。
+2. MQTT over WiFi 标注「<50ms」过于乐观。实际家庭 WiFi 环境下 MQTT QoS 1 延迟通常为 50-200ms，<50ms 仅在有线网络或本地 loopback 环境下可实现。
+3. Swift 示例代码中 `socket.write(data: data)` 后没有错误处理分支（try/catch），且 `didReceive` 回调中解析到 JSON 后没有任何执行逻辑（只有注释「解析指令 → 执行动作」），读者无法知道如何真正响应 ROS 2 发来的控制指令。
+4. mqtt_on_message 回调函数将 msg.payload（bytes 类型）直接传给 on_message(topic, msg)，但 on_message 函数内执行 ujson.loads(msg)，MicroPython/ujson 在某些版本对 bytes 参数处理不稳定，应显式调用 msg.payload.decode() 再传入。
+5. MediaPipe 功能表（③ MediaPipe）仅列出 3 项能力（物体检测 ~0.81ms / 手势识别 ~2ms / 全身姿态 ~5ms），标题为「功能最全」，但缺少 MediaPipe 常见能力如人脸网格（Face Mesh）、目标追踪（Object Tracking）等，内容不完整。

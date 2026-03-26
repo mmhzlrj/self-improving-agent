@@ -1,0 +1,153 @@
+{
+  "task_id": "T-01-A08",
+  "version": 2,
+  "line_start": 2101,
+  "line_end": 2400,
+  "headings": [
+    {
+      "line_in_return": 4,
+      "line_in_file": 2104,
+      "level": 4,
+      "heading": "采购建议"
+    },
+    {
+      "line_in_return": 10,
+      "line_in_file": 2110,
+      "level": 4,
+      "heading": "H3863 AI 推理能力分析（重要）"
+    },
+    {
+      "line_in_return": 98,
+      "line_in_file": 2198,
+      "level": 2,
+      "heading": "2.6 Medusa Halo：移动 AI 工作站（长期规划）"
+    },
+    {
+      "line_in_return": 106,
+      "line_in_file": 2206,
+      "level": 3,
+      "heading": "核心规格（AMD 官方参数 + 爆料预估）"
+    },
+    {
+      "line_in_return": 123,
+      "line_in_file": 2223,
+      "level": 3,
+      "heading": "LPDDR6 带宽对本地大模型的意义"
+    },
+    {
+      "line_in_return": 132,
+      "line_in_file": 2232,
+      "level": 3,
+      "heading": "256GB+ 统一内存对 0-1 移动终端的意义"
+    },
+    {
+      "line_in_return": 144,
+      "line_in_file": 2244,
+      "level": 3,
+      "heading": "多 Agent 并行支持"
+    },
+    {
+      "line_in_return": 156,
+      "line_in_file": 2256,
+      "level": 3,
+      "heading": "与家中 AI Halo 的性能对比"
+    },
+    {
+      "line_in_return": 167,
+      "line_in_file": 2267,
+      "level": 3,
+      "heading": "结论"
+    },
+    {
+      "line_in_return": 174,
+      "line_in_file": 2274,
+      "level": 3,
+      "heading": "当前可买的最近替代（过渡方案）"
+    },
+    {
+      "line_in_return": 183,
+      "line_in_file": 2283,
+      "level": 2,
+      "heading": "2.7 手部与执行器设计"
+    },
+    {
+      "line_in_return": 189,
+      "line_in_file": 2289,
+      "level": 4,
+      "heading": "0-1 首选：Kinetix 开源灵巧手"
+    },
+    {
+      "line_in_return": 207,
+      "line_in_file": 2307,
+      "level": 4,
+      "heading": "行业现状（参考）"
+    },
+    {
+      "line_in_return": 216,
+      "line_in_file": 2316,
+      "level": 4,
+      "heading": "自由度（Degrees of Freedom, DOF）说明"
+    },
+    {
+      "line_in_return": 225,
+      "line_in_file": 2325,
+      "level": 4,
+      "heading": "手部设计的三个关键参数"
+    },
+    {
+      "line_in_return": 233,
+      "line_in_file": 2333,
+      "level": 4,
+      "heading": "0-1 推荐方案（分阶段）"
+    },
+    {
+      "line_in_return": 253,
+      "line_in_file": 2353,
+      "level": 4,
+      "heading": "腱绳驱动（Tendon-driven）参考"
+    },
+    {
+      "line_in_return": 261,
+      "line_in_file": 2361,
+      "level": 4,
+      "heading": "触觉传感器选型"
+    },
+    {
+      "line_in_return": 276,
+      "line_in_file": 2376,
+      "level": 2,
+      "heading": "2.8 技术可行性：五条技术路线"
+    },
+    {
+      "line_in_return": 282,
+      "line_in_file": 2382,
+      "level": 3,
+      "heading": "技术路线一：开源 AI Agent 框架"
+    },
+    {
+      "line_in_return": 286,
+      "line_in_file": 2386,
+      "level": 3,
+      "heading": "技术路线二：消费级物理仿真"
+    },
+    {
+      "line_in_return": 290,
+      "line_in_file": 2390,
+      "level": 3,
+      "heading": "技术路线三：个人制造工具链"
+    },
+    {
+      "line_in_return": 294,
+      "line_in_file": 2394,
+      "level": 3,
+      "heading": "技术路线四：本地大模型推理"
+    },
+    {
+      "line_in_return": 298,
+      "line_in_file": 2398,
+      "level": 3,
+      "heading": "技术路线五：统一内存架构芯片走向成熟"
+    }
+  ],
+  "total_headings": 24
+}

@@ -1,0 +1,29 @@
+{
+  "task_id": "T-01-R02",
+  "group": "R",
+  "version": 3,
+  "section": "§1.2 核心系统：贵庚",
+  "line_range": "224-523",
+  "total_lines": 300,
+  "issues_found": 3,
+  "issues": [
+    {
+      "type": "逻辑矛盾",
+      "line_approx": 393,
+      "description": "RynnBrain 记忆更新机制表格称「GRPO 训练 KL 散度惩罚（β=0.02），新记忆不覆盖旧记忆」，将其作为 RynnBrain 整体的记忆机制。但下一段「重要澄清」明确指出「RynnBrain 基础模型（2B/8B/30B MoE）使用标准 SFT 预训练，不用 GRPO。GRPO 仅用于 RynnBrain-CoP（Chain-of-Point 推理变体）Post-training 对齐阶段」。两处描述相互矛盾：表格把 GRPO 的防止遗忘效果归属于基础模型，而澄清说基础模型根本不用 GRPO。",
+      "severity": "high"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 390,
+      "description": "「连续100个任务微调后，基础能力保留率 94%」这一具体数据，来源标注为「arXiv:2602.14979 附录持续学习实验 + RynnBrain 官方 GitHub 技术白皮书 + 2026-02-10 开源发布会披露」，三项来源混合写在同一括号内，发布会披露不属于正式学术或技术文档来源，且未提供具体链接或页码，数据的可验证性不足。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 467,
+      "description": "部署路径表格（阶段一/二/三）中，阶段二的「硬件」列为空（仅描述「AMD AI Halo 128GB」于基座行，未填硬件列），阶段三的「硬件」列和「基座」列均为空，阶段三行完全空白仅写了 RynnBrain-30B MoE 实时推理，表格完整性不足。",
+      "severity": "medium"
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "task_id": "T-01-R03",
+  "group": "R",
+  "version": 3,
+  "section": "§3.4 ROS 2 支持情况与替代框架",
+  "line_range": "2500-2780",
+  "total_lines": 280,
+  "issues_found": 3,
+  "issues": [
+    {
+      "type": "逻辑矛盾",
+      "line_approx": 2507,
+      "description": "硬件总览表中写「ROS 2 Foxy + Ubuntu 18.04」，但 ROS 2 Foxy 官方仅支持 Ubuntu 20.04 LTS，3.4.1 详表也正确写「20.04 LTS」，前后矛盾",
+      "severity": "high"
+    },
+    {
+      "type": "代码问题",
+      "line_approx": 2599,
+      "description": "ESP32 micro-ROS 示例代码中 `rclc_node_init_default(&node, \"esp32_cam\", \"\", &support)` 使用了未声明变量 `support`（类型应为 `rclc_support_t`），需先 `rclc_support_init(&support, 0, NULL, &rmw_fastrtps_c_shared_library)` 初始化，否则无法编译",
+      "severity": "high"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 2770,
+      "description": "替代框架表列出「YUR」框架，无法确认为真实存在的机器人框架，且整条数据无任何引用出处",
+      "severity": "medium"
+    }
+  ]
+}

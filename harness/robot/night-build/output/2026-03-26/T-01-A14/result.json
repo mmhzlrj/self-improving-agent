@@ -1,0 +1,21 @@
+{
+  "task_id": "T-01-A14",
+  "version": 2,
+  "line_start": 3901,
+  "line_end": 4200,
+  "headings": [
+    {"line_in_return": 17, "line_in_file": 3917, "level": 2, "heading": "5.5 机器人技能训练：从模仿学习到自主泛化"},
+    {"line_in_return": 34, "line_in_file": 3934, "level": 4, "heading": "行业现状"},
+    {"line_in_return": 47, "line_in_file": 3947, "level": 4, "heading": "三种主要训练范式"},
+    {"line_in_return": 50, "line_in_file": 3950, "level": 4, "heading": "3DGS 仿真数据生成（RoboGSim）——解决数据不足的关键方案"},
+    {"line_in_return": 86, "line_in_file": 3986, "level": 4, "heading": "0-1 分阶段训练方案"},
+    {"line_in_return": 113, "line_in_file": 4013, "level": 4, "heading": "关键问题：数据从哪来？"},
+    {"line_in_return": 135, "line_in_file": 4035, "level": 4, "heading": "参考项目"},
+    {"line_in_return": 146, "line_in_file": 4046, "level": 1, "heading": "第六章：本地 LLM 推理"},
+    {"line_in_return": 148, "line_in_file": 4048, "level": 2, "heading": "6.1 推理框架对比"},
+    {"line_in_return": 185, "line_in_file": 4085, "level": 3, "heading": "RTX 2060 量化方案"},
+    {"line_in_return": 196, "line_in_file": 4096, "level": 3, "heading": "ROCm 对 AMD AI Halo 128GB 的支持"},
+    {"line_in_return": 224, "line_in_file": 4124, "level": 3, "heading": "vLLM ROCm 支持（v0.14.0+）"}
+  ],
+  "total_headings": 12
+}

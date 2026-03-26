@@ -1,0 +1,240 @@
+{
+  "task_id": "T-01-H01",
+  "script_issues": 39,
+  "issues": [
+    {
+      "type": "data_missing",
+      "line": 2294,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2295,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2296,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2297,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2298,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2299,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2300,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2301,
+      "description": "表格空单元格（第3列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2310,
+      "description": "表格空单元格（第6列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2311,
+      "description": "表格空单元格（第6列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2312,
+      "description": "表格空单元格（第6列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2313,
+      "description": "表格空单元格（第6列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2314,
+      "description": "表格空单元格（第6列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2315,
+      "description": "表格空单元格（第6列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2328,
+      "description": "表格空单元格（第4列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2329,
+      "description": "表格空单元格（第4列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2330,
+      "description": "表格空单元格（第4列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2331,
+      "description": "表格空单元格（第4列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2332,
+      "description": "表格空单元格（第4列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2366,
+      "description": "表格空单元格（第5列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2367,
+      "description": "表格空单元格（第5列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2368,
+      "description": "表格空单元格（第5列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2369,
+      "description": "表格空单元格（第5列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2370,
+      "description": "表格空单元格（第5列）",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line": 2371,
+      "description": "表格空单元格（第5列）",
+      "severity": "medium"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2312,
+      "description": "含数据但无来源: | Tesla | Optimus Gen3 | **22 DOF × 2（单手）** | 触觉传感器（指尖力反馈）| ",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2313,
+      "description": "含数据但无来源: | Boston Dynamics | Atlas | 全身56 DOF | 全身触觉感知 | 全关节连续旋转，可做复杂",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2319,
+      "description": "含数据但无来源: DOF = 独立控制的旋转/平移轴数量。人类单手约 27 DOF：",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2320,
+      "description": "含数据但无来源: - 大拇指：5 DOF（2个关节 + 腕掌关节）",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2321,
+      "description": "含数据但无来源: - 食指：4 DOF",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2322,
+      "description": "含数据但无来源: - 中指/无名指/小指：各 4 DOF",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2323,
+      "description": "含数据但无来源: - 腕部：3 DOF",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2324,
+      "description": "含数据但无来源: - 总计：约 27-28 DOF",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2330,
+      "description": "含数据但无来源: | **关节数（DOF）** | 决定能做什么动作 | 单手 ≥12 DOF（基础），≥20 DOF（进阶） |",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2331,
+      "description": "含数据但无来源: | **指尖力矩** | 决定能抓多重的东西 | 持续抓取 ≥5kg（基础），≥20kg（进阶） |",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2337,
+      "description": "含数据但无来源: - 使用 Cyber Bricks 现有舵机，12 DOF 单手",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2343,
+      "description": "含数据但无来源: - 目标：单手 16-22 DOF + 指尖压力传感",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2344,
+      "description": "含数据但无来源: - 方案：LD-2209 伺服舵机（20kg/cm 扭矩）× 12个 + 薄膜压力传感器",
+      "severity": "low"
+    },
+    {
+      "type": "possible_no_source",
+      "line": 2350,
+      "description": "含数据但无来源: - 单手 22 DOF + 多维力矩传感器 + 腱绳驱动（Tendon-driven）",
+      "severity": "low"
+    }
+  ]
+}

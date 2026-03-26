@@ -1,0 +1,36 @@
+你是事实核查员。请联网搜索验证以下 32 个声明。
+每个声明裁决: verified=文档确实有问题 / false_alarm=审核误报文档是对的 / needs_attention=部分正确 / inconclusive=无法确定
+简短回答，每条一行格式: 编号.[裁决] 简述证据
+
+1. v3.23 版本说明中「94%数据溯源恢复」中的 94% 数字含义不明——无上下文说明这是哪类数据的溯源率（是全部硬件规格的94%？还是某一章节？），读者无法判断 6% 未恢复的是什么内容
+2. 「1990万样本」的预训练内化数量无出处。这是一个关键性能数字，但表中未注明数据来源（论文/官方 GitHub/发布会等）。
+3. 全文出现「拓竹星闪模块」「拓竹N1」「拓竹农场管家」等名称，但未解释「拓竹」是什么——是产品名、品牌名还是前文已定义的概念？来源不明。
+4. BearPi-Pico H3863（海思 WS63 RISC-V）标注「WiFi6+BLE+SLE三模」，其中 SLE（星闪）支持存疑——海思 WS63 公开资料主要提及 WiFi 和 BLE，SLE 支持需官方确认或注明来源。
+5. 「拓竹 H2C」疑为笔误。拓竹（Bambu Lab）当前市售机型为 H2 / H2D，并无 H2C 型号。同一文档 line 2392 也使用「拓竹 H2C」，说明非偶发笔误，但来源存疑。
+6. Boston Dynamics Atlas「全身触觉感知」描述无具体来源。液压版 Atlas 的触觉传感器分布和覆盖范围未标注引用，实际传感方案存在争议（2024 年电动版 Atlas 已发布，方案可能不同）。
+7. 「腾讯推出 QClaw 深度集成微信/QQ 生态」无任何来源验证。搜索无公开资料匹配该产品名称或合作声明。
+8. 「宇树 G1 展示过捏鸡蛋、拧螺丝等精细操作」无具体来源链接或视频引用，无法核实该演示是否真实存在。
+9. Genesis「华人团队（CMU、MIT 等）开源」——团队背景过于笼统，未注明主要作者姓名和论文链接。
+10. 「OpenClaw 是全球最流行的开源 AI Agent 项目」无任何引用依据（无 GitHub stars 数量、无行业报告排名、无下载量数据）。
+11. 替代框架表中「YUR」框架（描述：极轻量、Web 可视化、快速原型，教学/Web 端监控）来源不明。机器人领域常见框架为 YARP（Yet Another Robot Platform，由 IIT 开发，用于机器人通信中间件，而非轻量 Web 可视化原型框架），此条目疑为 YARP 的笔误，或为虚构框架，建议核实来源或更正为 YARP。
+12. Swift 代码示例使用了 Starscream WebSocket 库，但文档中未说明如何获取/安装该库（未提供 Swift Package Manager / CocoaPods 依赖配置），初学者无法直接运行示例。
+13. Step 5 代码调用「bridge.ask(text)」，但 OpenClaw bridge API 不存在 ask() 方法，会导致运行时 AttributeError。代码无法执行。
+14. openclaw node run 命令同时使用环境变量「OPENCLAW_GATEWAY_URL」和命令行标志「--host/--port 192.168.x.x:18789」。若 --host/--port 是指定节点监听地址（而非网关地址），则指向 Mac Gateway 是错误的。文档未说明这些标志的确切语义，存在歧义。
+15. Step 1 用 balenaEtcher 烧录 SD 卡，但没有提供下载链接。
+16. openclaw node run 命令使用了「--display-name」标志，未验证此标志是否为 openclaw CLI 的有效参数。
+17. 文档声称 Genesis 是「Apple 团队开源的独立物理引擎」，经核实 GitHub 仓库（Genesis-Embodied-AI/Genesis）由 Genesis AI Company 主导开发，并非 Apple 团队的产品。Apple Silicon Metal 仅为其支持的计算后端之一。
+18. §5.3 开头的警告框中，对 Newton 引擎的描述缺少来源说明。Genesis 小节注明「来源：Genesis GitHub + 官方文档」，但 Newton 小节（3601 行起）无等效来源标注，GitHub URL 也未标注验证日期。
+19. RynnBrain 核心能力表中「100步+任务完成率 88%」「零样本适配 未知环境成功率 94%」两个关键性能指标，标注来源为「官方 Demo 验证」，但缺少具体论文/官方文档/仓库链接，无法追溯验证。
+20. LangSplat 开源项目表格单元格中「LangSplat（CVPR 2024 Highlight）」为论文 Highlight，但表格「对 0-1 价值」列仅填「⭐⭐⭐⭐⭐ 语义建图」，缺少具体应用场景描述（如支持自然语言查询哪些类型的物体），价值说明不够具体。
+21. Genesis GitHub URL 为 404：https://github.com/applecartn/genesis 经验证返回 404，已失效。同一 URL 在文档其他位置（行 4237）也出现，需全局替换。正确仓库应为 Genesis 官方仓库，但未确认具体地址，暂以 broken_link 记录。
+22. Cosmos Predict 2.5 在数据来源表中被列为关键数据源（成本「中」，质量「中」），但无任何来源链接。同期望 RoboGSim 有 GitHub + arXiv 链接，Isaac Gym 有明确引用，Cosmos 无链接导致可信度无法验证。
+23. AgiBot World 链接指向 OpenDataLab 下载页面（opendatalab.com/OpenDriveLab/AgiBot-World/download），而非智元官方项目页面或 GitHub，来源非一手。
+24. GO-1 的 GitHub 组织名列为「open-agibot/go1-sim」，但智元官方 GitHub 组织为「Agibot」（非 open-agibot），实际 repo 名也存在差异。链接指向不存在的 org。
+25. ALOHA（斯坦福）项目标注「—」，无任何 GitHub/项目链接，来源完全缺失。
+26. RT-1（Google）项目标注「—」，无任何 GitHub/项目链接，来源完全缺失。
+27. RynnBrain（阿里）标注「—」无任何来源；其描述「30B MoE + Plan/Nav/CoP」未经证实，且该描述不见诸任何阿里官方文档，极可能为编造。
+28. NemoClaw 项目标注「—」，无任何来源链接，来源完全缺失。
+29. Genesis 物理引擎链接 github.com/applecartn/genesis——applecartn 非任何已知官方账号，实际 Genesis 项目为 pythonphysics genesis / hass现货，链接目标可疑。
+30. 「哪吒双足机器人」—— 49个自由度、手部12DOF 的具体参数来源未标注
+31. 「启元 Q1」—— 「全球首款」「小到能塞进书包」等描述缺乏来源支撑
+32. Cosmos Predict 2.5「体积缩小至 1/3.5」的倍数关系缺乏原始来源，仅有结论性描述

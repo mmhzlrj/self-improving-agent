@@ -1,0 +1,40 @@
+{
+  "verification_group": "V10-V12",
+  "results": [
+    {
+      "id": "V10",
+      "claim": "Jetson AGX Thor 已发布，官方数据可验证",
+      "verdict": "confirmed",
+      "evidence": "NVIDIA于2025年8月25日正式发布Jetson AGX Thor。开发者套件售价$3,499，千片单价$2,999（ Jetson T5000模组）。规格：AI算力2,070 FP4 TFLOPS（约为AGX Orin的7.5倍），Blackwell架构GPU（2,560 CUDA核心+96 Tensor核心），14核Arm Neoverse-V3AE CPU，128GB LPDDR5X，功耗40-130W可配置。",
+      "confidence": "high",
+      "sources": [
+        "https://www.nvidia.com/en-us/autonomous-machines/embedded-systems/",
+        "https://eetimes.jp/ee/2025/08/",
+        "https://www.techweb.com.cn"
+      ]
+    },
+    {
+      "id": "V11",
+      "claim": "Microsoft Phi-3.5-mini 不是交叉编码器（cross encoder）",
+      "verdict": "confirmed",
+      "evidence": "Phi-3.5-mini是Dense Decoder-only Transformer架构（自回归解码器-only），38亿参数，专为文本生成设计。不是交叉编码器——交叉编码器是专门用于同时输入文本对并输出相关性分数的模型，而Phi-3.5-mini是自回归生成模型，无法直接输出相似度分数。虽然可以通过Prompt方式让它辅助排序任务，但架构上完全不同。",
+      "confidence": "high",
+      "sources": [
+        "https://ai.azure.com/explore/models/Phi-3.5-mini",
+        "https://build.nvidia.com/microsoft/phi-3.5-mini-instruct"
+      ]
+    },
+    {
+      "id": "V12",
+      "claim": "OpenClaw 的 GitHub 地址不是 github.com/openclaw/openclaw",
+      "verdict": "rejected",
+      "evidence": "github.com/openclaw/openclaw 正是OpenClaw的官方仓库地址。该仓库页面标题为「openclaw/openclaw: Your own personal AI assistant」，由Peter Steinberger创建维护，npm包名为openclaw，官方文档、官网均指向此仓库。声明的「不是」与事实相反。",
+      "confidence": "high",
+      "sources": [
+        "https://github.com/openclaw/openclaw",
+        "https://docs.openclaw.ai",
+        "https://openclaws.io/zh/faq"
+      ]
+    }
+  ]
+}

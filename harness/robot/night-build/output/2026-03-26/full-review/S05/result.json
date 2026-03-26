@@ -1,0 +1,13 @@
+{"task_id": "S05", "name": "§1.2 贵庚-4", "line_range": "1277-1776", "total_lines": 500, "issues_found": 11, "issues": [
+  {"type": "来源缺失", "line_approx": 1283, "description": "自毁触发条件写道「详见 §8.3」但本文档属于 §1.2 贵庚-4，§8.3 节不在本文件结构内，属于无效交叉引用。", "severity": "high"},
+  {"type": "逻辑矛盾", "line_approx": 1293, "description": "自毁触发条件说「长时间（如30天）无法联系上主人」，但上层「最好的预防」段落说「0-1 每天看到主人平安在家 → 情感上满足 → 继续正常陪伴行为」。若主人每日平安在家，0-1 不可能 30 天联系不上，触发条件与日常状态描述自相矛盾。", "severity": "high"},
+  {"type": "内容不完整", "line_approx": 1300, "description": "自毁触发条件「主人确认触发」写「立即执行」，未说明确认方式：是指令需要物理在场、语音还是其他验证形式？触发机制不完整。", "severity": "medium"},
+  {"type": "数据缺失", "line_approx": 1365, "description": "硬件选型表格中 NAS_3 冻层一行的「设备」列完全空白，配置建议列却有内容，表格信息不完整。", "severity": "high"},
+  {"type": "内容不完整", "line_approx": 1400, "description": "「重要记忆的判断标准」段落定义了哪些需要多区域冗余，但未给出各判断标准的具体操作阈值（如 importance 权重访问频率阈值是多少），导致策略无法落地执行。", "severity": "medium"},
+  {"type": "来源缺失", "line_approx": 1355, "description": "全文出现「拓竹星闪模块」「拓竹N1」「拓竹农场管家」等名称，但未解释「拓竹」是什么——是产品名、品牌名还是前文已定义的概念？来源不明。", "severity": "medium"},
+  {"type": "逻辑矛盾", "line_approx": 1418, "description": "分布式 NAS 架构描述中，前文 NAS_Primary 的 /embeddings/ 写的是「向量索引库（PGVector 数据目录）」，后文又说「向量索引层（集中，不按地域分）」。本地 NAS 存向量索引与集中式向量索引层之间存在架构矛盾，说法不一致。", "severity": "medium"},
+  {"type": "内容不完整", "line_approx": 1385, "description": "「主人回到家，重新连接 → 倒计时取消 → 恢复正常」段落未说明：若主人未回家但通过视频通话等远程方式恢复联系，倒计时是否同样取消？取消条件只描述了一种场景，不够完整。", "severity": "medium"},
+  {"type": "事实性错误", "line_approx": 1395, "description": "地理分区表中将「陕西」列为固定住所/长租房 Backup 区域，但本 SOP 是九节狼的私人文档，陕西是否为固定住所属于用户私人信息，不应被文档编造假设。", "severity": "medium"},
+  {"type": "重复内容", "line_approx": 1350, "description": "「Mac离线 → 进入失联状态倒计时（30天，可设定）」在两个位置几乎完全重复出现（自毁触发机制段落和自毁与断连关系段落），内容未增量，可合并。", "severity": "low"},
+  {"type": "内容不完整", "line_approx": 1340, "description": "星闪节点 C 的连接方式描述为「SLE + WiFi：作为 iPhone 的网络桥接」，但节点 A 已说明支持 WiFi，节点 C 为何用「SLE + WiFi」而非「BLE + WiFi」与前文 iPhone 托管模式的「BLE / 有线」说法不一致，拓扑描述不清。", "severity": "low"}
+]}

@@ -1,0 +1,69 @@
+{
+  "task_id": "S07",
+  "name": "§2.1-2.4 硬件",
+  "line_range": "1841-2004",
+  "total_lines": 164,
+  "issues_found": 10,
+  "issues": [
+    {
+      "type": "数据缺失",
+      "line_approx": 1886,
+      "description": "「拓竹 Cyber Tanks 内置电池」的容量/电压等关键参数标注为「未知」。电源方案作为具身机器人核心设计，此处缺失使后续续航计算和电源规划无法进行。",
+      "severity": "high"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 1848,
+      "description": "BearPi-Pico H3863（海思 WS63 RISC-V）标注「WiFi6+BLE+SLE三模」，其中 SLE（星闪）支持存疑——海思 WS63 公开资料主要提及 WiFi 和 BLE，SLE 支持需官方确认或注明来源。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 1956,
+      "description": "AMD AI Halo 128GB（Ryzen AI Max+ 395）仅列出 NPU 50 TOPS + Total Platform AI 126 TOPS，缺少 GPU 部分算力（GPU TFLOPS）和核心规格，导致无法与 Jetson AGX Thor 的 GPU 算力表格横向对比。",
+      "severity": "medium"
+    },
+    {
+      "type": "事实性错误",
+      "line_approx": 1849,
+      "description": "「拓竹 H2C」疑为笔误。拓竹（Bambu Lab）当前市售机型为 H2 / H2D，并无 H2C 型号。同一文档 line 2392 也使用「拓竹 H2C」，说明非偶发笔误，但来源存疑。",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 1957,
+      "description": "Jetson AGX Thor 完整算力规格标注来源为「NVIDIA 官方技术博客（表1）+ 官方产品页面」（更新 2026-03-25），但该产品截至 2026-03 尚未正式发布，官方数据不可验证；「NVIDIA官方」标注缺乏可查证的链接或引用。",
+      "severity": "high"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 1955,
+      "description": "RTX 5050 9GB GDDR7 标注「2026-06」售价约 2,000 元。RTX 50 系列尚未发布（截至 2026-03），此价格为预测而非实际报价，应注明「预测价格」或标注「待核实」。",
+      "severity": "medium"
+    },
+    {
+      "type": "逻辑矛盾",
+      "line_approx": 1958,
+      "description": "「阶段一（备选）」写「先用 Jetson Nano 2GB（已有）」，而 §2.1 表格 line 1841 已将「Jetson Nano 2GB」列为「现有硬件」，此处又列为「阶段一待用」存在重复宣告；且后续「等 Jetson Thor Nano 8G/16G 上市后替换」与「Jetson Thor 已上市」说法自相矛盾——若 Thor 已上市则无需等 Nano 版。",
+      "severity": "high"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 1960,
+      "description": "NAS 项目标注「存储矩阵已有，无需额外采购」却仍标价 3,000 元，两句话自相矛盾；且「贵庚」为错别字（疑为「归档」或「贵重」），需修正。",
+      "severity": "low"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 1956,
+      "description": "「Q2」无年份——与同行其他条目（2026-06、阶段一、阶段四）格式不统一，AMD AI Halo 128GB 的具体采购季度不明确。",
+      "severity": "low"
+    },
+    {
+      "type": "格式问题",
+      "line_approx": 1961,
+      "description": "「阶段四」与「可选」「充裕时」并列，但三者均无时间节点——与表格中其他有时间（如 2026-06、Q2）的条目风格不一致，读者无法判断执行顺序。",
+      "severity": "low"
+    }
+  ]
+}

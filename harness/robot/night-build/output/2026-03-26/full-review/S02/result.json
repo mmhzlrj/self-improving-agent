@@ -1,0 +1,50 @@
+{"task_id": "S02", "name": "§1.2 贵庚-1", "line_range": "224-523", "total_lines": 300, "issues_found": 8, "issues": [
+  {
+    "type": "格式问题",
+    "line_approx": 263,
+    "description": "表格列对齐格式错误：`| 参数 | 配置值 | 说明 |` 后面一行是 `|:---|:---|:---|`，但第二列的配置值列中出现了独立的「0.02」，说明该列本应有列头（如「值」或「配置」）但被误写成了数据行内容。正确格式应为三列表头 + 对齐行，或检查 `组大小（group_size）| 5` 是否应与 `KL 散度系数（β）| 0.02` 合并为同一行。",
+    "severity": "medium"
+  },
+  {
+    "type": "来源缺失",
+    "line_approx": 244,
+    "description": "三个硬件偏好举例「AMD AI Halo 128GB、苹果 M 系列、DGX Spark」为大额采购决策的具体参数（128GB 内存），但未注明数据来源。这些设备的统一内存 128GB 规格需要官方参数支持，当前无出处。",
+    "severity": "medium"
+  },
+  {
+    "type": "来源缺失",
+    "line_approx": 254,
+    "description": "「1990万样本」的预训练内化数量无出处。这是一个关键性能数字，但表中未注明数据来源（论文/官方 GitHub/发布会等）。",
+    "severity": "medium"
+  },
+  {
+    "type": "逻辑矛盾",
+    "line_approx": 268,
+    "description": "OpenClaw RL 参考弧记为「arXiv:2603.10165」，而 RynnBrain-CoP GRPO 参数表中的弧记为「arXiv:2602.14979」——两个号码不同，且均为数字编号，未标注论文标题，无法确认是否为同一篇文献或不同文献。",
+    "severity": "medium"
+  },
+  {
+    "type": "逻辑矛盾",
+    "line_approx": 261,
+    "description": "「防止灾难性遗忘：GRPO 训练 KL 散度惩罚（β=0.02）」这一行与后续「重要澄清」段落（line 263附近）中「RynnBrain 基础模型（2B/8B/30B MoE）使用标准 SFT 预训练，不用 GRPO。GRPO 仅用于 RynnBrain-CoP」存在逻辑冲突：前段描述 GRPO 的 KL 惩罚防止遗忘，后段却说 GRPO 不是所有 RynnBrain 变体都使用，读者无法判断 GRPO 与防止遗忘的因果关系是否适用于基础模型。",
+    "severity": "high"
+  },
+  {
+    "type": "重复内容",
+    "line_approx": 261,
+    "description": "「防止灾难性遗忘：GRPO 训练 KL 散度惩罚（β=0.02）」与上方 RynnBrain-CoP GRPO 超参数表（line 263）中「KL 散度系数（β）| 0.02」实质为同一信息，出现在同一表格内，且与该段落的「重要澄清」说明形成冗余。",
+    "severity": "low"
+  },
+  {
+    "type": "来源缺失",
+    "line_approx": 248,
+    "description": "「阶段一（1-2年）/ 阶段二（3-4年）/ 阶段三（5年+）」的时间规划无依据。未说明这些时间段是基于什么得出的（行业经验、项目计划还是假设），也未说明「阶段一」对应 SOP 中的哪个 Phase（只提到 Phase 1-4，但没有具体定义这些 Phase 的起止时间）。",
+    "severity": "medium"
+  },
+  {
+    "type": "内容不完整",
+    "line_approx": 248,
+    "description": "「前期/中期/长期」三阶段的时间框架说明需要与 SOP 主体中的 Phase 编号（Phase 1-6）对齐。本节提到「阶段一（SOP Phase 1-4）」和「阶段二（Phase 5-6）」，但 SOP 主体中没有找到 Phase 1-6 的明确定义或时间节点，导致读者无法将「1-2年」对应到具体的时间范围。",
+    "severity": "medium"
+  }
+]}

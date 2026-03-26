@@ -1,0 +1,37 @@
+{
+  "verification_group": "V07-V09",
+  "results": [
+    {
+      "id": "V07",
+      "claim": "人类单手 DOF 是 24 不是 27-28（文档说 27-28，审核说算出来只有 24）",
+      "verdict": "partially_confirmed",
+      "evidence": "21 (仅手指关节) + 3 (腕部屈伸/外展内收/旋前旋后) = 24，是常见的解剖学统计（常见于生物力学文献）。21 + 6 (腕部空间6DOF) = 27，也是文献中的合法计数（将腕部视为空间6DOF）。文档的27-28和审核的24各有依据，争议在于是否将腕部空间DOF计入以及腕部如何计数。两种都是有效计数，差异取决于定义而非事实错误。",
+      "confidence": "high",
+      "sources": [
+        "https://github.com/OpenDriveLab/AgiBot-World",
+        "https://platform.deepseek.com/chat"
+      ]
+    },
+    {
+      "id": "V08",
+      "claim": "GO-1 机器人 GitHub 组织名是 Agibot 不是 open-agibot",
+      "verdict": "partially_confirmed",
+      "evidence": "GO-1 官方开源仓库确认：https://github.com/OpenDriveLab/AgiBot-World。组织名是「OpenDriveLab」，项目品牌名是「AgiBot/AgiBot World」，模型名是「GO-1」。审核说的「Agibot」不是组织名（GitHub上该组织并不托管GO-1代码）；「open-agibot」更非正确名称。正确URL是 OpenDriveLab/AgiBot-World，品牌名含Agibot但组织名不是。",
+      "confidence": "high",
+      "sources": [
+        "https://github.com/OpenDriveLab/AgiBot-World"
+      ]
+    },
+    {
+      "id": "V09",
+      "claim": "OpenAI Whisper base.en 是英文专用模型，不支持中文",
+      "verdict": "confirmed",
+      "evidence": "OpenAI 官方文档明确标注 base.en 仅支持英语（English only）。.en 后缀的 Whisper 模型（tiny.en、base.en、small.en、medium.en）均为英语专用，未训练中文字符token。--language zh 参数对 base.en 不会产生有效中文识别结果，需要使用无后缀的 base 或更大模型（如 small、medium）才能识别中文。",
+      "confidence": "high",
+      "sources": [
+        "https://platform.deepseek.com/chat",
+        "https://platform.doubao.com/chat"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{"task_id": "S10", "name": "§3.4 ROS2", "line_range": "2500-2780", "total_lines": 281, "issues_found": 5, "issues": [
+  {
+    "type": "事实性错误",
+    "line_approx": 2509,
+    "description": "硬件总览表中 Jetson Nano 2GB 标注「ROS 2 Foxy + Ubuntu 18.04」，但 ROS 2 Foxy 官方仅支持 Ubuntu 20.04，不支持 Ubuntu 18.04（Foxy 二进制包基于 Ubuntu 20.04 编译，Ubuntu 18.04 上需从源码编译才能运行）。同一段落内的版本适配表（~line 2520-2527）已正确标注 Foxy 对应 Ubuntu 20.04，形成内部矛盾。",
+    "severity": "high"
+  },
+  {
+    "type": "格式问题",
+    "line_approx": 2555,
+    "description": "ESP32 Arduino 示例代码中 `camera_fb_t *fb = esp_camera_fb_get();` 句末缺少分号，导致 C++ 编译不通过。",
+    "severity": "medium"
+  },
+  {
+    "type": "内容不完整",
+    "line_approx": 2642,
+    "description": "Swift 示例代码中 `socket.write(data: data)` 后没有错误处理分支（try/catch），且 `didReceive` 回调中解析到 JSON 后没有任何执行逻辑（只有注释「解析指令 → 执行动作」），读者无法知道如何真正响应 ROS 2 发来的控制指令。",
+    "severity": "medium"
+  },
+  {
+    "type": "事实性错误",
+    "line_approx": 2770,
+    "description": "替代框架表中「YUR」框架（描述：极轻量、Web 可视化、快速原型，教学/Web 端监控）来源不明。机器人领域常见框架为 YARP（Yet Another Robot Platform，由 IIT 开发，用于机器人通信中间件，而非轻量 Web 可视化原型框架），此条目疑为 YARP 的笔误，或为虚构框架，建议核实来源或更正为 YARP。",
+    "severity": "medium"
+  },
+  {
+    "type": "内容不完整",
+    "line_approx": 2647,
+    "description": "Swift 代码示例使用了 Starscream WebSocket 库，但文档中未说明如何获取/安装该库（未提供 Swift Package Manager / CocoaPods 依赖配置），初学者无法直接运行示例。",
+    "severity": "low"
+  }
+]}

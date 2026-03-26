@@ -1,0 +1,62 @@
+{"task_id": "S08", "name": "§2.5-2.6", "line_range": "2005-2282", "total_lines": 278, "issues_found": 10, "issues": [
+  {
+    "type": "格式问题",
+    "line_approx": 2007,
+    "description": "§2.5 头部缺少「来源」字段。§2.6 有「来源：多源爆料（非官方确认）」，§2.5 仅有「最后更新」而无来源说明，数据权威性无从判断。",
+    "severity": "medium"
+  },
+  {
+    "type": "事实性错误",
+    "line_approx": 2013,
+    "description": "存储规格「606KB SRAM + 300KB ROM + 4MB Flash」中 Flash 容量疑似错误。Hi3863V100 官方 datasheet 显示内置 Flash 为 2MB（Hi3861 才是 2MB + SPI NOR Flash），BearPi Pico H3863 模块通常配 2MB 闪存。4MB 数字无明确来源，且与官方参数表「Hi3863V100」行中的「存储 | 4MB Flash」一致，意味着两处均错误。建议溯源至官方文档核实。",
+    "severity": "high"
+  },
+  {
+    "type": "格式问题",
+    "line_approx": 2013,
+    "description": "规格表备注缺失。「Wi-Fi 6（114.7Mbps）」括号内 114.7Mbps 是具体数值但无来源；「SLE 1.0（12Mbps）」括号内数据同样无来源标注，两项关键无线参数均未标明数据出处。",
+    "severity": "medium"
+  },
+  {
+    "type": "逻辑矛盾",
+    "line_approx": 2030,
+    "description": "§2.5 核心价值第1条声称「SLE 时延 20μs（蓝牙10ms级）」，但后文 AI 分析部分「SLE 传输能力（实测）」表中「空口时延」为 49μs/帧，与 20μs 存在明显差异。两处均未注明 20μs 为理论值还是实测条件（距离/包大小/环境），导致读者无法判断哪个数字更可信。",
+    "severity": "medium"
+  },
+  {
+    "type": "逻辑矛盾",
+    "line_approx": 2077,
+    "description": "YOLO 推理能力表标题为「MCUBench 实测数据」，但表格最后一行 H3863（240MHz/606KB）标注「~4 FPS」，此数字是「换算」值（根据 STM32H573 线性推算），并非 MCUBench 实测数据。表头声明「实测」与 H3863 行实际为估算数据不符，混淆了数据性质。",
+    "severity": "medium"
+  },
+  {
+    "type": "事实性错误（概率高）",
+    "line_approx": 2077,
+    "description": "H3863 SRAM 标注为「606KB」，与「参考对比」列中 ESP32-S3 的算力对比中「比 ESP32-S3 弱」的结论可能不准确。ESP32-S3 算力约 0.6 TOPS（INT8）或未公开准确 GFLOPS；RISC-V 240MHz 无 NPU 的 0.24 GFLOPS 换算本身也存在单位混用问题（GFLOPS 通常指浮点，YOLO 推理主要用 INT8），建议标注计算方法或注明为估算值。",
+    "severity": "low"
+  },
+  {
+    "type": "来源缺失",
+    "line_approx": 2217,
+    "description": "Medusa Halo 规格表「来源」行仅注明「多源确认（Olrak29_@X、Tom's Hardware、TechPowerUp、Fudzilla）」，但 Fudzilla 的具体文章/报道内容未附链接，无法核实「2nm N2P + 3nm N3P」等具体参数具体来自哪个爆料源。",
+    "severity": "medium"
+  },
+  {
+    "type": "事实性错误（概率高）",
+    "line_approx": 2218,
+    "description": "die process 标注「2nm N2P + 3nm N3P」过于模糊。N2P 和 N3P 分别是台积电不同工艺节点，若代表同一芯片不同组件（CPU vs. GPU）需明确说明；若是预测两种可能方案则应标注「待确认」。此外「4nm/5nm」应为「4nm + 5nm」TSMC 多节点封装（CPU/GPU/SoC 分离），但未说明与「2nm + 3nm」的关系。",
+    "severity": "medium"
+  },
+  {
+    "type": "内容不完整",
+    "line_approx": 2218,
+    "description": "「AI算力」行「4-10倍」提升区间跨度过大（200-500 TOPS 范围），无具体数值也无来源说明。Strix Halo NPU 为 50 TOPS，4倍=200 TOPS，10倍=500 TOPS，相差一倍以上，对于评估「能否跑 405B 模型」的结论影响重大，应给出更精确的预估或说明不确定性。",
+    "severity": "medium"
+  },
+  {
+    "type": "内容不完整",
+    "line_approx": 2218,
+    "description": "CPU 核心数「24+2核」含义不明：未说明是 24P+2E（大核+小核）还是 24+2 SMT（超线程翻倍），两种解读对应截然不同的 CPU 设计路线，对功耗和性能评估影响显著，应明确说明来源假设。",
+    "severity": "medium"
+  }
+]}

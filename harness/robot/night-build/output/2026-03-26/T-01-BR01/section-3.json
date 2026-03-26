@@ -1,0 +1,43 @@
+{
+  "section": "§2.8 技术可行性：五条技术路线",
+  "line_range": "2376-2500",
+  "issues_found": 6,
+  "issues": [
+    {
+      "type": "夸大陈述",
+      "line_approx": 2380,
+      "description": "声称 'OpenClaw 是全球最流行的开源 AI Agent 项目'，但 '最流行' 无任何排名或引用依据。AI Agent 框架领域还有 LangChain、AutoGPT CrewAI 等流行项目，此类绝对化表述应标注数据来源（如 GitHub stars、使用量等）。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 2380,
+      "description": "技术路线一描述 'Claw 已成为 AI Agent 领域的命名共识，各大厂商纷纷围绕 OpenClaw 构建自己的配套生态'，但提到的 'AMD 推出 RyzenClaw / RadeonClaw 部署指南' 和 'Intel 优化 OpenClaw 混合 AI 执行' 均未提供官方链接或文档来源。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 2383,
+      "description": "技术路线二称 'Genesis...RTX 4090 上 43M FPS'，43M FPS 数值极大（4300万帧每秒），但无来源链接、benchmark 截图或论文引用。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 2390,
+      "description": "技术路线四声称 'Ollama 最易用、vLLM 吞吐最高、SGLang 支持复杂 Agent 任务'，三个判断均无来源。其中 'vLLM 吞吐最高' 断言较强，与 LM Studio 等高吞吐量方案比较未提供依据。",
+      "severity": "low"
+    },
+    {
+      "type": "事实性错误/数据陈旧",
+      "line_approx": 2393,
+      "description": "技术路线五称 '苹果 M5 带宽 153GB/s'。截至 2026-03（文档更新日期），苹果尚未正式发布 M5 芯片（当前最新为 M4 系列），此数据来源不明或为提前泄露，准确性无法验证。",
+      "severity": "high"
+    },
+    {
+      "type": "数据陈旧",
+      "line_approx": 2383,
+      "description": "技术路线二提到 'RTX 5090 已发布，性能更强，待更新 benchmark'，说明 43M FPS 数据基于 RTX 4090，未更新至 RTX 5090。鉴于 5090 已发布，应标注当前 benchmark 数据。",
+      "severity": "low"
+    }
+  ]
+}

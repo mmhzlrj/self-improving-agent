@@ -1,0 +1,75 @@
+{
+  task_id: S19,
+  name: 「§8.4-9.2 风险」,
+  line_range: 「4465-4690」,
+  total_lines: 226,
+  issues_found: 11,
+  issues: [
+    {
+      type: 「事实性错误 / 用词不当」,
+      line_approx: 4465,
+      description: 「§8.3 标题：'在物理被盗或被强制夺取时，自动销毁贵庚的核心数据'——'贵庚'是中文'询问对方年龄'的敬语，在此技术上下文中明显是 typo（应为'机器人'或'系统'）。全文多处出现'贵庚'（如§8.4 表格'贵庚数据双备份'），应为统一错误。」,
+      severity: 「high」
+    },
+    {
+      type: 「事实性错误 / 逻辑矛盾」,
+      line_approx: 4469,
+      description: 「触发条件表格'异常检测'行称 ESP32-Cam '检测到被拆解（加速度计异常）'——ESP32-Cam 本身并无加速度计；加速度计应位于 Jetson Nano 或 Cyber Bricks 上。此条目混入了其他硬件的感知能力。」,
+      severity: 「high」
+    },
+    {
+      type: 「事实性错误 / 代码问题」,
+      line_approx: 4482,
+      description: 「shred 命令使用 -ruv 标志（-r 递归，-u 立即删除），但 shred 对目录的处理行为与预期不符；且代码注释已说明'shed -n 3 对 SSD/NVMe 效果有限'——代码本身未能体现 LUKS 密钥销毁的推荐方案，形成说一套做一套的矛盾。」,
+      severity: 「medium」
+    },
+    {
+      type: 「数据缺失」,
+      line_approx: 4529,
+      description: 「每周维护表格'备份'行：'rsync 到 NAS'——rsync 命令缺少源路径和目标 NAS 路径，无法执行。NAS 地址（如 IP 或挂载点）完全缺失。」,
+      severity: 「high」
+    },
+    {
+      type: 「数据缺失」,
+      line_approx: 4534,
+      description: 「每日检查第4项'检查 Cyber Bricks 电池'使用 curl http://192.168.1.z/battery，但 192.168.1.z 并未定义；与其他项的 'x'/'y' placeholder 风格不统一（x/y/z 混用），且无占位符说明。」,
+      severity: 「medium」
+    },
+    {
+      type: 「重复内容 / 分类错误」,
+      line_approx: 4535,
+      description: 「每周维护表格'固件检查'行位于'Cyber Bricks'行之后，但内容'检查 ESP32-Cam 新固件'属于 ESP32-Cam 章节，不属于 Cyber Bricks——疑似复制粘贴错误，Cyber Bricks 固件检查缺失。」,
+      severity: 「medium」
+    },
+    {
+      type: 「内容不完整」,
+      line_approx: 4570,
+      description: 「Cyber Bricks 问题排查表格只有3个问题条目（电机不转/舵机抖转/WiFi断开），但 Jetson Nano 和 ESP32-Cam 均有4条；作为与 Jetson Nano/ESP32-Cam 同级的重要硬件，Cyber Bricks 缺失第4项（如'电池异常'或'通讯中断'等常见问题）。」,
+      severity: 「medium」
+    },
+    {
+      type: 「内容不完整」,
+      line_approx: 4580,
+      description: 「OpenClaw 问题排查表格只有3行（Node 不在线/exec 超时/配对失败），但其他硬件（Jetson Nano/ESP32-Cam/Cyber Bricks）均有4条；缺少常见问题如'Gateway 无法启动'或'通道消息丢失'。」,
+      severity: 「low」
+    },
+    {
+      type: 「事实性错误 / 逻辑矛盾」,
+      line_approx: 4618,
+      description: 「§9.1 技术风险表格'WiFi 被劫持'缓解措施：'启用 WPA3、关闭 WPS'——ESP32-Cam 的 WiFi 模块基于 ESP32，ESP32 仅支持 WPA2，不支持 WPA3；若缓解措施包含 WPA3，则针对的是 Jetson Nano 的网络接口，而非 ESP32-Cam，表述与风险来源（ESP32-Cam）不匹配。」,
+      severity: 「high」
+    },
+    {
+      type: 「来源缺失 / 适用性存疑」,
+      line_approx: 4660,
+      description: 「§9.2 法规风险表格引用 GB/T 40013-2021《家用和类似用途服务机器人》（推荐性国标）——该标准主要针对服务机器人（如扫地机、送餐机器人），与本文档描述的轮式移动机器人（涉及人行道通行、机械臂控制）的应用场景存在差异；引用此国标作为合规依据的关联性未说明。」,
+      severity: 「medium」
+    },
+    {
+      type: 「内容不完整」,
+      line_approx: 4665,
+      description: 「§10 调研记录包含2026-03-22、2026-03-21深夜、2026-03-24傍晚三条记录，但2026-03-24记录'① Dummy-Robot 机械臂'只列出了部分内容（CAN总线/三种指令模式/零点校准），后续的'逆运动学算法'等核心内容在第4690行被截断，无法验证内容完整性。」,
+      severity: 「low」
+    }
+  ]
+}

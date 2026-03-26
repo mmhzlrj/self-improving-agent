@@ -1,0 +1,41 @@
+{
+  "verification_group": "V01-V03",
+  "results": [
+    {
+      "id": "V01",
+      "claim": "Qwen3.5 系列不存在，阿里官方从未发布 3.5 版本",
+      "verdict": "confirmed",
+      "evidence": "官方 QwenLM GitHub (github.com/QwenLM/Qwen3) 展示的最新版本为 Qwen3 系列（如 Qwen3-8B、Qwen3-30B-A3B-Instruct-2507 等），arxiv 论文为 qwen3 (arXiv:2505.09388)。官方博客 (qwenlm.github.io/blog) 最新文章为 Qwen3Guard、Qwen-Image 等基于 Qwen3 的产品。官方仓库中无任何 Qwen3.5 标识。版本演进路径为 Qwen1 → Qwen2 → Qwen2.5 → Qwen3，从未出现过 Qwen3.5。",
+      "confidence": "high",
+      "sources": [
+        "https://github.com/QwenLM/Qwen3",
+        "https://qwenlm.github.io/blog/"
+      ]
+    },
+    {
+      "id": "V02",
+      "claim": "Genesis 物理仿真引擎的 GitHub 仓库地址不是 github.com/applecartn/genesis（404）",
+      "verdict": "confirmed",
+      "evidence": "访问 github.com/applecartn/genesis 返回明确的 404 Page not found 页面。而正确的仓库地址 github.com/Genesis-Embodied-AI/Genesis 存在并返回 200 状态，仓库拥有 28.3k stars，描述为「A generative world for general-purpose robotics & embodied AI learning」。",
+      "confidence": "high",
+      "sources": [
+        "https://github.com/applecartn/genesis",
+        "https://github.com/Genesis-Embodied-AI/Genesis"
+      ]
+    },
+    {
+      "id": "V03",
+      "claim": "Genesis 不是 Apple 团队开发的，而是 Genesis-Embodied-AI 组织开发的",
+      "verdict": "confirmed",
+      "evidence": "Genesis 官方 GitHub 仓库由 Genesis-Embodied-AI 组织托管（github.com/Genesis-Embodied-AI）。README 明确写道「Genesis is a physics platform designed for general-purpose Robotics/Embodied AI/Physical AI applications」，作者标注为「Genesis Authors」。该项目自 2025-07-02 起获得 Genesis AI 公司支持，但从未与 Apple 产生关联。applecartn/genesis 返回 404 证明该路径不存在。",
+      "confidence": "high",
+      "sources": [
+        "https://github.com/Genesis-Embodied-AI/Genesis",
+        "https://genesis-embodied-ai.github.io/"
+      ]
+    }
+  ],
+  "total_confirmed": 3,
+  "total_rejected": 0,
+  "total_unverified": 0
+}

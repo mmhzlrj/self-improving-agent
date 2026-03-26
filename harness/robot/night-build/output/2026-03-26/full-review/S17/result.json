@@ -1,0 +1,57 @@
+{
+  "task_id": "S17",
+  "name": "§6.1-§6.3（任务描述误标为§6.4+附录A）",
+  "line_range": "4078-4199",
+  "total_lines": 122,
+  "issues_found": 8,
+  "issues": [
+    {
+      "type": "内容与任务描述不符",
+      "line_approx": 4078,
+      "description": "任务描述要求审核「§6.4 模型+附录A」，但实际提取的第4078-4199行内容为§6.1（推理框架对比）、§6.2（NemoClaw）、§6.3（AMD官方方案）三个小节，§6.4从第4200行才开始。附录A不在此范围内。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失-性能数据无来源",
+      "line_approx": 4101,
+      "description": "ROCm 7.9 nightly「897 tokens/s (Qwen3-30B 提示词处理)」性能数据无任何来源引用。表格中其他ROCm数据均有版本对应关系，唯独此项缺少来源、测试硬件配置及具体条件。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失-版本真实性存疑",
+      "line_approx": 4098,
+      "description": "ROCm 7.2.2标注「CES 2026 发布，Day-0 优化支持」——CES 2026（2026年1月）尚未到来（任务时间2026-03-26在CES之后，但AMD ROCm正式发布历史中，7.2.x系列从未在CES发布）。建议核实是否为AMD真实路线图中的版本号。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据缺失-性能比较基准不完整",
+      "line_approx": 4102,
+      "description": "Vulkan后端「~412 tokens/s」仅列出数值，无GPU型号、batch size、上下文长度等任何测试条件说明。与ROCm 7.0.2的对比也因此缺少对照组信息（两组数字不是同一条件下的对比）。",
+      "severity": "medium"
+    },
+    {
+      "type": "格式问题-脚注位置歧义",
+      "line_approx": 4159,
+      "description": "「对贵庚的影响」脚注位于第4159行，介于「---」分隔符（§6.2结尾）与「## 6.3 AMD官方方案」标题之间。其内容「企业级安全护栏 → OpenClaw 可进入生产环境」属§6.2 NemoClaw的总结性脚注，但被放在了跨章节分隔符之后，归属不明确。",
+      "severity": "low"
+    },
+    {
+      "type": "来源缺失-官方定性不明确",
+      "line_approx": 4165,
+      "description": "§6.2 NemoClaw描述为「NVIDIA GTC 2026 为 OpenClaw 定制的官方软件栈（黄仁勋发布）」，标注「来源：NVIDIA GTC 2026」。但该描述将「官方」归属于OpenClaw优化——此处「官方」修饰的是NVIDIA的GTC活动，还是OpenClaw与NVIDIA的合作关系，表述模糊，无官方声明链接。",
+      "severity": "low"
+    },
+    {
+      "type": "数据缺失-Vulkan对比基准不完整",
+      "line_approx": 4103,
+      "description": "性能比较「ROCm 7.0.2 + ROCm后端：876.9 tokens/s (+112%)」——基准 Vulkan后端的412 tokens/s已在上下文中，但缺少测试硬件配置的一致性说明（两者的GPU型号、batch size、量化方式是否相同）。",
+      "severity": "low"
+    },
+    {
+      "type": "数据缺失-表格内容不完整",
+      "line_approx": 4101,
+      "description": "vLLM版本表（4087-4091行）未说明测试GPU型号。ROCm支持表跨越多个vLLM版本但缺少具体测试硬件环境（是AMD AI Halo还是其他RDNA GPU？），导致版本演进的有效性无法独立验证。",
+      "severity": "low"
+    }
+  ]
+}

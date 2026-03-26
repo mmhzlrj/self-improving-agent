@@ -1,0 +1,2084 @@
+[
+  {
+    "line": 1,
+    "level": 1,
+    "heading": "🤖 0-1 私人 AI 机器人完整实施指南",
+    "prefix": "#"
+  },
+  {
+    "line": 16,
+    "level": 1,
+    "heading": "目录",
+    "prefix": "#"
+  },
+  {
+    "line": 206,
+    "level": 1,
+    "heading": "第一章：概念与愿景",
+    "prefix": "#"
+  },
+  {
+    "line": 208,
+    "level": 2,
+    "heading": "1.1 项目愿景",
+    "prefix": "##"
+  },
+  {
+    "line": 224,
+    "level": 2,
+    "heading": "1.2 核心系统：贵庚",
+    "prefix": "##"
+  },
+  {
+    "line": 234,
+    "level": 3,
+    "heading": "核心价值主张",
+    "prefix": "###"
+  },
+  {
+    "line": 244,
+    "level": 3,
+    "heading": "贵庚记忆系统技术架构",
+    "prefix": "###"
+  },
+  {
+    "line": 248,
+    "level": 4,
+    "heading": "核心定位：原生数据的容器，而非技术路线",
+    "prefix": "####"
+  },
+  {
+    "line": 271,
+    "level": 4,
+    "heading": "发展阶段",
+    "prefix": "####"
+  },
+  {
+    "line": 281,
+    "level": 4,
+    "heading": "三个核心设计难点（技术层面）",
+    "prefix": "####"
+  },
+  {
+    "line": 291,
+    "level": 4,
+    "heading": "模型路线：边权重实例型大模型",
+    "prefix": "####"
+  },
+  {
+    "line": 325,
+    "level": 4,
+    "heading": "OpenClaw RL 集成",
+    "prefix": "####"
+  },
+  {
+    "line": 354,
+    "level": 4,
+    "heading": "RynnBrain 与贵庚记忆系统的接入位置",
+    "prefix": "####"
+  },
+  {
+    "line": 405,
+    "level": 4,
+    "heading": "RynnBrain → 贵庚 Layer 2：完整数据流",
+    "prefix": "####"
+  },
+  {
+    "line": 434,
+    "level": 4,
+    "heading": "RynnBrain 官方接口规格（调研确认）",
+    "prefix": "####"
+  },
+  {
+    "line": 446,
+    "level": 1,
+    "heading": "物体定位输出格式",
+    "prefix": "#"
+  },
+  {
+    "line": 449,
+    "level": 1,
+    "heading": "CoP（Chain-of-Points）推理模式输出格式",
+    "prefix": "#"
+  },
+  {
+    "line": 451,
+    "level": 4,
+    "heading": "<answer><trajectory><frame n>: (x1, y1), (x2, y2)... </trajectory></answer>",
+    "prefix": "####"
+  },
+  {
+    "line": 461,
+    "level": 4,
+    "heading": "对接流程（修正后）",
+    "prefix": "####"
+  },
+  {
+    "line": 495,
+    "level": 4,
+    "heading": "贵庚记忆索引架构：多维度检索",
+    "prefix": "####"
+  },
+  {
+    "line": 633,
+    "level": 4,
+    "heading": "检索质量反馈闭环：自我提升机制",
+    "prefix": "####"
+  },
+  {
+    "line": 693,
+    "level": 4,
+    "heading": "开源标注工具链",
+    "prefix": "####"
+  },
+  {
+    "line": 725,
+    "level": 4,
+    "heading": "Embedding 模型分层层级（完整调研，2026-03-25）",
+    "prefix": "####"
+  },
+  {
+    "line": 835,
+    "level": 4,
+    "heading": "自训练标注模型：Few-Shot 主动学习循环",
+    "prefix": "####"
+  },
+  {
+    "line": 841,
+    "level": 4,
+    "heading": "聚类与 Embedding 的协同逻辑（调研札记，2026-03-25）",
+    "prefix": "####"
+  },
+  {
+    "line": 866,
+    "level": 4,
+    "heading": "聚类算法选型（完整调研报告，2026-03-25）",
+    "prefix": "####"
+  },
+  {
+    "line": 985,
+    "level": 4,
+    "heading": "数据存储层级与过期策略：NAS 作为分级存储核心",
+    "prefix": "####"
+  },
+  {
+    "line": 1027,
+    "level": 4,
+    "heading": "跨代际兼容性：让 20 年后的设备仍能读取贵庚的记忆",
+    "prefix": "####"
+  },
+  {
+    "line": 1060,
+    "level": 4,
+    "heading": "贵庚密钥管理路径",
+    "prefix": "####"
+  },
+  {
+    "line": 1084,
+    "level": 4,
+    "heading": "玻璃光学存储详细对比（2026年最新数据）",
+    "prefix": "####"
+  },
+  {
+    "line": 1088,
+    "level": 4,
+    "heading": "微软 Project Silica（来源：Nature 论文 2026-02 / 至顶网 2025-12）",
+    "prefix": "####"
+  },
+  {
+    "line": 1103,
+    "level": 4,
+    "heading": "国产（来源：华中科大武汉光电国家研究中心 / 一尧科技，2025-10）",
+    "prefix": "####"
+  },
+  {
+    "line": 1116,
+    "level": 4,
+    "heading": "国产 vs 微软对比",
+    "prefix": "####"
+  },
+  {
+    "line": 1127,
+    "level": 4,
+    "heading": "玻璃光学存储的适合场景：",
+    "prefix": "####"
+  },
+  {
+    "line": 1330,
+    "level": 4,
+    "heading": "网络断连分级应对：0-1 不会变砖",
+    "prefix": "####"
+  },
+  {
+    "line": 1777,
+    "level": 2,
+    "heading": "1.3 核心陪伴理念：从「响应」到「懂你」",
+    "prefix": "##"
+  },
+  {
+    "line": 1793,
+    "level": 3,
+    "heading": "三个层次",
+    "prefix": "###"
+  },
+  {
+    "line": 1807,
+    "level": 2,
+    "heading": "1.4 10年五阶段路线图",
+    "prefix": "##"
+  },
+  {
+    "line": 1809,
+    "level": 3,
+    "heading": "最终确认的五阶段",
+    "prefix": "###"
+  },
+  {
+    "line": 1819,
+    "level": 3,
+    "heading": "Phase 编号与五阶段对应关系",
+    "prefix": "###"
+  },
+  {
+    "line": 1839,
+    "level": 1,
+    "heading": "第二章：硬件体系",
+    "prefix": "#"
+  },
+  {
+    "line": 1841,
+    "level": 2,
+    "heading": "2.1 现有硬件",
+    "prefix": "##"
+  },
+  {
+    "line": 1854,
+    "level": 3,
+    "heading": "Jetson Nano 2GB 版本特别说明",
+    "prefix": "###"
+  },
+  {
+    "line": 1866,
+    "level": 2,
+    "heading": "2.2 需要采购（阶段一 MVP）",
+    "prefix": "##"
+  },
+  {
+    "line": 1880,
+    "level": 2,
+    "heading": "2.3 电源方案",
+    "prefix": "##"
+  },
+  {
+    "line": 1893,
+    "level": 3,
+    "heading": "2.3.1 电池换电机制（行业对标 & 设计参考）",
+    "prefix": "###"
+  },
+  {
+    "line": 1899,
+    "level": 4,
+    "heading": "行业现状",
+    "prefix": "####"
+  },
+  {
+    "line": 1908,
+    "level": 4,
+    "heading": "核心设计原则",
+    "prefix": "####"
+  },
+  {
+    "line": 1939,
+    "level": 2,
+    "heading": "2.4 梯度采购路线图",
+    "prefix": "##"
+  },
+  {
+    "line": 1967,
+    "level": 3,
+    "heading": "Jetson AGX Thor 完整算力规格（官方数据）",
+    "prefix": "###"
+  },
+  {
+    "line": 1971,
+    "level": 4,
+    "heading": "官方算力数据表（Jetson T5000 模组，130W MAXN）",
+    "prefix": "####"
+  },
+  {
+    "line": 1982,
+    "level": 4,
+    "heading": "关键说明",
+    "prefix": "####"
+  },
+  {
+    "line": 1992,
+    "level": 4,
+    "heading": "Jetson AGX Thor 与 Orin 核心区别",
+    "prefix": "####"
+  },
+  {
+    "line": 2005,
+    "level": 2,
+    "heading": "2.5 星闪通信模块：BearPi-Pico H3863 详细方案",
+    "prefix": "##"
+  },
+  {
+    "line": 2012,
+    "level": 4,
+    "heading": "核心规格",
+    "prefix": "####"
+  },
+  {
+    "line": 2025,
+    "level": 4,
+    "heading": "为什么选择 H3863 而不是 ESP32-C6",
+    "prefix": "####"
+  },
+  {
+    "line": 2036,
+    "level": 4,
+    "heading": "对 0-1 的核心价值",
+    "prefix": "####"
+  },
+  {
+    "line": 2049,
+    "level": 4,
+    "heading": "与现有硬件的集成方案",
+    "prefix": "####"
+  },
+  {
+    "line": 2083,
+    "level": 4,
+    "heading": "开发环境",
+    "prefix": "####"
+  },
+  {
+    "line": 2093,
+    "level": 4,
+    "heading": "落地步骤",
+    "prefix": "####"
+  },
+  {
+    "line": 2104,
+    "level": 4,
+    "heading": "采购建议",
+    "prefix": "####"
+  },
+  {
+    "line": 2110,
+    "level": 4,
+    "heading": "H3863 AI 推理能力分析（重要）",
+    "prefix": "####"
+  },
+  {
+    "line": 2198,
+    "level": 2,
+    "heading": "2.6 Medusa Halo：移动 AI 工作站（长期规划）",
+    "prefix": "##"
+  },
+  {
+    "line": 2206,
+    "level": 3,
+    "heading": "核心规格（AMD 官方参数 + 爆料预估）",
+    "prefix": "###"
+  },
+  {
+    "line": 2223,
+    "level": 3,
+    "heading": "LPDDR6 带宽对本地大模型的意义",
+    "prefix": "###"
+  },
+  {
+    "line": 2232,
+    "level": 3,
+    "heading": "256GB+ 统一内存对 0-1 移动终端的意义",
+    "prefix": "###"
+  },
+  {
+    "line": 2244,
+    "level": 3,
+    "heading": "多 Agent 并行支持",
+    "prefix": "###"
+  },
+  {
+    "line": 2256,
+    "level": 3,
+    "heading": "与家中 AI Halo 的性能对比",
+    "prefix": "###"
+  },
+  {
+    "line": 2267,
+    "level": 3,
+    "heading": "结论",
+    "prefix": "###"
+  },
+  {
+    "line": 2274,
+    "level": 3,
+    "heading": "当前可买的最近替代（过渡方案）",
+    "prefix": "###"
+  },
+  {
+    "line": 2283,
+    "level": 2,
+    "heading": "2.7 手部与执行器设计",
+    "prefix": "##"
+  },
+  {
+    "line": 2289,
+    "level": 4,
+    "heading": "0-1 首选：Kinetix 开源灵巧手",
+    "prefix": "####"
+  },
+  {
+    "line": 2307,
+    "level": 4,
+    "heading": "行业现状（参考）",
+    "prefix": "####"
+  },
+  {
+    "line": 2316,
+    "level": 4,
+    "heading": "自由度（Degrees of Freedom, DOF）说明",
+    "prefix": "####"
+  },
+  {
+    "line": 2325,
+    "level": 4,
+    "heading": "手部设计的三个关键参数",
+    "prefix": "####"
+  },
+  {
+    "line": 2333,
+    "level": 4,
+    "heading": "0-1 推荐方案（分阶段）",
+    "prefix": "####"
+  },
+  {
+    "line": 2353,
+    "level": 4,
+    "heading": "腱绳驱动（Tendon-driven）参考",
+    "prefix": "####"
+  },
+  {
+    "line": 2361,
+    "level": 4,
+    "heading": "触觉传感器选型",
+    "prefix": "####"
+  },
+  {
+    "line": 2376,
+    "level": 2,
+    "heading": "2.8 技术可行性：五条技术路线",
+    "prefix": "##"
+  },
+  {
+    "line": 2382,
+    "level": 3,
+    "heading": "技术路线一：开源 AI Agent 框架",
+    "prefix": "###"
+  },
+  {
+    "line": 2386,
+    "level": 3,
+    "heading": "技术路线二：消费级物理仿真",
+    "prefix": "###"
+  },
+  {
+    "line": 2390,
+    "level": 3,
+    "heading": "技术路线三：个人制造工具链",
+    "prefix": "###"
+  },
+  {
+    "line": 2394,
+    "level": 3,
+    "heading": "技术路线四：本地大模型推理",
+    "prefix": "###"
+  },
+  {
+    "line": 2398,
+    "level": 3,
+    "heading": "技术路线五：统一内存架构芯片走向成熟",
+    "prefix": "###"
+  },
+  {
+    "line": 2404,
+    "level": 1,
+    "heading": "第三章：系统架构",
+    "prefix": "#"
+  },
+  {
+    "line": 2406,
+    "level": 2,
+    "heading": "3.1 整体架构",
+    "prefix": "##"
+  },
+  {
+    "line": 2443,
+    "level": 3,
+    "heading": "iPhone 接入后的完整拓扑",
+    "prefix": "###"
+  },
+  {
+    "line": 2455,
+    "level": 2,
+    "heading": "3.2 节点说明",
+    "prefix": "##"
+  },
+  {
+    "line": 2468,
+    "level": 2,
+    "heading": "3.3 通信协议",
+    "prefix": "##"
+  },
+  {
+    "line": 2470,
+    "level": 3,
+    "heading": "设备内通信",
+    "prefix": "###"
+  },
+  {
+    "line": 2478,
+    "level": 3,
+    "heading": "有线通信（GPIO / UART / I2C）",
+    "prefix": "###"
+  },
+  {
+    "line": 2488,
+    "level": 3,
+    "heading": "通信场景选择",
+    "prefix": "###"
+  },
+  {
+    "line": 2500,
+    "level": 2,
+    "heading": "3.4 ROS 2 支持情况与替代框架",
+    "prefix": "##"
+  },
+  {
+    "line": 2505,
+    "level": 3,
+    "heading": "硬件 ROS 2 支持总览",
+    "prefix": "###"
+  },
+  {
+    "line": 2516,
+    "level": 3,
+    "heading": "3.4.1 Jetson Nano 2GB — 完整 ROS 2 方案",
+    "prefix": "###"
+  },
+  {
+    "line": 2518,
+    "level": 4,
+    "heading": "推荐版本",
+    "prefix": "####"
+  },
+  {
+    "line": 2526,
+    "level": 4,
+    "heading": "安装步骤（Foxy + ros-base）",
+    "prefix": "####"
+  },
+  {
+    "line": 2529,
+    "level": 1,
+    "heading": "1. 配置 locale",
+    "prefix": "#"
+  },
+  {
+    "line": 2534,
+    "level": 1,
+    "heading": "2. 添加 ROS 2 源",
+    "prefix": "#"
+  },
+  {
+    "line": 2542,
+    "level": 1,
+    "heading": "3. 安装（仅 ros-base，节省内存）",
+    "prefix": "#"
+  },
+  {
+    "line": 2546,
+    "level": 1,
+    "heading": "4. 初始化",
+    "prefix": "#"
+  },
+  {
+    "line": 2551,
+    "level": 1,
+    "heading": "5. 环境",
+    "prefix": "#"
+  },
+  {
+    "line": 2556,
+    "level": 4,
+    "heading": "资源占用",
+    "prefix": "####"
+  },
+  {
+    "line": 2568,
+    "level": 3,
+    "heading": "3.4.2 ESP32-CAM — micro-ROS 接入方案",
+    "prefix": "###"
+  },
+  {
+    "line": 2570,
+    "level": 4,
+    "heading": "核心限制",
+    "prefix": "####"
+  },
+  {
+    "line": 2575,
+    "level": 4,
+    "heading": "方案 1：micro-ROS + WiFi（推荐）",
+    "prefix": "####"
+  },
+  {
+    "line": 2587,
+    "level": 1,
+    "heading": "include <micro_ros_arduino.h>",
+    "prefix": "#"
+  },
+  {
+    "line": 2588,
+    "level": 1,
+    "heading": "include <sensor_msgs/msg/compressed_image.h>",
+    "prefix": "#"
+  },
+  {
+    "line": 2622,
+    "level": 1,
+    "heading": "安装 micro-ROS agent",
+    "prefix": "#"
+  },
+  {
+    "line": 2625,
+    "level": 1,
+    "heading": "WiFi 模式启动",
+    "prefix": "#"
+  },
+  {
+    "line": 2631,
+    "level": 4,
+    "heading": "方案 2：micro-ROS + UART（低延迟，有线）",
+    "prefix": "####"
+  },
+  {
+    "line": 2638,
+    "level": 1,
+    "heading": "Jetson Nano 端",
+    "prefix": "#"
+  },
+  {
+    "line": 2642,
+    "level": 4,
+    "heading": "方案 3：HTTP/MJPEG 流（最简，不跑 micro-ROS）",
+    "prefix": "####"
+  },
+  {
+    "line": 2645,
+    "level": 1,
+    "heading": "Jetson Nano 拉取 ESP32-CAM MJPEG 流，转 ROS 2 Image",
+    "prefix": "#"
+  },
+  {
+    "line": 2664,
+    "level": 3,
+    "heading": "3.4.3 BearPi Pico H3863 — 移植方案",
+    "prefix": "###"
+  },
+  {
+    "line": 2666,
+    "level": 4,
+    "heading": "现状",
+    "prefix": "####"
+  },
+  {
+    "line": 2671,
+    "level": 4,
+    "heading": "移植路径",
+    "prefix": "####"
+  },
+  {
+    "line": 2681,
+    "level": 4,
+    "heading": "星闪 SLE vs 其他无线方案对比",
+    "prefix": "####"
+  },
+  {
+    "line": 2692,
+    "level": 3,
+    "heading": "3.4.4 iPhone 16 Pro — rosbridge / MCP 方案",
+    "prefix": "###"
+  },
+  {
+    "line": 2694,
+    "level": 4,
+    "heading": "架构",
+    "prefix": "####"
+  },
+  {
+    "line": 2704,
+    "level": 4,
+    "heading": "Swift + rosbridge 示例",
+    "prefix": "####"
+  },
+  {
+    "line": 2751,
+    "level": 4,
+    "heading": "替代方案对比",
+    "prefix": "####"
+  },
+  {
+    "line": 2763,
+    "level": 3,
+    "heading": "3.4.5 比 ROS 2 更好的替代框架",
+    "prefix": "###"
+  },
+  {
+    "line": 2779,
+    "level": 1,
+    "heading": "第四章：实施阶段",
+    "prefix": "#"
+  },
+  {
+    "line": 2781,
+    "level": 2,
+    "heading": "Phase 0：Ubuntu 台式机对接 Gateway",
+    "prefix": "##"
+  },
+  {
+    "line": 2785,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 2788,
+    "level": 3,
+    "heading": "硬件连接",
+    "prefix": "###"
+  },
+  {
+    "line": 2792,
+    "level": 3,
+    "heading": "配置步骤",
+    "prefix": "###"
+  },
+  {
+    "line": 2808,
+    "level": 1,
+    "heading": "安装 OpenClaw（如果尚未安装）",
+    "prefix": "#"
+  },
+  {
+    "line": 2811,
+    "level": 1,
+    "heading": "启动 node，指向 Mac Gateway",
+    "prefix": "#"
+  },
+  {
+    "line": 2823,
+    "level": 1,
+    "heading": "找到 Pending 的 Ubuntu 设备",
+    "prefix": "#"
+  },
+  {
+    "line": 2830,
+    "level": 1,
+    "heading": "应该显示 Ubuntu-GPU-Node 状态为 online",
+    "prefix": "#"
+  },
+  {
+    "line": 2841,
+    "level": 2,
+    "heading": "Phase 1：语音陪伴模块",
+    "prefix": "##"
+  },
+  {
+    "line": 2845,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 2848,
+    "level": 3,
+    "heading": "硬件",
+    "prefix": "###"
+  },
+  {
+    "line": 2855,
+    "level": 3,
+    "heading": "软件架构",
+    "prefix": "###"
+  },
+  {
+    "line": 2869,
+    "level": 3,
+    "heading": "实施步骤",
+    "prefix": "###"
+  },
+  {
+    "line": 2877,
+    "level": 1,
+    "heading": "换阿里云源（加速）",
+    "prefix": "#"
+  },
+  {
+    "line": 2881,
+    "level": 1,
+    "heading": "开启 SSH",
+    "prefix": "#"
+  },
+  {
+    "line": 2885,
+    "level": 1,
+    "heading": "记录 IP",
+    "prefix": "#"
+  },
+  {
+    "line": 2892,
+    "level": 1,
+    "heading": "查看设备",
+    "prefix": "#"
+  },
+  {
+    "line": 2896,
+    "level": 1,
+    "heading": "USB 耳机通常是 card 1",
+    "prefix": "#"
+  },
+  {
+    "line": 2897,
+    "level": 1,
+    "heading": "创建 ~/.asoundrc 设为默认设备",
+    "prefix": "#"
+  },
+  {
+    "line": 2913,
+    "level": 1,
+    "heading": "克隆 whisper.cpp",
+    "prefix": "#"
+  },
+  {
+    "line": 2917,
+    "level": 1,
+    "heading": "下载模型（base.en 最轻量，适合实时）",
+    "prefix": "#"
+  },
+  {
+    "line": 2920,
+    "level": 1,
+    "heading": "测试",
+    "prefix": "#"
+  },
+  {
+    "line": 2928,
+    "level": 1,
+    "heading": "测试",
+    "prefix": "#"
+  },
+  {
+    "line": 2935,
+    "level": 1,
+    "heading": "!/usr/bin/env python3",
+    "prefix": "#"
+  },
+  {
+    "line": 2943,
+    "level": 1,
+    "heading": "sys.path 需要加入 openclaw-bridge 路径",
+    "prefix": "#"
+  },
+  {
+    "line": 2990,
+    "level": 2,
+    "heading": "Phase 2：视觉记录模块",
+    "prefix": "##"
+  },
+  {
+    "line": 2994,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 2997,
+    "level": 3,
+    "heading": "硬件",
+    "prefix": "###"
+  },
+  {
+    "line": 3003,
+    "level": 3,
+    "heading": "ESP32-Cam 固件烧录",
+    "prefix": "###"
+  },
+  {
+    "line": 3018,
+    "level": 1,
+    "heading": "安装 esptool",
+    "prefix": "#"
+  },
+  {
+    "line": 3021,
+    "level": 1,
+    "heading": "擦除闪存",
+    "prefix": "#"
+  },
+  {
+    "line": 3024,
+    "level": 1,
+    "heading": "下载 CameraWebServer 固件",
+    "prefix": "#"
+  },
+  {
+    "line": 3025,
+    "level": 1,
+    "heading": "从 Arduino IDE > Tools > ESP32 > Camera > AI Thinker Configuration",
+    "prefix": "#"
+  },
+  {
+    "line": 3026,
+    "level": 1,
+    "heading": "或从 https://github.com/easytarget/esp32-cam-webserver 获取",
+    "prefix": "#"
+  },
+  {
+    "line": 3028,
+    "level": 1,
+    "heading": "烧录",
+    "prefix": "#"
+  },
+  {
+    "line": 3045,
+    "level": 3,
+    "heading": "RTSP 接收（Jetson Nano）",
+    "prefix": "###"
+  },
+  {
+    "line": 3048,
+    "level": 1,
+    "heading": "安装 GStreamer",
+    "prefix": "#"
+  },
+  {
+    "line": 3052,
+    "level": 1,
+    "heading": "查看 RTSP 流（测试用）",
+    "prefix": "#"
+  },
+  {
+    "line": 3055,
+    "level": 1,
+    "heading": "GStreamer pipeline（更低延迟）",
+    "prefix": "#"
+  },
+  {
+    "line": 3062,
+    "level": 2,
+    "heading": "Phase 3：iPhone 感知前端",
+    "prefix": "##"
+  },
+  {
+    "line": 3066,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 3069,
+    "level": 3,
+    "heading": "iPhone 接入架构",
+    "prefix": "###"
+  },
+  {
+    "line": 3081,
+    "level": 3,
+    "heading": "iPhone 感知分工（与 Jetson Nano 对比）",
+    "prefix": "###"
+  },
+  {
+    "line": 3099,
+    "level": 2,
+    "heading": "Phase 4：运动控制模块",
+    "prefix": "##"
+  },
+  {
+    "line": 3103,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 3106,
+    "level": 3,
+    "heading": "通信架构",
+    "prefix": "###"
+  },
+  {
+    "line": 3118,
+    "level": 3,
+    "heading": "MicroPython 示例（Cyber Bricks 固件）",
+    "prefix": "###"
+  },
+  {
+    "line": 3121,
+    "level": 1,
+    "heading": "CyberBrick 接收 MQTT 并执行 - Phase 4",
+    "prefix": "#"
+  },
+  {
+    "line": 3127,
+    "level": 1,
+    "heading": "初始化 UART（连接 Jetson Nano）",
+    "prefix": "#"
+  },
+  {
+    "line": 3130,
+    "level": 1,
+    "heading": "初始化舵机",
+    "prefix": "#"
+  },
+  {
+    "line": 3134,
+    "level": 1,
+    "heading": "初始化电机驱动",
+    "prefix": "#"
+  },
+  {
+    "line": 3171,
+    "level": 1,
+    "heading": "连接 WiFi",
+    "prefix": "#"
+  },
+  {
+    "line": 3178,
+    "level": 1,
+    "heading": "连接 MQTT",
+    "prefix": "#"
+  },
+  {
+    "line": 3186,
+    "level": 3,
+    "heading": "OpenClaw → Cyber Bricks 指令脚本",
+    "prefix": "###"
+  },
+  {
+    "line": 3189,
+    "level": 1,
+    "heading": "!/usr/bin/env python3",
+    "prefix": "#"
+  },
+  {
+    "line": 3224,
+    "level": 3,
+    "heading": "有线 GPIO 应急停止",
+    "prefix": "###"
+  },
+  {
+    "line": 3227,
+    "level": 1,
+    "heading": "Jetson Nano 发送紧急停止信号（通过 UART 或直接 GPIO）",
+    "prefix": "#"
+  },
+  {
+    "line": 3228,
+    "level": 1,
+    "heading": "方法1: UART 发送停止命令",
+    "prefix": "#"
+  },
+  {
+    "line": 3231,
+    "level": 1,
+    "heading": "方法2: GPIO 硬件中断（Jetson Nano Pin 29）",
+    "prefix": "#"
+  },
+  {
+    "line": 3242,
+    "level": 2,
+    "heading": "Phase 5：面部表情系统",
+    "prefix": "##"
+  },
+  {
+    "line": 3244,
+    "level": 3,
+    "heading": "设计理念",
+    "prefix": "###"
+  },
+  {
+    "line": 3247,
+    "level": 3,
+    "heading": "系统组成",
+    "prefix": "###"
+  },
+  {
+    "line": 3255,
+    "level": 3,
+    "heading": "拓竹加工方案",
+    "prefix": "###"
+  },
+  {
+    "line": 3264,
+    "level": 3,
+    "heading": "控制代码",
+    "prefix": "###"
+  },
+  {
+    "line": 3267,
+    "level": 1,
+    "heading": "!/usr/bin/env python3",
+    "prefix": "#"
+  },
+  {
+    "line": 3277,
+    "level": 1,
+    "heading": "表情定义（RGB 元组）",
+    "prefix": "#"
+  },
+  {
+    "line": 3295,
+    "level": 1,
+    "heading": "MQTT 接收表情指令",
+    "prefix": "#"
+  },
+  {
+    "line": 3312,
+    "level": 2,
+    "heading": "Phase 6：室内移动与智能家居硬件拓展",
+    "prefix": "##"
+  },
+  {
+    "line": 3316,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 3319,
+    "level": 3,
+    "heading": "核心路线",
+    "prefix": "###"
+  },
+  {
+    "line": 3322,
+    "level": 3,
+    "heading": "阶段一：IoT 控制现有设备（可立刻落地）",
+    "prefix": "###"
+  },
+  {
+    "line": 3328,
+    "level": 1,
+    "heading": "HomeAssistant MQTT 集成",
+    "prefix": "#"
+  },
+  {
+    "line": 3362,
+    "level": 3,
+    "heading": "阶段二：私人定制硬件拓展 kit（Maker 方式打造）",
+    "prefix": "###"
+  },
+  {
+    "line": 3380,
+    "level": 1,
+    "heading": "第五章：AI 与感知",
+    "prefix": "#"
+  },
+  {
+    "line": 3382,
+    "level": 2,
+    "heading": "5.1 Jetson Nano 视觉感知",
+    "prefix": "##"
+  },
+  {
+    "line": 3390,
+    "level": 3,
+    "heading": "工具选择",
+    "prefix": "###"
+  },
+  {
+    "line": 3401,
+    "level": 3,
+    "heading": "YOLO + TensorRT FP16 部署（Nano 2GB 必读）",
+    "prefix": "###"
+  },
+  {
+    "line": 3405,
+    "level": 1,
+    "heading": "最大性能模式",
+    "prefix": "#"
+  },
+  {
+    "line": 3409,
+    "level": 1,
+    "heading": "添加 swap（防止 OOM）",
+    "prefix": "#"
+  },
+  {
+    "line": 3415,
+    "level": 1,
+    "heading": "降低输入分辨率：320x320 而非 640x640",
+    "prefix": "#"
+  },
+  {
+    "line": 3420,
+    "level": 1,
+    "heading": "/etc/deepstream-7.0/sources/configs/deepstream-app/config.txt",
+    "prefix": "#"
+  },
+  {
+    "line": 3437,
+    "level": 3,
+    "heading": "实测 FPS（完整 pipeline，含前后处理）",
+    "prefix": "###"
+  },
+  {
+    "line": 3450,
+    "level": 3,
+    "heading": "MediaPipe on Jetson Nano 2GB",
+    "prefix": "###"
+  },
+  {
+    "line": 3458,
+    "level": 3,
+    "heading": "YOLO + MediaPipe 共存方案",
+    "prefix": "###"
+  },
+  {
+    "line": 3473,
+    "level": 2,
+    "heading": "5.2 iPhone 感知前端技术方案",
+    "prefix": "##"
+  },
+  {
+    "line": 3479,
+    "level": 3,
+    "heading": "iPhone 作为 OpenClaw Node 的能力",
+    "prefix": "###"
+  },
+  {
+    "line": 3490,
+    "level": 3,
+    "heading": "四平台完整对比",
+    "prefix": "###"
+  },
+  {
+    "line": 3499,
+    "level": 3,
+    "heading": "A18 Pro vs A17 Pro",
+    "prefix": "###"
+  },
+  {
+    "line": 3507,
+    "level": 3,
+    "heading": "三大主力方案详解",
+    "prefix": "###"
+  },
+  {
+    "line": 3509,
+    "level": 4,
+    "heading": "① Apple Vision Framework（原生免费）",
+    "prefix": "####"
+  },
+  {
+    "line": 3526,
+    "level": 4,
+    "heading": "② Core ML + YOLO（通用物体检测首选）",
+    "prefix": "####"
+  },
+  {
+    "line": 3535,
+    "level": 1,
+    "heading": "一键导出 Core ML（Ultralytics 官方支持）",
+    "prefix": "#"
+  },
+  {
+    "line": 3539,
+    "level": 4,
+    "heading": "③ MediaPipe（功能最全）",
+    "prefix": "####"
+  },
+  {
+    "line": 3547,
+    "level": 4,
+    "heading": "④ Apple FastVLM（本地 VLM）",
+    "prefix": "####"
+  },
+  {
+    "line": 3555,
+    "level": 3,
+    "heading": "VLM vs YOLO：怎么选",
+    "prefix": "###"
+  },
+  {
+    "line": 3573,
+    "level": 3,
+    "heading": "Camera Control 按钮可行性",
+    "prefix": "###"
+  },
+  {
+    "line": 3582,
+    "level": 3,
+    "heading": "LiDAR 导航：ARKit vs 传统 SLAM",
+    "prefix": "###"
+  },
+  {
+    "line": 3595,
+    "level": 2,
+    "heading": "5.3 物理仿真引擎：Genesis 与 Newton",
+    "prefix": "##"
+  },
+  {
+    "line": 3602,
+    "level": 3,
+    "heading": "Genesis 物理引擎（Apple 开源，2025-02）",
+    "prefix": "###"
+  },
+  {
+    "line": 3607,
+    "level": 3,
+    "heading": "Genesis vs Isaac Gym 完整对比",
+    "prefix": "###"
+  },
+  {
+    "line": 3621,
+    "level": 3,
+    "heading": "Genesis 最新功能（2026年以来）",
+    "prefix": "###"
+  },
+  {
+    "line": 3631,
+    "level": 3,
+    "heading": "Genesis 快速入门",
+    "prefix": "###"
+  },
+  {
+    "line": 3636,
+    "level": 1,
+    "heading": "创建仿真环境",
+    "prefix": "#"
+  },
+  {
+    "line": 3640,
+    "level": 1,
+    "heading": "强化学习训练循环",
+    "prefix": "#"
+  },
+  {
+    "line": 3651,
+    "level": 3,
+    "heading": "Newton 物理引擎（NVIDIA + DeepMind + Disney，2025-03 GTC）⭐⭐⭐⭐⭐",
+    "prefix": "###"
+  },
+  {
+    "line": 3658,
+    "level": 4,
+    "heading": "技术架构",
+    "prefix": "####"
+  },
+  {
+    "line": 3667,
+    "level": 4,
+    "heading": "关键特性",
+    "prefix": "####"
+  },
+  {
+    "line": 3677,
+    "level": 4,
+    "heading": "Genesis vs Newton 怎么选",
+    "prefix": "####"
+  },
+  {
+    "line": 3687,
+    "level": 4,
+    "heading": "对 0-1 的建议",
+    "prefix": "####"
+  },
+  {
+    "line": 3696,
+    "level": 2,
+    "heading": "5.4 具身大脑基模：RynnBrain 与空间智能",
+    "prefix": "##"
+  },
+  {
+    "line": 3702,
+    "level": 3,
+    "heading": "RynnBrain（阿里巴巴达摩院，2026-02-10 开源）",
+    "prefix": "###"
+  },
+  {
+    "line": 3707,
+    "level": 4,
+    "heading": "发布模型（全系列）",
+    "prefix": "####"
+  },
+  {
+    "line": 3718,
+    "level": 4,
+    "heading": "核心能力（官方 Demo 验证）",
+    "prefix": "####"
+  },
+  {
+    "line": 3729,
+    "level": 4,
+    "heading": "端侧部署实测",
+    "prefix": "####"
+  },
+  {
+    "line": 3735,
+    "level": 4,
+    "heading": "对 0-1 的直接价值",
+    "prefix": "####"
+  },
+  {
+    "line": 3750,
+    "level": 3,
+    "heading": "李飞飞空间智能（World Labs）",
+    "prefix": "###"
+  },
+  {
+    "line": 3755,
+    "level": 4,
+    "heading": "核心研究方向",
+    "prefix": "####"
+  },
+  {
+    "line": 3764,
+    "level": 4,
+    "heading": "3D Gaussian Splatting（3DGS）：空间智能的重建底座 ⭐⭐⭐⭐⭐",
+    "prefix": "####"
+  },
+  {
+    "line": 3772,
+    "level": 5,
+    "heading": "核心优势对比",
+    "prefix": "#####"
+  },
+  {
+    "line": 3781,
+    "level": 5,
+    "heading": "主要应用方向",
+    "prefix": "#####"
+  },
+  {
+    "line": 3817,
+    "level": 5,
+    "heading": "关键开源项目",
+    "prefix": "#####"
+  },
+  {
+    "line": 3826,
+    "level": 5,
+    "heading": "硬件算力门槛（对 0-1 的意义）",
+    "prefix": "#####"
+  },
+  {
+    "line": 3837,
+    "level": 5,
+    "heading": "3DGS 与 PointWorld / Genesis 的分工",
+    "prefix": "#####"
+  },
+  {
+    "line": 3852,
+    "level": 4,
+    "heading": "对 0-1 的中期价值",
+    "prefix": "####"
+  },
+  {
+    "line": 3860,
+    "level": 3,
+    "heading": "技术路线建议（0-1 如何整合）",
+    "prefix": "###"
+  },
+  {
+    "line": 3872,
+    "level": 3,
+    "heading": "Isaac GR00T N1.6：NVIDIA 视觉-语言-动作基础模型 ⭐⭐⭐⭐⭐",
+    "prefix": "###"
+  },
+  {
+    "line": 3881,
+    "level": 4,
+    "heading": "模型架构",
+    "prefix": "####"
+  },
+  {
+    "line": 3889,
+    "level": 4,
+    "heading": "预训练数据（关键！）",
+    "prefix": "####"
+  },
+  {
+    "line": 3896,
+    "level": 4,
+    "heading": "对 0-1 的关键价值",
+    "prefix": "####"
+  },
+  {
+    "line": 3918,
+    "level": 2,
+    "heading": "5.5 机器人技能训练：从模仿学习到自主泛化",
+    "prefix": "##"
+  },
+  {
+    "line": 3924,
+    "level": 4,
+    "heading": "行业现状",
+    "prefix": "####"
+  },
+  {
+    "line": 3934,
+    "level": 4,
+    "heading": "三种主要训练范式",
+    "prefix": "####"
+  },
+  {
+    "line": 4006,
+    "level": 4,
+    "heading": "0-1 分阶段训练方案",
+    "prefix": "####"
+  },
+  {
+    "line": 4039,
+    "level": 4,
+    "heading": "关键问题：数据从哪来？",
+    "prefix": "####"
+  },
+  {
+    "line": 4059,
+    "level": 4,
+    "heading": "参考项目",
+    "prefix": "####"
+  },
+  {
+    "line": 4076,
+    "level": 1,
+    "heading": "第六章：本地 LLM 推理",
+    "prefix": "#"
+  },
+  {
+    "line": 4078,
+    "level": 2,
+    "heading": "6.1 推理框架对比",
+    "prefix": "##"
+  },
+  {
+    "line": 4092,
+    "level": 3,
+    "heading": "RTX 2060 量化方案",
+    "prefix": "###"
+  },
+  {
+    "line": 4104,
+    "level": 1,
+    "heading": "一键安装",
+    "prefix": "#"
+  },
+  {
+    "line": 4106,
+    "level": 1,
+    "heading": "运行量化模型",
+    "prefix": "#"
+  },
+  {
+    "line": 4110,
+    "level": 3,
+    "heading": "ROCm 对 AMD AI Halo 128GB 的支持",
+    "prefix": "###"
+  },
+  {
+    "line": 4123,
+    "level": 3,
+    "heading": "vLLM ROCm 支持（v0.14.0+）",
+    "prefix": "###"
+  },
+  {
+    "line": 4133,
+    "level": 3,
+    "heading": "SGLang ROCm 支持",
+    "prefix": "###"
+  },
+  {
+    "line": 4146,
+    "level": 2,
+    "heading": "6.2 NemoClaw — NVIDIA 官方 OpenClaw 优化",
+    "prefix": "##"
+  },
+  {
+    "line": 4163,
+    "level": 2,
+    "heading": "6.3 AMD 官方 OpenClaw 方案",
+    "prefix": "##"
+  },
+  {
+    "line": 4170,
+    "level": 3,
+    "heading": "RyzenClaw & RadeonClaw 硬件对比",
+    "prefix": "###"
+  },
+  {
+    "line": 4181,
+    "level": 3,
+    "heading": "Ryzen AI Max+ 395 完整规格",
+    "prefix": "###"
+  },
+  {
+    "line": 4190,
+    "level": 3,
+    "heading": "性能数据（Qwen 3.5 35B A3B 模型）",
+    "prefix": "###"
+  },
+  {
+    "line": 4200,
+    "level": 2,
+    "heading": "6.4 各硬件能跑的模型",
+    "prefix": "##"
+  },
+  {
+    "line": 4212,
+    "level": 1,
+    "heading": "第七章：附录",
+    "prefix": "#"
+  },
+  {
+    "line": 4214,
+    "level": 2,
+    "heading": "A.1 关键开源项目参考",
+    "prefix": "##"
+  },
+  {
+    "line": 4218,
+    "level": 3,
+    "heading": "机器人硬件",
+    "prefix": "###"
+  },
+  {
+    "line": 4230,
+    "level": 3,
+    "heading": "机器人软件",
+    "prefix": "###"
+  },
+  {
+    "line": 4243,
+    "level": 3,
+    "heading": "固件 / 驱动",
+    "prefix": "###"
+  },
+  {
+    "line": 4251,
+    "level": 3,
+    "heading": "电机驱动参考",
+    "prefix": "###"
+  },
+  {
+    "line": 4258,
+    "level": 3,
+    "heading": "其他相关",
+    "prefix": "###"
+  },
+  {
+    "line": 4266,
+    "level": 3,
+    "heading": "NVIDIA 机器人开源生态（2025-03 GTC 新增）",
+    "prefix": "###"
+  },
+  {
+    "line": 4282,
+    "level": 2,
+    "heading": "A.2 语音交互模块",
+    "prefix": "##"
+  },
+  {
+    "line": 4284,
+    "level": 3,
+    "heading": "TTS 推荐（本地离线）",
+    "prefix": "###"
+  },
+  {
+    "line": 4292,
+    "level": 3,
+    "heading": "语音唤醒方案",
+    "prefix": "###"
+  },
+  {
+    "line": 4300,
+    "level": 3,
+    "heading": "降噪链路（最佳实践）",
+    "prefix": "###"
+  },
+  {
+    "line": 4312,
+    "level": 3,
+    "heading": "Whisper 优化（Jetson Nano）",
+    "prefix": "###"
+  },
+  {
+    "line": 4320,
+    "level": 2,
+    "heading": "A.3 ESP32-Cam 有线通信",
+    "prefix": "##"
+  },
+  {
+    "line": 4322,
+    "level": 3,
+    "heading": "ESP32-Cam 最新固件（2025年推荐）",
+    "prefix": "###"
+  },
+  {
+    "line": 4337,
+    "level": 3,
+    "heading": "UART 通信（Jetson Nano ↔ ESP32-Cam）",
+    "prefix": "###"
+  },
+  {
+    "line": 4343,
+    "level": 3,
+    "heading": "I2C 总线注意事项",
+    "prefix": "###"
+  },
+  {
+    "line": 4351,
+    "level": 3,
+    "heading": "GPIO 应急停止（推荐电路）",
+    "prefix": "###"
+  },
+  {
+    "line": 4361,
+    "level": 2,
+    "heading": "A.4 拓竹软件生态",
+    "prefix": "##"
+  },
+  {
+    "line": 4374,
+    "level": 1,
+    "heading": "第八章：安全与维护",
+    "prefix": "#"
+  },
+  {
+    "line": 4376,
+    "level": 2,
+    "heading": "8.1 声纹识别",
+    "prefix": "##"
+  },
+  {
+    "line": 4378,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 4381,
+    "level": 3,
+    "heading": "实现方式",
+    "prefix": "###"
+  },
+  {
+    "line": 4401,
+    "level": 3,
+    "heading": "声纹注册流程",
+    "prefix": "###"
+  },
+  {
+    "line": 4412,
+    "level": 2,
+    "heading": "8.2 异常检测",
+    "prefix": "##"
+  },
+  {
+    "line": 4414,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 4417,
+    "level": 3,
+    "heading": "监控指标",
+    "prefix": "###"
+  },
+  {
+    "line": 4427,
+    "level": 3,
+    "heading": "监控脚本",
+    "prefix": "###"
+  },
+  {
+    "line": 4430,
+    "level": 1,
+    "heading": "!/usr/bin/env python3",
+    "prefix": "#"
+  },
+  {
+    "line": 4465,
+    "level": 2,
+    "heading": "8.3 数据自毁",
+    "prefix": "##"
+  },
+  {
+    "line": 4467,
+    "level": 3,
+    "heading": "目标",
+    "prefix": "###"
+  },
+  {
+    "line": 4470,
+    "level": 3,
+    "heading": "触发条件",
+    "prefix": "###"
+  },
+  {
+    "line": 4479,
+    "level": 3,
+    "heading": "销毁流程",
+    "prefix": "###"
+  },
+  {
+    "line": 4482,
+    "level": 1,
+    "heading": "!/usr/bin/env python3",
+    "prefix": "#"
+  },
+  {
+    "line": 4504,
+    "level": 2,
+    "heading": "8.4 日常维护",
+    "prefix": "##"
+  },
+  {
+    "line": 4506,
+    "level": 3,
+    "heading": "每日检查",
+    "prefix": "###"
+  },
+  {
+    "line": 4509,
+    "level": 1,
+    "heading": "1. 检查节点在线状态",
+    "prefix": "#"
+  },
+  {
+    "line": 4512,
+    "level": 1,
+    "heading": "2. 检查 Jetson Nano 温度",
+    "prefix": "#"
+  },
+  {
+    "line": 4515,
+    "level": 1,
+    "heading": "3. 检查 ESP32-Cam 视频流",
+    "prefix": "#"
+  },
+  {
+    "line": 4518,
+    "level": 1,
+    "heading": "4. 检查 Cyber Bricks 电池",
+    "prefix": "#"
+  },
+  {
+    "line": 4522,
+    "level": 3,
+    "heading": "每周维护",
+    "prefix": "###"
+  },
+  {
+    "line": 4531,
+    "level": 3,
+    "heading": "每月维护",
+    "prefix": "###"
+  },
+  {
+    "line": 4542,
+    "level": 2,
+    "heading": "8.5 常见问题排查",
+    "prefix": "##"
+  },
+  {
+    "line": 4544,
+    "level": 3,
+    "heading": "Jetson Nano 问题",
+    "prefix": "###"
+  },
+  {
+    "line": 4553,
+    "level": 3,
+    "heading": "ESP32-Cam 问题",
+    "prefix": "###"
+  },
+  {
+    "line": 4562,
+    "level": 3,
+    "heading": "Cyber Bricks 问题",
+    "prefix": "###"
+  },
+  {
+    "line": 4570,
+    "level": 3,
+    "heading": "OpenClaw 问题",
+    "prefix": "###"
+  },
+  {
+    "line": 4580,
+    "level": 1,
+    "heading": "第九章：风险与合规",
+    "prefix": "#"
+  },
+  {
+    "line": 4582,
+    "level": 2,
+    "heading": "9.1 技术风险",
+    "prefix": "##"
+  },
+  {
+    "line": 4594,
+    "level": 2,
+    "heading": "9.2 法规风险",
+    "prefix": "##"
+  },
+  {
+    "line": 4609,
+    "level": 1,
+    "heading": "第十章：调研更新记录",
+    "prefix": "#"
+  },
+  {
+    "line": 4613,
+    "level": 2,
+    "heading": "调研记录：2026-03-22",
+    "prefix": "##"
+  },
+  {
+    "line": 4617,
+    "level": 3,
+    "heading": "新增内容",
+    "prefix": "###"
+  },
+  {
+    "line": 4635,
+    "level": 2,
+    "heading": "调研记录：2026-03-21 深夜",
+    "prefix": "##"
+  },
+  {
+    "line": 4639,
+    "level": 3,
+    "heading": "新增内容",
+    "prefix": "###"
+  },
+  {
+    "line": 4653,
+    "level": 2,
+    "heading": "调研记录：2026-03-24 傍晚",
+    "prefix": "##"
+  },
+  {
+    "line": 4658,
+    "level": 3,
+    "heading": "稚晖君（彭志辉）开源项目对 0-1 的价值",
+    "prefix": "###"
+  },
+  {
+    "line": 4662,
+    "level": 4,
+    "heading": "① Dummy-Robot 机械臂 ⭐⭐⭐⭐⭐（最高优先级）",
+    "prefix": "####"
+  },
+  {
+    "line": 4699,
+    "level": 4,
+    "heading": "② AgiBot World 百万真机数据集 ⭐⭐⭐⭐⭐",
+    "prefix": "####"
+  },
+  {
+    "line": 4710,
+    "level": 4,
+    "heading": "③ AimRT 机器人中间件 ⭐⭐⭐⭐",
+    "prefix": "####"
+  },
+  {
+    "line": 4716,
+    "level": 4,
+    "heading": "④ XUAN-Bike \"大脑 + 小脑\"架构 ⭐⭐⭐",
+    "prefix": "####"
+  },
+  {
+    "line": 4724,
+    "level": 4,
+    "heading": "⑤ 哪吒双足机器人 ⭐⭐⭐",
+    "prefix": "####"
+  },
+  {
+    "line": 4730,
+    "level": 4,
+    "heading": "⑥ 启元 Q1 ⭐⭐⭐",
+    "prefix": "####"
+  },
+  {
+    "line": 4736,
+    "level": 4,
+    "heading": "关键链接汇总",
+    "prefix": "####"
+  },
+  {
+    "line": 4748,
+    "level": 2,
+    "heading": "调研记录：2026-03-24 下午（续）",
+    "prefix": "##"
+  },
+  {
+    "line": 4750,
+    "level": 3,
+    "heading": "RynnBrain + 空间智能新增",
+    "prefix": "###"
+  },
+  {
+    "line": 4761,
+    "level": 3,
+    "heading": "Medusa Halo 新增",
+    "prefix": "###"
+  },
+  {
+    "line": 4771,
+    "level": 3,
+    "heading": "核查结果汇总",
+    "prefix": "###"
+  },
+  {
+    "line": 4790,
+    "level": 3,
+    "heading": "新增内容",
+    "prefix": "###"
+  },
+  {
+    "line": 4802,
+    "level": 2,
+    "heading": "调研记录：2026-03-24 晚间",
+    "prefix": "##"
+  },
+  {
+    "line": 4807,
+    "level": 3,
+    "heading": "NVIDIA 机器人开源核心技术对 0-1 的价值",
+    "prefix": "###"
+  },
+  {
+    "line": 4819,
+    "level": 3,
+    "heading": "对 0-1 的整合建议",
+    "prefix": "###"
+  },
+  {
+    "line": 4826,
+    "level": 3,
+    "heading": "重要纠正",
+    "prefix": "###"
+  },
+  {
+    "line": 4836,
+    "level": 1,
+    "heading": "术语表（Glossary）",
+    "prefix": "#"
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "verification_group": "V04-V06",
+  "results": [
+    {
+      "id": "V04",
+      "claim": "Hi3863V100 Flash 容量是 2MB 不是 4MB",
+      "verdict": "rejected",
+      "evidence": "海思官方规格确认 Hi3863V100 系列芯片合封 4MB Flash（包括基础款 Hi3863 和增强款 Hi3863E），内置 606KB SRAM 和 300KB ROM。多源搜索（DeepSeek、Doubao）均指向 4MB，无 2MB 版本。Qwen 搜索结果提及 2MB 与主流官方资料矛盾，以官方资料为准。",
+      "confidence": "high"
+    },
+    {
+      "id": "V05",
+      "claim": "ROS 2 Foxy 只支持 Ubuntu 20.04 不支持 18.04",
+      "verdict": "confirmed",
+      "evidence": "ROS 2 Foxy 官方目标平台为 Ubuntu 20.04 LTS (Focal Fossa)，Tier 1 支持 amd64 和 arm64。Ubuntu 18.04 对应的官方 ROS 2 版本为 Dashing（已停止维护）。官方未提供 Foxy 在 Ubuntu 18.04 上的安装包或支持。DeepSeek 和 Doubao 搜索结果一致。",
+      "confidence": "high"
+    },
+    {
+      "id": "V06",
+      "claim": "OpenClaw bridge API 不存在 ask() 方法",
+      "verdict": "confirmed",
+      "evidence": "OpenClaw Bridge 作为 MCP 服务器，核心交互方法为 ask_user（用于向用户发起交互式提示，支持选项、自由文本和多选）和 notify_user（单向通知）。不存在 ask() 方法。旧版 TCP Bridge 协议已废弃，新客户端应使用 Gateway WebSocket 协议。",
+      "confidence": "high"
+    }
+  ]
+}

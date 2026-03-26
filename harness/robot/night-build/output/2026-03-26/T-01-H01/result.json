@@ -1,0 +1,87 @@
+{
+  "task_id": "T-01-H01",
+  "group": "H",
+  "version": 1,
+  "script_issues": 39,
+  "manual_issues": 5,
+  "total_issues": 11,
+  "issues": [
+    {
+      "type": "false_positive_markdown_table_trailing",
+      "source": "script",
+      "line_approx": "2294-2301",
+      "description": "Kinetix 参数表（2列表格）被误报第3列空单元格——实为 markdown 表格行尾 `|` 分隔符在 split 时产生的空字符串，非真实数据缺失。脚本对所有多列表格统一按最宽表头检测，导致误判。",
+      "severity": "low"
+    },
+    {
+      "type": "false_positive_markdown_table_trailing",
+      "source": "script",
+      "line_approx": "2310-2315",
+      "description": "行业现状表（6列表格）被误报第6列空单元格——实为表格列数差异（各行填写的列数不同），但实际内容完整（部分行因数据未公开而留空，属于合理设计选择）。",
+      "severity": "low"
+    },
+    {
+      "type": "false_positive_markdown_table_trailing",
+      "source": "script",
+      "line_approx": "2328-2332",
+      "description": "手部设计三参数表（3列表格）被误报第4列空单元格——表格本身仅3列，脚本检测到第4个空字符串（来自行尾 `|`），属误报。",
+      "severity": "low"
+    },
+    {
+      "type": "false_positive_markdown_table_trailing",
+      "source": "script",
+      "line_approx": "2366-2371",
+      "description": "触觉传感器选型表（4列表格）被误报第5列空单元格——表格本身仅4列（类型/价格/精度/适用场景），行尾 `|` 导致误报。这4行"第5列空"问题均为误报。",
+      "severity": "low"
+    },
+    {
+      "type": "data_source_missing",
+      "source": "manual",
+      "line_approx": 2312,
+      "description": "行业现状表 Tesla Optimus Gen3 一行：22 DOF × 2 数据来自 Tesla 官方发布会或官方视频，但文档中未标注具体来源（如世WISE大会演讲或官方Blog链接），读者无法核实。",
+      "severity": "medium"
+    },
+    {
+      "type": "data_source_missing",
+      "source": "manual",
+      "line_approx": 2313,
+      "description": "行业现状表 Boston Dynamics Atlas 一行：56 DOF、触觉感知、复杂体操动作等参数来自官方视频或官网描述，但未标注具体来源链接或发布日期。",
+      "severity": "medium"
+    },
+    {
+      "type": "data_source_missing",
+      "source": "manual",
+      "line_approx": 2314,
+      "description": "行业现状表 宇树 G1 一行：23-34 关节、捏鸡蛋/拧螺丝等操作描述来自宇树官方宣传，但未标注具体视频或官方文档来源。",
+      "severity": "medium"
+    },
+    {
+      "type": "data_source_missing",
+      "source": "manual",
+      "line_approx": 2315,
+      "description": "行业现状表 Figure 03 一行：多维力矩传感器、执行器速度2倍于上代——'2倍'是相对值描述，来源不明，且 Figure 官方未公开具体技术参数，仅靠媒体报道。",
+      "severity": "medium"
+    },
+    {
+      "type": "unverified_reference",
+      "source": "manual",
+      "line_approx": 2337,
+      "description": "阶段一方案提到'使用 Cyber Bricks 现有舵机'，但未说明具体型号或规格，无法判断是否真的可用；且前后成本 ¥200/手的估算也缺乏依据（舵机型号、数量均未列出）。",
+      "severity": "medium"
+    },
+    {
+      "type": "contradiction_minor",
+      "source": "manual",
+      "line_approx": "2328-2350",
+      "description": "手部设计三参数表'进阶版'列写的是'单手 ≥20 DOF'，但阶段二/三的进阶方案 DOF 分别是 '16-22 DOF' 和 '22 DOF'。进阶版目标值与实际阶段方案目标存在轻微不一致。",
+      "severity": "low"
+    },
+    {
+      "type": "content_continuity",
+      "source": "manual",
+      "line_approx": 2375,
+      "description": "§2.7 章节结束位置不明确：2.8 节标题'## 2.8 技术可行性：五条技术路线'出现在 2376 行，但在 2.7 的'触觉传感器选型'内容之后、2.8 之前缺少清晰的章节分隔标记（如水平线 `---`），视觉边界模糊。",
+      "severity": "low"
+    }
+  ]
+}

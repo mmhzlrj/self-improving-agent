@@ -1,0 +1,57 @@
+{
+  "task_id": "S12",
+  "name": "Phase 3-6+§5.1",
+  "line_range": "2990-3241",
+  "total_lines": 252,
+  "issues_found": 8,
+  "issues": [
+    {
+      "type": "content_mismatch",
+      "line_approx": 2990,
+      "description": "任务要求审核 Phase 3-6+§5.1，但实际行范围 2990-3241 仅包含 Phase 2（第2990行）、Phase 3（第3062行）和 Phase 4（第3099行）。Phase 5（从第3242行开始）、Phase 6（从第3312行开始）不在此范围内。",
+      "severity": "high"
+    },
+    {
+      "type": "content_missing",
+      "line_approx": 3382,
+      "description": "§5.1 Jetson Nano 视觉感知 位于第3382行，完全在行范围 2990-3241 之外，未被审核。",
+      "severity": "high"
+    },
+    {
+      "type": "format_issue",
+      "line_approx": 3091,
+      "description": "第3091-3092行出现重复的章节分隔符（'---'连续出现两次，中间无内容），属于多余格式标记。",
+      "severity": "low"
+    },
+    {
+      "type": "language_mismatch",
+      "line_approx": 3107,
+      "description": "Cyber Bricks 控制示例代码使用 MicroPython 语法（如 'import network'、'from machine import Pin, PWM, UART'），但 Cyber Bricks 微控制器通常运行 Arduino C++ 固件，不支持 MicroPython。语言与目标硬件不匹配。",
+      "severity": "high"
+    },
+    {
+      "type": "logic_error",
+      "line_approx": 3115,
+      "description": "mqtt_on_message 回调函数将 msg.payload（bytes 类型）直接传给 on_message(topic, msg)，但 on_message 函数内执行 ujson.loads(msg)，MicroPython/ujson 在某些版本对 bytes 参数处理不稳定，应显式调用 msg.payload.decode() 再传入。",
+      "severity": "medium"
+    },
+    {
+      "type": "ambiguous_content",
+      "line_approx": 3134,
+      "description": "Jetson Nano 与 Cyber Bricks 之间的 UART 接线方案未提供（只写了注释 '# 初始化 UART（连接 Jetson Nano）'），缺少 TX/RX 对应引脚说明，用户无法直接按此 SOP 接线。",
+      "severity": "medium"
+    },
+    {
+      "type": "reference_error",
+      "line_approx": 3062,
+      "description": "Phase 3 提到'详见第五章 5.2 节'，但该 SOP 全文无 '## 5.2' 章节标题（grep 未找到 '^## 5.2' 或 '^## 5\\.2'），引用目标缺失。",
+      "severity": "medium"
+    },
+    {
+      "type": "code_inconsistency",
+      "line_approx": 3191,
+      "description": "set_servo 函数注释标明'0-90度'范围，但 Phase 4 指令脚本中 angle=135 用于 right 指令，超出函数定义的范围（0-90），执行结果不确定。",
+      "severity": "medium"
+    }
+  ]
+}

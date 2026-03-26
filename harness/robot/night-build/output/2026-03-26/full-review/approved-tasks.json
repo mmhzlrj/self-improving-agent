@@ -1,0 +1,657 @@
+{
+  "total_approved": 81,
+  "needs_search": [
+    {
+      "num": 1,
+      "seg": "S01",
+      "line": 12,
+      "type": "内容不完整",
+      "desc": "v3.23 版本说明中「94%数据溯源恢复」中的 94% 数字含义不明——无上下文说明这是哪类数据的溯源率（是全部硬件规格的94%？还是某一章节？），读者无法判断 6% 未恢复的是什么内容",
+      "note": "找到论文，以论文信息为准"
+    },
+    {
+      "num": 16,
+      "seg": "S03",
+      "line": 723,
+      "type": "数据缺失",
+      "desc": "声称「EdgeTPU 同等硬件上 embedding 延迟 < 15ms」，但该数据没有标注具体来源（benchmark 链接、官方文档或实测）。同段落内其他数据如 openPangu 的首 token 1.8s 同样无来源标注，整体 benchmark 数据缺乏可追溯性。",
+      "note": "找到相关论文引用数据并记录"
+    },
+    {
+      "num": 18,
+      "seg": "S04",
+      "line": 788,
+      "type": "来源缺失",
+      "desc": "Benchmark 数据来源表中「MLPerf Tiny」标注为「MCU 级别推理基准测试」，但 MLPerf Tiny 的官方 target 分类（MCU / M4 / HiWi）主要针对 ARM Cortex-M 级微控制器，与 Jetson Nano（边缘计算设备，GPU/NPU 算力远超 M",
+      "note": "查证后去除"
+    },
+    {
+      "num": 35,
+      "seg": "S05",
+      "line": 1395,
+      "type": "事实性错误",
+      "desc": "地理分区表中将「陕西」列为固定住所/长租房 Backup 区域，但本 SOP 是九节狼的私人文档，陕西是否为固定住所属于用户私人信息，不应被文档编造假设。",
+      "note": "查证后修改"
+    },
+    {
+      "num": 45,
+      "seg": "S07",
+      "line": 1956,
+      "type": "数据缺失",
+      "desc": "AMD AI Halo 128GB（Ryzen AI Max+ 395）仅列出 NPU 50 TOPS + Total Platform AI 126 TOPS，缺少 GPU 部分算力（GPU TFLOPS）和核心规格，导致无法与 Jetson AGX Thor 的 GPU 算力表格横向对比。",
+      "note": "找到论文引用，并标记引用标注。"
+    },
+    {
+      "num": 59,
+      "seg": "S08",
+      "line": 2217,
+      "type": "来源缺失",
+      "desc": "Medusa Halo 规格表「来源」行仅注明「多源确认（Olrak29_@X、Tom's Hardware、TechPowerUp、Fudzilla）」，但 Fudzilla 的具体文章/报道内容未附链接，无法核实「2nm N2P + 3nm N3P」等具体参数具体来自哪个爆料源。",
+      "note": "拓竹官网：https://bambulab.cn/zh-cn  \n\n具体名词：\n\nBambu Studio\n智能易用的多功能切片软件\n\nBambu Handy\n一键发起打印，远程掌控进程\n\nBambu Suite\n激光·刀切·画笔，一程尽显\n\n拓竹农场管家\n让管理设备群组更简单\n\nBambu Connect (Beta)\n用于连接和发送打印到拓竹 3D 打印机的工具\n\nCyberBrick\n在桌面和移动端自由创建和调试CyberBrick 项目\n拓竹星闪模块是通过3D 打印的零部件，结合PICO Hi3861 以及其他必要元器件组合成一个佩戴在主人身上的便携式/佩戴式设备。"
+    },
+    {
+      "num": 111,
+      "seg": "S13",
+      "line": 3295,
+      "type": "内容不完整",
+      "desc": "Phase 5 MQTT on_message 回调函数中，`msg.payload.decode()` 缺少异常处理（未处理 decode 失败、非法 payload 等情况），与 Phase 6 的 HomeAssistant MQTT 示例一样无重连逻辑，不适合直接落地",
+      "note": "找到并关联"
+    },
+    {
+      "num": 112,
+      "seg": "S14",
+      "line": 3473,
+      "type": "内容边界不符",
+      "desc": "任务描述称本区间包含「§5.3 仿真+§5.4 基模」，但实际内容为：3473-3594 属于 §5.2（iPhone 感知前端）末尾，3595-3695 属于 §5.3（物理仿真引擎），§5.4（基模）从 3696 行才开始，完全不在本区间内。本区间实际上不包含 §5.4。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 113,
+      "seg": "S14",
+      "line": 3596,
+      "type": "事实性错误",
+      "desc": "文档声称 Genesis 是「Apple 团队开源的独立物理引擎」，经核实 GitHub 仓库（Genesis-Embodied-AI/Genesis）由 Genesis AI Company 主导开发，并非 Apple 团队的产品。Apple Silicon Metal 仅为其支持的计算后端之一。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 114,
+      "seg": "S14",
+      "line": 3534,
+      "type": "数据缺失",
+      "desc": "MediaPipe 功能表（③ MediaPipe）仅列出 3 项能力（物体检测 ~0.81ms / 手势识别 ~2ms / 全身姿态 ~5ms），标题为「功能最全」，但缺少 MediaPipe 常见能力如人脸网格（Face Mesh）、目标追踪（Object Tracking）等，内容不完整。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 117,
+      "seg": "S14",
+      "line": 3638,
+      "type": "内容重复",
+      "desc": "「Genesis vs Newton 怎么选」对比表（3638 行）的内容与上方「Genesis vs Isaac Gym 完整对比」表（3607 行）以及下方的「对 0-1 的建议」（3690-3691 行）在资源需求、适用场景等维度上高度重复，未做差异化描述。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 121,
+      "seg": "S15",
+      "line": 3727,
+      "type": "来源缺失",
+      "desc": "RynnBrain 核心能力表中「100步+任务完成率 88%」「零样本适配 未知环境成功率 94%」两个关键性能指标，标注来源为「官方 Demo 验证」，但缺少具体论文/官方文档/仓库链接，无法追溯验证。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 122,
+      "seg": "S15",
+      "line": 3896,
+      "type": "来源缺失",
+      "desc": "GR00T N1.6 预训练数据声称包含「宇树 G1 全身运动操作数据」「智元机器人 AgiBot Genie-1 双手操作数据」「Bimanual YAM 双臂遥操作数据」，但整段无任何 arXiv/GitHub/HuggingFace 来源链接。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 123,
+      "seg": "S15",
+      "line": 3901,
+      "type": "事实性错误或过度推测",
+      "desc": "「Cyber Bricks 作为宇树同源架构，动作空间可能兼容」——宇树 G1 使用宇树自研关节电机与通信协议，「同源架构」不等于「动作空间兼容」，此兼容性结论过度确定，应加更强 Hedge 词或说明待实际验证。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 124,
+      "seg": "S15",
+      "line": 3917,
+      "type": "内容不完整",
+      "desc": "§5.5「机器人技能训练」内容极度单薄：仅有 1 行章节标题 + 1 行备注 + 1 张厂商训练方式概述表，无任何具体 SOP、数据集链接、训练 pipeline 描述或基准测试。备注「⚠️ 0-1 当前状态：文档完全没有描述如何让机器人学会新任务」说明文档本身已承认内容缺失，但并未补充。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 125,
+      "seg": "S15",
+      "line": 3709,
+      "type": "格式问题",
+      "desc": "RynnBrain 模型表中「复杂任务（主力）」使用口语化词汇「主力」，不符合 SOP 技术文档的专业表述规范，应改为「主要用途」或「推荐场景」。",
+      "note": "找到并关联"
+    },
+    {
+      "num": 154,
+      "seg": "S18",
+      "line": 4232,
+      "type": "来源缺失",
+      "desc": "RT-1（Google）项目标注「—」，无任何 GitHub/项目链接，来源完全缺失。",
+      "note": "根据官网文档具体指引来正确补充：\ndocs.openclaw.ai"
+    }
+  ],
+  "needs_fix": [
+    {
+      "num": 6,
+      "seg": "S02",
+      "line": 254,
+      "type": "来源缺失",
+      "desc": "「1990万样本」的预训练内化数量无出处。这是一个关键性能数字，但表中未注明数据来源（论文/官方 GitHub/发布会等）。",
+      "note": "硬件选型（当前推荐）：\n\n设备\t角色\t配置建议\n拓竹 N1 或同级别 NAS\tNAS_1 热+温\t≥ 8 盘位，RAID5，SSD 缓存加速\n企业级 NAS\tNAS_2 冷层\t≥ 16 盘位，JBOD 模式，大容量氦气盘\nNAS_3 冻层\t离线备份\t每月一次同步，其余时间物理断开网络\n最小起步配置\t阶段一 NAS\t4 盘位 NAS，2TB × 4 = 8TB 起，够用 1-2 年\n整个表格改为\n绿联私有云DXP4800 Plus 16G内存8T四盘位NAS网络存储 个人云硬盘家庭服务器 万兆网口"
+    },
+    {
+      "num": 7,
+      "seg": "S02",
+      "line": 268,
+      "type": "逻辑矛盾",
+      "desc": "OpenClaw RL 参考弧记为「arXiv:2603.10165」，而 RynnBrain-CoP GRPO 参数表中的弧记为「arXiv:2602.14979」——两个号码不同，且均为数字编号，未标注论文标题，无法确认是否为同一篇文献或不同文献。",
+      "note": "根据实际情况修正格式"
+    },
+    {
+      "num": 8,
+      "seg": "S02",
+      "line": 261,
+      "type": "逻辑矛盾",
+      "desc": "「防止灾难性遗忘：GRPO 训练 KL 散度惩罚（β=0.02）」这一行与后续「重要澄清」段落（line 263附近）中「RynnBrain 基础模型（2B/8B/30B MoE）使用标准 SFT 预训练，不用 GRPO。GRPO 仅用于 RynnBrain-CoP」存在逻辑冲突：前段描述 GRPO",
+      "note": "按实际情况修正格式"
+    },
+    {
+      "num": 9,
+      "seg": "S02",
+      "line": 261,
+      "type": "重复内容",
+      "desc": "「防止灾难性遗忘：GRPO 训练 KL 散度惩罚（β=0.02）」与上方 RynnBrain-CoP GRPO 超参数表（line 263）中「KL 散度系数（β）| 0.02」实质为同一信息，出现在同一表格内，且与该段落的「重要澄清」说明形成冗余。",
+      "note": "14500 7.4V 800mAh Li-ion Battery(1PCS) - PC003"
+    },
+    {
+      "num": 10,
+      "seg": "S02",
+      "line": 248,
+      "type": "来源缺失",
+      "desc": "「阶段一（1-2年）/ 阶段二（3-4年）/ 阶段三（5年+）」的时间规划无依据。未说明这些时间段是基于什么得出的（行业经验、项目计划还是假设），也未说明「阶段一」对应 SOP 中的哪个 Phase（只提到 Phase 1-4，但没有具体定义这些 Phase 的起止时间）。",
+      "note": "Jetson AGX Thor 已发布 https://www.nvidia.cn/autonomous-machines/embedded-systems/jetson-thor/"
+    },
+    {
+      "num": 12,
+      "seg": "S03",
+      "line": 651,
+      "type": "事实性错误",
+      "desc": "表格中声称 Recall 使用「Phi-3.5-mini (4B) 交叉编码器（微软官方未披露具体型号，此为 SOP 标注型号，待核实）」——Phi-3.5-mini 是微软的小语言模型，并非交叉编码器。Recall 官方从未披露具体编码器型号，文档自己标注了「待核实」却仍将此作为对比项写入，容易误",
+      "note": "Hi3863V100 不是我一开始列出来的，是AI找数据的时候乱补进去的。 PICO Hi3861 才是我列出来的 存储规格「606KB SRAM + 300KB ROM + 4MB Flash」是对的。"
+    },
+    {
+      "num": 13,
+      "seg": "S03",
+      "line": 661,
+      "type": "事实性错误",
+      "desc": "表格中声称「Windows Semantic Index（语义索引）将图像和文本转换为向量，架构类型待核实（官方未披露双塔/交叉编码器）」——双塔（bi-encoder）和交叉编码器（cross-encoder）是两种不同架构，前者分别编码query和document，后者联合编码。将「待核实」的架",
+      "note": "按实际情况修正"
+    },
+    {
+      "num": 14,
+      "seg": "S03",
+      "line": 693,
+      "type": "逻辑矛盾",
+      "desc": "表格将 Mem0 定位为「Graph + Vector 核心引擎（应用层）」，将 Neo4j 定位为「图关系+时序引擎（存储层）」——但 Mem0 本身支持 Neo4j 作为后端存储，并非纯应用层。Mem0 与 Neo4j 的关系描述存在层级混淆，两者并非上游应用与下游存储的简单分层关系。",
+      "note": "不是三者并发，现阶段只需要拥有3个功能，实际上用的时候，只用一个。不会同时用3个。"
+    },
+    {
+      "num": 15,
+      "seg": "S03",
+      "line": 736,
+      "type": "事实性错误",
+      "desc": "声称 EmbeddingGemma 有「308M 参数，量化后 < 200MB」——Google 官方发布的 EmbeddingGemma 模型实际参数量为 278M，而非 308M。数字差异虽小但属于具体事实错误。",
+      "note": "这里应该缺了一个 iPhone 16 Pro 与 PICO Hi3861 （它对接 Jetson nano 2GB和ESP32-cam) 或者 接入一个 USB Type-C 的转接口之后可以实现。"
+    },
+    {
+      "num": 17,
+      "seg": "S03",
+      "line": 687,
+      "type": "内容不完整",
+      "desc": "检索延迟分析中，步骤③（向量检索 1M 向量在 HNSW 上约 10-50ms）和步骤⑤的重要性排序均未说明具体实现细节（如 HNSW 参数：efConstruction/M/ef，或重要性权重使用什么公式）。另外「含 LLM 生成的完整响应延迟约 1-3 秒」与不涉及 LLM 的延迟分析混在一起，",
+      "note": "https://github.com/pythops/jetson-image\nhttps://github.com/topics/jetson-nano-2gb"
+    },
+    {
+      "num": 19,
+      "seg": "S04",
+      "line": 793,
+      "type": "来源缺失",
+      "desc": "TensorSLM (ICML 2025) 引用标注为「RPi 上张量列分解压缩 embedding 能耗与延迟」，但 ICML 2025 会议（通常于当年7月举行）属于未来时间点（截至本 SOP 撰写时该会议尚未召开），相关论文无法核实其存在性与内容准确性。应在论文正式发表并核实后补充具体 pap",
+      "note": ""
+    },
+    {
+      "num": 20,
+      "seg": "S04",
+      "line": 794,
+      "type": "来源缺失",
+      "desc": "Google EmbeddingGemma 的 EdgeTPU benchmark 数据（< 15ms embedding）标注为数据来源，但没有提供具体报告名称、版本号或链接，无法溯源此数据的具体出处。15ms 这一具体数值的可信度无法评估。",
+      "note": "https://docs.openclaw.ai/gateway/bridge-protocol#bridge-protocol"
+    },
+    {
+      "num": 21,
+      "seg": "S04",
+      "line": 1093,
+      "type": "来源缺失",
+      "desc": "玻璃光学存储详细对比表中，微软 Project Silica「4光束并行 8.25 MB/s」写入速度数值未标注来源。该数值在 SOP 中多次出现（数据流图、降级策略），但始终无原始数据出处。相比之下，双折射体素方案表格标题标注了 Nature 论文 2026-02，而写入速度这一关键参数却缺乏同等",
+      "note": ""
+    },
+    {
+      "num": 22,
+      "seg": "S04",
+      "line": 1013,
+      "type": "逻辑矛盾",
+      "desc": "四层存储架构表中，冷层（Cold）的保留策略描述为「高压缩率存储（HEVC/H.266）」，其中 H.266/VVC 是有损视频编码标准。然而，同节内容以及冻层（Frozen）策略均强调「永不删除原始数据」「原始数据不可再造」等不可逆损失零容忍原则。有损压缩意味着重新解码时必然产生质量损失，与「保留",
+      "note": ""
+    },
+    {
+      "num": 24,
+      "seg": "S04",
+      "line": 1087,
+      "type": "来源缺失",
+      "desc": "微软 Project Silica 主要数据来源标注为「Nature 论文 2026-02」。从 SOP 撰写时点（2026-03-26）来看，该论文发表于约一个月前，但 SOP 内另有一句坦诚说明——「国产数据来自公开报道，部分参数待厂商确认」。相比之下，微软数据虽标注了 Nature 来源，但 ",
+      "note": ""
+    },
+    {
+      "num": 25,
+      "seg": "S04",
+      "line": 1215,
+      "type": "内容不完整",
+      "desc": "访客数据保留说明中提到「未来新的分割模型可能出现，可以重新从 raw data 中提取访客信息」，但未说明如果该分割模型始终未出现、或开发方停止维护的情况下，访客 raw data 的保留策略是否有所不同。访客数据同样适用「永不删除原始数据」原则，但与用户本人数据不同，访客 raw data 的长期",
+      "note": ""
+    },
+    {
+      "num": 26,
+      "seg": "S04",
+      "line": 1069,
+      "type": "内容不完整",
+      "desc": "密钥管理路径表格中，阶段三（阶段三：AMD AI Halo PSP fTPM）标注为「需在 BIOS 确认启用，商业版通常保留 PSP 单元」，但缺少具体验证步骤（如：如何确认 BIOS 中 PSP/TPM 选项已启用；哪些厂商主板/BIOS 版本已知支持此功能；Strix Halo 桌面平台的 f",
+      "note": "Genesis 正确 URL 是 https://github.com/Genesis-Embodied-AI/Genesis，由 CMU + 20+机构开发，2025年7月正式由 Genesis AI 公司支持"
+    },
+    {
+      "num": 27,
+      "seg": "S05",
+      "line": 1283,
+      "type": "来源缺失",
+      "desc": "自毁触发条件写道「详见 §8.3」但本文档属于 §1.2 贵庚-4，§8.3 节不在本文件结构内，属于无效交叉引用。",
+      "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对"
+    },
+    {
+      "num": 28,
+      "seg": "S05",
+      "line": 1293,
+      "type": "逻辑矛盾",
+      "desc": "自毁触发条件说「长时间（如30天）无法联系上主人」，但上层「最好的预防」段落说「0-1 每天看到主人平安在家 → 情感上满足 → 继续正常陪伴行为」。若主人每日平安在家，0-1 不可能 30 天联系不上，触发条件与日常状态描述自相矛盾。",
+      "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对"
+    },
+    {
+      "num": 29,
+      "seg": "S05",
+      "line": 1300,
+      "type": "内容不完整",
+      "desc": "自毁触发条件「主人确认触发」写「立即执行」，未说明确认方式：是指令需要物理在场、语音还是其他验证形式？触发机制不完整。",
+      "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对"
+    },
+    {
+      "num": 30,
+      "seg": "S05",
+      "line": 1365,
+      "type": "数据缺失",
+      "desc": "硬件选型表格中 NAS_3 冻层一行的「设备」列完全空白，配置建议列却有内容，表格信息不完整。",
+      "note": "验证事实情况"
+    },
+    {
+      "num": 31,
+      "seg": "S05",
+      "line": 1400,
+      "type": "内容不完整",
+      "desc": "「重要记忆的判断标准」段落定义了哪些需要多区域冗余，但未给出各判断标准的具体操作阈值（如 importance 权重访问频率阈值是多少），导致策略无法落地执行。",
+      "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对"
+    },
+    {
+      "num": 40,
+      "seg": "S06",
+      "line": 1817,
+      "type": "逻辑矛盾",
+      "desc": "正文说明「Phase 1-6 覆盖阶段一和阶段二的内容，阶段三至五属于远期规划」，即 Phase 1-6 对应阶段一二（1-4年）。但 Phase 6 表格中「对应年份」标注为「阶段二（3-4年）」，处于阶段二的末期；更关键的是，阶段五（9-10年）没有任何 Phase 编号对应，而阶段四（7-8年",
+      "note": "实际上是40针，但具体有作用的是17针，其他为预留冗余"
+    },
+    {
+      "num": 43,
+      "seg": "S07",
+      "line": 1886,
+      "type": "数据缺失",
+      "desc": "「拓竹 Cyber Tanks 内置电池」的容量/电压等关键参数标注为「未知」。电源方案作为具身机器人核心设计，此处缺失使后续续航计算和电源规划无法进行。",
+      "note": ""
+    },
+    {
+      "num": 50,
+      "seg": "S07",
+      "line": 1960,
+      "type": "内容不完整",
+      "desc": "NAS 项目标注「存储矩阵已有，无需额外采购」却仍标价 3,000 元，两句话自相矛盾；且「贵庚」为错别字（疑为「归档」或「贵重」），需修正。",
+      "note": "多AI平台验证技术分层逻辑然后修正"
+    },
+    {
+      "num": 54,
+      "seg": "S08",
+      "line": 2013,
+      "type": "事实性错误",
+      "desc": "存储规格「606KB SRAM + 300KB ROM + 4MB Flash」中 Flash 容量疑似错误。Hi3863V100 官方 datasheet 显示内置 Flash 为 2MB（Hi3861 才是 2MB + SPI NOR Flash），BearPi Pico H3863 模块通常配",
+      "note": "以后所有的报告数据如果可以的话，都要把来源的网站或者其他更详细的数据标注好。"
+    },
+    {
+      "num": 61,
+      "seg": "S08",
+      "line": 2218,
+      "type": "内容不完整",
+      "desc": "「AI算力」行「4-10倍」提升区间跨度过大（200-500 TOPS 范围），无具体数值也无来源说明。Strix Halo NPU 为 50 TOPS，4倍=200 TOPS，10倍=500 TOPS，相差一倍以上，对于评估「能否跑 405B 模型」的结论影响重大，应给出更精确的预估或说明不确定性",
+      "note": "未来的场景里面，0-1 是随主人一起行动。前期没准备好之前，它应该是在实验室研发过程中，不会出去，被抢的概率也极低，该阶段不用考虑数据自毁状态。如果确实有突然分开的情况，0-1 应该是知情，且知道大概什么时候回来。另外随身佩戴的 PICO 星闪模组也在随时通讯。"
+    },
+    {
+      "num": 68,
+      "seg": "S09",
+      "line": 2390,
+      "type": "data_missing",
+      "desc": "NVIDIA NemoClaw 描述中「集成 OpenShell 安全沙箱 + Nemotron 模型」—— OpenShell（安全沙箱）与 OpenClaw（AI Agent 框架）是两个不同项目，描述将两者混用，且无 NVIDIA 官方产品页面或 GTC 公告链接。",
+      "note": ""
+    },
+    {
+      "num": 88,
+      "seg": "S11",
+      "line": 2781,
+      "type": "content_mismatch",
+      "desc": "任务标题为「Phase 0-2 台式机+语音+视觉」，但 Phase 2（视觉记录模块）内容从 line 2990 开始，不在 2781-2989 范围内。视觉模块完全没有被审核。",
+      "note": ""
+    },
+    {
+      "num": 90,
+      "seg": "S11",
+      "line": 2814,
+      "type": "logical_conflict",
+      "desc": "openclaw node run 命令同时使用环境变量「OPENCLAW_GATEWAY_URL」和命令行标志「--host/--port 192.168.x.x:18789」。若 --host/--port 是指定节点监听地址（而非网关地址），则指向 Mac Gateway 是错误的。文档未说明",
+      "note": ""
+    },
+    {
+      "num": 91,
+      "seg": "S11",
+      "line": 2855,
+      "type": "data_missing",
+      "desc": "硬件表格列出「Cyber Bricks ×1 已有」作为第一个物理输出节点，但 Phase 1 全程没有对 Cyber Bricks 进行任何配置或使用说明，内容不完整。",
+      "note": ""
+    },
+    {
+      "num": 92,
+      "seg": "S11",
+      "line": 2851,
+      "type": "data_missing",
+      "desc": "硬件表格写「Jetson Nano 2GB」，未注明具体型号变体（是 Jetson Nano B01 还是早期版本），不同变体硬件配置可能不同。",
+      "note": ""
+    },
+    {
+      "num": 93,
+      "seg": "S11",
+      "line": 2867,
+      "type": "missing_source",
+      "desc": "Step 1 要求下载 JetPack 5.x 镜像（NVIDIA 官网，L4T 35.x），但没有提供具体下载 URL，用户无法直接找到正确版本。",
+      "note": ""
+    },
+    {
+      "num": 97,
+      "seg": "S11",
+      "line": 2815,
+      "type": "command_validity",
+      "desc": "openclaw node run 命令使用了「--display-name」标志，未验证此标志是否为 openclaw CLI 的有效参数。",
+      "note": ""
+    },
+    {
+      "num": 98,
+      "seg": "S11",
+      "line": 2860,
+      "type": "data_missing",
+      "desc": "Step 1 基础配置中开启了 SSH（sudo systemctl enable ssh），但未说明从 Mac 如何通过 SSH 连接到 Jetson Nano（需要 IP 地址和用户名），缺乏关键操作步骤。",
+      "note": ""
+    },
+    {
+      "num": 103,
+      "seg": "S12",
+      "line": 3115,
+      "type": "logic_error",
+      "desc": "mqtt_on_message 回调函数将 msg.payload（bytes 类型）直接传给 on_message(topic, msg)，但 on_message 函数内执行 ujson.loads(msg)，MicroPython/ujson 在某些版本对 bytes 参数处理不稳定，应显式调",
+      "note": "完整列出"
+    },
+    {
+      "num": 104,
+      "seg": "S12",
+      "line": 3134,
+      "type": "ambiguous_content",
+      "desc": "Jetson Nano 与 Cyber Bricks 之间的 UART 接线方案未提供（只写了注释 '# 初始化 UART（连接 Jetson Nano）'），缺少 TX/RX 对应引脚说明，用户无法直接按此 SOP 接线。",
+      "note": "Newton 引擎 来自于英伟达2026 gtc 演讲。"
+    },
+    {
+      "num": 105,
+      "seg": "S12",
+      "line": 3062,
+      "type": "reference_error",
+      "desc": "Phase 3 提到'详见第五章 5.2 节'，但该 SOP 全文无 '## 5.2' 章节标题（grep 未找到 '^## 5.2' 或 '^## 5\\.2'），引用目标缺失。",
+      "note": "必须 NVIDIA RTX 8GB+是最低配运行要求的配置，RTX 3090+ 是推荐配置，可以补充一下。"
+    },
+    {
+      "num": 106,
+      "seg": "S12",
+      "line": 3191,
+      "type": "code_inconsistency",
+      "desc": "set_servo 函数注释标明'0-90度'范围，但 Phase 4 指令脚本中 angle=135 用于 right 指令，超出函数定义的范围（0-90），执行结果不确定。",
+      "note": "可以优化描述"
+    },
+    {
+      "num": 107,
+      "seg": "S13",
+      "line": 3449,
+      "type": "格式问题",
+      "desc": "实测FPS表中 YOLOv4-tiny 行格式损坏，应为5列实际出现7列：`| YOLOv4-tiny | 416x416| YOLOv4-tiny | 416x416 | ~20-30 | 轻量老模型 |`，模型名和分辨率被重复填入，导致表格渲染错误",
+      "note": ""
+    },
+    {
+      "num": 109,
+      "seg": "S13",
+      "line": 3377,
+      "type": "来源缺失",
+      "desc": "Phase 6末尾仅有一句「星闪通信模块详见 §2.5」，没有实际内容，是一个悬空交叉引用",
+      "note": ""
+    },
+    {
+      "num": 115,
+      "seg": "S14",
+      "line": 3601,
+      "type": "来源缺失",
+      "desc": "§5.3 开头的警告框中，对 Newton 引擎的描述缺少来源说明。Genesis 小节注明「来源：Genesis GitHub + 官方文档」，但 Newton 小节（3601 行起）无等效来源标注，GitHub URL 也未标注验证日期。",
+      "note": ""
+    },
+    {
+      "num": 116,
+      "seg": "S14",
+      "line": 3609,
+      "type": "数据不一致",
+      "desc": "Isaac Gym 的 GPU 要求存在两种说法：对比表（3609 行）写「必须 NVIDIA RTX 8GB+」，而下方的意义说明（3611 行）写「RTX 3090+」。RTX 3090 为 24GB 显存，「8GB+」与「RTX 3090+」是两个不同量级的标准，容易误导读者。",
+      "note": ""
+    },
+    {
+      "num": 133,
+      "seg": "S15",
+      "line": 3776,
+      "type": "文字错误",
+      "desc": "李飞飞空间智能表格中「BRS 家机器」中「家」字疑似错别字或多余字，应为「BRS 机器」或「BRS 家清机器人」等合法名称，全段无其他上下文可推断原意。",
+      "note": ""
+    },
+    {
+      "num": 139,
+      "seg": "S16",
+      "line": 3939,
+      "type": "internal_inconsistency",
+      "desc": "章节引言称「三种主要训练范式」，但实际列出四项内容（模仿学习、强化学习、端到端神经网络、3DGS 仿真数据生成），且 3DGS 被单独作为第 4 项标题列出，标题数与内容数不一致。",
+      "note": ""
+    },
+    {
+      "num": 141,
+      "seg": "S17",
+      "line": 4078,
+      "type": "内容与任务描述不符",
+      "desc": "任务描述要求审核「§6.4 模型+附录A」，但实际提取的第4078-4199行内容为§6.1（推理框架对比）、§6.2（NemoClaw）、§6.3（AMD官方方案）三个小节，§6.4从第4200行才开始。附录A不在此范围内。",
+      "note": "SLE + BLE 都是在同一个星闪芯片的功能里面，应该要一起描述出来才对。"
+    },
+    {
+      "num": 147,
+      "seg": "S17",
+      "line": 4103,
+      "type": "数据缺失-Vulkan对比基准不完整",
+      "desc": "性能比较「ROCm 7.0.2 + ROCm后端：876.9 tokens/s (+112%)」——基准 Vulkan后端的412 tokens/s已在上下文中，但缺少测试硬件配置的一致性说明（两者的GPU型号、batch size、量化方式是否相同）。",
+      "note": ""
+    },
+    {
+      "num": 149,
+      "seg": "S18",
+      "line": 4201,
+      "type": "事实性错误",
+      "desc": "「RTX 2060 6GB」行中出现「Qwen3.5-4B」——Qwen 系列官方发布历史上从未有「3.5」版本；直接从 Qwen2.5 跳到 QwQ 系列。Qwen3.5-4B 为未发布/虚构模型。",
+      "note": "官方的JetPack 4.6.1 或者 https://github.com/pythops/jetson-image"
+    },
+    {
+      "num": 150,
+      "seg": "S18",
+      "line": 4201,
+      "type": "事实性错误",
+      "desc": "「AMD AI Halo 128GB」行中出现「Qwen3.5-122B（4-bit 需 ~70GB）」——Qwen 官方系列最大参数为 Qwen2.5-72B，不存在 122B 参数版本；Qwen3.5 根本不存在。此为虚构数据。",
+      "note": ""
+    },
+    {
+      "num": 151,
+      "seg": "S18",
+      "line": 4225,
+      "type": "来源缺失",
+      "desc": "AgiBot World 链接指向 OpenDataLab 下载页面（opendatalab.com/OpenDriveLab/AgiBot-World/download），而非智元官方项目页面或 GitHub，来源非一手。",
+      "note": "改为购买蓝牙耳机"
+    },
+    {
+      "num": 152,
+      "seg": "S18",
+      "line": 4227,
+      "type": "事实性错误",
+      "desc": "GO-1 的 GitHub 组织名列为「open-agibot/go1-sim」，但智元官方 GitHub 组织为「Agibot」（非 open-agibot），实际 repo 名也存在差异。链接指向不存在的 org。",
+      "note": "改为购买蓝牙耳机"
+    },
+    {
+      "num": 153,
+      "seg": "S18",
+      "line": 4231,
+      "type": "来源缺失",
+      "desc": "ALOHA（斯坦福）项目标注「—」，无任何 GitHub/项目链接，来源完全缺失。",
+      "note": ""
+    },
+    {
+      "num": 155,
+      "seg": "S18",
+      "line": 4233,
+      "type": "来源缺失 + 事实性错误",
+      "desc": "RynnBrain（阿里）标注「—」无任何来源；其描述「30B MoE + Plan/Nav/CoP」未经证实，且该描述不见诸任何阿里官方文档，极可能为编造。",
+      "note": ""
+    },
+    {
+      "num": 156,
+      "seg": "S18",
+      "line": 4237,
+      "type": "来源缺失",
+      "desc": "NemoClaw 项目标注「—」，无任何来源链接，来源完全缺失。",
+      "note": ""
+    },
+    {
+      "num": 157,
+      "seg": "S18",
+      "line": 4239,
+      "type": "格式问题",
+      "desc": "Isaac GR00T N1.6 名称写作「Isaac GR00T N1.6.3B」，重复出现「GR00T」两次；NVIDIA HuggingFace 官方名称为「GR00T-N1.6-3B」，此处格式有误。",
+      "note": ""
+    },
+    {
+      "num": 158,
+      "seg": "S18",
+      "line": 4241,
+      "type": "URL 错误",
+      "desc": "Cosmos Predict 2.5 的 HuggingFace URL 结尾为「/cosmos-predict-and-transfer2-5」，多出一个横杠，应为「...cosmos-predict-and-transfer-2-5」或正确路径。",
+      "note": ""
+    },
+    {
+      "num": 159,
+      "seg": "S18",
+      "line": 4242,
+      "type": "URL 错误",
+      "desc": "Isaac Lab-Arena 链接指向 NVIDIA Developer Blog 文章页（blog.nvidia.com/...isaac-lab-arena/），而非 GitHub 仓库或官方文档页，链接类型不符合其他行使用 GitHub/HuggingFace 仓库的规范。",
+      "note": ""
+    },
+    {
+      "num": 164,
+      "seg": "S18",
+      "line": 0,
+      "type": "逻辑矛盾",
+      "desc": "异常检测表格注明「内存使用：正常<80% / 异常>90%」，但代码实际判断 mem.percent > 90，二者一致；但表头「正常范围」与「异常阈值」列的含义与代码逻辑不完全对应（代码只检查单一阈值，无「正常范围」判断）。",
+      "note": ""
+    },
+    {
+      "num": 170,
+      "seg": "S20",
+      "line": 4739,
+      "type": "事实性错误",
+      "desc": "BearPi GPIO 核查结果存在歧义：先说「修正：17个GPIO（非40针GPIO）」，但同一条又写「40针排针座含电源/地」，两句话相互矛盾",
+      "note": ""
+    }
+  ],
+  "needs_subagent": [
+    {
+      "num": 38,
+      "seg": "S06",
+      "line": 1802,
+      "type": "格式问题",
+      "desc": "Phase 编号与五阶段对应关系表格结构错误：表头行「Phase | 实施内容 | 对应年份 | | | |」有6个管道符分隔的列，但只定义了3个列名，导致后续6列数据行与3列表头严重不对齐，markdown渲染行为未定义。",
+      "note": "subagents补充代码"
+    },
+    {
+      "num": 39,
+      "seg": "S06",
+      "line": 1815,
+      "type": "内容不完整",
+      "desc": "Phase 5（面部表情系统）在阶段对应表格中没有「阶段」列的取值，而 Phase 1/2/3/4/6 均有明确的阶段编号，Phase 5 缺少此字段，信息不完整。",
+      "note": "subagents补充代码"
+    },
+    {
+      "num": 89,
+      "seg": "S11",
+      "line": 2859,
+      "type": "missing_definition",
+      "desc": "架构图和代码中多次出现「贵庚大脑」「贵庚」，但整个文档中没有定义这是什么（项目代号？AI模型？），读者无法理解其含义。",
+      "note": "补齐代码"
+    },
+    {
+      "num": 101,
+      "seg": "S12",
+      "line": 3091,
+      "type": "format_issue",
+      "desc": "第3091-3092行出现重复的章节分隔符（'---'连续出现两次，中间无内容），属于多余格式标记。",
+      "note": "按照逻辑改进代码"
+    },
+    {
+      "num": 127,
+      "seg": "S15",
+      "line": 3790,
+      "type": "事实性错误或过度推测",
+      "desc": "表格两次出现「RTX 5090已发布，待更新」标注：一次在 RoboGSim 行（3822附近），一次在 SplaTAM 行（3825附近）。RTX 5090 发布时间未经验证，属推测性内容，不应写入 SOP。",
+      "note": "补充检测代码"
+    }
+  ]
+}

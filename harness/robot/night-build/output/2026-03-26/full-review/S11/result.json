@@ -1,0 +1,105 @@
+{
+  "task_id": "S11",
+  "name": "Phase 0-2",
+  "line_range": "2781-2989",
+  "total_lines": 209,
+  "issues_found": 16,
+  "issues": [
+    {
+      "type": "factual_error",
+      "line_approx": 2914,
+      "description": "Step 5 代码调用「bridge.ask(text)」，但 OpenClaw bridge API 不存在 ask() 方法，会导致运行时 AttributeError。代码无法执行。",
+      "severity": "high"
+    },
+    {
+      "type": "factual_error",
+      "line_approx": 2889,
+      "description": "Step 3 下载 Whisper 模型为「base.en」（英文专用），但 Step 5 用「--language zh」做中文识别。base.en 只在英文数据上训练，用于中文识别效果极差。应该用多语言模型如 base、small 或 medium。",
+      "severity": "high"
+    },
+    {
+      "type": "data_missing",
+      "line_approx": 2934,
+      "description": "代码导入了「from openclaw_bridge import OpenClawBridge」，但整个 Phase 1 没有提供 openclaw-bridge 的安装或配置方法，用户无法获得该模块，代码无法运行。",
+      "severity": "high"
+    },
+    {
+      "type": "incomplete_content",
+      "line_approx": 2954,
+      "description": "Step 5 主循环「while True」没有 try/KeyboardInterrupt 处理，缺少优雅退出机制（无法 Ctrl+C 干净退出），属于不完整的代码实现。",
+      "severity": "medium"
+    },
+    {
+      "type": "path_error",
+      "line_approx": 2910,
+      "description": "Step 3 中「cd whisper.cpp && make -j4」后，工作目录在 whisper.cpp 内，模型下载到相对路径「models/ggml-base.en.bin」。但 Step 5 脚本使用「./whisper.cpp/bin/whisper-cli」和「whisper.cpp/models/ggml-base.en.bin」，这是相对于脚本工作目录（如 /home/nvidia/）而非 whisper.cpp 目录，路径不匹配。",
+      "severity": "medium"
+    },
+    {
+      "type": "content_mismatch",
+      "line_approx": 2781,
+      "description": "任务标题为「Phase 0-2 台式机+语音+视觉」，但 Phase 2（视觉记录模块）内容从 line 2990 开始，不在 2781-2989 范围内。视觉模块完全没有被审核。",
+      "severity": "medium"
+    },
+    {
+      "type": "missing_definition",
+      "line_approx": 2859,
+      "description": "架构图和代码中多次出现「贵庚大脑」「贵庚」，但整个文档中没有定义这是什么（项目代号？AI模型？），读者无法理解其含义。",
+      "severity": "medium"
+    },
+    {
+      "type": "logical_conflict",
+      "line_approx": 2814,
+      "description": "openclaw node run 命令同时使用环境变量「OPENCLAW_GATEWAY_URL」和命令行标志「--host/--port 192.168.x.x:18789」。若 --host/--port 是指定节点监听地址（而非网关地址），则指向 Mac Gateway 是错误的。文档未说明这些标志的确切语义，存在歧义。",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line_approx": 2855,
+      "description": "硬件表格列出「Cyber Bricks ×1 已有」作为第一个物理输出节点，但 Phase 1 全程没有对 Cyber Bricks 进行任何配置或使用说明，内容不完整。",
+      "severity": "medium"
+    },
+    {
+      "type": "data_missing",
+      "line_approx": 2851,
+      "description": "硬件表格写「Jetson Nano 2GB」，未注明具体型号变体（是 Jetson Nano B01 还是早期版本），不同变体硬件配置可能不同。",
+      "severity": "low"
+    },
+    {
+      "type": "missing_source",
+      "line_approx": 2867,
+      "description": "Step 1 要求下载 JetPack 5.x 镜像（NVIDIA 官网，L4T 35.x），但没有提供具体下载 URL，用户无法直接找到正确版本。",
+      "severity": "low"
+    },
+    {
+      "type": "missing_source",
+      "line_approx": 2860,
+      "description": "Step 1 用 balenaEtcher 烧录 SD 卡，但没有提供下载链接。",
+      "severity": "low"
+    },
+    {
+      "type": "assumption_untested",
+      "line_approx": 2863,
+      "description": "音频配置假设 USB 耳机一定是 card 1（「USB 耳机通常是 card 1」），但未提供验证步骤。若 card 编号不对，后续所有音频操作都会失败。",
+      "severity": "low"
+    },
+    {
+      "type": "cross_reference_missing",
+      "line_approx": 2852,
+      "description": "硬件表格写「USB 耳机 需采购 Phase 2 一起买」，但 Phase 2 内容不在本审核范围内，交叉引用无法验证。",
+      "severity": "low"
+    },
+    {
+      "type": "command_validity",
+      "line_approx": 2815,
+      "description": "openclaw node run 命令使用了「--display-name」标志，未验证此标志是否为 openclaw CLI 的有效参数。",
+      "severity": "low"
+    },
+    {
+      "type": "data_missing",
+      "line_approx": 2860,
+      "description": "Step 1 基础配置中开启了 SSH（sudo systemctl enable ssh），但未说明从 Mac 如何通过 SSH 连接到 Jetson Nano（需要 IP 地址和用户名），缺乏关键操作步骤。",
+      "severity": "low"
+    }
+  ]
+}

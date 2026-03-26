@@ -1,0 +1,67 @@
+{
+  "section": "§2.6 Medusa Halo：移动 AI 工作站（长期规划）",
+  "line_range": "2198-2283",
+  "issues_found": 10,
+  "issues": [
+    {
+      "type": "产品名称错误",
+      "line_approx": 2223,
+      "description": "表格中 'Strix Halo（当前旗舰）' — AMD正式产品名称为 Strix Point 或 Ryzen AI Max+，而非 'Strix Halo'。'Halo' 是媒体/社区的非官方称呼，不应在规格表标题中作为官方名称使用。",
+      "severity": "medium"
+    },
+    {
+      "type": "产品型号错误",
+      "line_approx": 2214,
+      "description": "提到 'Ryzen AI Max+ 392' — AMD当前产品线无此型号（已知有385、395），392可能是错误信息或未来型号。",
+      "severity": "high"
+    },
+    {
+      "type": "模型名称不存在",
+      "line_approx": 2236,
+      "description": "Qwen3.5-32B、Qwen3.5-72B、Qwen3.5-130B、Qwen3.5-405B — Qwen3.5系列不存在。阿里最新开源系列为Qwen3（Qwen3.0）或Qwen2.5，Qwen3.5属于虚构。",
+      "severity": "high"
+    },
+    {
+      "type": "架构预测无依据",
+      "line_approx": 2209,
+      "description": "Medusa Halo规格中 RDNA 5（当前RDNA 4尚未发布）、Zen 6（当前Zen 5为主流）、2nm N2P制程 — 均为远期预测，标注为'爆料预估'，但全文混在正式规格中无明显区分。",
+      "severity": "high"
+    },
+    {
+      "type": "数据矛盾",
+      "line_approx": 2208,
+      "description": "AI算力提升标注'4-10倍'，但下方KV缓存部分说'2-3倍'，同一性能指标两个说法，读者无法判断哪个准确。",
+      "severity": "high"
+    },
+    {
+      "type": "数据矛盾",
+      "line_approx": 2262,
+      "description": "对比表中'Strix Halo（128GB）'标注'256 GB/s'带宽，但正文表头写256 GB/s是Strix Halo，两处重复无说明；且移动终端表格标注'256GB+'而对比表标注不同。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据范围过宽",
+      "line_approx": 2208,
+      "description": "AI算力'4-10倍'和带宽'+80%~+170%'范围极宽，实际意义有限，应给出中位数预估或场景说明。",
+      "severity": "medium"
+    },
+    {
+      "type": "来源可靠性",
+      "line_approx": 2205,
+      "description": "核心规格表标注'来源：多源确认（Olrak29_@X、Tom's Hardware...）' — Olrak29_是X平台硬件爆料者，非官方来源；文档头部明确'非官方确认'却大量引用作为技术依据。",
+      "severity": "medium"
+    },
+    {
+      "type": "定价信息不完整",
+      "line_approx": 2282,
+      "description": " Asus ProArt PX13 ($2,199+) 和 ROG Flow Z13 ($2,499+) — 缺少货币单位（美元符号已写但前后格式不统一）、缺少来源链接。",
+      "severity": "low"
+    },
+    {
+      "type": "产品混淆",
+      "line_approx": 2273,
+      "description": "正文多处称'家中 AI Halo'、'AI Halo（Strix Halo 128GB）'，而§2.8路线五用的是'AMD AI Max+' — 三种名称指代同一产品线，命名不统一。",
+      "severity": "medium"
+    }
+  ]
+}

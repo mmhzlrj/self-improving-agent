@@ -1,0 +1,20 @@
+{"task_id": "S18", "name": "§8.x 维护+风险", "line_range": "4200-4464", "total_lines": 265, "issues_found": 18, "issues": [
+  {"type": "事实性错误", "line_approx": 4201, "description": "「RTX 2060 6GB」行中出现「Qwen3.5-4B」——Qwen 系列官方发布历史上从未有「3.5」版本；直接从 Qwen2.5 跳到 QwQ 系列。Qwen3.5-4B 为未发布/虚构模型。", "severity": "high"},
+  {"type": "事实性错误", "line_approx": 4201, "description": "「AMD AI Halo 128GB」行中出现「Qwen3.5-122B（4-bit 需 ~70GB）」——Qwen 官方系列最大参数为 Qwen2.5-72B，不存在 122B 参数版本；Qwen3.5 根本不存在。此为虚构数据。", "severity": "high"},
+  {"type": "来源缺失", "line_approx": 4225, "description": "AgiBot World 链接指向 OpenDataLab 下载页面（opendatalab.com/OpenDriveLab/AgiBot-World/download），而非智元官方项目页面或 GitHub，来源非一手。", "severity": "medium"},
+  {"type": "事实性错误", "line_approx": 4227, "description": "GO-1 的 GitHub 组织名列为「open-agibot/go1-sim」，但智元官方 GitHub 组织为「Agibot」（非 open-agibot），实际 repo 名也存在差异。链接指向不存在的 org。", "severity": "high"},
+  {"type": "来源缺失", "line_approx": 4231, "description": "ALOHA（斯坦福）项目标注「—」，无任何 GitHub/项目链接，来源完全缺失。", "severity": "medium"},
+  {"type": "来源缺失", "line_approx": 4232, "description": "RT-1（Google）项目标注「—」，无任何 GitHub/项目链接，来源完全缺失。", "severity": "medium"},
+  {"type": "来源缺失 + 事实性错误", "line_approx": 4233, "description": "RynnBrain（阿里）标注「—」无任何来源；其描述「30B MoE + Plan/Nav/CoP」未经证实，且该描述不见诸任何阿里官方文档，极可能为编造。", "severity": "high"},
+  {"type": "来源缺失", "line_approx": 4237, "description": "NemoClaw 项目标注「—」，无任何来源链接，来源完全缺失。", "severity": "medium"},
+  {"type": "格式问题", "line_approx": 4239, "description": "Isaac GR00T N1.6 名称写作「Isaac GR00T N1.6.3B」，重复出现「GR00T」两次；NVIDIA HuggingFace 官方名称为「GR00T-N1.6-3B」，此处格式有误。", "severity": "low"},
+  {"type": "URL 错误", "line_approx": 4241, "description": "Cosmos Predict 2.5 的 HuggingFace URL 结尾为「/cosmos-predict-and-transfer2-5」，多出一个横杠，应为「...cosmos-predict-and-transfer-2-5」或正确路径。", "severity": "medium"},
+  {"type": "URL 错误", "line_approx": 4242, "description": "Isaac Lab-Arena 链接指向 NVIDIA Developer Blog 文章页（blog.nvidia.com/...isaac-lab-arena/），而非 GitHub 仓库或官方文档页，链接类型不符合其他行使用 GitHub/HuggingFace 仓库的规范。", "severity": "medium"},
+  {"type": "URL 错误", "line_approx": 4243, "description": "Genesis 物理引擎链接 github.com/applecartn/genesis——applecartn 非任何已知官方账号，实际 Genesis 项目为 pythonphysics genesis / hass现货，链接目标可疑。", "severity": "high"},
+  {"type": "URL 错误", "line_approx": 4245, "description": "OpenClaw 链接 github.com/openclaw/openclaw 不存在（404），实际 GitHub 地址应为 github.com/openclaw/openclaw（但 openclaw org 下项目结构不同）。", "severity": "medium"},
+  {"type": "逻辑矛盾", "line_approx": 4432-4456, "description": "监控指标表中声明「网络延迟 > 500ms 切换网络」，但监控脚本中完全没有实现网络延迟检测代码，声称的功能未实现。", "severity": "high"},
+  {"type": "逻辑矛盾", "line_approx": 4431-4456, "description": "监控脚本未实现 GPU 温度检测，但异常检测表格中列有 GPU 温度监控项（> 85°C 处理：降频/停机），代码与规格不符。", "severity": "high"},
+  {"type": "逻辑矛盾", "line_approx": 4431-4456, "description": "异常检测表格注明「内存使用：正常<80% / 异常>90%」，但代码实际判断 mem.percent > 90，二者一致；但表头「正常范围」与「异常阈值」列的含义与代码逻辑不完全对应（代码只检查单一阈值，无「正常范围」判断）。", "severity": "low"},
+  {"type": "内容不完整", "line_approx": 4431-4456, "description": "异常检测规格表列出「ESP32-Cam FPS」监控项（< 10 FPS 重启固件），但监控脚本中完全没有实现 ESP32-Cam FPS 检测逻辑。", "severity": "medium"},
+  {"type": "格式/结构问题", "line_approx": 4200-4210, "description": "章节 6.4「各硬件能跑的模型」出现在第七章附录标题（第 4212 行）之后，章节编号（6.4）与实际文档层级结构不符（应为附录内子节而非第六章内容），建议重新组织层级或移除章节编号。", "severity": "low"}
+]}

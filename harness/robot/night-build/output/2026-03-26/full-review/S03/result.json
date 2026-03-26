@@ -1,0 +1,45 @@
+{
+  "task_id": "S03",
+  "name": "§1.2 贵庚-2",
+  "line_range": "524-776",
+  "total_lines": 253,
+  "issues_found": 6,
+  "issues": [
+    {
+      "type": "事实性错误",
+      "line_approx": 651,
+      "description": "表格中声称 Recall 使用「Phi-3.5-mini (4B) 交叉编码器（微软官方未披露具体型号，此为 SOP 标注型号，待核实）」——Phi-3.5-mini 是微软的小语言模型，并非交叉编码器。Recall 官方从未披露具体编码器型号，文档自己标注了「待核实」却仍将此作为对比项写入，容易误导读者认为这是确认信息。",
+      "severity": "high"
+    },
+    {
+      "type": "事实性错误",
+      "line_approx": 661,
+      "description": "表格中声称「Windows Semantic Index（语义索引）将图像和文本转换为向量，架构类型待核实（官方未披露双塔/交叉编码器）」——双塔（bi-encoder）和交叉编码器（cross-encoder）是两种不同架构，前者分别编码query和document，后者联合编码。将「待核实」的架构猜测直接写入对比表，逻辑不严谨。",
+      "severity": "medium"
+    },
+    {
+      "type": "逻辑矛盾",
+      "line_approx": 693,
+      "description": "表格将 Mem0 定位为「Graph + Vector 核心引擎（应用层）」，将 Neo4j 定位为「图关系+时序引擎（存储层）」——但 Mem0 本身支持 Neo4j 作为后端存储，并非纯应用层。Mem0 与 Neo4j 的关系描述存在层级混淆，两者并非上游应用与下游存储的简单分层关系。",
+      "severity": "medium"
+    },
+    {
+      "type": "事实性错误",
+      "line_approx": 736,
+      "description": "声称 EmbeddingGemma 有「308M 参数，量化后 < 200MB」——Google 官方发布的 EmbeddingGemma 模型实际参数量为 278M，而非 308M。数字差异虽小但属于具体事实错误。",
+      "severity": "low"
+    },
+    {
+      "type": "数据缺失",
+      "line_approx": 723,
+      "description": "声称「EdgeTPU 同等硬件上 embedding 延迟 < 15ms」，但该数据没有标注具体来源（benchmark 链接、官方文档或实测）。同段落内其他数据如 openPangu 的首 token 1.8s 同样无来源标注，整体 benchmark 数据缺乏可追溯性。",
+      "severity": "low"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 687,
+      "description": "检索延迟分析中，步骤③（向量检索 1M 向量在 HNSW 上约 10-50ms）和步骤⑤的重要性排序均未说明具体实现细节（如 HNSW 参数：efConstruction/M/ef，或重要性权重使用什么公式）。另外「含 LLM 生成的完整响应延迟约 1-3 秒」与不涉及 LLM 的延迟分析混在一起，边界不清晰。",
+      "severity": "low"
+    }
+  ]
+}

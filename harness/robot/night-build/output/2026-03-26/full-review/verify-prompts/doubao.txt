@@ -1,0 +1,28 @@
+你是事实核查员。请联网搜索验证以下 24 个声明。
+裁决: verified=文档有问题 / false_alarm=审核误报 / needs_attention=部分正确 / inconclusive=无法确定
+格式: 编号.[裁决] 证据简述
+
+1. 三个硬件偏好举例「AMD AI Halo 128GB、苹果 M 系列、DGX Spark」为大额采购决策的具体参数（128GB 内存），但未注明数据来源。这些设备的统一内存 128GB 规格需要官方参数支持，当前无出处。
+2. 「拓竹 Cyber Tanks 内置电池」的容量/电压等关键参数标注为「未知」。电源方案作为具身机器人核心设计，此处缺失使后续续航计算和电源规划无法进行。
+3. AMD AI Halo 128GB（Ryzen AI Max+ 395）仅列出 NPU 50 TOPS + Total Platform AI 126 TOPS，缺少 GPU 部分算力（GPU TFLOPS）和核心规格，导致无法与 Jetson AGX Thor 的 GPU 算力表格横向对比。
+4. Jetson AGX Thor 完整算力规格标注来源为「NVIDIA 官方技术博客（表1）+ 官方产品页面」（更新 2026-03-25），但该产品截至 2026-03 尚未正式发布，官方数据不可验证；「NVIDIA官方」标注缺乏可查证的链接或引用。
+5. RTX 5050 9GB GDDR7 标注「2026-06」售价约 2,000 元。RTX 50 系列尚未发布（截至 2026-03），此价格为预测而非实际报价，应注明「预测价格」或标注「待核实」。
+6. 存储规格「606KB SRAM + 300KB ROM + 4MB Flash」中 Flash 容量疑似错误。Hi3863V100 官方 datasheet 显示内置 Flash 为 2MB（Hi3861 才是 2MB + SPI NOR Flash），BearPi Pico H3863 模块通常配 2MB 闪存。4MB 数字无明确来源，且与官方参数表「Hi3863V100」行中的「存储 | 4M...
+7. H3863 SRAM 标注为「606KB」，与「参考对比」列中 ESP32-S3 的算力对比中「比 ESP32-S3 弱」的结论可能不准确。ESP32-S3 算力约 0.6 TOPS（INT8）或未公开准确 GFLOPS；RISC-V 240MHz 无 NPU 的 0.24 GFLOPS 换算本身也存在单位混用问题（GFLOPS 通常指浮点，YOLO 推理主要用 INT8），建议标注计算方法或注明...
+8. Medusa Halo 规格表「来源」行仅注明「多源确认（Olrak29_@X、Tom's Hardware、TechPowerUp、Fudzilla）」，但 Fudzilla 的具体文章/报道内容未附链接，无法核实「2nm N2P + 3nm N3P」等具体参数具体来自哪个爆料源。
+9. die process 标注「2nm N2P + 3nm N3P」过于模糊。N2P 和 N3P 分别是台积电不同工艺节点，若代表同一芯片不同组件（CPU vs. GPU）需明确说明；若是预测两种可能方案则应标注「待确认」。此外「4nm/5nm」应为「4nm + 5nm」TSMC 多节点封装（CPU/GPU/SoC 分离），但未说明与「2nm + 3nm」的关系。
+10. CPU 核心数「24+2核」含义不明：未说明是 24P+2E（大核+小核）还是 24+2 SMT（超线程翻倍），两种解读对应截然不同的 CPU 设计路线，对功耗和性能评估影响显著，应明确说明来源假设。
+11. iPhone 16 Pro 物理上无法直接连接 UART/I2C/GPIO。iPhone 使用 Lightning/USB-C，不存在暴露的 GPIO 引脚。拓扑图显示「有线 UART/I2C/GPIO」连接 iPhone 与 Jetson，但未说明任何协议转换层（如 USB-TTL 桥接芯片）。
+12. Genesis 物理仿真「RTX 4090 上 43M FPS」性能数据无官方 benchmark 来源。未标注 paper URL、GitHub README 或官方 benchmark 链接。
+13. AMD「RyzenClaw / RadeonClaw」不是标准 AMD 产品命名。AMD 消费级 APU 系列名为 Ryzen AI（搭载 NPU），桌面 GPU 为 Radeon；这两个 Claw 命名均不存在于 AMD 官方产品线中。
+14. AMD AI Halo 128GB「618 可能低于 1 万」为无来源的价格预测，且 AMD AI Max+ 系列实际型号命名和统一内存容量规格无官方来源佐证。
+15. Step 1 要求下载 JetPack 5.x 镜像（NVIDIA 官网，L4T 35.x），但没有提供具体下载 URL，用户无法直接找到正确版本。
+16. Cyber Bricks 控制示例代码使用 MicroPython 语法（如 'import network'、'from machine import Pin, PWM, UART'），但 Cyber Bricks 微控制器通常运行 Arduino C++ 固件，不支持 MicroPython。语言与目标硬件不匹配。
+17. Genesis 速度基准「43M FPS（RTX 4090）」已标注 RTX 5090 已发布待更新 benchmark，但 Isaac Gym 对比列的「100+ 智能体并行」未注明具体 GPU 环境，参考价值有限。
+18. 「Cyber Bricks 作为宇树同源架构，动作空间可能兼容」——宇树 G1 使用宇树自研关节电机与通信协议，「同源架构」不等于「动作空间兼容」，此兼容性结论过度确定，应加更强 Hedge 词或说明待实际验证。
+19. 硬件算力门槛表格声称「台式机 RTX 2060 ✅」，但 0-1 当前台式机是否确实配有 RTX 2060 未经证实；且表格中各任务算力需求数据均无来源引用，无法验证准确性。
+20. ROCm 7.2.2标注「CES 2026 发布，Day-0 优化支持」——CES 2026（2026年1月）尚未到来（任务时间2026-03-26在CES之后，但AMD ROCm正式发布历史中，7.2.x系列从未在CES发布）。建议核实是否为AMD真实路线图中的版本号。
+21. Vulkan后端「~412 tokens/s」仅列出数值，无GPU型号、batch size、上下文长度等任何测试条件说明。与ROCm 7.0.2的对比也因此缺少对照组信息（两组数字不是同一条件下的对比）。
+22. §6.2 NemoClaw描述为「NVIDIA GTC 2026 为 OpenClaw 定制的官方软件栈（黄仁勋发布）」，标注「来源：NVIDIA GTC 2026」。但该描述将「官方」归属于OpenClaw优化——此处「官方」修饰的是NVIDIA的GTC活动，还是OpenClaw与NVIDIA的合作关系，表述模糊，无官方声明链接。
+23. 异常检测规格表列出「ESP32-Cam FPS」监控项（< 10 FPS 重启固件），但监控脚本中完全没有实现 ESP32-Cam FPS 检测逻辑。
+24. 「Cyber Bricks」定义仅含品牌和硬件信息，缺少软件栈、控制协议等关键说明

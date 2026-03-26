@@ -1,86 +1,1234 @@
 {
   "item-1": {
     "id": "item-1",
-    "title": "#1 GRPO 与 RynnBrain 混淆",
-    "status": "rejected",
-    "note": "不能这样乱移动。OpenClaw RL 是单独开源的skill，你为什么要这样随便移动？\n# RynnBrain GRPO 训练官方参数完整说明\n以下参数均来自阿里达摩院RynnBrain官方技术报告（arXiv:2602.14979v1）、官方开源仓库、达摩院权威发布的技术解读文章，是RynnBrain-CoP（点链推理模型）对齐训练使用的**GRPO（组相对策略优化）官方配置**。\n\n## 一、核心训练超参数（官方公开标准配置）\nRynnBrain的GRPO训练基于预训练的RynnBrain基础模型（2B/8B/30B MoE）冷启动，核心超参数在不同尺寸模型上保持一致，仅显存优化策略随模型规模调整。\n\n| 参数类别 | 具体参数 | 官方配置值 | 说明 |\n|:--- |:--- |:--- |:--- |\n| **核心GRPO配置** | 组大小（group_size/num_generations） | 5 | 同一prompt下并行生成的采样输出数量，用于组内相对优势估计，替代PPO的critic价值网络 |\n| | KL散度系数（kl_coef） | 0.02 | 约束策略更新幅度，避免模型分布偏离初始模型，保证训练稳定性 |\n| | 裁剪范围（clip_range） | [0.2, 0.28] | 策略梯度裁剪区间，限制单次更新的最大幅度，防止训练崩溃 |\n| **训练迭代配置** | 训练轮次（epoch） | 10 | GRPO对齐训练的完整迭代轮数 |\n| | 全局批量大小（global_batch_size） | 128 | 单轮参数更新的总样本数 |\n| | 最大序列长度（max_context_length） | 16384 tokens | 适配第一视角长视频输入，支持长程时空记忆推理 |\n| **学习率策略** | 学习率调度器 | 余弦学习率调度 | 训练过程中学习率按余弦曲线衰减 |\n| | 预热期（warmup） | 3% | 总训练步数的3%用于学习率线性预热，避免初始梯度爆炸 |\n| **采样与推理** | Rollout推理引擎 | SGLang | 用于高效生成采样轨迹，提升训练吞吐效率 |\n| | 视频帧采样 | 2 FPS（最大2048帧） | 长时程自我中心视频的帧采样策略，适配时空记忆训练 |\n\n## 二、奖励函数设计（GRPO核心对齐逻辑）\nRynnBrain的GRPO训练针对具身物理空间推理任务设计了专属奖励函数，核心目标是减少模型空间幻觉，奖励精准的物理坐标输出：\n1.  **核心空间精度奖励**：采用**弗雷歇距离（Fréchet Distance）** 和**Chamfer距离**作为核心评分指标，直接衡量模型输出的坐标、轨迹、点集与真实标注的空间匹配度，匹配度越高，正向奖励越大。\n2.  **格式合规奖励**：约束模型严格遵循「文本推理-空间锚定」的交错输出格式，确保推理过程与物理坐标强绑定，不符合格式的输出给予负向惩罚。\n3.  **KL约束奖励**：通过KL散度惩罚策略分布与初始模型的过度偏离，保证模型在提升空间精度的同时，不丢失基础的语言理解与通用能力。\n\n## 三、训练工程优化与显存配置\n| 优化项 | 官方配置 | 适配场景 |\n|:--- |:--- |:--- |\n| 分布式训练优化 | DeepSpeed ZeRO-1 | 2B/8B稠密模型的全参数微调，优化显存占用 |\n| | ZeRO-2 + 专家并行（EP） | 30B MoE稀疏模型，优化MoE专家模块的跨卡计算与分发效率 |\n| 显存优化 | 梯度检查点（Gradient Checkpoint） | 长序列训练场景，大幅降低激活值显存占用 |\n| | 输出token过滤 | 过滤无效生成token，减少计算冗余 |\n| 训练框架 | HuggingFace Transformers | 基础训练与推理框架，官方已开源适配代码 |\n\n## 四、补充说明\n1.  **适用范围**：上述GRPO参数为RynnBrain-CoP模型的官方标准训练配置，RynnBrain-Plan、RynnBrain-Nav等专用模型的强化学习微调，核心GRPO超参数保持一致，仅奖励函数根据任务目标做针对性调整（如导航任务新增轨迹成功率奖励、规划任务新增步骤完成度奖励）。\n2.  **开源状态**：截至2026年3月，RynnBrain官方GitHub仓库已开源模型权重、推理demo与下游任务微调教程，完整GRPO训练代码暂未开源，仅在官方技术报告中公开了上述核心训练参数与算法逻辑。\n3.  **预训练与冷启动**：GRPO训练前，模型先经过1个epoch的全参数监督微调（SFT）冷启动，SFT阶段采用AdamW优化器，语言模型峰值学习率1e-5，视觉编码器峰值学习率2e-6，全局batch size 128。\n我查到的是有的。你是不是又偷懒了？",
-    "time": "2026-03-25T01:24:44.944Z"
+    "title": "#1 [S02] L261 — 逻辑矛盾",
+    "status": "approved",
+    "note": "找到论文，以论文信息为准",
+    "time": "2026-03-26T07:36:41.555Z"
   },
   "item-2": {
     "id": "item-2",
-    "title": "#2 AMD AI Halo \"1 PFLOPS\" 严重夸大",
+    "title": "#2 [S03] L651 — 事实性错误",
     "status": "rejected",
-    "note": "最强消费级 RTX 4090已经是过去式，而且它不是AI专用的显卡。它是通用消费级显卡，现在的最新消费级显卡也不是它，而是5090，而且马上5090ti 也出了。AMD AI Halo官方详情页这里有官方写的各种参数：https://www.amd.com/zh-cn/products/processors/laptop/ryzen/ai-300-series/amd-ryzen-ai-max-plus-395.html\n你阅读官方详情页之后，再做修改。",
-    "time": "2026-03-25T01:29:59.217Z"
+    "note": "写了待核实，就不会有误导读者认为这是确认信息这个问题。",
+    "time": "2026-03-26T07:36:51.483Z"
   },
   "item-3": {
     "id": "item-3",
-    "title": "#3 星闪\"三模\"不准确",
+    "title": "#3 [S04] L1013 — 逻辑矛盾",
     "status": "rejected",
-    "note": "改为：小熊派WS63星闪开发板BearPi-Pico H3863 芯片WiFi6 BLE SLE模组",
-    "time": "2026-03-25T01:30:30.897Z"
+    "note": "这里是因为高压缩率存储（HEVC/H.266）是用在存储空间不够的非常时期的非常手段。总比没有存储空间而存储不了记忆会更好一些",
+    "time": "2026-03-26T07:36:57.075Z"
   },
   "item-4": {
     "id": "item-4",
-    "title": "#4 Jetson \"2070 TFLOPS\" 单位错误",
+    "title": "#4 [S05] L1283 — 来源缺失",
     "status": "rejected",
-    "note": "把不同的情况下的算力都找到然后写清楚",
-    "time": "2026-03-25T01:31:12.977Z"
+    "note": "上下文问题",
+    "time": "2026-03-26T07:37:20.756Z"
   },
   "item-5": {
     "id": "item-5",
-    "title": "#5 SSD 2280 16TB 不存在",
+    "title": "#5 [S05] L1293 — 逻辑矛盾",
     "status": "rejected",
-    "note": "我又没有说是消费级SSD 2280 16TB，而且工业级都出来了，消费级还会远吗，我又不是现在采购。",
-    "time": "2026-03-25T01:31:44.161Z"
+    "note": "因为非正常的原因0-1 可能被抢，被天灾，战争的因素影响，所以还是有较低可能长时间无法接触。",
+    "time": "2026-03-26T07:37:28.532Z"
   },
   "item-6": {
     "id": "item-6",
-    "title": "#6 Project Silica 容量数据过时",
-    "status": "rejected",
-    "note": "除了补充最新的数据，还要补充国产的数据。国产的也有了",
-    "time": "2026-03-25T01:31:59.143Z"
+    "title": "#6 [S05] L1365 — 数据缺失",
+    "status": "approved",
+    "note": "硬件选型（当前推荐）：\n\n设备\t角色\t配置建议\n拓竹 N1 或同级别 NAS\tNAS_1 热+温\t≥ 8 盘位，RAID5，SSD 缓存加速\n企业级 NAS\tNAS_2 冷层\t≥ 16 盘位，JBOD 模式，大容量氦气盘\nNAS_3 冻层\t离线备份\t每月一次同步，其余时间物理断开网络\n最小起步配置\t阶段一 NAS\t4 盘位 NAS，2TB × 4 = 8TB 起，够用 1-2 年\n整个表格改为\n绿联私有云DXP4800 Plus 16G内存8T四盘位NAS网络存储 个人云硬盘家庭服务器 万兆网口",
+    "time": "2026-03-26T07:37:34.900Z"
   },
   "item-7": {
     "id": "item-7",
-    "title": "#7 screenray.exe 名称不准确",
+    "title": "#7 [S06] L1802 — 格式问题",
     "status": "approved",
-    "note": "",
-    "time": "2026-03-25T01:19:30.834Z"
+    "note": "根据实际情况修正格式",
+    "time": "2026-03-26T07:39:40.565Z"
   },
   "item-8": {
     "id": "item-8",
-    "title": "#8 Recall 向量引擎推测错误",
-    "status": "rejected",
-    "note": "这里应该两个都记录上，然后写待核实",
-    "time": "2026-03-25T01:32:28.361Z"
+    "title": "#8 [S06] L1815 — 内容不完整",
+    "status": "approved",
+    "note": "按实际情况修正格式",
+    "time": "2026-03-26T07:39:45.142Z"
   },
   "item-9": {
     "id": "item-9",
-    "title": "#9 Recall Phi-3.5-mini 型号未确认",
-    "status": "rejected",
-    "note": "我觉得如果都是没有准确的答案的情况下，SOP 指定了 Phi-3.5-mini，但该型号未被官方确认。这样的描述比使用轻量级交叉编码器\"（不指定型号）描述更好。因为如果是知道错的人，会直接说出来他知道对的型号。而不知道的人，会觉得有型号会比没型号做的更专业。而且这个型号也代表了轻量级交叉编码器的意思。",
-    "time": "2026-03-25T01:21:27.454Z"
+    "title": "#9 [S07] L1886 — 数据缺失",
+    "status": "approved",
+    "note": "14500 7.4V 800mAh Li-ion Battery(1PCS) - PC003",
+    "time": "2026-03-26T07:39:48.678Z"
   },
   "item-10": {
     "id": "item-10",
-    "title": "#10 RynnBrain GRPO β=0.02 参数无法核实",
-    "status": "rejected",
-    "note": "# RynnBrain GRPO 训练官方参数完整说明\n以下参数均来自阿里达摩院RynnBrain官方技术报告（arXiv:2602.14979v1）、官方开源仓库、达摩院权威发布的技术解读文章，是RynnBrain-CoP（点链推理模型）对齐训练使用的**GRPO（组相对策略优化）官方配置**。\n\n## 一、核心训练超参数（官方公开标准配置）\nRynnBrain的GRPO训练基于预训练的RynnBrain基础模型（2B/8B/30B MoE）冷启动，核心超参数在不同尺寸模型上保持一致，仅显存优化策略随模型规模调整。\n\n| 参数类别 | 具体参数 | 官方配置值 | 说明 |\n|:--- |:--- |:--- |:--- |\n| **核心GRPO配置** | 组大小（group_size/num_generations） | 5 | 同一prompt下并行生成的采样输出数量，用于组内相对优势估计，替代PPO的critic价值网络 |\n| | KL散度系数（kl_coef） | 0.02 | 约束策略更新幅度，避免模型分布偏离初始模型，保证训练稳定性 |\n| | 裁剪范围（clip_range） | [0.2, 0.28] | 策略梯度裁剪区间，限制单次更新的最大幅度，防止训练崩溃 |\n| **训练迭代配置** | 训练轮次（epoch） | 10 | GRPO对齐训练的完整迭代轮数 |\n| | 全局批量大小（global_batch_size） | 128 | 单轮参数更新的总样本数 |\n| | 最大序列长度（max_context_length） | 16384 tokens | 适配第一视角长视频输入，支持长程时空记忆推理 |\n| **学习率策略** | 学习率调度器 | 余弦学习率调度 | 训练过程中学习率按余弦曲线衰减 |\n| | 预热期（warmup） | 3% | 总训练步数的3%用于学习率线性预热，避免初始梯度爆炸 |\n| **采样与推理** | Rollout推理引擎 | SGLang | 用于高效生成采样轨迹，提升训练吞吐效率 |\n| | 视频帧采样 | 2 FPS（最大2048帧） | 长时程自我中心视频的帧采样策略，适配时空记忆训练 |\n\n## 二、奖励函数设计（GRPO核心对齐逻辑）\nRynnBrain的GRPO训练针对具身物理空间推理任务设计了专属奖励函数，核心目标是减少模型空间幻觉，奖励精准的物理坐标输出：\n1.  **核心空间精度奖励**：采用**弗雷歇距离（Fréchet Distance）** 和**Chamfer距离**作为核心评分指标，直接衡量模型输出的坐标、轨迹、点集与真实标注的空间匹配度，匹配度越高，正向奖励越大。\n2.  **格式合规奖励**：约束模型严格遵循「文本推理-空间锚定」的交错输出格式，确保推理过程与物理坐标强绑定，不符合格式的输出给予负向惩罚。\n3.  **KL约束奖励**：通过KL散度惩罚策略分布与初始模型的过度偏离，保证模型在提升空间精度的同时，不丢失基础的语言理解与通用能力。\n\n## 三、训练工程优化与显存配置\n| 优化项 | 官方配置 | 适配场景 |\n|:--- |:--- |:--- |\n| 分布式训练优化 | DeepSpeed ZeRO-1 | 2B/8B稠密模型的全参数微调，优化显存占用 |\n| | ZeRO-2 + 专家并行（EP） | 30B MoE稀疏模型，优化MoE专家模块的跨卡计算与分发效率 |\n| 显存优化 | 梯度检查点（Gradient Checkpoint） | 长序列训练场景，大幅降低激活值显存占用 |\n| | 输出token过滤 | 过滤无效生成token，减少计算冗余 |\n| 训练框架 | HuggingFace Transformers | 基础训练与推理框架，官方已开源适配代码 |\n\n## 四、补充说明\n1.  **适用范围**：上述GRPO参数为RynnBrain-CoP模型的官方标准训练配置，RynnBrain-Plan、RynnBrain-Nav等专用模型的强化学习微调，核心GRPO超参数保持一致，仅奖励函数根据任务目标做针对性调整（如导航任务新增轨迹成功率奖励、规划任务新增步骤完成度奖励）。\n2.  **开源状态**：截至2026年3月，RynnBrain官方GitHub仓库已开源模型权重、推理demo与下游任务微调教程，完整GRPO训练代码暂未开源，仅在官方技术报告中公开了上述核心训练参数与算法逻辑。\n3.  **预训练与冷启动**：GRPO训练前，模型先经过1个epoch的全参数监督微调（SFT）冷启动，SFT阶段采用AdamW优化器，语言模型峰值学习率1e-5，视觉编码器峰值学习率2e-6，全局batch size 128。\n你又偷懒了",
-    "time": "2026-03-25T01:35:52.796Z"
+    "title": "#10 [S07] L1957 — 来源缺失",
+    "status": "approved",
+    "note": "Jetson AGX Thor 已发布 https://www.nvidia.cn/autonomous-machines/embedded-systems/jetson-thor/",
+    "time": "2026-03-26T07:39:55.423Z"
   },
   "item-11": {
     "id": "item-11",
-    "title": "#11 RynnBrain 94% 保留率数据无法核实",
+    "title": "#11 [S07] L1958 — 逻辑矛盾",
     "status": "rejected",
-    "note": "# RynnBrain 94% 基础能力保留率数据来源完整溯源\n该数据的核心出处、实验背景与公开链路，按权威优先级排序如下：\n\n## 一、核心公开来源\n该数据**最早由阿里达摩院RynnBrain官方团队在2026年2月模型开源发布时同步披露**，完整、可溯源的公开表述，来自达摩院官方技术团队参与撰写的权威技术落地指南《阿里 RynnBrain 具身智能开源登顶!30B MoE 时空记忆架构，16 项评测超谷歌 Gemini》，其中明确标注：\n> 灾难性遗忘抑制：采用增量式记忆更新策略，新的任务经验仅更新对应专家模块的记忆单元，不影响基础模型的通用能力，**在100个连续任务的微调测试中，基础能力保留率达到94%**。\n\n该内容为RynnBrain开源后，国内头部技术社区首发的官方合作深度解读，是该数据最广泛引用的公开来源。\n\n## 二、原始实验背景与测试对象\n1.  **测试模型**：该数据为**RynnBrain-30B MoE**的专项实测结果，该型号是全系列中唯一完成100个连续任务全流程测试的旗舰模型，也是官方重点验证增量学习与记忆抗遗忘能力的核心版本。\n2.  **测试方案**：采用具身智能领域标准的持续学习（Continual Learning）测试范式：在100个连续的具身操作、视觉导航、长程规划下游任务中，对模型进行增量式微调；每完成一个任务的微调后，测试模型在RynnBrain-Bench官方基准的核心基础能力指标上的得分，最终统计得到基础能力的平均保留率为94%。\n3.  **核心验证目标**：该实验专门用于验证RynnBrain时空记忆模块的增量式更新策略，能否解决传统大模型微调中的灾难性遗忘问题，证明新任务的记忆写入不会覆盖、破坏模型的基础通用能力。\n\n## 三、官方权威载体补充说明\n1.  **官方技术白皮书与模型卡**：该数据的完整实验细节，收录于RynnBrain官方GitHub仓库配套的技术白皮书附录、以及Hugging Face模型卡的性能补充说明中，是官方对模型工程化能力的补充披露。\n2.  **arXiv官方论文**：RynnBrain的主论文《RynnBrain: Open Embodied Foundation Models》（arXiv:2602.14979）中，重点公开了模型在20个具身基准、8个通用视觉基准的SOTA结果，以及RynnBrain-Bench的完整评测体系；该94%保留率的专项实验数据，作为工程化落地补充结果，未完整收录于主论文正文，仅在论文附录的持续学习实验部分有简要提及。\n3.  **官方发布会披露**：该数据同时在2026年2月10日RynnBrain开源发布会上，由达摩院具身智能实验室团队现场发布，是官方对外公开的核心性能指标之一。\n你又偷懒了",
-    "time": "2026-03-25T01:35:43.338Z"
+    "note": "「Jetson Nano 2GB」是「现有硬件」后续「等 Jetson Thor Nano 8G/16G 上市后替换」与「Jetson Thor 已上市」是权衡不同预算的选择。现状是缺钱，不是说上市了就可以无脑直接买，我是个人的开发者，不是公司为了开发产品的研发行为。",
+    "time": "2026-03-26T07:40:03.070Z"
   },
   "item-12": {
     "id": "item-12",
-    "title": "#12 Neo4j TimeTree 插件状态待确认",
+    "title": "#12 [S08] L2013 — 事实性错误",
+    "status": "approved",
+    "note": "Hi3863V100 不是我一开始列出来的，是AI找数据的时候乱补进去的。 PICO Hi3861 才是我列出来的 存储规格「606KB SRAM + 300KB ROM + 4MB Flash」是对的。",
+    "time": "2026-03-26T07:40:26.655Z"
+  },
+  "item-13": {
+    "id": "item-13",
+    "title": "#13 [S09] L2321 — logic_contradiction",
+    "status": "approved",
+    "note": "按实际情况修正",
+    "time": "2026-03-26T07:40:32.687Z"
+  },
+  "item-14": {
+    "id": "item-14",
+    "title": "#14 [S09] L2421 — logic_contradiction",
+    "status": "approved",
+    "note": "不是三者并发，现阶段只需要拥有3个功能，实际上用的时候，只用一个。不会同时用3个。",
+    "time": "2026-03-26T07:40:40.392Z"
+  },
+  "item-15": {
+    "id": "item-15",
+    "title": "#15 [S09] L2426 — logic_contradiction",
+    "status": "approved",
+    "note": "这里应该缺了一个 iPhone 16 Pro 与 PICO Hi3861 （它对接 Jetson nano 2GB和ESP32-cam) 或者 接入一个 USB Type-C 的转接口之后可以实现。",
+    "time": "2026-03-26T07:40:45.887Z"
+  },
+  "item-16": {
+    "id": "item-16",
+    "title": "#16 [S09] L2380 — data_missing",
+    "status": "approved",
+    "note": "找到相关论文引用数据并记录",
+    "time": "2026-03-26T07:40:51.312Z"
+  },
+  "item-17": {
+    "id": "item-17",
+    "title": "#17 [S10] L2509 — 事实性错误",
+    "status": "approved",
+    "note": "https://github.com/pythops/jetson-image\nhttps://github.com/topics/jetson-nano-2gb",
+    "time": "2026-03-26T07:41:23.665Z"
+  },
+  "item-18": {
+    "id": "item-18",
+    "title": "#18 [S11] L2914 — factual_error",
+    "status": "approved",
+    "note": "查证后去除",
+    "time": "2026-03-26T05:43:21.215Z"
+  },
+  "item-19": {
+    "id": "item-19",
+    "title": "#19 [S11] L2889 — factual_error",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T05:43:15.690Z"
+  },
+  "item-20": {
+    "id": "item-20",
+    "title": "#20 [S11] L2934 — data_missing",
+    "status": "approved",
+    "note": "https://docs.openclaw.ai/gateway/bridge-protocol#bridge-protocol",
+    "time": "2026-03-26T07:41:34.081Z"
+  },
+  "item-21": {
+    "id": "item-21",
+    "title": "#21 [S12] L2990 — content_mismatch",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T05:44:49.625Z"
+  },
+  "item-22": {
+    "id": "item-22",
+    "title": "#22 [S12] L3382 — content_missing",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T05:44:56.298Z"
+  },
+  "item-23": {
+    "id": "item-23",
+    "title": "#23 [S12] L3107 — language_mismatch",
     "status": "rejected",
-    "note": "### Neo4j TimeTree 插件核心状态\n**该插件已正式退役（RETIRED），完全停止维护与更新**，官方仓库已于2021年5月归档，不再提供功能迭代、Bug修复和新版本兼容支持。\n\n---\n\n### 关键详情\n1.  **版本兼容上限**\n    插件最终正式发布版本为 `3.5.14.58.29`，最高仅兼容 **Neo4j 3.5.x 系列**，完全不支持 Neo4j 4.x、5.x 以及 2025/2026 等后续新版本。\n    开源社区版仅适配 Neo4j 社区版 3.5.x，无法兼容 Neo4j 企业版；企业版需单独获取 GraphAware 商业授权，且同样无后续更新。\n\n2.  **核心功能与历史定位**\n    TimeTree 是 GraphAware 推出的 Neo4j 扩展模块，用于在图数据库中构建时间树结构，支持年到毫秒级的时间粒度、时区适配，以及事件节点与时间节点的快速关联挂载，解决早期 Neo4j 时间序列数据查询的性能瓶颈问题。\n\n---\n\n### 主流替代方案\n针对 Neo4j 新版本（4.x/5.x/2025+）的时间序列场景，推荐以下替代方案：\n1.  **原生 Cypher 时间函数+索引优化**\n    利用 Neo4j 原生的 `datetime`、`duration` 等时间类型，配合时间属性的范围索引、点索引，可满足绝大多数常规时间查询需求，无需额外插件。\n2.  **APOC 扩展库**\n    Neo4j 官方维护的 APOC 扩展提供了丰富的时间处理、日期生成、时间范围遍历等函数，可便捷实现时间树的按需构建与查询，是官方推荐的标准扩展方案。\n3.  **手动构建时间树模型**\n    基于业务场景自定义年-月-日层级的时间节点模型，通过 Cypher 语句实现节点创建、关联与查询，完全适配新版本 Neo4j，可灵活定制粒度与分区规则。\n4.  **Neo4j GDS 图数据科学库**\n    针对时序分析、时间序列预测等高级场景，可使用 GDS 库提供的时序算法与时间序列处理能力，满足复杂的业务分析需求。",
-    "time": "2026-03-25T01:37:20.375Z"
+    "note": "官网是写着支持MicroPython 语法，如果额外支持Arduino C++ 固件也正常。\nhttps://makerworld.com/zh/cyberbrick",
+    "time": "2026-03-26T07:41:44.552Z"
+  },
+  "item-24": {
+    "id": "item-24",
+    "title": "#24 [S13] L3449 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T05:47:50.791Z"
+  },
+  "item-25": {
+    "id": "item-25",
+    "title": "#25 [S14] L3473 — 内容边界不符",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T05:47:59.382Z"
+  },
+  "item-26": {
+    "id": "item-26",
+    "title": "#26 [S14] L3596 — 事实性错误",
+    "status": "approved",
+    "note": "Genesis 正确 URL 是 https://github.com/Genesis-Embodied-AI/Genesis，由 CMU + 20+机构开发，2025年7月正式由 Genesis AI 公司支持",
+    "time": "2026-03-26T07:42:01.088Z"
+  },
+  "item-27": {
+    "id": "item-27",
+    "title": "#27 [S15] L3696 — 内容范围不符",
+    "status": "approved",
+    "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对",
+    "time": "2026-03-26T05:49:10.937Z"
+  },
+  "item-28": {
+    "id": "item-28",
+    "title": "#28 [S15] L3727 — 来源缺失",
+    "status": "approved",
+    "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对",
+    "time": "2026-03-26T07:42:08.873Z"
+  },
+  "item-29": {
+    "id": "item-29",
+    "title": "#29 [S15] L3896 — 来源缺失",
+    "status": "approved",
+    "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对",
+    "time": "2026-03-26T07:42:12.122Z"
+  },
+  "item-30": {
+    "id": "item-30",
+    "title": "#30 [S15] L3901 — 事实性错误或过度推测",
+    "status": "approved",
+    "note": "验证事实情况",
+    "time": "2026-03-26T07:42:15.464Z"
+  },
+  "item-31": {
+    "id": "item-31",
+    "title": "#31 [S15] L3917 — 内容不完整",
+    "status": "approved",
+    "note": "如果是上下文截断的问题就忽略，如果是真的错了就弄对",
+    "time": "2026-03-26T07:42:19.280Z"
+  },
+  "item-32": {
+    "id": "item-32",
+    "title": "#32 [S16] L4066 — broken_link",
+    "status": "rejected",
+    "note": "Genesis 正确 URL 是 https://github.com/Genesis-Embodied-AI/Genesis，由 CMU + 20+机构开发，2025年7月正式由 Genesis AI 公司支持",
+    "time": "2026-03-26T07:42:25.985Z"
+  },
+  "item-33": {
+    "id": "item-33",
+    "title": "#33 [S18] L4201 — 事实性错误",
+    "status": "rejected",
+    "note": "Qwen3.5 已发布，重新查证，并找到对应的网址补充佐证",
+    "time": "2026-03-26T07:42:31.666Z"
+  },
+  "item-34": {
+    "id": "item-34",
+    "title": "#34 [S18] L4201 — 事实性错误",
+    "status": "rejected",
+    "note": "「AMD AI Halo 128GB」行中出现「Qwen3.5-122B（4-bit 需 ~70GB）」事实存在，需要找到出处佐证",
+    "time": "2026-03-26T07:42:49.602Z"
+  },
+  "item-35": {
+    "id": "item-35",
+    "title": "#35 [S18] L4227 — 事实性错误",
+    "status": "approved",
+    "note": "查证后修改",
+    "time": "2026-03-26T07:42:55.554Z"
+  },
+  "item-36": {
+    "id": "item-36",
+    "title": "#36 [S18] L4233 — 来源缺失 + 事实性错误",
+    "status": "rejected",
+    "note": "RynnBrain（阿里） 30B MoE  事实存在，Plan/Nav/CoP需查证并找到网址记录",
+    "time": "2026-03-26T07:43:02.842Z"
+  },
+  "item-37": {
+    "id": "item-37",
+    "title": "#37 [S18] L4243 — URL 错误",
+    "status": "rejected",
+    "note": "Genesis 正确 URL 是 https://github.com/Genesis-Embodied-AI/Genesis，由 CMU + 20+机构开发，2025年7月正式由 Genesis AI 公司支持",
+    "time": "2026-03-26T07:43:12.546Z"
+  },
+  "item-38": {
+    "id": "item-38",
+    "title": "#38 [S18] L0 — 逻辑矛盾",
+    "status": "approved",
+    "note": "subagents补充代码",
+    "time": "2026-03-26T07:43:26.270Z"
+  },
+  "item-39": {
+    "id": "item-39",
+    "title": "#39 [S18] L0 — 逻辑矛盾",
+    "status": "approved",
+    "note": "subagents补充代码",
+    "time": "2026-03-26T07:43:37.722Z"
+  },
+  "item-40": {
+    "id": "item-40",
+    "title": "#40 [S20] L4739 — 事实性错误",
+    "status": "approved",
+    "note": "实际上是40针，但具体有作用的是17针，其他为预留冗余",
+    "time": "2026-03-26T07:43:45.538Z"
+  },
+  "item-41": {
+    "id": "item-41",
+    "title": "#41 [S01] L12 — 内容不完整",
+    "status": "rejected",
+    "note": "上下文的问题，具体数据来自于论文。",
+    "time": "2026-03-26T07:43:52.324Z"
+  },
+  "item-42": {
+    "id": "item-42",
+    "title": "#42 [S01] L12 — 内容不完整",
+    "status": "rejected",
+    "note": "上下文的问题，具体数据来自于论文。",
+    "time": "2026-03-26T07:43:57.619Z"
+  },
+  "item-43": {
+    "id": "item-43",
+    "title": "#43 [S02] L263 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T05:59:42.252Z"
+  },
+  "item-44": {
+    "id": "item-44",
+    "title": "#44 [S02] L244 — 来源缺失",
+    "status": "rejected",
+    "note": "不需要标注出处，我知道事实。",
+    "time": "2026-03-26T07:44:07.282Z"
+  },
+  "item-45": {
+    "id": "item-45",
+    "title": "#45 [S02] L254 — 来源缺失",
+    "status": "approved",
+    "note": "找到论文引用，并标记引用标注。",
+    "time": "2026-03-26T07:44:11.267Z"
+  },
+  "item-46": {
+    "id": "item-46",
+    "title": "#46 [S02] L268 — 逻辑矛盾",
+    "status": "rejected",
+    "note": "OpenClaw RL和 RynnBrain 不是同一个东西，论文不一样很正常",
+    "time": "2026-03-26T07:44:18.006Z"
+  },
+  "item-47": {
+    "id": "item-47",
+    "title": "#47 [S02] L248 — 来源缺失",
+    "status": "rejected",
+    "note": "这是我自己的粗略规划",
+    "time": "2026-03-26T07:44:22.053Z"
+  },
+  "item-48": {
+    "id": "item-48",
+    "title": "#48 [S02] L248 — 内容不完整",
+    "status": "rejected",
+    "note": "这是我自己的粗略规划",
+    "time": "2026-03-26T07:44:25.668Z"
+  },
+  "item-49": {
+    "id": "item-49",
+    "title": "#49 [S03] L661 — 事实性错误",
+    "status": "rejected",
+    "note": "我觉得这样很严谨，如果后面看到了就知道去核实，而不是幻觉或者造假",
+    "time": "2026-03-26T07:44:30.060Z"
+  },
+  "item-50": {
+    "id": "item-50",
+    "title": "#50 [S03] L693 — 逻辑矛盾",
+    "status": "approved",
+    "note": "多AI平台验证技术分层逻辑然后修正",
+    "time": "2026-03-26T07:44:34.748Z"
+  },
+  "item-51": {
+    "id": "item-51",
+    "title": "#51 [S04] L788 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:06:34.137Z"
+  },
+  "item-52": {
+    "id": "item-52",
+    "title": "#52 [S04] L793 — 来源缺失",
+    "status": "rejected",
+    "note": "现在是2026年3月26，在问之前，要先告诉大模型现在的时间，以免让它产生时间认知错误。产生额外的不必要的审核问题。",
+    "time": "2026-03-26T07:44:43.883Z"
+  },
+  "item-53": {
+    "id": "item-53",
+    "title": "#53 [S04] L794 — 来源缺失",
+    "status": "rejected",
+    "note": "Google EmbeddingGemma 的 EdgeTPU benchmark 数据（< 15ms embedding）标注为数据来源，但没有提供具体报告名称、版本号或链接，无法溯源此数据的具体出处。以后所有的报告数据如果可以的话，都要把来源的网站或者其他更详细的数据标注好。",
+    "time": "2026-03-26T07:44:51.171Z"
+  },
+  "item-54": {
+    "id": "item-54",
+    "title": "#54 [S04] L1093 — 来源缺失",
+    "status": "approved",
+    "note": "以后所有的报告数据如果可以的话，都要把来源的网站或者其他更详细的数据标注好。",
+    "time": "2026-03-26T07:44:57.789Z"
+  },
+  "item-55": {
+    "id": "item-55",
+    "title": "#55 [S04] L1087 — 来源缺失",
+    "status": "rejected",
+    "note": "忽略",
+    "time": "2026-03-26T07:45:02.000Z"
+  },
+  "item-56": {
+    "id": "item-56",
+    "title": "#56 [S04] L1215 — 内容不完整",
+    "status": "rejected",
+    "note": "访客数据同样适用「永不删除原始数据」原则，除非访客知晓且起诉后，将其生物敏感信息覆盖为无法获取到真人的其他特征数据，保留其他剩余数据。同时也保留追溯对方是否留存我方数据的备份的权益。",
+    "time": "2026-03-26T07:45:08.053Z"
+  },
+  "item-57": {
+    "id": "item-57",
+    "title": "#57 [S05] L1300 — 内容不完整",
+    "status": "rejected",
+    "note": "各种验证过是主人触发的情况，具体非常多种。先不详细列举。",
+    "time": "2026-03-26T07:45:12.597Z"
+  },
+  "item-58": {
+    "id": "item-58",
+    "title": "#58 [S05] L1400 — 内容不完整",
+    "status": "rejected",
+    "note": "这个在未来逐步完善",
+    "time": "2026-03-26T07:45:18.205Z"
+  },
+  "item-59": {
+    "id": "item-59",
+    "title": "#59 [S05] L1355 — 来源缺失",
+    "status": "approved",
+    "note": "拓竹官网：https://bambulab.cn/zh-cn  \n\n具体名词：\n\nBambu Studio\n智能易用的多功能切片软件\n\nBambu Handy\n一键发起打印，远程掌控进程\n\nBambu Suite\n激光·刀切·画笔，一程尽显\n\n拓竹农场管家\n让管理设备群组更简单\n\nBambu Connect (Beta)\n用于连接和发送打印到拓竹 3D 打印机的工具\n\nCyberBrick\n在桌面和移动端自由创建和调试CyberBrick 项目\n拓竹星闪模块是通过3D 打印的零部件，结合PICO Hi3861 以及其他必要元器件组合成一个佩戴在主人身上的便携式/佩戴式设备。",
+    "time": "2026-03-26T07:45:28.118Z"
+  },
+  "item-60": {
+    "id": "item-60",
+    "title": "#60 [S05] L1418 — 逻辑矛盾",
+    "status": "rejected",
+    "note": "上下文的问题，前面提到贵庚最重要的功能，不是某一种技术实现，而是完成原生数据的积累。这里提到的，都是过程中运用的某一种技术",
+    "time": "2026-03-26T07:45:47.397Z"
+  },
+  "item-61": {
+    "id": "item-61",
+    "title": "#61 [S05] L1385 — 内容不完整",
+    "status": "approved",
+    "note": "未来的场景里面，0-1 是随主人一起行动。前期没准备好之前，它应该是在实验室研发过程中，不会出去，被抢的概率也极低，该阶段不用考虑数据自毁状态。如果确实有突然分开的情况，0-1 应该是知情，且知道大概什么时候回来。另外随身佩戴的 PICO 星闪模组也在随时通讯。",
+    "time": "2026-03-26T07:45:55.421Z"
+  },
+  "item-62": {
+    "id": "item-62",
+    "title": "#62 [S05] L1395 — 事实性错误",
+    "status": "rejected",
+    "note": "这里的假设是主人自己加上的，没有任何问题。",
+    "time": "2026-03-26T07:46:00.469Z"
+  },
+  "item-63": {
+    "id": "item-63",
+    "title": "#63 [S06] L1817 — 逻辑矛盾",
+    "status": "rejected",
+    "note": "因为未来的计划还没有想好",
+    "time": "2026-03-26T07:46:07.022Z"
+  },
+  "item-64": {
+    "id": "item-64",
+    "title": "#64 [S06] L1811 — 数据缺失",
+    "status": "rejected",
+    "note": "因为未来的计划还没有想好",
+    "time": "2026-03-26T07:46:12.375Z"
+  },
+  "item-65": {
+    "id": "item-65",
+    "title": "#65 [S07] L1848 — 来源缺失",
+    "status": "rejected",
+    "note": "2.5 星闪通信模块：BearPi-Pico H3863 详细方案 里面有具体来源。",
+    "time": "2026-03-26T07:46:35.688Z"
+  },
+  "item-66": {
+    "id": "item-66",
+    "title": "#66 [S07] L1956 — 数据缺失",
+    "status": "rejected",
+    "note": "这两个不需要横向对比，是不同应用领域的两个硬件。",
+    "time": "2026-03-26T07:46:39.615Z"
+  },
+  "item-67": {
+    "id": "item-67",
+    "title": "#67 [S07] L1849 — 事实性错误",
+    "status": "rejected",
+    "note": "拓竹 H2C非笔误，是已经上市并使用的产品。大模型数据库太老的问题。",
+    "time": "2026-03-26T07:46:42.391Z"
+  },
+  "item-68": {
+    "id": "item-68",
+    "title": "#68 [S07] L1955 — 数据缺失",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:28:28.799Z"
+  },
+  "item-69": {
+    "id": "item-69",
+    "title": "#69 [S08] L2007 — 格式问题",
+    "status": "rejected",
+    "note": "爆料的信息，有权威的更好，没权威的也能接受。不需要纠结这个。 ",
+    "time": "2026-03-26T07:46:49.966Z"
+  },
+  "item-70": {
+    "id": "item-70",
+    "title": "#70 [S08] L2013 — 格式问题",
+    "status": "rejected",
+    "note": "上下文问题，忽略",
+    "time": "2026-03-26T07:46:55.559Z"
+  },
+  "item-71": {
+    "id": "item-71",
+    "title": "#71 [S08] L2030 — 逻辑矛盾",
+    "status": "rejected",
+    "note": "一个是理论数据，一个是实测数据，正常。",
+    "time": "2026-03-26T07:47:00.534Z"
+  },
+  "item-72": {
+    "id": "item-72",
+    "title": "#72 [S08] L2077 — 逻辑矛盾",
+    "status": "rejected",
+    "note": "这里只是从前面两个数据做一个换算猜测。不用改",
+    "time": "2026-03-26T07:47:06.007Z"
+  },
+  "item-73": {
+    "id": "item-73",
+    "title": "#73 [S08] L2217 — 来源缺失",
+    "status": "rejected",
+    "note": "这里没必要核实",
+    "time": "2026-03-26T07:47:08.943Z"
+  },
+  "item-74": {
+    "id": "item-74",
+    "title": "#74 [S08] L2218 — 事实性错误（概率高）",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:34:45.368Z"
+  },
+  "item-75": {
+    "id": "item-75",
+    "title": "#75 [S08] L2218 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:35:15.839Z"
+  },
+  "item-76": {
+    "id": "item-76",
+    "title": "#76 [S08] L2218 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:35:23.713Z"
+  },
+  "item-77": {
+    "id": "item-77",
+    "title": "#77 [S09] L2333 — data_missing",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:35:40.530Z"
+  },
+  "item-78": {
+    "id": "item-78",
+    "title": "#78 [S09] L2390 — data_missing",
+    "status": "rejected",
+    "note": "是两个不同项目，也有官方描述的文章。在2026GTC，并非混淆。",
+    "time": "2026-03-26T06:36:28.569Z"
+  },
+  "item-79": {
+    "id": "item-79",
+    "title": "#79 [S09] L2394 — logic_contradiction",
+    "status": "rejected",
+    "note": "是标准 AMD 产品命名 2026年3月13日的新闻报道里面有写",
+    "time": "2026-03-26T06:36:40.157Z"
+  },
+  "item-80": {
+    "id": "item-80",
+    "title": "#80 [S09] L2394 — data_missing",
+    "status": "rejected",
+    "note": "是我本人自己预测最低价9999",
+    "time": "2026-03-26T06:37:24.710Z"
+  },
+  "item-81": {
+    "id": "item-81",
+    "title": "#81 [S09] L2392 — data_missing",
+    "status": "rejected",
+    "note": "有",
+    "time": "2026-03-26T06:37:43.624Z"
+  },
+  "item-82": {
+    "id": "item-82",
+    "title": "#82 [S09] L2331 — data_missing",
+    "status": "rejected",
+    "note": "有",
+    "time": "2026-03-26T06:38:04.306Z"
+  },
+  "item-83": {
+    "id": "item-83",
+    "title": "#83 [S09] L2418 — logic_contradiction",
+    "status": "rejected",
+    "note": "主AI目前是引用Minimax和GLM 的API。未来如果可以用于部署本地化大模型的硬件到位后，再考虑其他主AI。",
+    "time": "2026-03-26T06:38:25.441Z"
+  },
+  "item-84": {
+    "id": "item-84",
+    "title": "#84 [S09] L2379 — data_missing",
+    "status": "rejected",
+    "note": "本来就是一个很大的团队。",
+    "time": "2026-03-26T06:39:22.651Z"
+  },
+  "item-85": {
+    "id": "item-85",
+    "title": "#85 [S09] L2387 — data_missing",
+    "status": "rejected",
+    "note": "这里应该subagents自己去找数据",
+    "time": "2026-03-26T06:39:45.728Z"
+  },
+  "item-86": {
+    "id": "item-86",
+    "title": "#86 [S09] L2400 — data_missing",
+    "status": "rejected",
+    "note": "上面的主题是统一内存架构芯片走向成熟，不是集成 NPU+GPU+CPU ，subagents逻辑不对。",
+    "time": "2026-03-26T06:41:42.784Z"
+  },
+  "item-87": {
+    "id": "item-87",
+    "title": "#87 [S09] L2448 — logic_contradiction",
+    "status": "rejected",
+    "note": "多AI表明在wifi6下事实存在，可以再重新查证。",
+    "time": "2026-03-26T06:46:16.126Z"
+  },
+  "item-88": {
+    "id": "item-88",
+    "title": "#88 [S10] L2555 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:46:24.422Z"
+  },
+  "item-89": {
+    "id": "item-89",
+    "title": "#89 [S10] L2642 — 内容不完整",
+    "status": "approved",
+    "note": "补齐代码",
+    "time": "2026-03-26T06:46:41.878Z"
+  },
+  "item-90": {
+    "id": "item-90",
+    "title": "#90 [S10] L2770 — 事实性错误",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:47:52.057Z"
+  },
+  "item-91": {
+    "id": "item-91",
+    "title": "#91 [S11] L2954 — incomplete_content",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:48:07.681Z"
+  },
+  "item-92": {
+    "id": "item-92",
+    "title": "#92 [S11] L2910 — path_error",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:48:19.257Z"
+  },
+  "item-93": {
+    "id": "item-93",
+    "title": "#93 [S11] L2781 — content_mismatch",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:49:04.155Z"
+  },
+  "item-94": {
+    "id": "item-94",
+    "title": "#94 [S11] L2859 — missing_definition",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:49:22.923Z"
+  },
+  "item-95": {
+    "id": "item-95",
+    "title": "#95 [S11] L2814 — logical_conflict",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:49:53.685Z"
+  },
+  "item-96": {
+    "id": "item-96",
+    "title": "#96 [S11] L2855 — data_missing",
+    "status": "rejected",
+    "note": "有",
+    "time": "2026-03-26T06:50:10.837Z"
+  },
+  "item-97": {
+    "id": "item-97",
+    "title": "#97 [S12] L3115 — logic_error",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:51:08.511Z"
+  },
+  "item-98": {
+    "id": "item-98",
+    "title": "#98 [S12] L3134 — ambiguous_content",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T06:51:27.287Z"
+  },
+  "item-99": {
+    "id": "item-99",
+    "title": "#99 [S12] L3062 — reference_error",
+    "status": "rejected",
+    "note": "上下文问题。",
+    "time": "2026-03-26T06:52:14.929Z"
+  },
+  "item-100": {
+    "id": "item-100",
+    "title": "#100 [S12] L3191 — code_inconsistency",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T06:55:57.008Z"
+  },
+  "item-101": {
+    "id": "item-101",
+    "title": "#101 [S13] L3334 — 内容不完整",
+    "status": "approved",
+    "note": "按照逻辑改进代码",
+    "time": "2026-03-26T06:57:26.681Z"
+  },
+  "item-102": {
+    "id": "item-102",
+    "title": "#102 [S13] L3377 — 来源缺失",
+    "status": "rejected",
+    "note": "上下文问题",
+    "time": "2026-03-26T06:57:23.650Z"
+  },
+  "item-103": {
+    "id": "item-103",
+    "title": "#103 [S14] L3534 — 数据缺失",
+    "status": "approved",
+    "note": "完整列出",
+    "time": "2026-03-26T06:58:22.312Z"
+  },
+  "item-104": {
+    "id": "item-104",
+    "title": "#104 [S14] L3601 — 来源缺失",
+    "status": "approved",
+    "note": "Newton 引擎 来自于英伟达2026 gtc 演讲。",
+    "time": "2026-03-26T07:47:23.968Z"
+  },
+  "item-105": {
+    "id": "item-105",
+    "title": "#105 [S14] L3609 — 数据不一致",
+    "status": "approved",
+    "note": "必须 NVIDIA RTX 8GB+是最低配运行要求的配置，RTX 3090+ 是推荐配置，可以补充一下。",
+    "time": "2026-03-26T07:00:27.054Z"
+  },
+  "item-106": {
+    "id": "item-106",
+    "title": "#106 [S15] L3709 — 格式问题",
+    "status": "approved",
+    "note": "可以优化描述",
+    "time": "2026-03-26T07:00:50.302Z"
+  },
+  "item-107": {
+    "id": "item-107",
+    "title": "#107 [S15] L3761 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:01:22.856Z"
+  },
+  "item-108": {
+    "id": "item-108",
+    "title": "#108 [S15] L3790 — 事实性错误或过度推测",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:01:31.928Z"
+  },
+  "item-109": {
+    "id": "item-109",
+    "title": "#109 [S15] L3826 — 技术描述不精确",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:02:12.744Z"
+  },
+  "item-110": {
+    "id": "item-110",
+    "title": "#110 [S15] L3833 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:02:20.696Z"
+  },
+  "item-111": {
+    "id": "item-111",
+    "title": "#111 [S15] L3822 — 来源缺失",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:02:32.216Z"
+  },
+  "item-112": {
+    "id": "item-112",
+    "title": "#112 [S15] L3894 — 技术描述不精确",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:02:53.325Z"
+  },
+  "item-113": {
+    "id": "item-113",
+    "title": "#113 [S16] L4068 — data_missing",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:03:15.274Z"
+  },
+  "item-114": {
+    "id": "item-114",
+    "title": "#114 [S16] L4047 — source_missing",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:03:29.914Z"
+  },
+  "item-115": {
+    "id": "item-115",
+    "title": "#115 [S16] L3918 — content_mismatch",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:03:58.652Z"
+  },
+  "item-116": {
+    "id": "item-116",
+    "title": "#116 [S17] L4078 — 内容与任务描述不符",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:04:24.716Z"
+  },
+  "item-117": {
+    "id": "item-117",
+    "title": "#117 [S17] L4101 — 数据缺失-性能数据无来源",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:05:02.612Z"
+  },
+  "item-118": {
+    "id": "item-118",
+    "title": "#118 [S17] L4098 — 数据缺失-版本真实性存疑",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:05:16.780Z"
+  },
+  "item-119": {
+    "id": "item-119",
+    "title": "#119 [S17] L4102 — 数据缺失-性能比较基准不完整",
+    "status": "rejected",
+    "note": "前面有写ROCm 对 AMD AI Halo 128GB ",
+    "time": "2026-03-26T07:06:30.910Z"
+  },
+  "item-120": {
+    "id": "item-120",
+    "title": "#120 [S18] L4225 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:07:06.205Z"
+  },
+  "item-121": {
+    "id": "item-121",
+    "title": "#121 [S18] L4231 — 来源缺失",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:07:42.991Z"
+  },
+  "item-122": {
+    "id": "item-122",
+    "title": "#122 [S18] L4232 — 来源缺失",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:07:44.127Z"
+  },
+  "item-123": {
+    "id": "item-123",
+    "title": "#123 [S18] L4237 — 来源缺失",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:07:48.600Z"
+  },
+  "item-124": {
+    "id": "item-124",
+    "title": "#124 [S18] L4241 — URL 错误",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:08:05.919Z"
+  },
+  "item-125": {
+    "id": "item-125",
+    "title": "#125 [S18] L4242 — URL 错误",
+    "status": "approved",
+    "note": "找到并关联",
+    "time": "2026-03-26T07:08:14.452Z"
+  },
+  "item-126": {
+    "id": "item-126",
+    "title": "#126 [S18] L4245 — URL 错误",
+    "status": "rejected",
+    "note": "这两个网址一样",
+    "time": "2026-03-26T07:10:09.667Z"
+  },
+  "item-127": {
+    "id": "item-127",
+    "title": "#127 [S18] L0 — 内容不完整",
+    "status": "approved",
+    "note": "补充检测代码",
+    "time": "2026-03-26T07:10:34.290Z"
+  },
+  "item-128": {
+    "id": "item-128",
+    "title": "#128 [S20] L4696 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:11:17.324Z"
+  },
+  "item-129": {
+    "id": "item-129",
+    "title": "#129 [S20] L4707 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:11:42.259Z"
+  },
+  "item-130": {
+    "id": "item-130",
+    "title": "#130 [S20] L4715 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:11:51.796Z"
+  },
+  "item-131": {
+    "id": "item-131",
+    "title": "#131 [S20] L4781 — 格式问题",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:12:11.267Z"
+  },
+  "item-132": {
+    "id": "item-132",
+    "title": "#132 [S20] L4766 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:12:40.149Z"
+  },
+  "item-133": {
+    "id": "item-133",
+    "title": "#133 [S01] L20 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:12:48.285Z"
+  },
+  "item-134": {
+    "id": "item-134",
+    "title": "#134 [S02] L261 — 重复内容",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:13:07.206Z"
+  },
+  "item-135": {
+    "id": "item-135",
+    "title": "#135 [S03] L736 — 事实性错误",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:13:21.646Z"
+  },
+  "item-136": {
+    "id": "item-136",
+    "title": "#136 [S03] L723 — 数据缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:13:37.278Z"
+  },
+  "item-137": {
+    "id": "item-137",
+    "title": "#137 [S03] L687 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:13:51.047Z"
+  },
+  "item-138": {
+    "id": "item-138",
+    "title": "#138 [S04] L1013 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:15:32.409Z"
+  },
+  "item-139": {
+    "id": "item-139",
+    "title": "#139 [S04] L1069 — 内容不完整",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:15:57.810Z"
+  },
+  "item-140": {
+    "id": "item-140",
+    "title": "#140 [S05] L1350 — 重复内容",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:16:25.234Z"
+  },
+  "item-141": {
+    "id": "item-141",
+    "title": "#141 [S05] L1340 — 内容不完整",
+    "status": "approved",
+    "note": "SLE + BLE 都是在同一个星闪芯片的功能里面，应该要一起描述出来才对。",
+    "time": "2026-03-26T07:18:32.981Z"
+  },
+  "item-142": {
+    "id": "item-142",
+    "title": "#142 [S06] L1779 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:18:44.717Z"
+  },
+  "item-143": {
+    "id": "item-143",
+    "title": "#143 [S07] L1960 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:18:53.893Z"
+  },
+  "item-144": {
+    "id": "item-144",
+    "title": "#144 [S07] L1956 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:19:05.477Z"
+  },
+  "item-145": {
+    "id": "item-145",
+    "title": "#145 [S07] L1961 — 格式问题",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:19:11.013Z"
+  },
+  "item-146": {
+    "id": "item-146",
+    "title": "#146 [S08] L2077 — 事实性错误（概率高）",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:19:25.838Z"
+  },
+  "item-147": {
+    "id": "item-147",
+    "title": "#147 [S10] L2647 — 内容不完整",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:19:59.238Z"
+  },
+  "item-148": {
+    "id": "item-148",
+    "title": "#148 [S11] L2851 — data_missing",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:20:08.294Z"
+  },
+  "item-149": {
+    "id": "item-149",
+    "title": "#149 [S11] L2867 — missing_source",
+    "status": "approved",
+    "note": "官方的JetPack 4.6.1 或者 https://github.com/pythops/jetson-image",
+    "time": "2026-03-26T07:21:35.840Z"
+  },
+  "item-150": {
+    "id": "item-150",
+    "title": "#150 [S11] L2860 — missing_source",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:21:45.833Z"
+  },
+  "item-151": {
+    "id": "item-151",
+    "title": "#151 [S11] L2863 — assumption_untested",
+    "status": "approved",
+    "note": "改为购买蓝牙耳机",
+    "time": "2026-03-26T07:22:01.409Z"
+  },
+  "item-152": {
+    "id": "item-152",
+    "title": "#152 [S11] L2852 — cross_reference_missing",
+    "status": "approved",
+    "note": "改为购买蓝牙耳机",
+    "time": "2026-03-26T07:22:42.289Z"
+  },
+  "item-153": {
+    "id": "item-153",
+    "title": "#153 [S11] L2815 — command_validity",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:22:55.514Z"
+  },
+  "item-154": {
+    "id": "item-154",
+    "title": "#154 [S11] L2860 — data_missing",
+    "status": "approved",
+    "note": "根据官网文档具体指引来正确补充：\ndocs.openclaw.ai",
+    "time": "2026-03-26T07:23:01.802Z"
+  },
+  "item-155": {
+    "id": "item-155",
+    "title": "#155 [S12] L3091 — format_issue",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:25:16.950Z"
+  },
+  "item-156": {
+    "id": "item-156",
+    "title": "#156 [S13] L3428 — 内容不完整",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:25:27.861Z"
+  },
+  "item-157": {
+    "id": "item-157",
+    "title": "#157 [S13] L3295 — 内容不完整",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:25:43.175Z"
+  },
+  "item-158": {
+    "id": "item-158",
+    "title": "#158 [S14] L3638 — 内容重复",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:25:51.789Z"
+  },
+  "item-159": {
+    "id": "item-159",
+    "title": "#159 [S14] L3569 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:25:57.180Z"
+  },
+  "item-160": {
+    "id": "item-160",
+    "title": "#160 [S14] L3610 — 数据待更新",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:30:04.538Z"
+  },
+  "item-161": {
+    "id": "item-161",
+    "title": "#161 [S15] L3915 — 逻辑重复",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:30:39.571Z"
+  },
+  "item-162": {
+    "id": "item-162",
+    "title": "#162 [S15] L3776 — 文字错误",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:31:14.244Z"
+  },
+  "item-163": {
+    "id": "item-163",
+    "title": "#163 [S15] L3800 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:31:30.628Z"
+  },
+  "item-164": {
+    "id": "item-164",
+    "title": "#164 [S16] L3939 — internal_inconsistency",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:32:02.669Z"
+  },
+  "item-165": {
+    "id": "item-165",
+    "title": "#165 [S16] L3918 — title_content_mismatch",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:32:17.716Z"
+  },
+  "item-166": {
+    "id": "item-166",
+    "title": "#166 [S17] L4159 — 格式问题-脚注位置歧义",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:32:51.894Z"
+  },
+  "item-167": {
+    "id": "item-167",
+    "title": "#167 [S17] L4165 — 来源缺失-官方定性不明确",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:33:11.246Z"
+  },
+  "item-168": {
+    "id": "item-168",
+    "title": "#168 [S17] L4103 — 数据缺失-Vulkan对比基准不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:33:19.245Z"
+  },
+  "item-169": {
+    "id": "item-169",
+    "title": "#169 [S17] L4101 — 数据缺失-表格内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:33:35.743Z"
+  },
+  "item-170": {
+    "id": "item-170",
+    "title": "#170 [S18] L4239 — 格式问题",
+    "status": "approved",
+    "note": "",
+    "time": "2026-03-26T07:33:58.744Z"
+  },
+  "item-171": {
+    "id": "item-171",
+    "title": "#171 [S18] L0 — 逻辑矛盾",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:34:42.133Z"
+  },
+  "item-172": {
+    "id": "item-172",
+    "title": "#172 [S18] L0 — 格式/结构问题",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:35:46.752Z"
+  },
+  "item-173": {
+    "id": "item-173",
+    "title": "#173 [S20] L4765 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:36:12.161Z"
+  },
+  "item-174": {
+    "id": "item-174",
+    "title": "#174 [S20] L4777 — 内容不完整",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:36:17.794Z"
+  },
+  "item-175": {
+    "id": "item-175",
+    "title": "#175 [S20] L4726 — 重复内容",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:47:59.416Z"
+  },
+  "item-176": {
+    "id": "item-176",
+    "title": "#176 [S20] L4789 — 来源缺失",
+    "status": "rejected",
+    "note": "",
+    "time": "2026-03-26T07:48:08.009Z"
   }
 }

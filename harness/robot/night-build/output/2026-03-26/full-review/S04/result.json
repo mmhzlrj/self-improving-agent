@@ -1,0 +1,63 @@
+{
+  "task_id": "S04",
+  "name": "§1.2 贵庚-3",
+  "line_range": "777-1276",
+  "total_lines": 500,
+  "issues_found": 9,
+  "issues": [
+    {
+      "type": "来源缺失",
+      "line_approx": 788,
+      "description": "Benchmark 数据来源表中「MLPerf Tiny」标注为「MCU 级别推理基准测试」，但 MLPerf Tiny 的官方 target 分类（MCU / M4 / HiWi）主要针对 ARM Cortex-M 级微控制器，与 Jetson Nano（边缘计算设备，GPU/NPU 算力远超 MCU）不在同一级别。表格中将其与 Jetson Nano 实测数据并列引用，适用范围不匹配，应补充说明 MLPerf Tiny 中哪一具体 benchmark 项目适用于边缘设备推理性能参考，或替换为更相关的基准测试来源。",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 793,
+      "description": "TensorSLM (ICML 2025) 引用标注为「RPi 上张量列分解压缩 embedding 能耗与延迟」，但 ICML 2025 会议（通常于当年7月举行）属于未来时间点（截至本 SOP 撰写时该会议尚未召开），相关论文无法核实其存在性与内容准确性。应在论文正式发表并核实后补充具体 paper title 和可验证链接。",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 794,
+      "description": "Google EmbeddingGemma 的 EdgeTPU benchmark 数据（< 15ms embedding）标注为数据来源，但没有提供具体报告名称、版本号或链接，无法溯源此数据的具体出处。15ms 这一具体数值的可信度无法评估。",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 1093,
+      "description": "玻璃光学存储详细对比表中，微软 Project Silica「4光束并行 8.25 MB/s」写入速度数值未标注来源。该数值在 SOP 中多次出现（数据流图、降级策略），但始终无原始数据出处。相比之下，双折射体素方案表格标题标注了 Nature 论文 2026-02，而写入速度这一关键参数却缺乏同等来源说明。",
+      "severity": "medium"
+    },
+    {
+      "type": "逻辑矛盾",
+      "line_approx": 1013,
+      "description": "四层存储架构表中，冷层（Cold）的保留策略描述为「高压缩率存储（HEVC/H.266）」，其中 H.266/VVC 是有损视频编码标准。然而，同节内容以及冻层（Frozen）策略均强调「永不删除原始数据」「原始数据不可再造」等不可逆损失零容忍原则。有损压缩意味着重新解码时必然产生质量损失，与「保留原始数据」的核心原则存在直接矛盾。冷层作为 1-5 年仍可能需要「重新标注」的数据层，使用有损压缩会引入额外质量退化，影响后续 AI 模型的重新处理质量。建议明确冷层使用无损或有损压缩，以及若使用有损压缩，原始数据在压缩前后的质量损失可接受条件。",
+      "severity": "high"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 1013,
+      "description": "四层存储架构表中，Frozen（冻层）行的「访问频率」列内容被截断（表格格式显示「几乎不访问」但与 Cold 行末字连排，无法确认为完整描述还是截断）。此外，保留策略列「极低压缩/无损，永久封存」与前述冷层「高压缩率存储」形成对比，但未说明冷层降级到冻层时是否涉及格式转换，以及冻层封存后若需紧急读取，其读取流程（需从 NAS_3 离线介质恢复）也缺乏说明。",
+      "severity": "low"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 1087,
+      "description": "微软 Project Silica 主要数据来源标注为「Nature 论文 2026-02」。从 SOP 撰写时点（2026-03-26）来看，该论文发表于约一个月前，但 SOP 内另有一句坦诚说明——「国产数据来自公开报道，部分参数待厂商确认」。相比之下，微软数据虽标注了 Nature 来源，但 SOP 未能说明该 Nature 论文是否经过同行评审、是否为 preprint，以及该论文的具体 DOI。鉴于 Nature 期刊为顶级学术期刊，其 2026-02 论文内容可信度较高，建议补充 DOI 以便核查；国产数据建议同样补充厂商联系人或产品规格书编号，与微软数据来源的说明标准对齐。",
+      "severity": "medium"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 1215,
+      "description": "访客数据保留说明中提到「未来新的分割模型可能出现，可以重新从 raw data 中提取访客信息」，但未说明如果该分割模型始终未出现、或开发方停止维护的情况下，访客 raw data 的保留策略是否有所不同。访客数据同样适用「永不删除原始数据」原则，但与用户本人数据不同，访客 raw data 的长期保留法律风险（如 GDPR 类法规）和存储成本未被讨论。建议补充：若访客数据长期（约定期限，如 3-5 年）内无任何检索命中，是否可以匿名化处理后继续保留，而非永久保存 raw data。",
+      "severity": "medium"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 1069,
+      "description": "密钥管理路径表格中，阶段三（阶段三：AMD AI Halo PSP fTPM）标注为「需在 BIOS 确认启用，商业版通常保留 PSP 单元」，但缺少具体验证步骤（如：如何确认 BIOS 中 PSP/TPM 选项已启用；哪些厂商主板/BIOS 版本已知支持此功能；Strix Halo 桌面平台的 fTPM 与移动平台 PSP TPM 在安全等效性上是否有差异）。如将此作为阶段三的核心技术路径，应补充具体操作验证步骤，以确保该方案可落地执行。",
+      "severity": "low"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{"task_id": "S14", "name": "§5.3-5.4 仿真+基模", "line_range": "3473-3695", "total_lines": 223, "issues_found": 8, "issues": [
+  {"type": "内容边界不符", "line_approx": 3473, "description": "任务描述称本区间包含「§5.3 仿真+§5.4 基模」，但实际内容为：3473-3594 属于 §5.2（iPhone 感知前端）末尾，3595-3695 属于 §5.3（物理仿真引擎），§5.4（基模）从 3696 行才开始，完全不在本区间内。本区间实际上不包含 §5.4。", "severity": "high"},
+  {"type": "事实性错误", "line_approx": 3596, "description": "文档声称 Genesis 是「Apple 团队开源的独立物理引擎」，经核实 GitHub 仓库（Genesis-Embodied-AI/Genesis）由 Genesis AI Company 主导开发，并非 Apple 团队的产品。Apple Silicon Metal 仅为其支持的计算后端之一。", "severity": "high"},
+  {"type": "数据缺失", "line_approx": 3534, "description": "MediaPipe 功能表（③ MediaPipe）仅列出 3 项能力（物体检测 ~0.81ms / 手势识别 ~2ms / 全身姿态 ~5ms），标题为「功能最全」，但缺少 MediaPipe 常见能力如人脸网格（Face Mesh）、目标追踪（Object Tracking）等，内容不完整。", "severity": "medium"},
+  {"type": "来源缺失", "line_approx": 3601, "description": "§5.3 开头的警告框中，对 Newton 引擎的描述缺少来源说明。Genesis 小节注明「来源：Genesis GitHub + 官方文档」，但 Newton 小节（3601 行起）无等效来源标注，GitHub URL 也未标注验证日期。", "severity": "medium"},
+  {"type": "数据不一致", "line_approx": 3609, "description": "Isaac Gym 的 GPU 要求存在两种说法：对比表（3609 行）写「必须 NVIDIA RTX 8GB+」，而下方的意义说明（3611 行）写「RTX 3090+」。RTX 3090 为 24GB 显存，「8GB+」与「RTX 3090+」是两个不同量级的标准，容易误导读者。", "severity": "medium"},
+  {"type": "内容重复", "line_approx": 3638, "description": "「Genesis vs Newton 怎么选」对比表（3638 行）的内容与上方「Genesis vs Isaac Gym 完整对比」表（3607 行）以及下方的「对 0-1 的建议」（3690-3691 行）在资源需求、适用场景等维度上高度重复，未做差异化描述。", "severity": "low"},
+  {"type": "格式问题", "line_approx": 3569, "description": "Genesis 快速入门代码块（3562-3569 行）以 ```python 开头，但未见对应闭合的 ```，代码块在第 3569 行后直接被 「---」分隔符截断，格式不完整。", "severity": "low"},
+  {"type": "数据待更新", "line_approx": 3610, "description": "Genesis 速度基准「43M FPS（RTX 4090）」已标注 RTX 5090 已发布待更新 benchmark，但 Isaac Gym 对比列的「100+ 智能体并行」未注明具体 GPU 环境，参考价值有限。", "severity": "low"}
+]}

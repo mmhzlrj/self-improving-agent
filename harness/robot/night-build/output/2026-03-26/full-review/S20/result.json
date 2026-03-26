@@ -1,0 +1,69 @@
+{
+  "task_id": "S20",
+  "name": "调研记录+术语表",
+  "line_range": "4691-4917",
+  "total_lines": 227,
+  "issues_found": 10,
+  "issues": [
+    {
+      "type": "来源缺失",
+      "line_approx": 4696,
+      "description": "「3D 打印结构（替代 CNC，¥2000 以内）」—— ¥2000 的具体价格来源未标注，无参考依据",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 4707,
+      "description": "「哪吒双足机器人」—— 49个自由度、手部12DOF 的具体参数来源未标注",
+      "severity": "medium"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 4715,
+      "description": "「启元 Q1」—— 「全球首款」「小到能塞进书包」等描述缺乏来源支撑",
+      "severity": "medium"
+    },
+    {
+      "type": "事实性错误",
+      "line_approx": 4739,
+      "description": "BearPi GPIO 核查结果存在歧义：先说「修正：17个GPIO（非40针GPIO）」，但同一条又写「40针排针座含电源/地」，两句话相互矛盾",
+      "severity": "high"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 4765,
+      "description": "GR00T N1.6「宇树 G1 已验证」—— 但未说明验证的具体内容或成果",
+      "severity": "low"
+    },
+    {
+      "type": "内容不完整",
+      "line_approx": 4777,
+      "description": "「Cyber Bricks」定义仅含品牌和硬件信息，缺少软件栈、控制协议等关键说明",
+      "severity": "low"
+    },
+    {
+      "type": "格式问题",
+      "line_approx": 4781,
+      "description": "「Genesis」术语说明中「Mac RTX 4090 上 43M FPS」的性能数字未注明测试场景与对比基准，难以判断其意义",
+      "severity": "medium"
+    },
+    {
+      "type": "重复内容",
+      "line_approx": 4726,
+      "description": "Dummy-Robot GitHub 链接在「关键链接汇总」表和前文调研记录中重复出现，未合并引用",
+      "severity": "low"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 4789,
+      "description": "「Jetson Nano」术语定义仅有「NVIDIA 低成本嵌入式 AI 计算机」，2GB/4GB/8GB 版本区别未提及，而前文调研记录已确认各版本存在差异",
+      "severity": "low"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 4766,
+      "description": "Cosmos Predict 2.5「体积缩小至 1/3.5」的倍数关系缺乏原始来源，仅有结论性描述",
+      "severity": "medium"
+    }
+  ]
+}

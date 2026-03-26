@@ -1,0 +1,20 @@
+{
+  "task_id": "T-01-A01",
+  "version": 2,
+  "line_start": 1,
+  "line_end": 300,
+  "headings": [
+    {"line_in_return": 1, "line_in_file": 1, "level": 1, "heading": "🤖 0-1 私人 AI 机器人完整实施指南"},
+    {"line_in_return": 11, "line_in_file": 11, "level": 1, "heading": "目录"},
+    {"line_in_return": 199, "line_in_file": 199, "level": 1, "heading": "第一章：概念与愿景"},
+    {"line_in_return": 200, "line_in_file": 200, "level": 2, "heading": "1.1 项目愿景"},
+    {"line_in_return": 210, "line_in_file": 210, "level": 2, "heading": "1.2 核心系统：贵庚"},
+    {"line_in_return": 216, "line_in_file": 216, "level": 3, "heading": "核心价值主张"},
+    {"line_in_return": 224, "line_in_file": 224, "level": 3, "heading": "贵庚记忆系统技术架构"},
+    {"line_in_return": 226, "line_in_file": 226, "level": 4, "heading": "核心定位：原生数据的容器，而非技术路线"},
+    {"line_in_return": 239, "line_in_file": 239, "level": 4, "heading": "发展阶段"},
+    {"line_in_return": 246, "line_in_file": 246, "level": 4, "heading": "三个核心设计难点（技术层面）"},
+    {"line_in_return": 253, "line_in_file": 253, "level": 4, "heading": "模型路线：边权重实例型大模型"}
+  ],
+  "total_headings": 11
+}

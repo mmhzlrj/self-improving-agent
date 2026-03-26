@@ -1,0 +1,17 @@
+{"task_id": "S15", "name": "§5.5+§6.1", "line_range": "3696-3917", "total_lines": 222, "issues_found": 15, "issues": [
+  {"type": "内容范围不符", "line_approx": 3696, "description": "行范围 3696-3917 被标注为「§5.5 训练+§6.1 推理框架」，但实际内容 99% 属于 §5.4（具身大脑基模：RynnBrain 与空间智能），仅最后一行（3917）是 §5.5 的章节标题。实际内容与任务描述严重不符。", "severity": "high"},
+  {"type": "来源缺失", "line_approx": 3727, "description": "RynnBrain 核心能力表中「100步+任务完成率 88%」「零样本适配 未知环境成功率 94%」两个关键性能指标，标注来源为「官方 Demo 验证」，但缺少具体论文/官方文档/仓库链接，无法追溯验证。", "severity": "high"},
+  {"type": "来源缺失", "line_approx": 3896, "description": "GR00T N1.6 预训练数据声称包含「宇树 G1 全身运动操作数据」「智元机器人 AgiBot Genie-1 双手操作数据」「Bimanual YAM 双臂遥操作数据」，但整段无任何 arXiv/GitHub/HuggingFace 来源链接。", "severity": "high"},
+  {"type": "事实性错误或过度推测", "line_approx": 3901, "description": "「Cyber Bricks 作为宇树同源架构，动作空间可能兼容」——宇树 G1 使用宇树自研关节电机与通信协议，「同源架构」不等于「动作空间兼容」，此兼容性结论过度确定，应加更强 Hedge 词或说明待实际验证。", "severity": "high"},
+  {"type": "内容不完整", "line_approx": 3917, "description": "§5.5「机器人技能训练」内容极度单薄：仅有 1 行章节标题 + 1 行备注 + 1 张厂商训练方式概述表，无任何具体 SOP、数据集链接、训练 pipeline 描述或基准测试。备注「⚠️ 0-1 当前状态：文档完全没有描述如何让机器人学会新任务」说明文档本身已承认内容缺失，但并未补充。", "severity": "high"},
+  {"type": "格式问题", "line_approx": 3709, "description": "RynnBrain 模型表中「复杂任务（主力）」使用口语化词汇「主力」，不符合 SOP 技术文档的专业表述规范，应改为「主要用途」或「推荐场景」。", "severity": "medium"},
+  {"type": "格式问题", "line_approx": 3761, "description": "World Labs 官网链接写作「www.worldlabs.ai」，缺少协议前缀（应为 https://www.worldlabs.ai），影响链接可用性。", "severity": "medium"},
+  {"type": "事实性错误或过度推测", "line_approx": 3790, "description": "表格两次出现「RTX 5090已发布，待更新」标注：一次在 RoboGSim 行（3822附近），一次在 SplaTAM 行（3825附近）。RTX 5090 发布时间未经验证，属推测性内容，不应写入 SOP。", "severity": "medium"},
+  {"type": "技术描述不精确", "line_approx": 3826, "description": "MonoGS 项目描述为「单目 SLAM」不够准确——MonoGS 基于 3DGS（3D Gaussian Splatting）进行 RGB-D SLAM，本质是单 RGB 相机（非 RGB-D 传统单目），描述有歧义，应更精确说明其技术路线。", "severity": "medium"},
+  {"type": "来源缺失", "line_approx": 3833, "description": "硬件算力门槛表格声称「台式机 RTX 2060 ✅」，但 0-1 当前台式机是否确实配有 RTX 2060 未经证实；且表格中各任务算力需求数据均无来源引用，无法验证准确性。", "severity": "medium"},
+  {"type": "来源缺失", "line_approx": 3822, "description": "RoboGSim 项目链接为「robogsim.github.io/」，但整段缺少 arXiv 论文编号（应为 arXiv:2411.11839）的正式引用，论文与 GitHub 仓库未关联。", "severity": "medium"},
+  {"type": "技术描述不精确", "line_approx": 3894, "description": "GR00T N1.6 架构描述「NVIDIA Cosmos-2B 变体」——NVIDIA Cosmos 官方模型名为「Cosmos-2B」，但 Cosmos 是否已发布面向机器人定制微调的变体版本、GR00T N1.6 具体使用哪个 Cosmos 微调版本，未找到明确来源。", "severity": "medium"},
+  {"type": "逻辑重复", "line_approx": 3915, "description": "GR00T N1.6 部分「硬件需求」在第 3915 行和 3916 行连续两行几乎完全重复描述「预训练需要高端 GPU，但微调和推理可在 AGX Orin 64G 上进行」，行文冗余。", "severity": "low"},
+  {"type": "文字错误", "line_approx": 3776, "description": "李飞飞空间智能表格中「BRS 家机器」中「家」字疑似错别字或多余字，应为「BRS 机器」或「BRS 家清机器人」等合法名称，全段无其他上下文可推断原意。", "severity": "low"},
+  {"type": "内容不完整", "line_approx": 3800, "description": "LangSplat 开源项目表格单元格中「LangSplat（CVPR 2024 Highlight）」为论文 Highlight，但表格「对 0-1 价值」列仅填「⭐⭐⭐⭐⭐ 语义建图」，缺少具体应用场景描述（如支持自然语言查询哪些类型的物体），价值说明不够具体。", "severity": "low"}
+]}

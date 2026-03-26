@@ -1,0 +1,43 @@
+{
+  "section": "§2.6 Medusa Halo：移动 AI 工作站（长期规划）",
+  "line_range": "2198-2283",
+  "issues_found": 6,
+  "issues": [
+    {
+      "type": "数据可信度",
+      "line_approx": 2209,
+      "description": "表中 'AI算力' 标注 '4-10倍' 提升，来源为 'RDNA 4/5矩阵增强' 推断，无具体 TOPS 数值。提升幅度跨度大（4-10x），缺乏可信区间。",
+      "severity": "medium"
+    },
+    {
+      "type": "数据可信度",
+      "line_approx": 2230,
+      "description": "声称 'Agent 间通信延迟：微秒级（统一内存）'，无任何来源支撑。统一内存延迟通常在数十到数百纳秒量级，但跨进程/跨设备通信另有开销，微秒级声明未经验证。",
+      "severity": "medium"
+    },
+    {
+      "type": "事实性错误",
+      "line_approx": 2248,
+      "description": "表格 '256GB+ 统一内存对 0-1 移动终端的意义' 中，Strix Halo 128GB 行标注 'Qwen3.5-32B：⚠️ 勉强'，但 §2.6 前文 'LPDDR6 带宽对本地大模型的意义' 仅声称 Strix Halo '可流畅跑 7B/13B 量化模型'，未提及 32B 在 128GB 上可行，前后描述不一致。",
+      "severity": "low"
+    },
+    {
+      "type": "格式问题",
+      "line_approx": 2253,
+      "description": "过渡方案表格中 'Asus ProArt PX13' 和 'Asus ROG Flow Z13' 均未标注具体配置差异，仅注明 '同上 APU'，未说明是否均为 Ryzen AI Max+ 395（128GB）。",
+      "severity": "low"
+    },
+    {
+      "type": "来源缺失",
+      "line_approx": 2248,
+      "description": "模型在不同内存容量下的运行可行性（表格内 ⚠️/✅ 标注）均无来源依据，属于主观判断，建议注明 '基于经验估算'。",
+      "severity": "low"
+    },
+    {
+      "type": "夸大陈述",
+      "line_approx": 2205,
+      "description": "标头称 '来源：AMD 官方产品页（AI 算力数据）+ Olrak29_/Tom's Hardware/Fudzilla（硬件规格爆料）'，但 'AI算力：4-10倍' 并非 AMD 官方数据，亦非爆料，而是基于架构推断的估算值，应标注为 '（基于架构推断，非官方）'。",
+      "severity": "low"
+    }
+  ]
+}

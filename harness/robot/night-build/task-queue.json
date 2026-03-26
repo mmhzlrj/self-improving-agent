@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "date": "2026-03-26",
+  "phase": "ab-test-night-1-v2",
+  "description": "A/B 测试 v2：A 组改为 300 行/段 + 显式行号计算公式",
+  "tasks": [
+    {"id": "T-01-A01", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A02", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A03", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A04", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A05", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A06", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A07", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A08", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A09", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A10", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A11", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A12", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A13", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A14", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A15", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A16", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-A17", "group": "A", "version": 2, "status": "pending", "priority": 1},
+    {"id": "T-01-B01", "group": "B", "status": "pending", "priority": 2},
+    {"id": "T-01-B02", "group": "B", "status": "pending", "priority": 2},
+    {"id": "T-01-B03", "group": "B", "status": "pending", "priority": 2}
+  ]
+}

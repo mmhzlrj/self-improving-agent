@@ -1,0 +1,58 @@
+{
+  "task_id": "T-01-R01",
+  "group": "R",
+  "version": 2,
+  "total_sections": 3,
+  "sections_completed": 3,
+  "total_issues": 27,
+  "section_results": [
+    {
+      "section": "§2.8 技术可行性：五条技术路线",
+      "line_range": "2376-2404",
+      "issues_found": 8,
+      "issues": [
+        {"type": "数据错误", "line_approx": 2381, "description": "Genesis RTX 4090 上 '43M FPS' — 数值异常（4300万帧/秒不合物理现实），疑似单位错误（应为 43K FPS 或类似）。无来源验证。", "severity": "high"},
+        {"type": "数据缺失", "line_approx": 2381, "description": "RTX 5090 benchmark 待更新 — 提到'已发布'但无具体数据，声明'待更新 benchmark'意味着本节数据不完整。", "severity": "medium"},
+        {"type": "产品命名混淆", "line_approx": 2387, "description": "AMD AI Halo vs AMD AI Max+ — 路线四提'AMD AI Halo 128GB'，路线五提'AMD AI Max+'和'AI Max+ 128GB'。两者为同一产品还是不同产品？命名不统一造成混淆。", "severity": "medium"},
+        {"type": "数据来源缺失", "line_approx": 2381, "description": "Genesis 43M FPS 性能数据无引用来源，无法核实。", "severity": "high"},
+        {"type": "定价预测", "line_approx": 2387, "description": "'AMD AI Halo 128GB（618 可能低于 1 万）' — 618促销价格预测，非已确认数据，不应作为技术可行性论据。", "severity": "low"},
+        {"type": "数据可信度", "line_approx": 2394, "description": "苹果 M5 带宽 153GB/s — M5芯片尚未发布（截至知识截止日），且M4 Max带宽约500GB/s，153GB/s数值可能不实。无来源。", "severity": "high"},
+        {"type": "数据来源缺失", "line_approx": 2393, "description": "'苹果 M5 带宽 153GB/s、MacBook 24GB 可跑 30B 模型' — 无任何来源引用。", "severity": "high"},
+        {"type": "格式问题", "line_approx": 2404, "description": "章节编号跳跃异常：从 §2.8 直接跳到'第三章：系统架构'，中间缺少 §2.9、§2.10 等编号。", "severity": "low"}
+      ]
+    },
+    {
+      "section": "§2.7 手部与执行器设计",
+      "line_range": "2283-2376",
+      "issues_found": 9,
+      "issues": [
+        {"type": "产品名称存疑", "line_approx": 2324, "description": "LD-2209 伺服舵机 — 该型号在公开资料中无法核实（搜索不到可靠结果），疑似虚构或极小众型号。来源标注缺失。", "severity": "high"},
+        {"type": "数据歧义", "line_approx": 2296, "description": "Tesla Optimus Gen3 表格中 '22 DOF × 2（单手）' 表述不清：×2是指两只手，还是22 DOF已包含两只手？人类约27-28 DOF/手，81%计算逻辑不明确。", "severity": "medium"},
+        {"type": "数据存疑", "line_approx": 2297, "description": "Boston Dynamics Atlas '全身56 DOF' — 液压版Atlas有此DOF，但新电动Atlas的DOF未公开披露，引用来源不明确。", "severity": "medium"},
+        {"type": "来源缺失", "line_approx": 2286, "description": "头部注明'来源：Tesla/Optimus/宇树等厂商公开参数'但正文内无具体引用，各厂商参数均为定性描述，无数据锚点。", "severity": "medium"},
+        {"type": "价格数据时效性", "line_approx": 2325, "description": "阶段一¥200/手、阶段二¥800/手、阶段三¥2000/手 — 无来源、无时间标注，汇率或通胀因素未说明。", "severity": "low"},
+        {"type": "重复内容", "line_approx": 2304, "description": "DOF说明在第2304行和第2299行几乎完全重复（人类单手约27 DOF，分解相同），可合并精简。", "severity": "low"},
+        {"type": "逻辑矛盾", "line_approx": 2286, "description": "头部说'暂不考虑因时/特斯拉方案'，但正文多次以Tesla Optimus作为参考标杆（阶段二/阶段三均参考Tesla路线），与头部声明矛盾。", "severity": "medium"},
+        {"type": "价格数据歧义", "line_approx": 2358, "description": "触觉传感器价格表缺少货币单位（¥指人民币，但部分读者可能误解为日元或其他货币）。", "severity": "low"},
+        {"type": "外部链接无超链接", "line_approx": 2288, "description": "Kinetix GitHub链接以纯文本形式提供，读者无法直接点击访问。", "severity": "low"}
+      ]
+    },
+    {
+      "section": "§2.6 Medusa Halo：移动 AI 工作站（长期规划）",
+      "line_range": "2198-2283",
+      "issues_found": 10,
+      "issues": [
+        {"type": "产品名称错误", "line_approx": 2223, "description": "表格中 'Strix Halo（当前旗舰）' — AMD正式产品名称为 Strix Point 或 Ryzen AI Max+，而非 'Strix Halo'。'Halo' 是媒体/社区的非官方称呼，不应在规格表标题中作为官方名称使用。", "severity": "medium"},
+        {"type": "产品型号错误", "line_approx": 2214, "description": "提到 'Ryzen AI Max+ 392' — AMD当前产品线无此型号（已知有385、395），392可能是错误信息或未来型号。", "severity": "high"},
+        {"type": "模型名称不存在", "line_approx": 2236, "description": "Qwen3.5-32B、Qwen3.5-72B、Qwen3.5-130B、Qwen3.5-405B — Qwen3.5系列不存在。阿里最新开源系列为Qwen3（Qwen3.0）或Qwen2.5，Qwen3.5属于虚构。", "severity": "high"},
+        {"type": "架构预测无依据", "line_approx": 2209, "description": "Medusa Halo规格中 RDNA 5（当前RDNA 4尚未发布）、Zen 6（当前Zen 5为主流）、2nm N2P制程 — 均为远期预测，标注为'爆料预估'，但全文混在正式规格中无明显区分。", "severity": "high"},
+        {"type": "数据矛盾", "line_approx": 2208, "description": "AI算力提升标注'4-10倍'，但下方KV缓存部分说'2-3倍'，同一性能指标两个说法，读者无法判断哪个准确。", "severity": "high"},
+        {"type": "数据矛盾", "line_approx": 2262, "description": "对比表中'Strix Halo（128GB）'标注'256 GB/s'带宽，但正文表头写256 GB/s是Strix Halo，两处重复无说明；且移动终端表格标注'256GB+'而对比表标注不同。", "severity": "medium"},
+        {"type": "数据范围过宽", "line_approx": 2208, "description": "AI算力'4-10倍'和带宽'+80%~+170%'范围极宽，实际意义有限，应给出中位数预估或场景说明。", "severity": "medium"},
+        {"type": "来源可靠性", "line_approx": 2205, "description": "核心规格表标注'来源：多源确认（Olrak29_@X、Tom's Hardware...）' — Olrak29_是X平台硬件爆料者，非官方来源；文档头部明确'非官方确认'却大量引用作为技术依据。", "severity": "medium"},
+        {"type": "定价信息不完整", "line_approx": 2282, "description": "Asus ProArt PX13 ($2,199+) 和 ROG Flow Z13 ($2,499+) — 缺少货币单位（美元符号已写但前后格式不统一）、缺少来源链接。", "severity": "low"},
+        {"type": "产品混淆", "line_approx": 2273, "description": "正文多处称'家中 AI Halo'、'AI Halo（Strix Halo 128GB）'，而§2.8路线五用的是'AMD AI Max+' — 三种名称指代同一产品线，命名不统一。", "severity": "medium"}
+      ]
+    }
+  ]
+}

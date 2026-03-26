@@ -1,0 +1,137 @@
+{
+  "task_id": "T-01-BR01",
+  "total_sections": 3,
+  "sections_completed": 3,
+  "total_issues": 18,
+  "section_results": [
+    {
+      "section": "§2.6 Medusa Halo：移动 AI 工作站（长期规划）",
+      "line_range": "2198-2283",
+      "issues_found": 6,
+      "issues": [
+        {
+          "type": "数据可信度",
+          "line_approx": 2209,
+          "description": "表中 'AI算力' 标注 '4-10倍' 提升，来源为 'RDNA 4/5矩阵增强' 推断，无具体 TOPS 数值。提升幅度跨度大（4-10x），缺乏可信区间。",
+          "severity": "medium"
+        },
+        {
+          "type": "数据可信度",
+          "line_approx": 2230,
+          "description": "声称 'Agent 间通信延迟：微秒级（统一内存）'，无任何来源支撑。统一内存延迟通常在数十到数百纳秒量级，但跨进程/跨设备通信另有开销，微秒级声明未经验证。",
+          "severity": "medium"
+        },
+        {
+          "type": "事实性错误",
+          "line_approx": 2248,
+          "description": "表格 '256GB+ 统一内存对 0-1 移动终端的意义' 中，Strix Halo 128GB 行标注 'Qwen3.5-32B：⚠️ 勉强'，但 §2.6 前文 'LPDDR6 带宽对本地大模型的意义' 仅声称 Strix Halo '可流畅跑 7B/13B 量化模型'，未提及 32B 在 128GB 上可行，前后描述不一致。",
+          "severity": "low"
+        },
+        {
+          "type": "格式问题",
+          "line_approx": 2253,
+          "description": "过渡方案表格中 'Asus ProArt PX13' 和 'Asus ROG Flow Z13' 均未标注具体配置差异，仅注明 '同上 APU'，未说明是否均为 Ryzen AI Max+ 395（128GB）。",
+          "severity": "low"
+        },
+        {
+          "type": "来源缺失",
+          "line_approx": 2248,
+          "description": "模型在不同内存容量下的运行可行性（表格内 ⚠️/✅ 标注）均无来源依据，属于主观判断，建议注明 '基于经验估算'。",
+          "severity": "low"
+        },
+        {
+          "type": "夸大陈述",
+          "line_approx": 2205,
+          "description": "标头称 '来源：AMD 官方产品页（AI 算力数据）+ Olrak29_/Tom's Hardware/Fudzilla（硬件规格爆料）'，但 'AI算力：4-10倍' 并非 AMD 官方数据，亦非爆料，而是基于架构推断的估算值，应标注为 '（基于架构推断，非官方）'。",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "section": "§2.7 手部与执行器设计",
+      "line_range": "2283-2376",
+      "issues_found": 6,
+      "issues": [
+        {
+          "type": "逻辑矛盾",
+          "line_approx": 2326,
+          "description": "阶段一描述 '12 DOF 单手'，但设计目标表格明确 '单手 ≥20 DOF（进阶）'。12 DOF 属于 '基础' 阶段，进阶目标 ≥20 DOF，两个阶段的 DOF 目标定义互相矛盾，容易误导读者认为 12 DOF 已满足进阶要求。",
+          "severity": "high"
+        },
+        {
+          "type": "数据缺失",
+          "line_approx": 2324,
+          "description": "阶段二方案 'LD-2209 伺服舵机（20kg/cm 扭矩）× 12个' 中，12 个舵机如何分配到 16-22 DOF 无说明。12 个舵机理论上最多控制 12 个自由度，无法实现 16-22 DOF，说明不完整。",
+          "severity": "high"
+        },
+        {
+          "type": "事实性错误",
+          "line_approx": 2313,
+          "description": "行业现状表格称 'Boston Dynamics Atlas：全身56 DOF...全关节连续旋转，可做复杂体操动作'。Atlas（电驱动版本）并非全身56 DOF，且其能力描述混淆了波士顿动力早期液压版Atlas与现役电驱动版Atlas的技术特性。",
+          "severity": "medium"
+        },
+        {
+          "type": "数据缺失",
+          "line_approx": 2358,
+          "description": "触觉传感器选型表中，'HT201 压力传感阵列 ¥200/个' 未标注来源。¥200 单价与其他传感器的价差较大（是薄膜传感器的10-40倍），缺乏来源使成本估算不可靠。",
+          "severity": "medium"
+        },
+        {
+          "type": "来源缺失",
+          "line_approx": 2347,
+          "description": "阶段三参考 'Tesla Optimus Gen3 执行器设计（腱绳驱动，前臂执行器）' 无具体来源链接，无法追溯是否为官方披露信息。",
+          "severity": "low"
+        },
+        {
+          "type": "格式不一致",
+          "line_approx": 2296,
+          "description": "Kinetix 参数表和行业现状表均无来源脚注，仅在章节头注 '来源：Tesla/Optimus/宇树等厂商公开参数 + Kinetix/GitHub 开源方案'，各表格行目无具体引用对应，溯源困难。",
+          "severity": "low"
+        }
+      ]
+    },
+    {
+      "section": "§2.8 技术可行性：五条技术路线",
+      "line_range": "2376-2500",
+      "issues_found": 6,
+      "issues": [
+        {
+          "type": "夸大陈述",
+          "line_approx": 2380,
+          "description": "声称 'OpenClaw 是全球最流行的开源 AI Agent 项目'，但 '最流行' 无任何排名或引用依据。AI Agent 框架领域还有 LangChain、AutoGPT CrewAI 等流行项目，此类绝对化表述应标注数据来源（如 GitHub stars、使用量等）。",
+          "severity": "medium"
+        },
+        {
+          "type": "数据缺失",
+          "line_approx": 2380,
+          "description": "技术路线一描述 'Claw 已成为 AI Agent 领域的命名共识，各大厂商纷纷围绕 OpenClaw 构建自己的配套生态'，但提到的 'AMD 推出 RyzenClaw / RadeonClaw 部署指南' 和 'Intel 优化 OpenClaw 混合 AI 执行' 均未提供官方链接或文档来源。",
+          "severity": "medium"
+        },
+        {
+          "type": "数据缺失",
+          "line_approx": 2383,
+          "description": "技术路线二称 'Genesis...RTX 4090 上 43M FPS'，43M FPS 数值极大（4300万帧每秒），但无来源链接、benchmark 截图或论文引用。",
+          "severity": "medium"
+        },
+        {
+          "type": "数据缺失",
+          "line_approx": 2390,
+          "description": "技术路线四声称 'Ollama 最易用、vLLM 吞吐最高、SGLang 支持复杂 Agent 任务'，三个判断均无来源。其中 'vLLM 吞吐最高' 断言较强，与 LM Studio 等高吞吐量方案比较未提供依据。",
+          "severity": "low"
+        },
+        {
+          "type": "事实性错误/数据陈旧",
+          "line_approx": 2393,
+          "description": "技术路线五称 '苹果 M5 带宽 153GB/s'。截至 2026-03（文档更新日期），苹果尚未正式发布 M5 芯片（当前最新为 M4 系列），此数据来源不明或为提前泄露，准确性无法验证。",
+          "severity": "high"
+        },
+        {
+          "type": "数据陈旧",
+          "line_approx": 2383,
+          "description": "技术路线二提到 'RTX 5090 已发布，性能更强，待更新 benchmark'，说明 43M FPS 数据基于 RTX 4090，未更新至 RTX 5090。鉴于 5090 已发布，应标注当前 benchmark 数据。",
+          "severity": "low"
+        }
+      ]
+    }
+  ]
+}

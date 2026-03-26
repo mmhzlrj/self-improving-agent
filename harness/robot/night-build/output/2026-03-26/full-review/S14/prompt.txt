@@ -1,0 +1,31 @@
+审核 ROBOT-SOP.md 第 3473 到 3695 行（223行，§5.3-5.4 仿真+基模）。
+
+用 exec 执行以下命令读取完整内容：
+
+sed -n '3473,3695p' harness/robot/night-build/reference/ROBOT-SOP.md
+
+逐行审核，找出以下问题类型：
+1. 数据缺失：表格字段为空/TBD/未完成
+2. 逻辑矛盾：前后描述不一致
+3. 重复内容：同一段信息出现两次以上
+4. 来源缺失：具体数据（价格/参数/性能）无出处
+5. 格式问题：Markdown 格式错误
+6. 事实性错误：数据与已知事实不符
+7. 内容不完整：章节说要做某事但没有具体方案
+
+对每个问题记录：
+- type: 问题类型
+- line_approx: 大约在第几行（相对于原始文件，即 line_start + 行内偏移）
+- description: 问题描述
+- severity: high / medium / low
+
+写入 harness/robot/night-build/output/2026-03-26/full-review/S14/result.json
+
+JSON 格式：
+{"task_id": "S14", "name": "§5.3-5.4 仿真+基模", "line_range": "3473-3695", "total_lines": 223, "issues_found": 0, "issues": [...]}
+
+⚠️ 重要规则：
+- JSON 字符串中禁止使用双引号，用「」替代
+- 不要编造问题，每个问题必须能在原文中找到对应
+- 如果没有任何问题，写 issues_found: 0 和空数组
+- 行号使用原始文件行号（不是 sed 输出的相对行号）
