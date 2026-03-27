@@ -463,3 +463,79 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - 额度 100% 时等重置再派
 - timeout 设 5 分钟，别卡到自然超时浪费调用次数
 - 刚才教训：3 个 subagent 同时跑文件编辑 → 全部超时卡死，浪费约 226k tokens 的调用
+
+---
+
+## 0-1 机器人项目核心摘要（2026-03-26 整理）
+
+> 来源：harness/robot/ROBOT-SOP.md（v3.30，约216900字符）
+
+### 项目定位
+- **名称**：0-1（零杠一）—— 不是机器，是你人生的另一面
+- **愿景**：用10年分五阶段，打造一个会跟着AI能力一起长大的陪伴机器人
+- **核心系统**：贵庚（Guìgēng）—— 为保存一个人完整一生而设计的记忆系统
+- **哲学**："技术会过时，数据不会"，原始数据以最完整形态保留
+
+### 硬件体系（已到位 + 待采购）
+| 设备 | 型号/规格 | 状态 |
+|------|----------|------|
+| 主控 | Jetson Nano 2GB（非4GB开发套件）| 已有，内存小需开swap |
+| 摄像头 | ESP32-Cam（OV2640）| 已有，待烧录固件 |
+| 星闪通信 | BearPi-Pico H3863（WS63，WiFi6+BLE+SLE）| 已有×2，需测试SLE |
+| 3D打印 | 拓竹 H2C + Bambu Suite | 已有，完整生态 |
+| 运动执行 | Cyber Bricks（ESP32-C3）+ 电机+舵机 | 已有×2，拓竹赠送 |
+| 手机感知 | iPhone 16 Pro（A18 Pro + LiDAR）| 已有，待接入 |
+| GPU节点 | Ubuntu 5600G+32G+RTX 2060 | 已有，待对接Gateway |
+| Gateway | MacBook Pro | 运行中 |
+
+### 软件架构
+- **OpenClaw**：0-1的大脑+记忆中枢，跑在Mac Gateway上
+- **通信**：MQTT（设备间）+ 星闪SLE（低延迟控制，20μs）+ UART有线（应急）
+- **视觉**：Jetson Nano上YOLO+TensorRT FP16；ESP32-Cam通过RTSP推流
+- **语音**：Whisper（识别）+ Edge-TTS（合成），Jetson Nano本地运行
+- **运动**：Cyber Bricks固件MicroPython，通过UART/MQTT接收指令
+- **ROS 2**：Jetson Nano 2GB可用micro-ROS，但文档认为有更好替代框架
+
+### 实施阶段状态（Phase 0-6）
+| Phase | 内容 | 状态 |
+|-------|------|------|
+| Phase 0 | Ubuntu台机对接Gateway | **未完成**（待执行） |
+| Phase 1 | 语音陪伴（OpenClaw+Cyber Bricks联动）| **未完成**（USB耳机待采购）|
+| Phase 2 | 视觉记录（ESP32-Cam+Nano RTSP）| **未完成**（固件待烧录）|
+| Phase 3 | iPhone感知前端接入 | **未完成** |
+| Phase 4 | 运动控制（Cyber Bricks+MQTT）| **未完成**（指令脚本已有，需实测）|
+| Phase 5 | 面部表情系统（0-1-三元素显示）| **未完成** |
+| Phase 6 | 室内移动+智能家居拓展 | **未完成** |
+
+### 关键决策理由
+- **Jetson Nano 2GB**：便宜+有AI加速，但2GB内存是瓶颈，需开swap，必须用FP16（Maxwell不支持INT8）
+- **ESP32-Cam**：低成本RTSP摄像头，但供电不足会导致花屏/崩溃
+- **星闪H3863 vs ESP32-C6**：H3863原生SLE（20μs时延 vs 蓝牙10ms级），国密支持，国产供应链
+- **拓竹H2C**：Bambu Suite覆盖打印/激光雕刻/切割，从结构件到精密加工全流程
+- **Cyber Bricks**：拓竹赠送，已有MicroPython固件，WiFi/MQTT可接入
+- **RynnBrain（阶段二接入）**：阿里巴巴达摩院2026-02开源，时空定位+轨迹追踪，专职感知不替代贵庚
+
+### 踩过的坑（文档记录）
+- ESP32-Cam固件崩溃：内存泄漏导致 → 重刷固件；SVGA而非UXGA减少内存压力；降频240MHz减少发热
+- ESP32-Cam视频花屏：供电不足 → 5V/2A电源
+- ESP32-Cam IP变更：设为静态IP解决
+- Jetson Nano WiFi断开：驱动问题 → 安装linux-firmware
+- Jetson Nano 2GB OOM：YOLO+MediaPipe同时跑必须开swap
+- UART电平：双方都是3.3V TTL，直接互连不需电平转换
+- 扫地机器人电池：进水报废，无修复价值
+- Cyber Bricks舵机抖转：信号干扰 → 加屏蔽
+
+### 当前瓶颈
+1. **最紧迫**：Phase 0（Ubuntu台机Gateway对接）未完成 → Phase 1-4全block
+2. **次紧迫**：ESP32-Cam固件烧录（Jetson Nano RTSP接收未打通）
+3. **待实测**：Cyber Bricks MQTT指令控制链路
+4. **阶段二门槛**：RynnBrain感知引擎接入（需先积累足够视频数据）
+
+### 个人风格/偏好（文档体现）
+- **Maker精神**：用标准件+3D打印+模块化电子，自己做出需要的东西，不依赖购买成品
+- **数据优先**：技术选型可以随时换，原始数据才是核心资产，永不删除raw data
+- **长期主义**：10年路线图，五阶段，每阶段技术选型都可能不同
+- **国产偏好**：星闪（H3863）而非蓝牙，国密算法，国产玻璃存储
+- **安全哲学**：数据自毁机制，失联30天触发，宁毁不屈；记忆主人是唯一真理仲裁者
+- **不追求最新**：Jetson Thor Nano 8G/16G要等Q3-Q4 2026，RTX 5050要等2026-06
+- **细节控**：v3.30文档81条采纳修改/37处实际修订，来源链接逐一核实

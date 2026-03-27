@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0-1 机器人项目 · 3D 可视化</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { overflow: hidden; background: #0a0a12; font-family: 'Courier New', monospace; }
+
+  .info-card {
+    position: absolute;
+    background: rgba(10, 12, 20, 0.94);
+    border: 2px solid #334;
+    padding: 14px 18px;
+    border-radius: 4px;
+    color: #c8d8f0;
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 270px;
+    pointer-events: auto;
+    display: none;
+    box-shadow: 0 0 20px rgba(0,200,255,0.12);
+    z-index: 100;
+  }
+  .info-card.active { display: block; }
+  .info-card h3 { font-size: 13px; margin-bottom: 8px; color: #7fd4ff; border-bottom: 1px solid #334; padding-bottom: 6px; }
+  .info-card .tag { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 10px; margin-right: 4px; }
+  .info-card .tag-p0 { background: #cc3333; color: #fff; }
+  .info-card .tag-p1 { background: #cc7700; color: #fff; }
+  .info-card .tag-p2 { background: #3366cc; color: #fff; }
+  .info-card .tag-interactive { background: #7733bb; color: #fff; }
+  .info-card .tag-auto { background: #228844; color: #fff; }
+  .info-card .tag-not-started { background: #555; color: #ccc; }
+  .info-card .tag-completed { background: #227744; color: #fff; }
+  .info-card .tag-planning { background: #aa5500; color: #fff; }
+  .info-card .tag-completed-with-issues { background: #aa7722; color: #fff; }
+  .info-card .close-btn {
+    position: absolute; top: 8px; right: 10px;
+    background: none; border: none; color: #668; cursor: pointer;
+    font-size: 14px; pointer-events: auto;
+  }
+  .info-card .close-btn:hover { color: #c8d8f0; }
+  .info-card a { color: #7fd4ff; }
+
+  #bubble-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
+
+  #title-bar {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(8,10,18,0.88); border: 1px solid #2a3a4a;
+    color: #7fd4ff; font-size: 13px; padding: 8px 24px; border-radius: 3px;
+    z-index: 20; pointer-events: none; letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(127,212,255,0.4);
+  }
+
+  #hint {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    color: #334; font-size: 11px; z-index: 20; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+
+<div id="title-bar">0-1 机器人项目 · 实时看板</div>
+<div id="hint">🖱 拖拽旋转 · 滚轮缩放 · 点击设备/NPC 查看详情</div>
+<canvas id="bubble-canvas"></canvas>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ─── Scene ────────────────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x060610);
+scene.fog = new THREE.Fog(0x060610, 60, 120);
+
+const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 500);
+camera.position.set(28, 22, 28);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.domElement.style.imageRendering = 'pixelated';
+document.body.appendChild(renderer.domElement);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+controls.minDistance = 10;
+controls.maxDistance = 70;
+controls.maxPolarAngle = Math.PI / 2.1;
+controls.target.set(0, 1, 0);
+controls.update();
+
+scene.add(new THREE.AmbientLight(0x223355, 0.7));
+const sunLight = new THREE.DirectionalLight(0x8899cc, 0.8);
+sunLight.position.set(15, 30, 10);
+scene.add(sunLight);
+scene.add(Object.assign(new THREE.PointLight(0x334466, 0.5, 60), { position: new THREE.Vector3(-10, 10, -10) }));
+
+// ─── Ground ───────────────────────────────────────────────────────────────────
+function buildGround() {
+  scene.add(Object.assign(
+    new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({ color: 0x0a140a })),
+    { rotation: new THREE.Euler(-Math.PI / 2, 0, 0) }
+  ));
+  const grid = new THREE.GridHelper(200, 50, 0x1a3a1a, 0x112211);
+  grid.position.y = 0.01;
+  scene.add(grid);
+}
+
+// ─── Stars ───────────────────────────────────────────────────────────────────
+function buildStars() {
+  const n = 2000, pos = new Float32Array(n*3), col = new Float32Array(n*3);
+  for (let i = 0; i < n; i++) {
+    const th = Math.random()*Math.PI*2, ph = Math.acos(2*Math.random()-1), r = 150+Math.random()*100;
+    pos[i*3]   = r*Math.sin(ph)*Math.cos(th);
+    pos[i*3+1] = Math.abs(r*Math.cos(ph))+10;
+    pos[i*3+2] = r*Math.sin(ph)*Math.sin(th);
+    const b = 0.3+Math.random()*0.7;
+    col[i*3]=b*(0.8+Math.random()*0.2); col[i*3+1]=b*(0.8+Math.random()*0.2); col[i*3+2]=b;
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(pos,3));
+  g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size:0.5, vertexColors:true })));
+}
+
+function pxMat(c) { return new THREE.MeshBasicMaterial({ color: c }); }
+
+// ─── MacBook ──────────────────────────────────────────────────────────────────
+const macbookGroup = new THREE.Group();
+macbookGroup.userData = { type:'device', id:'macbook', url:'http://127.0.0.1:18999/dashboard.html' };
+
+function buildMacbook() {
+  const g = macbookGroup;
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(4,0.3,2.8), pxMat(0x2a2a2e)), { position: new THREE.Vector3(0,0.15,0) }));
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(3.5,0.05,2.2), pxMat(0x1a1a1e)), { position: new THREE.Vector3(0,0.33,0.2) }));
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(4,2.8,0.2), pxMat(0x2a2a2e)), { position: new THREE.Vector3(0,1.7,-1.4) }));
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(3.6,2.4,0.05), pxMat(0x003366));
+  screen.position.set(0,1.7,-1.28); g.add(screen);
+  const glow = new THREE.Mesh(new THREE.BoxGeometry(3.8,2.6,0.04), new THREE.MeshBasicMaterial({ color:0x00aaff, transparent:true, opacity:0.25 }));
+  glow.position.set(0,1.7,-1.26); g.add(glow);
+  const sl = new THREE.PointLight(0x0088ff, 1.8, 7); sl.position.set(0,1.7,-0.8); g.add(sl);
+  const il = new THREE.PointLight(0x00ccff, 0.8, 3); il.position.set(0,1.7,0.2); g.add(il);
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(1.2,0.04,0.8), pxMat(0x1e1e22)), { position: new THREE.Vector3(0,0.34,-0.7) }));
+  const logo = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.05,8), pxMat(0x00ddff));
+  logo.rotation.x = Math.PI/2; logo.position.set(0,2.9,-1.35); g.add(logo);
+  scene.add(g);
+}
+
+// ─── MacBook Label ────────────────────────────────────────────────────────────
+function makeTextCanvas(text, color) {
+  const c = document.createElement('canvas'); c.width=320; c.height=60;
+  const ctx = c.getContext('2d');
+  ctx.font = 'bold 26px Courier New';
+  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, 160, 30);
+  return new THREE.CanvasTexture(c);
+}
+
+const macbookLabel = new THREE.Group();
+macbookLabel.userData = { type:'link', id:'macbook-link', url:'http://127.0.0.1:18999/dashboard.html' };
+macbookLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ color:0x001133, transparent:true, opacity:0.85 })));
+const mlMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('▶ OpenClaw','#00ffcc'), transparent:true }));
+mlMesh.position.z = 0.01; macbookLabel.add(mlMesh);
+macbookLabel.position.set(0, 4.5, -1.5);
+scene.add(macbookLabel);
+
+// ─── Ubuntu ───────────────────────────────────────────────────────────────────
+const ubuntuGroup = new THREE.Group();
+ubuntuGroup.userData = { type:'device', id:'ubuntu' };
+
+function buildUbuntu() {
+  const g = ubuntuGroup;
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(1.2,3.5,2.5), pxMat(0x3a3a3a)), { position: new THREE.Vector3(0,1.75,0) }));
+  const d1 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d1.position.set(0,2.5,1.26); g.add(d1);
+  const d2 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d2.position.set(0,2.1,1.26); g.add(d2);
+  const pb = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.1), pxMat(0x441111)); pb.position.set(0,3.3,1.26); g.add(pb);
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,0.3), pxMat(0x2a2a2a)), { position: new THREE.Vector3(0,3.5,-1.5) }));
+  const ms = new THREE.Mesh(new THREE.BoxGeometry(3,2,0.05), pxMat(0x0a0a0a)); ms.position.set(0,3.5,-1.34); g.add(ms);
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.3,0.8,0.3), pxMat(0x2a2a2a)), { position: new THREE.Vector3(0,2.1,-1.5) }));
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(1.5,0.1,0.8), pxMat(0x2a2a2a)), { position: new THREE.Vector3(0,1.7,-1.5) }));
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(2.5,0.15,0.9), pxMat(0x2e2e2e)), { position: new THREE.Vector3(0,1.58,-0.5) }));
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.4,0.15,0.6), pxMat(0x2e2e2e)), { position: new THREE.Vector3(1.6,1.58,-0.5) }));
+  g.position.set(10,0,-2); scene.add(g);
+}
+
+// ─── Ubuntu Label ─────────────────────────────────────────────────────────────
+const ubuntuLabel = new THREE.Group();
+ubuntuLabel.userData = { type:'device', id:'ubuntu-label' };
+ubuntuLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.55), new THREE.MeshBasicMaterial({ color:0x111111, transparent:true, opacity:0.75 })));
+const ulMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('Ubuntu 台机 (离线)','#556677'), transparent:true }));
+ulMesh.position.z=0.01; ubuntuLabel.add(ulMesh);
+ubuntuLabel.position.set(10,5.5,-2);
+scene.add(ubuntuLabel);
+
+// ─── Pixel Tree ────────────────────────────────────────────────────────────────
+function buildPixelTree(x, z) {
+  const t = new THREE.Group();
+  t.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.2,1.2,5), pxMat(0x3d2b1f)), { position: new THREE.Vector3(0,0.6,0) }));
+  [0x2d5a1e,0x3a7028,0x4a8a32].forEach((c,i) => {
+    const s=1.6-i*0.4, l=new THREE.Mesh(new THREE.BoxGeometry(s,0.8,s), pxMat(c));
+    l.position.set(0,1.4+i*0.7,0); t.add(l);
+  });
+  t.position.set(x,0,z); scene.add(t);
+}
+
+// ─── Street Lamp ──────────────────────────────────────────────────────────────
+const lamps = [];
+function buildStreetLamp(x, z) {
+  const l = new THREE.Group(); l.userData = { type:'lamp' };
+  l.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,4,5), pxMat(0x445544)), { position: new THREE.Vector3(0,2,0) }));
+  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,1), pxMat(0x445544)); arm.position.set(0.5,4,0); l.add(arm);
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.3,0.4), pxMat(0x667766)); head.position.set(1,3.9,0); l.add(head);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.15,4,4), pxMat(0xffffaa)); bulb.position.set(1,3.8,0); l.add(bulb);
+  const pt = new THREE.PointLight(0xffee88,1.2,8); pt.position.set(1,3.8,0); l.add(pt);
+  l.position.set(x,0,z); scene.add(l); lamps.push(l);
+}
+
+// ─── Pixel NPC ────────────────────────────────────────────────────────────────
+const npcs = [];
+function buildNPC(x, z, name, themeHex, bubbleText) {
+  const bright = new THREE.Color(themeHex);
+  const dark = bright.clone().multiplyScalar(0.4);
+  const g = new THREE.Group();
+  g.userData = {
+    type:'npc',
+    id: name.toLowerCase().replace(/\s+/g,'-'),
+    name, bubbleText,
+    startPos: new THREE.Vector3(x,0,z),
+    walkTarget: new THREE.Vector3(x,0,z),
+    walkSpeed: 0.015+Math.random()*0.01,
+    walkTimer: Math.random()*200,
+    isWalking: false, legPhase: 0,
+    leftArmPivot:null, rightArmPivot:null, leftLegPivot:null, rightLegPivot:null,
+  };
+
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.7,1.0,0.4), pxMat(dark.getHex())), { position: new THREE.Vector3(0,1.5,0) }));
+  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.5), pxMat(bright.getHex())), { position: new THREE.Vector3(0,2.35,0) }));
+  const eye1=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.05), pxMat(0xffffff)); eye1.position.set(-0.13,2.4,0.26); g.add(eye1);
+  const eye2=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.05), pxMat(0xffffff)); eye2.position.set(0.13,2.4,0.26); g.add(eye2);
+  const p1=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.04), pxMat(0x000000)); p1.position.set(-0.13,2.4,0.285); g.add(p1);
+  const p2=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.04), pxMat(0x000000)); p2.position.set(0.13,2.4,0.285); g.add(p2);
+
+  const lAP=new THREE.Group(); lAP.position.set(-0.45,1.9,0);
+  lAP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.22), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.35,0) }));
+  g.add(lAP); g.userData.leftArmPivot=lAP;
+
+  const rAP=new THREE.Group(); rAP.position.set(0.45,1.9,0);
+  rAP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.22), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.35,0) }));
+  g.add(rAP); g.userData.rightArmPivot=rAP;
+
+  const lLP=new THREE.Group(); lLP.position.set(-0.18,1.0,0);
+  lLP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.28,0.8,0.28), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.4,0) }));
+  g.add(lLP); g.userData.leftLegPivot=lLP;
+
+  const rLP=new THREE.Group(); rLP.position.set(0.18,1.0,0);
+  rLP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.28,0.8,0.28), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.4,0) }));
+  g.add(rLP); g.userData.rightLegPivot=rLP;
+
+  g.position.set(x,0,z); scene.add(g); npcs.push(g); return g;
+}
+
+// ─── Build Scene ─────────────────────────────────────────────────────────────
+buildGround(); buildStars();
+buildMacbook(); buildUbuntu();
+[[-12,-8],[-14,2],[14,-10],[8,10],[-5,-14],[16,4]].forEach(([x,z])=>buildPixelTree(x,z));
+[[-8,-8],[8,8],[-8,10],[12,-8]].forEach(([x,z])=>buildStreetLamp(x,z));
+const minimaxNPC = buildNPC(-3.5, 3, 'MiniMax Agent', '#0066cc', '夜间构建中...');
+const glmNPC     = buildNPC( 6, -5, 'GLM Agent',    '#8833cc', '等待指令...');
+
+// ─── Project Data ─────────────────────────────────────────────────────────────
+let projectData = null;
+try {
+  const r = await fetch('/project-board.json');
+  if (r.ok) projectData = await r.json();
+} catch(e) {}
+
+function refreshBubbles() {
+  if (!projectData || !projectData.tasks) return;
+  const t = projectData.tasks;
+  const ma = t.find(x=>x.mode==='auto'&&(x.status==='in-progress'||x.status==='planning'));
+  const mp = t.find(x=>x.mode==='auto'&&x.status==='not-started');
+  minimaxNPC.userData.bubbleText = ma ? '🤖 '+ma.name : mp ? '📋 '+mp.name : '✅ 全部完成';
+
+  const ga = t.find(x=>x.mode==='interactive'&&(x.status==='in-progress'||x.status==='planning'));
+  const gp = t.find(x=>x.mode==='interactive'&&x.status==='not-started');
+  glmNPC.userData.bubbleText = ga ? '⏳ '+ga.name : gp ? '📌 '+gp.name : '✅ 全部完成';
+}
+refreshBubbles();
+
+// ─── Bubble Canvas ────────────────────────────────────────────────────────────
+const bc = document.getElementById('bubble-canvas');
+const bx = bc.getContext('2d');
+bc.width=innerWidth; bc.height=innerHeight;
+
+function drawBubble(text, sx, sy) {
+  if (!text) return;
+  bx.clearRect(0,0,bc.width,bc.height);
+  bx.font='bold 13px Courier New';
+  const lines=text.split('\n'), lh=16, pad=10;
+  const mw=Math.max(...lines.map(l=>bx.measureText(l).width));
+  const bw=mw+pad*2, bh=lines.length*lh+pad*2;
+  const bxx=sx-bw/2, byy=sy-bh-22;
+  bx.fillStyle='rgba(8,12,28,0.93)'; bx.strokeStyle='#4488cc'; bx.lineWidth=2;
+  bx.beginPath(); bx.roundRect(bxx,byy,bw,bh,4); bx.fill(); bx.stroke();
+  bx.fillStyle='rgba(8,12,28,0.93)';
+  bx.beginPath(); bx.moveTo(sx-6,byy+bh); bx.lineTo(sx+6,byy+bh); bx.lineTo(sx,byy+bh+9); bx.closePath(); bx.fill(); bx.stroke();
+  bx.fillStyle='#aaddff'; bx.textAlign='left'; bx.textBaseline='top';
+  lines.forEach((l,i)=>bx.fillText(l,bxx+pad,byy+pad+i*lh));
+}
+
+// ─── Raycasting ───────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+let activeCard = null;
+const clickables = [macbookGroup, ubuntuGroup, minimaxNPC, glmNPC, macbookLabel];
+
+const statusMap = { 'not-started':'未开始','in-progress':'进行中',completed:'已完成',planning:'规划中','completed-with-issues':'完成(有问题)' };
+const modeMap = { interactive:'交互模式',auto:'自动模式' };
+
+function showCard(title, html, sx, sy) {
+  if (activeCard) activeCard.remove();
+  const c = document.createElement('div');
+  c.className='info-card active';
+  c.innerHTML=`<button class="close-btn">✕</button><h3>${title}</h3>${html}`;
+  c.style.left=Math.min(sx+20,innerWidth-290)+'px';
+  c.style.top=Math.min(sy-20,innerHeight-220)+'px';
+  c.querySelector('.close-btn').onclick=()=>{c.classList.remove('active');activeCard=null;};
+  document.body.appendChild(c); activeCard=c;
+}
+
+function taskHTML(task) {
+  if (!task) return '<p>无任务数据</p>';
+  return `<p style="margin-bottom:6px">${task.description||task.name||''}</p>
+    <p>${task.priority?`<span class="tag tag-${task.priority.toLowerCase()}">${task.priority}</span>`:''}
+       <span class="tag tag-${task.mode}">${modeMap[task.mode]||task.mode||''}</span>
+       <span class="tag tag-${task.status}">${statusMap[task.status]||task.status||''}</span>
+    </p>
+    ${task.reason?`<p style="margin-top:6px;color:#889;font-size:11px">📌 ${task.reason}</p>`:''}
+    ${task.deliverable?`<p style="margin-top:4px;color:#889;font-size:11px">🎯 ${task.deliverable}</p>`:''}
+    ${task.note?`<p style="margin-top:4px;color:#556;font-size:10px">${task.note}</p>`:''}`;
+}
+
+renderer.domElement.addEventListener('click', e => {
+  mouse.x=(e.clientX/innerWidth)*2-1;
+  mouse.y=-(e.clientY/innerHeight)*2+1;
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(clickables, true);
+  if (!hits.length) { if(activeCard){activeCard.remove();activeCard=null;} return; }
+  let obj = hits[0].object;
+  while (obj.parent && !obj.userData.type) obj = obj.parent;
+  const ud = obj.userData;
+  if (!ud.type) { if(activeCard){activeCard.remove();activeCard=null;} return; }
+  const sx=e.clientX, sy=e.clientY;
+  if (ud.url) { window.open(ud.url,'_blank'); return; }
+  if (ud.type==='device') {
+    if (ud.id==='ubuntu') {
+      const t = projectData?.tasks?.find(t=>t.id==='T-001');
+      showCard('Ubuntu 台机 (离线)',`<p style="margin-bottom:8px;color:#667">状态：未连接 Gateway</p><p style="color:#889;font-size:11px">Phase 0 节点 · 完成 Gateway 对接后将在线</p>${t?taskHTML(t):''}`,sx,sy);
+    } else if (ud.id==='macbook') {
+      showCard('MacBook Pro · OpenClaw',`<p style="margin-bottom:6px;color:#7fd4ff">OpenClaw 主控节点</p><p style="color:#889;font-size:11px">Dashboard：<a href="http://127.0.0.1:18999/dashboard.html" target="_blank">http://127.0.0.1:18999/dashboard.html</a></p><p style="margin-top:6px;color:#667;font-size:11px">点击浮动标签可直接打开 Dashboard</p>`,sx,sy);
+    }
+  }
+  if (ud.type==='npc') {
+    if (ud.id==='minimax-agent') {
+      const t = projectData?.tasks?.find(t=>t.mode==='auto');
+      showCard(`${ud.name} · 自动任务`, taskHTML(t), sx, sy);
+    } else if (ud.id==='glm-agent') {
+      const t = projectData?.tasks?.find(t=>t.mode==='interactive');
+      showCard(`${ud.name} · 交互任务`, taskHTML(t), sx, sy);
+    }
+  }
+});
+
+// ─── NPC Walk AI ─────────────────────────────────────────────────────────────
+npcs.forEach(npc => {
+  const sp = npc.userData.startPos;
+  const r = 4+Math.random()*6, ang = Math.random()*Math.PI*2;
+  npc.userData.walkTarget.set(sp.x+Math.cos(ang)*r, 0, sp.z+Math.sin(ang)*r);
+});
+
+function updateNPCs() {
+  npcs.forEach(npc => {
+    const ud = npc.userData;
+    ud.walkTimer++;
+    if (!ud.isWalking && ud.walkTimer > 120+Math.random()*120) {
+      ud.isWalking = true; ud.walkTimer = 0;
+      const sp=ud.startPos, r=4+Math.random()*6, ang=Math.random()*Math.PI*2;
+      ud.walkTarget.set(sp.x+Math.cos(ang)*r,0,sp.z+Math.sin(ang)*r);
+    }
+    if (ud.isWalking) {
+      const dir = new THREE.Vector3().subVectors(ud.walkTarget, npc.position);
+      const dist = dir.length();
+      if (dist < 0.3) { ud.isWalking=false; ud.walkTimer=0; npc.rotation.y=0; }
+      else {
+        dir.normalize(); npc.position.addScaledVector(dir, ud.walkSpeed);
+        npc.rotation.y = Math.atan2(dir.x, dir.z);
+        ud.legPhase += 0.15;
+        ud.leftLegPivot.rotation.x  =  Math.sin(ud.legPhase)*0.5;
+        ud.rightLegPivot.rotation.x = -Math.sin(ud.legPhase)*0.5;
+        ud.leftArmPivot.rotation.x  = -Math.sin(ud.legPhase)*0.4;
+        ud.rightArmPivot.rotation.x =  Math.sin(ud.legPhase)*0.4;
+      }
+    } else {
+      ud.leftLegPivot.rotation.x  *= 0.9; ud.rightLegPivot.rotation.x *= 0.9;
+      ud.leftArmPivot.rotation.x  *= 0.9; ud.rightArmPivot.rotation.x *= 0.9;
+    }
+  });
+}
+
+// ─── Resize ──────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  bc.width=innerWidth; bc.height=innerHeight;
+});
+
+// ─── Animate ─────────────────────────────────────────────────────────────────
+function worldToScreen(pos) {
+  const v = pos.clone().project(camera);
+  return { x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight };
+}
+
+let frame = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  controls.update();
+  updateNPCs();
+
+  // Billboard labels (make them face camera)
+  macbookLabel.lookAt(camera.position);
+  ubuntuLabel.lookAt(camera.position);
+
+  // Lamp gentle pulse
+  lamps.forEach((l,i) => {
+    const b = l.children.find(c => c.material && c.material.color && c.material.color.r === 1);
+    if (b) b.material.opacity = 0.7 + Math.sin(frame*0.03+i)*0.3;
+  });
+
+  // Screen flicker on MacBook
+  const screenObj = macbookGroup.children.find(c => c.material && c.material.color && c.material.color.b > 0.5 && c.geometry && c.geometry.parameters && c.geometry.parameters.width > 3);
+  if (screenObj) {
+    const fl = 0.85 + Math.random()*0.15;
+    screenObj.material.color.setRGB(0, 0.2*fl, 0.4*fl);
+  }
+
+  // NPC bubbles
+  bx.clearRect(0,0,bc.width,bc.height);
+  npcs.forEach(npc => {
+    const wp = npc.position.clone();
+    wp.y += 3.2;
+    const s = worldToScreen(wp);
+    if (s.x > 0 && s.x < innerWidth && s.y > 0 && s.y < innerHeight) {
+      drawBubble(npc.userData.bubbleText, s.x, s.y);
+    }
+  });
+
+  renderer.render(scene, camera);
+  frame++;
+}
+animate();
+</script>
+</body>
+</html>

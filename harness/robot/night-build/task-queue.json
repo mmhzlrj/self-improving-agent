@@ -1,28 +1,67 @@
 {
-  "version": 2,
-  "date": "2026-03-26",
-  "phase": "ab-test-night-1-v2",
-  "description": "A/B 测试 v2：A 组改为 300 行/段 + 显式行号计算公式",
+  "version": 3,
+  "date": "2026-03-27",
+  "phase": "night-build-v3",
+  "description": "每晚 Night Build 任务队列，orchestrator 每次必须重读此文件",
+  "rules": {
+    "每次触发必须": [
+      "1. 先读 task-queue.json 获取最新状态",
+      "2. 再查 MiniMax 额度",
+      "3. 根据 status=pending + 额度决定派哪个任务",
+      "4. subagent 完成后立即更新 task-queue.json（status 改为 success/failed）",
+      "5. 写入 orchestrator-log.json 记录本轮操作"
+    ],
+    "禁止": [
+      "跳过 task-queue.json 直接派任务",
+      "依赖记忆中的任务状态（cache-ttl 会清掉工具输出）",
+      "一次派超过 2 个 subagent（MiniMax 高峰限流）"
+    ]
+  },
   "tasks": [
-    {"id": "T-01-A01", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A02", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A03", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A04", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A05", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A06", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A07", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A08", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A09", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A10", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A11", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A12", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A13", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A14", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A15", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A16", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-A17", "group": "A", "version": 2, "status": "pending", "priority": 1},
-    {"id": "T-01-B01", "group": "B", "status": "pending", "priority": 2},
-    {"id": "T-01-B02", "group": "B", "status": "pending", "priority": 2},
-    {"id": "T-01-B03", "group": "B", "status": "pending", "priority": 2}
+    {
+      "id": "N-01",
+      "name": "Jetson 自定义镜像调研",
+      "status": "success",
+      "output": "reports/Jetson-Nano-Custom-Image-Research.md",
+      "completed_at": "2026-03-26T22:38:00+08:00",
+      "note": "已完成，同时产出 Jetson-Nano-OpenClaw-Setup.md"
+    },
+    {
+      "id": "N-02",
+      "name": "OpenClaw × ROBOT-SOP 映射报告（重做）",
+      "status": "success",
+      "output": "reports/OpenClaw-Features-0-1-Mapping-v2.md",
+      "completed_at": "2026-03-27T01:53:00+08:00",
+      "note": "已完成，151KB/5046行，但未经五平台交叉验证，Genesis来源有误"
+    },
+    {
+      "id": "N-03",
+      "name": "补充 Phase 0 / ESP32 / Jetson 报告",
+      "status": "pending",
+      "description": "基于映射报告 N-02 的新发现，回补三份已有报告",
+      "depends_on": ["N-02"],
+      "files_to_update": [
+        "reports/Phase-0-Gateway-Docking.md",
+        "reports/ESP32-Cam-Firmware-Flashing.md",
+        "reports/Jetson-Nano-OpenClaw-Setup.md"
+      ],
+      "note": "昨晚未执行——映射报告完成后三份报告的 mtime 均早于映射报告，说明没有被回补"
+    },
+    {
+      "id": "N-04",
+      "name": "文档整理 + 生成最终 INDEX",
+      "status": "pending",
+      "description": "整理所有产出文件，生成统一索引",
+      "depends_on": ["N-02", "N-03"],
+      "note": "昨晚未执行"
+    },
+    {
+      "id": "N-05",
+      "name": "映射报告五平台交叉验证",
+      "status": "pending",
+      "description": "用五平台（DeepSeek/豆包/Kimi/GLM/千问）验证映射报告中的事实性声明",
+      "depends_on": ["N-02"],
+      "note": "昨晚未执行，建议今晚优先做"
+    }
   ]
 }
