@@ -57,31 +57,180 @@
     position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
     color: #334; font-size: 11px; z-index: 20; pointer-events: none;
   }
+
+  .theme-mode-bar {
+    position: fixed; top: 16px; right: 16px; z-index: 30;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(14,16,21,0.88);
+    -webkit-backdrop-filter: blur(12px) saturate(1.6);
+    backdrop-filter: blur(12px) saturate(1.6);
+    border-radius: 999px;
+    display: inline-flex;
+    gap: 2px;
+    padding: 3px;
+  }
+  .theme-mode-btn {
+    border-radius: calc(999px - 3px);
+    width: 30px; height: 30px;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: color 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+    background: transparent;
+    border: 1px solid transparent;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .theme-mode-btn:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+  .theme-mode-btn.active { color: #ff5c5c; background: rgba(255,92,92,0.1); border-color: rgba(255,92,92,0.25); }
+  .theme-mode-btn svg { stroke: currentColor; fill: none; stroke-width: 1.75px; stroke-linecap: round; stroke-linejoin: round; width: 14px; height: 14px; }
 </style>
 </head>
 <body>
 
 <div id="title-bar">0-1 机器人项目 · 实时看板</div>
+<div class="theme-mode-bar">
+  <button class="theme-mode-btn active" id="btn-auto" onclick="setDayMode(null)" title="自动">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <button class="theme-mode-btn" id="btn-day" onclick="setDayMode(true)" title="白天">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+  <button class="theme-mode-btn" id="btn-night" onclick="setDayMode(false)" title="夜间">
+    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  </button>
+</div>
 <div id="hint">🖱 拖拽旋转 · 滚轮缩放 · 点击设备/NPC 查看详情</div>
 <canvas id="bubble-canvas"></canvas>
 
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+
+<script>
+// Shanghai sunrise/sunset (approximate)
+const SUNRISE = 6, SUNSET = 18; // hours
+let dayMode = null; // null = auto, true = day, false = night
+
+const DAY_NIGHT_KEYFRAMES = [
+  { time: 0,  bg: 0x070B1A, fog: 0x0A0E1F, ambient: 0x182040, sun: 0x182038, ambientI: 0.15, sunI: 0.05 },    // 深夜
+  { time: 6,  bg: 0x2A1A3A, fog: 0x3A2040, ambient: 0xC87840, sun: 0xFF9050, ambientI: 0.5, sunI: 0.9 },      // 日出
+  { time: 8,  bg: 0x87CEEB, fog: 0xC8DFF0, ambient: 0xFFFFFF, sun: 0xFFFFF0, ambientI: 1.0, sunI: 1.8 },     // 上午
+  { time: 12, bg: 0x5CB8E8, fog: 0xB0D4E8, ambient: 0xFFFFFF, sun: 0xFFE8B0, ambientI: 1.0, sunI: 2.0 },     // 正午
+  { time: 17, bg: 0xD4845A, fog: 0xC89070, ambient: 0xC8A870, sun: 0xFF9050, ambientI: 0.7, sunI: 0.9 },     // 日落
+  { time: 19, bg: 0x0F1228, fog: 0x141830, ambient: 0x1A2040, sun: 0x2040A0, ambientI: 0.25, sunI: 0.2 },    // 黄昏
+];
+
+function lerpVal(a, b, t) { return a + (b - a) * t; }
+function lerpColor(c1, c2, t) {
+  const r1 = (c1 >> 16) & 0xff, g1 = (c1 >> 8) & 0xff, b1 = c1 & 0xff;
+  const r2 = (c2 >> 16) & 0xff, g2 = (c2 >> 8) & 0xff, b2 = c2 & 0xff;
+  return (Math.round(lerpVal(r1,r2,t)) << 16) | (Math.round(lerpVal(g1,g2,t)) << 8) | Math.round(lerpVal(b1,b2,t));
+}
+
+function getCurrentSky() {
+  if (dayMode === true) return DAY_NIGHT_KEYFRAMES[2];
+  if (dayMode === false) return DAY_NIGHT_KEYFRAMES[0];
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+  let prev = DAY_NIGHT_KEYFRAMES[DAY_NIGHT_KEYFRAMES.length - 1];
+  let next = DAY_NIGHT_KEYFRAMES[0];
+  next = { ...next, time: next.time + 24 };
+  for (let i = 1; i < DAY_NIGHT_KEYFRAMES.length; i++) {
+    if (DAY_NIGHT_KEYFRAMES[i].time > h) {
+      next = DAY_NIGHT_KEYFRAMES[i];
+      prev = DAY_NIGHT_KEYFRAMES[i - 1];
+      break;
+    }
+  }
+  const span = next.time - prev.time;
+  const t = span > 0 ? (h - prev.time) / span : 0;
+  return {
+    bg: lerpColor(prev.bg, next.bg, t),
+    fog: lerpColor(prev.fog, next.fog, t),
+    ambient: lerpColor(prev.ambient, next.ambient, t),
+    sun: lerpColor(prev.sun, next.sun, t),
+    ambientI: lerpVal(prev.ambientI, next.ambientI, t),
+    sunI: lerpVal(prev.sunI, next.sunI, t),
+  };
+}
+
+function applySky(sky) {
+  const sc = window._scene;
+  if (!sc || typeof window._ambientLight === 'undefined') return;
+  sc.background.set(sky.bg);
+  if (sc.fog.color) sc.fog.color.set(sky.fog);
+  window._ambientLight.intensity = sky.ambientI;
+  window._ambientLight.color.set(sky.ambient);
+  window._sunLight.intensity = sky.sunI;
+  window._sunLight.color.set(sky.sun);
+  document.body.style.background = '#' + sky.bg.toString(16).padStart(6,'0');
+
+  let sunAngle;
+  if (dayMode === true) sunAngle = Math.PI / 2;
+  else if (dayMode === false) sunAngle = -0.1;
+  else {
+    const now = new Date();
+    const currentHour = now.getHours() + now.getMinutes() / 60;
+    sunAngle = ((currentHour - 6) / 12) * Math.PI;
+  }
+  window._sunLight.position.set(
+    Math.cos(sunAngle) * 15,
+    Math.max(0.5, Math.sin(sunAngle) * 20),
+    10
+  );
+
+  if (window._atmosphere && window._atmosphere.material.uniforms) {
+    window._atmosphere.material.uniforms.glowColor.value.set(sky.sun);
   }
 }
+
+function setDayMode(mode) {
+  dayMode = mode;
+  applySky(getCurrentSky());
+  const now = new Date();
+  const h = now.getHours() + now.getMinutes() / 60;
+
+  if (mode !== null) {
+    document.getElementById('btn-auto').classList.toggle('active', false);
+    document.getElementById('btn-day').classList.toggle('active', mode === true);
+    document.getElementById('btn-night').classList.toggle('active', mode === false);
+  } else {
+    document.getElementById('btn-auto').classList.toggle('active', true);
+    document.getElementById('btn-day').classList.toggle('active', h >= 6 && h < 19);
+    document.getElementById('btn-night').classList.toggle('active', h < 6 || h >= 19);
+  }
+  applySky(getCurrentSky());
+}
+
+function updateClock() {
+  if (dayMode !== null) return;
+  const sky = getCurrentSky();
+  applySky(sky);
+}
+
+setInterval(function(){
+  updateClock();
+  if (dayMode === null) applySky(getCurrentSky());
+}, 1000);
+updateClock();
 </script>
 
+<div id="error-log" style="position:fixed;top:40px;left:10px;color:red;font-size:12px;z-index:999;max-width:90vw;white-space:pre-wrap;background:rgba(0,0,0,0.8);padding:8px;display:none;"></div>
+<script>
+window.onerror=function(m,s,l){var e=document.getElementById('error-log');e.style.display='block';e.textContent+='ERR: '+m+' L'+l+' | ';};
+window.addEventListener('unhandledrejection',function(ev){var e=document.getElementById('error-log');e.style.display='block';e.textContent+='REJECT: '+(ev.reason&&ev.reason.message||String(ev.reason))+' | ';});
+</script>
 <script type="module">
-import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import * as THREE from './three.module.js';
+import { OrbitControls } from './OrbitControls.js';
+window._threeOk = true;
 
 // ─── Scene ────────────────────────────────────────────────────────────────────
 const scene = new THREE.Scene();
+window._scene = scene;
 scene.background = new THREE.Color(0x060610);
-scene.fog = new THREE.Fog(0x060610, 60, 120);
+scene.fog = new THREE.FogExp2(0x060610, 0.008);
 
 const camera = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 500);
 camera.position.set(28, 22, 28);
@@ -91,6 +240,10 @@ const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'h
 renderer.setSize(innerWidth, innerHeight);
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.domElement.style.imageRendering = 'pixelated';
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMappingExposure = 1.5;
 document.body.appendChild(renderer.domElement);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -102,21 +255,68 @@ controls.maxPolarAngle = Math.PI / 2.1;
 controls.target.set(0, 1, 0);
 controls.update();
 
-scene.add(new THREE.AmbientLight(0x223355, 0.7));
-const sunLight = new THREE.DirectionalLight(0x8899cc, 0.8);
-sunLight.position.set(15, 30, 10);
-scene.add(sunLight);
-scene.add(Object.assign(new THREE.PointLight(0x334466, 0.5, 60), { position: new THREE.Vector3(-10, 10, -10) }));
+camera.position.set(0, 25, 35);
+const flyTarget = { x: 0, y: 8, z: 18 };
+let flyProgress = 0;
+
+function updateCameraFlyIn() {
+  if (flyProgress >= 1) return;
+  flyProgress += 0.008;
+  if (flyProgress > 1) flyProgress = 1;
+  const t = flyProgress * flyProgress * (3 - 2 * flyProgress);
+  camera.position.x = THREE.MathUtils.lerp(camera.position.x, flyTarget.x, t * 0.05);
+  camera.position.y = THREE.MathUtils.lerp(25, flyTarget.y, t);
+  camera.position.z = THREE.MathUtils.lerp(35, flyTarget.z, t);
+}
+
+window._ambientLight = new THREE.AmbientLight(0x223355, 0.7); scene.add(window._ambientLight);
+window._sunLight = new THREE.DirectionalLight(0x8899cc, 0.8);
+window._sunLight.position.set(15, 30, 10);
+window._sunLight.castShadow = true;
+window._sunLight.shadow.mapSize.width = 1024;
+window._sunLight.shadow.mapSize.height = 1024;
+window._sunLight.shadow.camera.near = 0.5;
+window._sunLight.shadow.camera.far = 100;
+window._sunLight.shadow.camera.left = -30;
+window._sunLight.shadow.camera.right = 30;
+window._sunLight.shadow.camera.top = 30;
+window._sunLight.shadow.camera.bottom = -30;
+window._sunLight.shadow.bias = -0.001;
+scene.add(window._sunLight);
+const pLight = new THREE.PointLight(0x334466, 0.5, 60); pLight.position.set(-10, 10, -10); scene.add(pLight);
 
 // ─── Ground ───────────────────────────────────────────────────────────────────
 function buildGround() {
-  scene.add(Object.assign(
-    new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshBasicMaterial({ color: 0x0a140a })),
-    { rotation: new THREE.Euler(-Math.PI / 2, 0, 0) }
-  ));
+  // 底层地面
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0x0a140a, roughness: 0.7, metalness: 0.05 }));
+  ground.rotation.set(-Math.PI / 2, 0, 0);
+  ground.receiveShadow = true;
+  scene.add(ground);
+
+  // 原 GridHelper（保留）
   const grid = new THREE.GridHelper(200, 50, 0x1a3a1a, 0x112211);
   grid.position.y = 0.01;
   scene.add(grid);
+
+  // 地砖（恢复暗色，贴地面）
+  const deskFloor = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x2a2520, roughness: 0.9, metalness: 0.02 }));
+  deskFloor.rotation.x = -Math.PI / 2;
+  deskFloor.position.y = 0.005;
+  deskFloor.receiveShadow = true;
+  scene.add(deskFloor);
+
+  // 网格线（恢复 y=0.01）
+  for (let i = 0; i < 10; i++) {
+    const t = (i / 10) * 30 - 15;
+    const lineH = new THREE.Mesh(new THREE.PlaneGeometry(30, 0.03), new THREE.MeshBasicMaterial({ color: 0x2a2520, transparent: true, opacity: 0.18 }));
+    lineH.rotation.x = -Math.PI / 2;
+    lineH.position.set(0, 0.01, t);
+    scene.add(lineH);
+    const lineV = new THREE.Mesh(new THREE.PlaneGeometry(0.03, 30), new THREE.MeshBasicMaterial({ color: 0x2a2520, transparent: true, opacity: 0.18 }));
+    lineV.rotation.x = -Math.PI / 2;
+    lineV.position.set(t, 0.01, 0);
+    scene.add(lineV);
+  }
 }
 
 // ─── Stars ───────────────────────────────────────────────────────────────────
@@ -136,26 +336,220 @@ function buildStars() {
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size:0.5, vertexColors:true })));
 }
 
-function pxMat(c) { return new THREE.MeshBasicMaterial({ color: c }); }
+function pxMat(c) { return new THREE.MeshStandardMaterial({ color: c, roughness: 0.45, metalness: 0.15 }); }
+function pxMatBasic(c) { return new THREE.MeshBasicMaterial({ color: c }); }
+
+// ─── LED 幕墙 ─────────────────────────────────────────────────────────────────
+let ledTexture = null;
+let ledCtx = null;
+const ledCanvas = document.createElement('canvas');
+ledCanvas.width = 1920;
+ledCanvas.height = 1080;
+let lastLEDUpdate = 0;
+
+function initLEDWall() {
+  ledCtx = ledCanvas.getContext('2d');
+  drawLEDInit();
+  ledTexture = new THREE.CanvasTexture(ledCanvas);
+  ledTexture.minFilter = THREE.LinearFilter;
+
+  const wallW = 20, wallH = 10;
+
+  // LED 屏幕面板
+  const ledScreen = new THREE.Mesh(
+    new THREE.PlaneGeometry(wallW, wallH),
+    new THREE.MeshBasicMaterial({ map: ledTexture })
+  );
+  ledScreen.position.set(5, 5, -12);
+  scene.add(ledScreen);
+
+  // LED 边框
+  const frameMat = pxMat(0x222222);
+  const topFrame = new THREE.Mesh(new THREE.BoxGeometry(wallW + 0.4, 0.2, 0.3), frameMat);
+  topFrame.position.set(5, wallH + 0.1, -12.15);
+  scene.add(topFrame);
+  const botFrame = new THREE.Mesh(new THREE.BoxGeometry(wallW + 0.4, 0.2, 0.3), frameMat);
+  botFrame.position.set(5, -0.1, -12.15);
+  scene.add(botFrame);
+  const leftFrame = new THREE.Mesh(new THREE.BoxGeometry(0.2, wallH + 0.4, 0.3), frameMat);
+  leftFrame.position.set(-5.1, wallH / 2, -12.15);
+  scene.add(leftFrame);
+  const rightFrame = new THREE.Mesh(new THREE.BoxGeometry(0.2, wallH + 0.4, 0.3), frameMat);
+  rightFrame.position.set(15.1, wallH / 2, -12.15);
+  scene.add(rightFrame);
+
+  // 支架（2根）
+  const poleMat = pxMat(0x1a1a1a);
+  const pole1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.3), poleMat);
+  pole1.position.set(-5, -0.25, -12);
+  scene.add(pole1);
+  const pole2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.3), poleMat);
+  pole2.position.set(15, -0.25, -12);
+  scene.add(pole2);
+}
+
+function drawLEDInit() {
+  ledCtx.fillStyle = '#0a0a1a';
+  ledCtx.fillRect(0, 0, 1920, 1080);
+  // LED 像素点网格
+  ledCtx.fillStyle = '#1a1a3a';
+  for (let x = 0; x < 1920; x += 8) {
+    for (let y = 0; y < 1080; y += 8) {
+      ledCtx.fillRect(x, y, 6, 6);
+    }
+  }
+  // 标题文字
+  ledCtx.font = 'bold 48px sans-serif';
+  ledCtx.fillStyle = '#00ddff';
+  ledCtx.textAlign = 'center';
+  ledCtx.fillText('0-1 项目看板', 960, 100);
+  ledCtx.font = '24px sans-serif';
+  ledCtx.fillStyle = '#668899';
+  ledCtx.fillText('Loading...', 960, 150);
+}
+
+function updateLEDScreen() {
+  fetch('/api/open?file=harness/robot/project-board.json')
+    .then(r => r.json())
+    .then(data => {
+      drawDashboard(ledCtx, data);
+      if (ledTexture) ledTexture.needsUpdate = true;
+    })
+    .catch(() => {
+      // 网络错误时只更新时间戳
+      ledCtx.fillStyle = '#0a0a1a';
+      ledCtx.fillRect(0, 0, 1920, 1080);
+      ledCtx.fillStyle = '#111128';
+      for (let x = 0; x < 1920; x += 8) {
+        for (let y = 0; y < 1080; y += 8) {
+          ledCtx.fillRect(x, y, 6, 6);
+        }
+      }
+      ledCtx.font = 'bold 48px monospace';
+      ledCtx.fillStyle = '#00ddff';
+      ledCtx.textAlign = 'center';
+      ledCtx.fillText('0-1 项目看板', 960, 80);
+      ledCtx.font = '28px monospace';
+      ledCtx.fillStyle = '#ff4444';
+      ledCtx.fillText('无法连接服务器', 960, 160);
+      ledCtx.fillStyle = '#334455';
+      ledCtx.font = '20px monospace';
+      ledCtx.textAlign = 'right';
+      ledCtx.fillText(new Date().toLocaleString(), 1800, 1060);
+      if (ledTexture) ledTexture.needsUpdate = true;
+    });
+}
+
+function drawDashboard(ctx, data) {
+  ctx.fillStyle = '#0a0a1a';
+  ctx.fillRect(0, 0, 1920, 1080);
+
+  // LED 像素网格背景
+  ctx.fillStyle = '#111128';
+  for (let x = 0; x < 1920; x += 8) {
+    for (let y = 0; y < 1080; y += 8) {
+      ctx.fillRect(x, y, 6, 6);
+    }
+  }
+
+  // 标题
+  ctx.font = 'bold 48px monospace';
+  ctx.fillStyle = '#00ddff';
+  ctx.textAlign = 'center';
+  ctx.fillText('0-1 项目看板', 960, 80);
+
+  // 分隔线
+  ctx.strokeStyle = '#334466';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(80, 110);
+  ctx.lineTo(1840, 110);
+  ctx.stroke();
+
+  // 任务列表
+  if (data && data.tasks) {
+    let y = 160;
+    data.tasks.forEach(task => {
+      let color = '#666666';
+      if (task.status === 'completed') color = '#44ff44';
+      else if (task.status === 'in-progress') color = '#ffaa00';
+      else if (task.status === 'not-started') color = '#ff4444';
+      else if (task.status === 'planning') color = '#4488ff';
+
+      ctx.fillStyle = color;
+      ctx.font = 'bold 26px monospace';
+      ctx.textAlign = 'left';
+      const idStr = task.id || '';
+      const titleStr = task.title || task.name || '';
+      ctx.fillText(idStr + ' ' + titleStr, 80, y);
+
+      ctx.fillStyle = '#778899';
+      ctx.font = '20px monospace';
+      ctx.textAlign = 'right';
+      const statusStr = task.status || '';
+      ctx.fillText(statusStr, 1840, y);
+
+      // 进度条背景
+      ctx.fillStyle = '#1a1a2a';
+      ctx.fillRect(80, y + 6, 1680, 8);
+      // 进度条
+      let prog = 0;
+      if (task.status === 'completed') prog = 1;
+      else if (task.status === 'in-progress') prog = 0.5;
+      else if (task.status === 'planning') prog = 0.2;
+      ctx.fillStyle = color;
+      ctx.fillRect(80, y + 6, 1680 * prog, 8);
+
+      y += 60;
+      if (y > 980) return;
+    });
+  }
+
+  // 时间戳
+  ctx.fillStyle = '#334455';
+  ctx.font = '20px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(new Date().toLocaleString(), 1800, 1060);
+}
 
 // ─── MacBook ──────────────────────────────────────────────────────────────────
 const macbookGroup = new THREE.Group();
 macbookGroup.userData = { type:'device', id:'macbook', url:'http://127.0.0.1:18999/dashboard.html' };
+// MacBook group 位置保持在 y=0（地砖上）
+macbookGroup.position.set(0, 0, 0);
 
 function buildMacbook() {
   const g = macbookGroup;
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(4,0.3,2.8), pxMat(0x2a2a2e)), { position: new THREE.Vector3(0,0.15,0) }));
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(3.5,0.05,2.2), pxMat(0x1a1a1e)), { position: new THREE.Vector3(0,0.33,0.2) }));
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(4,2.8,0.2), pxMat(0x2a2a2e)), { position: new THREE.Vector3(0,1.7,-1.4) }));
+  // 整个 MacBook 位于 y=0（地砖上），子部件位置保持不变
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(4,0.3,2.8), pxMat(0x2a2a2e)); _m.position.set(0,0.15,0); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(3.5,0.05,2.2), pxMat(0x1a1a1e)); _m.position.set(0,0.33,0.2); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(4,2.8,0.2), pxMat(0x2a2a2e)); _m.position.set(0,1.7,-1.4); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
   const screen = new THREE.Mesh(new THREE.BoxGeometry(3.6,2.4,0.05), pxMat(0x003366));
-  screen.position.set(0,1.7,-1.28); g.add(screen);
+  screen.position.set(0,1.7,-1.28); screen.castShadow=true; screen.receiveShadow=true; g.add(screen);
   const glow = new THREE.Mesh(new THREE.BoxGeometry(3.8,2.6,0.04), new THREE.MeshBasicMaterial({ color:0x00aaff, transparent:true, opacity:0.25 }));
-  glow.position.set(0,1.7,-1.26); g.add(glow);
+  glow.position.set(0,1.7,-1.26); glow.castShadow=true; glow.receiveShadow=true; g.add(glow);
   const sl = new THREE.PointLight(0x0088ff, 1.8, 7); sl.position.set(0,1.7,-0.8); g.add(sl);
   const il = new THREE.PointLight(0x00ccff, 0.8, 3); il.position.set(0,1.7,0.2); g.add(il);
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(1.2,0.04,0.8), pxMat(0x1e1e22)), { position: new THREE.Vector3(0,0.34,-0.7) }));
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.04,0.8), pxMat(0x1e1e22)); _m.position.set(0,0.34,-0.7); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
   const logo = new THREE.Mesh(new THREE.CylinderGeometry(0.3,0.3,0.05,8), pxMat(0x00ddff));
-  logo.rotation.x = Math.PI/2; logo.position.set(0,2.9,-1.35); g.add(logo);
+  logo.rotation.x = Math.PI/2; logo.position.set(0,2.9,-1.35); logo.castShadow=true; logo.receiveShadow=true; g.add(logo);
+
+  // MacBook 状态指示器
+  const macStatusGeo = new THREE.SphereGeometry(0.2, 16, 16);
+  const macStatusMat = new THREE.MeshBasicMaterial({ color: 0x44ff44 });
+  const macStatus = new THREE.Mesh(macStatusGeo, macStatusMat);
+  macStatus.position.set(0, 3.2, 0);
+  macStatus.userData = { type: 'status-dot', device: 'macbook' };
+  g.add(macStatus);
+  window._macStatus = macStatus;
+  window._macPulse = new THREE.Mesh(
+    new THREE.RingGeometry(0.3, 0.5, 32),
+    new THREE.MeshBasicMaterial({ color: 0x44ff44, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
+  );
+  window._macPulse.position.set(0, 3.2, 0);
+  window._macPulse.userData = { type: 'pulse-ring' };
+  g.add(window._macPulse);
+
   scene.add(g);
 }
 
@@ -174,304 +568,203 @@ macbookLabel.userData = { type:'link', id:'macbook-link', url:'http://127.0.0.1:
 macbookLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ color:0x001133, transparent:true, opacity:0.85 })));
 const mlMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('▶ OpenClaw','#00ffcc'), transparent:true }));
 mlMesh.position.z = 0.01; macbookLabel.add(mlMesh);
-macbookLabel.position.set(0, 4.5, -1.5);
+macbookLabel.position.set(0, 3.6, -1.5);
 scene.add(macbookLabel);
 
 // ─── Ubuntu ───────────────────────────────────────────────────────────────────
 const ubuntuGroup = new THREE.Group();
-ubuntuGroup.userData = { type:'device', id:'ubuntu' };
-
-function buildUbuntu() {
-  const g = ubuntuGroup;
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(1.2,3.5,2.5), pxMat(0x3a3a3a)), { position: new THREE.Vector3(0,1.75,0) }));
-  const d1 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d1.position.set(0,2.5,1.26); g.add(d1);
-  const d2 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d2.position.set(0,2.1,1.26); g.add(d2);
-  const pb = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.1), pxMat(0x441111)); pb.position.set(0,3.3,1.26); g.add(pb);
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,0.3), pxMat(0x2a2a2a)), { position: new THREE.Vector3(0,3.5,-1.5) }));
-  const ms = new THREE.Mesh(new THREE.BoxGeometry(3,2,0.05), pxMat(0x0a0a0a)); ms.position.set(0,3.5,-1.34); g.add(ms);
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.3,0.8,0.3), pxMat(0x2a2a2a)), { position: new THREE.Vector3(0,2.1,-1.5) }));
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(1.5,0.1,0.8), pxMat(0x2a2a2a)), { position: new THREE.Vector3(0,1.7,-1.5) }));
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(2.5,0.15,0.9), pxMat(0x2e2e2e)), { position: new THREE.Vector3(0,1.58,-0.5) }));
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.4,0.15,0.6), pxMat(0x2e2e2e)), { position: new THREE.Vector3(1.6,1.58,-0.5) }));
-  g.position.set(10,0,-2); scene.add(g);
-}
+ubuntuGroup.userData = { type:'device', id:'ubuntu', url:'' };
+ubuntuGroup.position.set(10, 0, -2);
 
 // ─── Ubuntu Label ─────────────────────────────────────────────────────────────
 const ubuntuLabel = new THREE.Group();
-ubuntuLabel.userData = { type:'device', id:'ubuntu-label' };
-ubuntuLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.55), new THREE.MeshBasicMaterial({ color:0x111111, transparent:true, opacity:0.75 })));
-const ulMesh = new THREE.Mesh(new THREE.PlaneGeometry(3.4,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('Ubuntu 台机 (离线)','#556677'), transparent:true }));
-ulMesh.position.z=0.01; ubuntuLabel.add(ulMesh);
-ubuntuLabel.position.set(10,5.5,-2);
+ubuntuLabel.userData = { type:'link', id:'ubuntu-link', url:'' };
+ubuntuLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ color:0x001133, transparent:true, opacity:0.85 })));
+const ulMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('Ubuntu Desktop','#ff9900'), transparent:true }));
+ulMesh.position.z = 0.01; ubuntuLabel.add(ulMesh);
+ubuntuLabel.position.set(0, 4.8, -0.44);
 scene.add(ubuntuLabel);
 
-// ─── Pixel Tree ────────────────────────────────────────────────────────────────
-function buildPixelTree(x, z) {
-  const t = new THREE.Group();
-  t.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.15,0.2,1.2,5), pxMat(0x3d2b1f)), { position: new THREE.Vector3(0,0.6,0) }));
-  [0x2d5a1e,0x3a7028,0x4a8a32].forEach((c,i) => {
-    const s=1.6-i*0.4, l=new THREE.Mesh(new THREE.BoxGeometry(s,0.8,s), pxMat(c));
-    l.position.set(0,1.4+i*0.7,0); t.add(l);
-  });
-  t.position.set(x,0,z); scene.add(t);
+// ─── buildUbuntu ───────────────────────────────────────────────────────────────
+function buildUbuntu() {
+  const g = ubuntuGroup;
+  // 桌面
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(4.0,0.15,1.5), pxMat(0x2e2e2e)); _m.position.set(0,1.58,0); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 主机箱 - 放在桌面右侧
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.2,3.5,2.5), pxMat(0x3a3a3a)); _m.position.set(2.0,1.75,0.5); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 光驱
+  const d1 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d1.position.set(2.0,2.5,1.76); d1.castShadow=true; d1.receiveShadow=true; g.add(d1);
+  const d2 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d2.position.set(2.0,2.1,1.76); d2.castShadow=true; d2.receiveShadow=true; g.add(d2);
+  // 电源按钮
+  const pb = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.1), pxMat(0x441111)); pb.position.set(2.0,3.3,1.76); pb.castShadow=true; pb.receiveShadow=true; g.add(pb);
+  // 显示器支架底座
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.1,0.8), pxMat(0x2a2a2a)); _m.position.set(0,1.705,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 显示器支架立柱
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(0.3,1.0,0.3), pxMat(0x2a2a2a)); _m.position.set(0,2.255,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 显示器外壳
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,0.3), pxMat(0x2a2a2a)); _m.position.set(0,4.005,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 显示器屏幕
+  const ms = new THREE.Mesh(new THREE.BoxGeometry(3,2,0.05), pxMat(0x0a0a0a)); ms.position.set(0,4.005,-0.44); ms.castShadow=true; ms.receiveShadow=true; g.add(ms);
+  // 状态指示灯
+  const ubStatus = new THREE.Mesh(new THREE.SphereGeometry(0.2,16,16), new THREE.MeshBasicMaterial({color:0xff4444}));
+  ubStatus.position.set(0,5.6,0); g.add(ubStatus);
+  scene.add(g);
 }
 
-// ─── Street Lamp ──────────────────────────────────────────────────────────────
-const lamps = [];
-function buildStreetLamp(x, z) {
-  const l = new THREE.Group(); l.userData = { type:'lamp' };
-  l.add(Object.assign(new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,4,5), pxMat(0x445544)), { position: new THREE.Vector3(0,2,0) }));
-  const arm = new THREE.Mesh(new THREE.BoxGeometry(0.08,0.08,1), pxMat(0x445544)); arm.position.set(0.5,4,0); l.add(arm);
-  const head = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.3,0.4), pxMat(0x667766)); head.position.set(1,3.9,0); l.add(head);
-  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.15,4,4), pxMat(0xffffaa)); bulb.position.set(1,3.8,0); l.add(bulb);
-  const pt = new THREE.PointLight(0xffee88,1.2,8); pt.position.set(1,3.8,0); l.add(pt);
-  l.position.set(x,0,z); scene.add(l); lamps.push(l);
-}
-
-// ─── Pixel NPC ────────────────────────────────────────────────────────────────
+// ─── NPC ───────────────────────────────────────────────────────────────────────
 const npcs = [];
-function buildNPC(x, z, name, themeHex, bubbleText) {
-  const bright = new THREE.Color(themeHex);
-  const dark = bright.clone().multiplyScalar(0.4);
-  const g = new THREE.Group();
-  g.userData = {
-    type:'npc',
-    id: name.toLowerCase().replace(/\s+/g,'-'),
-    name, bubbleText,
-    startPos: new THREE.Vector3(x,0,z),
-    walkTarget: new THREE.Vector3(x,0,z),
-    walkSpeed: 0.015+Math.random()*0.01,
-    walkTimer: Math.random()*200,
-    isWalking: false, legPhase: 0,
-    leftArmPivot:null, rightArmPivot:null, leftLegPivot:null, rightLegPivot:null,
-  };
-
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.7,1.0,0.4), pxMat(dark.getHex())), { position: new THREE.Vector3(0,1.5,0) }));
-  g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.5), pxMat(bright.getHex())), { position: new THREE.Vector3(0,2.35,0) }));
-  const eye1=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.05), pxMat(0xffffff)); eye1.position.set(-0.13,2.4,0.26); g.add(eye1);
-  const eye2=new THREE.Mesh(new THREE.BoxGeometry(0.1,0.1,0.05), pxMat(0xffffff)); eye2.position.set(0.13,2.4,0.26); g.add(eye2);
-  const p1=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.04), pxMat(0x000000)); p1.position.set(-0.13,2.4,0.285); g.add(p1);
-  const p2=new THREE.Mesh(new THREE.BoxGeometry(0.06,0.06,0.04), pxMat(0x000000)); p2.position.set(0.13,2.4,0.285); g.add(p2);
-
-  const lAP=new THREE.Group(); lAP.position.set(-0.45,1.9,0);
-  lAP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.22), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.35,0) }));
-  g.add(lAP); g.userData.leftArmPivot=lAP;
-
-  const rAP=new THREE.Group(); rAP.position.set(0.45,1.9,0);
-  rAP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.22,0.7,0.22), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.35,0) }));
-  g.add(rAP); g.userData.rightArmPivot=rAP;
-
-  const lLP=new THREE.Group(); lLP.position.set(-0.18,1.0,0);
-  lLP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.28,0.8,0.28), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.4,0) }));
-  g.add(lLP); g.userData.leftLegPivot=lLP;
-
-  const rLP=new THREE.Group(); rLP.position.set(0.18,1.0,0);
-  rLP.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(0.28,0.8,0.28), pxMat(bright.getHex())), { position: new THREE.Vector3(0,-0.4,0) }));
-  g.add(rLP); g.userData.rightLegPivot=rLP;
-
-  g.position.set(x,0,z); scene.add(g); npcs.push(g); return g;
+function createNPC(x, z) {
+  const npc = new THREE.Group();
+  npc.userData.baseBodyY = 0;
+  // 身体
+  const body = new THREE.Mesh(new THREE.BoxGeometry(0.5,1.0,0.3), pxMat(0x4488cc));
+  body.position.y = 0.7; body.castShadow=true; body.receiveShadow=true;
+  npc.userData.body = body;
+  // 头
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.4,0.35), pxMat(0xffcc99));
+  head.position.y = 1.5; head.castShadow=true; head.receiveShadow=true;
+  npc.userData.head = head;
+  // 腿
+  const legL = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.5,0.2), pxMat(0x334455)); legL.position.set(-0.12,0.25,0); legL.castShadow=true; legL.receiveShadow=true;
+  const legR = new THREE.Mesh(new THREE.BoxGeometry(0.18,0.5,0.2), pxMat(0x334455)); legR.position.set(0.12,0.25,0); legR.castShadow=true; legR.receiveShadow=true;
+  // 手臂
+  const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.6,0.2), pxMat(0x4488cc)); armL.position.set(-0.35,0.9,0); armL.castShadow=true; armL.receiveShadow=true;
+  const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.6,0.2), pxMat(0x4488cc)); armR.position.set(0.35,0.9,0); armR.castShadow=true; armR.receiveShadow=true;
+  npc.add(body, head, legL, legR, armL, armR);
+  npc.position.set(x, 0, z);
+  scene.add(npc);
+  npcs.push(npc);
 }
+createNPC(-6, 3);
+createNPC(6, 5);
 
-// ─── Build Scene ─────────────────────────────────────────────────────────────
-buildGround(); buildStars();
+// ─── 树 ────────────────────────────────────────────────────────────────────────
+function createTree(x, z) {
+  const tree = new THREE.Group();
+  // 树干
+  const trunk = new THREE.Mesh(new THREE.BoxGeometry(0.3,1.5,0.3), pxMat(0x4a3728));
+  trunk.position.y = 0.75; trunk.castShadow=true; trunk.receiveShadow=true;
+  tree.add(trunk);
+  // 三层树冠
+  const levels = [{y:2.0,s:1.2},{y:2.8,s:0.9},{y:3.5,s:0.6}];
+  levels.forEach(l => {
+    const crown = new THREE.Mesh(new THREE.ConeGeometry(l.s,1.0,4), pxMat(0x228844));
+    crown.position.y = l.y; crown.castShadow=true; crown.receiveShadow=true;
+    tree.add(crown);
+  });
+  tree.position.set(x, 0, z);
+  scene.add(tree);
+}
+createTree(-4, -5); createTree(4, -6); createTree(12, -5); createTree(-12, -4); createTree(0, -8);
+
+// ─── 路灯 ─────────────────────────────────────────────────────────────────────
+function createStreetLight(x, z) {
+  const group = new THREE.Group();
+  // 灯杆
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.08,0.08,5,6), pxMat(0x555555));
+  pole.position.y = 2.5; pole.castShadow=true; pole.receiveShadow=true;
+  // 灯头
+  const head = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.2,0.5), pxMat(0x888888));
+  head.position.y = 5.1; head.castShadow=true; head.receiveShadow=true;
+  // 灯泡
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12,8,8), new THREE.MeshBasicMaterial({color:0xffffaa}));
+  bulb.position.y = 5.0;
+  // PointLight
+  const light = new THREE.PointLight(0xffffcc, 1.0, 8);
+  light.position.y = 5.0;
+  group.add(pole, head, bulb, light);
+  group.position.set(x, 0, z);
+  scene.add(group);
+}
+createStreetLight(-5, 1); createStreetLight(5, 1); createStreetLight(-10, 3); createStreetLight(10, 3);
+
+// ─── 大气层 ───────────────────────────────────────────────────────────────────
+const atmosphereVS = `
+varying vec3 vNormal;
+void main() { vNormal = normalize(normalMatrix * normal); gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }
+`;
+const atmosphereFS = `
+varying vec3 vNormal;
+uniform vec3 glowColor;
+void main() {
+  float intensity = pow(0.65 - dot(vNormal, vec3(0.0,0.0,1.0)), 2.5);
+  gl_FragColor = vec4(glowColor, intensity * 0.4);
+}
+`;
+const atmosphereMat = new THREE.ShaderMaterial({
+  vertexShader: atmosphereVS,
+  fragmentShader: atmosphereFS,
+  uniforms: { glowColor: { value: new THREE.Color(0x3399ff) } },
+  transparent: true, side: THREE.BackSide, depthWrite: false
+});
+window._atmosphere = new THREE.Mesh(new THREE.SphereGeometry(80,32,32), atmosphereMat);
+scene.add(window._atmosphere);
+
+// ─── 初始化 ───────────────────────────────────────────────────────────────────
+buildGround(); buildStars(); initLEDWall();
 buildMacbook(); buildUbuntu();
-[[-12,-8],[-14,2],[14,-10],[8,10],[-5,-14],[16,4]].forEach(([x,z])=>buildPixelTree(x,z));
-[[-8,-8],[8,8],[-8,10],[12,-8]].forEach(([x,z])=>buildStreetLamp(x,z));
-const minimaxNPC = buildNPC(-3.5, 3, 'MiniMax Agent', '#0066cc', '夜间构建中...');
-const glmNPC     = buildNPC( 6, -5, 'GLM Agent',    '#8833cc', '等待指令...');
 
-// ─── Project Data ─────────────────────────────────────────────────────────────
-let projectData = null;
-try {
-  const r = await fetch('/project-board.json');
-  if (r.ok) projectData = await r.json();
-} catch(e) {}
+// LED 首次更新延迟触发
+setTimeout(() => { updateLEDScreen(); }, 2000);
 
-function refreshBubbles() {
-  if (!projectData || !projectData.tasks) return;
-  const t = projectData.tasks;
-  const ma = t.find(x=>x.mode==='auto'&&(x.status==='in-progress'||x.status==='planning'));
-  const mp = t.find(x=>x.mode==='auto'&&x.status==='not-started');
-  minimaxNPC.userData.bubbleText = ma ? '🤖 '+ma.name : mp ? '📋 '+mp.name : '✅ 全部完成';
-
-  const ga = t.find(x=>x.mode==='interactive'&&(x.status==='in-progress'||x.status==='planning'));
-  const gp = t.find(x=>x.mode==='interactive'&&x.status==='not-started');
-  glmNPC.userData.bubbleText = ga ? '⏳ '+ga.name : gp ? '📌 '+gp.name : '✅ 全部完成';
-}
-refreshBubbles();
-
-// ─── Bubble Canvas ────────────────────────────────────────────────────────────
-const bc = document.getElementById('bubble-canvas');
-const bx = bc.getContext('2d');
-bc.width=innerWidth; bc.height=innerHeight;
-
-function drawBubble(text, sx, sy) {
-  if (!text) return;
-  bx.clearRect(0,0,bc.width,bc.height);
-  bx.font='bold 13px Courier New';
-  const lines=text.split('\n'), lh=16, pad=10;
-  const mw=Math.max(...lines.map(l=>bx.measureText(l).width));
-  const bw=mw+pad*2, bh=lines.length*lh+pad*2;
-  const bxx=sx-bw/2, byy=sy-bh-22;
-  bx.fillStyle='rgba(8,12,28,0.93)'; bx.strokeStyle='#4488cc'; bx.lineWidth=2;
-  bx.beginPath(); bx.roundRect(bxx,byy,bw,bh,4); bx.fill(); bx.stroke();
-  bx.fillStyle='rgba(8,12,28,0.93)';
-  bx.beginPath(); bx.moveTo(sx-6,byy+bh); bx.lineTo(sx+6,byy+bh); bx.lineTo(sx,byy+bh+9); bx.closePath(); bx.fill(); bx.stroke();
-  bx.fillStyle='#aaddff'; bx.textAlign='left'; bx.textBaseline='top';
-  lines.forEach((l,i)=>bx.fillText(l,bxx+pad,byy+pad+i*lh));
-}
-
-// ─── Raycasting ───────────────────────────────────────────────────────────────
+// ─── 点击交互 ─────────────────────────────────────────────────────────────────
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
-let activeCard = null;
-const clickables = [macbookGroup, ubuntuGroup, minimaxNPC, glmNPC, macbookLabel];
+const clickables = [macbookGroup, ubuntuGroup];
 
-const statusMap = { 'not-started':'未开始','in-progress':'进行中',completed:'已完成',planning:'规划中','completed-with-issues':'完成(有问题)' };
-const modeMap = { interactive:'交互模式',auto:'自动模式' };
-
-function showCard(title, html, sx, sy) {
-  if (activeCard) activeCard.remove();
-  const c = document.createElement('div');
-  c.className='info-card active';
-  c.innerHTML=`<button class="close-btn">✕</button><h3>${title}</h3>${html}`;
-  c.style.left=Math.min(sx+20,innerWidth-290)+'px';
-  c.style.top=Math.min(sy-20,innerHeight-220)+'px';
-  c.querySelector('.close-btn').onclick=()=>{c.classList.remove('active');activeCard=null;};
-  document.body.appendChild(c); activeCard=c;
-}
-
-function taskHTML(task) {
-  if (!task) return '<p>无任务数据</p>';
-  return `<p style="margin-bottom:6px">${task.description||task.name||''}</p>
-    <p>${task.priority?`<span class="tag tag-${task.priority.toLowerCase()}">${task.priority}</span>`:''}
-       <span class="tag tag-${task.mode}">${modeMap[task.mode]||task.mode||''}</span>
-       <span class="tag tag-${task.status}">${statusMap[task.status]||task.status||''}</span>
-    </p>
-    ${task.reason?`<p style="margin-top:6px;color:#889;font-size:11px">📌 ${task.reason}</p>`:''}
-    ${task.deliverable?`<p style="margin-top:4px;color:#889;font-size:11px">🎯 ${task.deliverable}</p>`:''}
-    ${task.note?`<p style="margin-top:4px;color:#556;font-size:10px">${task.note}</p>`:''}`;
-}
-
-renderer.domElement.addEventListener('click', e => {
-  mouse.x=(e.clientX/innerWidth)*2-1;
-  mouse.y=-(e.clientY/innerHeight)*2+1;
+renderer.domElement.addEventListener('click', (e) => {
+  mouse.x = (e.clientX / innerWidth) * 2 - 1;
+  mouse.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
   const hits = raycaster.intersectObjects(clickables, true);
-  if (!hits.length) { if(activeCard){activeCard.remove();activeCard=null;} return; }
-  let obj = hits[0].object;
-  while (obj.parent && !obj.userData.type) obj = obj.parent;
-  const ud = obj.userData;
-  if (!ud.type) { if(activeCard){activeCard.remove();activeCard=null;} return; }
-  const sx=e.clientX, sy=e.clientY;
-  if (ud.url) { window.open(ud.url,'_blank'); return; }
-  if (ud.type==='device') {
-    if (ud.id==='ubuntu') {
-      const t = projectData?.tasks?.find(t=>t.id==='T-001');
-      showCard('Ubuntu 台机 (离线)',`<p style="margin-bottom:8px;color:#667">状态：未连接 Gateway</p><p style="color:#889;font-size:11px">Phase 0 节点 · 完成 Gateway 对接后将在线</p>${t?taskHTML(t):''}`,sx,sy);
-    } else if (ud.id==='macbook') {
-      showCard('MacBook Pro · OpenClaw',`<p style="margin-bottom:6px;color:#7fd4ff">OpenClaw 主控节点</p><p style="color:#889;font-size:11px">Dashboard：<a href="http://127.0.0.1:18999/dashboard.html" target="_blank">http://127.0.0.1:18999/dashboard.html</a></p><p style="margin-top:6px;color:#667;font-size:11px">点击浮动标签可直接打开 Dashboard</p>`,sx,sy);
-    }
-  }
-  if (ud.type==='npc') {
-    if (ud.id==='minimax-agent') {
-      const t = projectData?.tasks?.find(t=>t.mode==='auto');
-      showCard(`${ud.name} · 自动任务`, taskHTML(t), sx, sy);
-    } else if (ud.id==='glm-agent') {
-      const t = projectData?.tasks?.find(t=>t.mode==='interactive');
-      showCard(`${ud.name} · 交互任务`, taskHTML(t), sx, sy);
-    }
+  if (hits.length) {
+    let obj = hits[0].object;
+    while (obj.parent && !obj.userData.url) obj = obj.parent;
+    if (obj.userData.url) window.open(obj.userData.url, '_blank');
   }
 });
 
-// ─── NPC Walk AI ─────────────────────────────────────────────────────────────
-npcs.forEach(npc => {
-  const sp = npc.userData.startPos;
-  const r = 4+Math.random()*6, ang = Math.random()*Math.PI*2;
-  npc.userData.walkTarget.set(sp.x+Math.cos(ang)*r, 0, sp.z+Math.sin(ang)*r);
-});
-
-function updateNPCs() {
-  npcs.forEach(npc => {
-    const ud = npc.userData;
-    ud.walkTimer++;
-    if (!ud.isWalking && ud.walkTimer > 120+Math.random()*120) {
-      ud.isWalking = true; ud.walkTimer = 0;
-      const sp=ud.startPos, r=4+Math.random()*6, ang=Math.random()*Math.PI*2;
-      ud.walkTarget.set(sp.x+Math.cos(ang)*r,0,sp.z+Math.sin(ang)*r);
-    }
-    if (ud.isWalking) {
-      const dir = new THREE.Vector3().subVectors(ud.walkTarget, npc.position);
-      const dist = dir.length();
-      if (dist < 0.3) { ud.isWalking=false; ud.walkTimer=0; npc.rotation.y=0; }
-      else {
-        dir.normalize(); npc.position.addScaledVector(dir, ud.walkSpeed);
-        npc.rotation.y = Math.atan2(dir.x, dir.z);
-        ud.legPhase += 0.15;
-        ud.leftLegPivot.rotation.x  =  Math.sin(ud.legPhase)*0.5;
-        ud.rightLegPivot.rotation.x = -Math.sin(ud.legPhase)*0.5;
-        ud.leftArmPivot.rotation.x  = -Math.sin(ud.legPhase)*0.4;
-        ud.rightArmPivot.rotation.x =  Math.sin(ud.legPhase)*0.4;
-      }
-    } else {
-      ud.leftLegPivot.rotation.x  *= 0.9; ud.rightLegPivot.rotation.x *= 0.9;
-      ud.leftArmPivot.rotation.x  *= 0.9; ud.rightArmPivot.rotation.x *= 0.9;
-    }
-  });
-}
-
-// ─── Resize ──────────────────────────────────────────────────────────────────
-window.addEventListener('resize', () => {
-  camera.aspect = innerWidth/innerHeight;
-  camera.updateProjectionMatrix();
-  renderer.setSize(innerWidth, innerHeight);
-  bc.width=innerWidth; bc.height=innerHeight;
-});
-
-// ─── Animate ─────────────────────────────────────────────────────────────────
-function worldToScreen(pos) {
-  const v = pos.clone().project(camera);
-  return { x:(v.x*0.5+0.5)*innerWidth, y:(-v.y*0.5+0.5)*innerHeight };
-}
-
-let frame = 0;
+// ─── 动画循环 ─────────────────────────────────────────────────────────────────
 function animate() {
   requestAnimationFrame(animate);
-  controls.update();
-  updateNPCs();
+  const time = Date.now() * 0.001;
 
-  // Billboard labels (make them face camera)
-  macbookLabel.lookAt(camera.position);
-  ubuntuLabel.lookAt(camera.position);
+  updateCameraFlyIn();
+  applySky(getCurrentSky());
 
-  // Lamp gentle pulse
-  lamps.forEach((l,i) => {
-    const b = l.children.find(c => c.material && c.material.color && c.material.color.r === 1);
-    if (b) b.material.opacity = 0.7 + Math.sin(frame*0.03+i)*0.3;
-  });
-
-  // Screen flicker on MacBook
-  const screenObj = macbookGroup.children.find(c => c.material && c.material.color && c.material.color.b > 0.5 && c.geometry && c.geometry.parameters && c.geometry.parameters.width > 3);
-  if (screenObj) {
-    const fl = 0.85 + Math.random()*0.15;
-    screenObj.material.color.setRGB(0, 0.2*fl, 0.4*fl);
+  // LED 幕墙更新（每 10 秒）
+  if (time - (window._lastLEDUpdate || 0) > 10) {
+    window._lastLEDUpdate = time;
+    updateLEDScreen();
   }
 
-  // NPC bubbles
-  bx.clearRect(0,0,bc.width,bc.height);
+  // NPC idle 动画
   npcs.forEach(npc => {
-    const wp = npc.position.clone();
-    wp.y += 3.2;
-    const s = worldToScreen(wp);
-    if (s.x > 0 && s.x < innerWidth && s.y > 0 && s.y < innerHeight) {
-      drawBubble(npc.userData.bubbleText, s.x, s.y);
-    }
+    const body = npc.userData.body;
+    const head = npc.userData.head;
+    if (body) body.position.y = (npc.userData.baseBodyY || 0) + Math.sin(time * 2 + npc.id * 10) * 0.03;
+    if (head) head.rotation.y = Math.sin(time * 1.5 + npc.id * 5) * 0.1;
   });
 
+  // MacBook 状态指示器脉冲
+  if (window._macPulse) {
+    const s = 1 + Math.sin(time * 3) * 0.3;
+    window._macPulse.scale.set(s, s, s);
+    window._macPulse.material.opacity = 0.3 - Math.sin(time * 3) * 0.2;
+  }
+
+  controls.update();
   renderer.render(scene, camera);
-  frame++;
 }
 animate();
+
+// ─── 窗口 resize ──────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
 </script>
 </body>
 </html>

@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>0-1 机器人项目 · GPU 增强版</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { overflow: hidden; background: #060610; font-family: 'Courier New', monospace; }
+
+  #title-bar {
+    position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+    background: rgba(8,10,18,0.88); border: 1px solid #2a3a4a;
+    color: #7fd4ff; font-size: 13px; padding: 8px 24px; border-radius: 3px;
+    z-index: 20; pointer-events: none; letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(127,212,255,0.4);
+  }
+  #hint {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%);
+    color: #334; font-size: 11px; z-index: 20; pointer-events: none;
+  }
+
+  .theme-mode-bar {
+    position: fixed; top: 16px; right: 16px; z-index: 30;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(14,16,21,0.88);
+    -webkit-backdrop-filter: blur(12px) saturate(1.6);
+    backdrop-filter: blur(12px) saturate(1.6);
+    border-radius: 999px;
+    display: inline-flex; gap: 2px; padding: 3px;
+  }
+  .theme-mode-btn {
+    border-radius: calc(999px - 3px);
+    width: 30px; height: 30px;
+    color: rgba(255,255,255,0.5);
+    cursor: pointer;
+    transition: color 0.18s, background 0.18s, border-color 0.18s;
+    background: transparent;
+    border: 1px solid transparent;
+    display: inline-flex; justify-content: center; align-items: center;
+    padding: 0; font-size: 14px; line-height: 1;
+  }
+  .theme-mode-btn:hover { color: rgba(255,255,255,0.9); background: rgba(255,255,255,0.06); }
+  .theme-mode-btn.active { color: #ff5c5c; background: rgba(255,92,92,0.1); border-color: rgba(255,92,92,0.25); }
+  .theme-mode-btn svg { stroke: currentColor; fill: none; stroke-width: 1.75px; stroke-linecap: round; stroke-linejoin: round; width: 14px; height: 14px; }
+
+  .info-card {
+    position: absolute;
+    background: rgba(10, 12, 20, 0.94);
+    border: 2px solid #334;
+    padding: 14px 18px;
+    border-radius: 4px;
+    color: #c8d8f0;
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 270px;
+    pointer-events: auto;
+    display: none;
+    box-shadow: 0 0 20px rgba(0,200,255,0.12);
+    z-index: 100;
+  }
+  .info-card.active { display: block; }
+  .info-card h3 { font-size: 13px; margin-bottom: 8px; color: #7fd4ff; border-bottom: 1px solid #334; padding-bottom: 6px; }
+  .info-card .tag { display: inline-block; padding: 1px 6px; border-radius: 2px; font-size: 10px; margin-right: 4px; }
+  .info-card .tag-p0 { background: #cc3333; color: #fff; }
+  .info-card .tag-p1 { background: #cc7700; color: #fff; }
+  .info-card .tag-p2 { background: #3366cc; color: #fff; }
+  .info-card .tag-interactive { background: #7733bb; color: #fff; }
+  .info-card .tag-auto { background: #228844; color: #fff; }
+  .info-card .tag-not-started { background: #555; color: #ccc; }
+  .info-card .tag-completed { background: #227744; color: #fff; }
+  .info-card .close-btn {
+    position: absolute; top: 8px; right: 10px;
+    background: none; border: none; color: #668; cursor: pointer;
+    font-size: 14px; pointer-events: auto;
+  }
+  .info-card .close-btn:hover { color: #c8d8f0; }
+  .info-card a { color: #7fd4ff; }
+
+  #loading {
+    position: fixed; inset: 0; background: #060610;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 9999; transition: opacity 0.6s;
+  }
+  #loading.hidden { opacity: 0; pointer-events: none; }
+  #loading-text { color: #7fd4ff; font-size: 14px; letter-spacing: 2px; margin-top: 16px; }
+  #loading-bar-wrap { width: 200px; height: 3px; background: #1a2a3a; border-radius: 2px; margin-top: 12px; overflow: hidden; }
+  #loading-bar { height: 100%; background: linear-gradient(90deg, #0077cc, #00ddff); width: 0%; transition: width 0.3s; border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div style="font-size:28px;color:#7fd4ff;text-shadow:0 0 20px rgba(127,212,255,0.5)">⚡</div>
+  <div id="loading-text">GPU 初始化中...</div>
+  <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+</div>
+
+<div id="title-bar">0-1 机器人项目 · GPU 增强版</div>
+<div class="theme-mode-bar">
+  <button class="theme-mode-btn" id="btn-auto" onclick="setDayMode(null)" title="自动">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+  </button>
+  <button class="theme-mode-btn" id="btn-day" onclick="setDayMode(true)" title="白天">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+  <button class="theme-mode-btn" id="btn-night" onclick="setDayMode(false)" title="夜间">
+    <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+  </button>
+</div>
+<div id="hint">🖱 拖拽旋转 · 滚轮缩放 · 点击设备查看详情 · RTX 2060 加速</div>
+
+<script>
+// Day/Night system — 6-keyframe lerp
+const SUNRISE = 6, SUNSET = 18;
+let dayMode = null;
+const SKY_DAY     = { bg: 0x87CEEB, fog: 0xc8dff0, ambient: 0xffffff, sun: 0xfff8e0, ambientI: 1.0, sunI: 1.5 };
+const SKY_EVENING = { bg: 0xff7b4a, fog: 0xff9966, ambient: 0xffccaa, sun: 0xff8844, ambientI: 0.85, sunI: 1.1 };
+const SKY_NIGHT   = { bg: 0x060610, fog: 0x060610, ambient: 0x223355, sun: 0x8899cc, ambientI: 0.6, sunI: 0.7 };
+
+function lerpSky(a, b, t) {
+  function lerpF(x, y, s) { return x + (y - x) * s; }
+  function hexLerp(ha, hb, s) {
+    const ra = (ha >> 16) & 0xff, ga = (ha >> 8) & 0xff, ba = ha & 0xff;
+    const rb = (hb >> 16) & 0xff, gb = (hb >> 8) & 0xff, bb = hb & 0xff;
+    return (Math.round(lerpF(ra,rb,s)) << 16) | (Math.round(lerpF(ga,gb,s)) << 8) | Math.round(lerpF(ba,bb,s));
+  }
+  return {
+    bg: hexLerp(a.bg, b.bg, t), fog: hexLerp(a.fog, b.fog, t),
+    ambient: hexLerp(a.ambient, b.ambient, t), sun: hexLerp(a.sun, b.sun, t),
+    ambientI: lerpF(a.ambientI, b.ambientI, t), sunI: lerpF(a.sunI, b.sunI, t),
+  };
+}
+
+function getCurrentSky() {
+  if (dayMode === true) return SKY_DAY;
+  if (dayMode === false) return SKY_NIGHT;
+  const h = new Date().getHours(), m = new Date().getMinutes();
+  const totalMin = h * 60 + m;
+  if (totalMin < 420)  return lerpSky(SKY_NIGHT, SKY_DAY, totalMin / 420);
+  if (totalMin < 720)  return SKY_DAY;
+  if (totalMin < 840)  return lerpSky(SKY_DAY, SKY_EVENING, (totalMin - 720) / 120);
+  if (totalMin < 1080) return lerpSky(SKY_EVENING, SKY_NIGHT, (totalMin - 840) / 240);
+  return SKY_NIGHT;
+}
+
+function applySky(sky) {
+  if (!window._scene) return;
+  window._scene.background.set(sky.bg);
+  if (window._scene.fog && window._scene.fog.color) window._scene.fog.color.set(sky.fog);
+  if (window._ambientLight) { window._ambientLight.intensity = sky.ambientI; window._ambientLight.color.set(sky.ambient); }
+  if (window._sunLight) { window._sunLight.intensity = sky.sunI; window._sunLight.color.set(sky.sun); }
+  document.body.style.background = '#' + sky.bg.toString(16).padStart(6,'0');
+}
+
+function setDayMode(mode) {
+  dayMode = mode;
+  document.getElementById('btn-auto').classList.toggle('active', mode === null);
+  document.getElementById('btn-day').classList.toggle('active', mode === true);
+  document.getElementById('btn-night').classList.toggle('active', mode === false);
+  applySky(getCurrentSky());
+}
+
+function updateLoadingProgress(p) {
+  const bar = document.getElementById('loading-bar');
+  if (bar) bar.style.width = p + '%';
+}
+</script>
+
+<div id="error-log" style="position:fixed;top:40px;left:10px;color:red;font-size:12px;z-index:9999;max-width:90vw;white-space:pre-wrap;background:rgba(0,0,0,0.8);padding:8px;display:none;"></div>
+<script>
+window.onerror = function(m,s,l){ var e=document.getElementById('error-log'); e.style.display='block'; e.textContent+='ERR: '+m+' L'+l+' | '; };
+window.addEventListener('unhandledrejection', function(ev){ var e=document.getElementById('error-log'); e.style.display='block'; e.textContent+='REJECT: '+(ev.reason&&ev.reason.message||String(ev.reason))+' | '; });
+</script>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+window._threeOk = true;
+
+// ─── Scene ────────────────────────────────────────────────────────────────────
+const scene = new THREE.Scene();
+window._scene = scene;
+scene.background = new THREE.Color(0x060610);
+scene.fog = new THREE.FogExp2(0x060610, 0.006);
+
+// ─── Camera ─────────────────────────────────────────────────────────────────
+const camera = new THREE.PerspectiveCamera(40, innerWidth / innerHeight, 0.1, 500);
+camera.position.set(30, 24, 30);
+camera.lookAt(0, 0, 0);
+
+// ─── Renderer (GPU Enhanced) ─────────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+// ─── Post-Processing (Bloom) ─────────────────────────────────────────────────
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(innerWidth, innerHeight),
+  0.8,   // strength
+  0.4,   // radius
+  0.2    // threshold — only bright things glow
+);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
+
+// ─── Controls ────────────────────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.07;
+controls.minDistance = 10;
+controls.maxDistance = 80;
+controls.maxPolarAngle = Math.PI / 2.1;
+controls.target.set(0, 2, 0);
+controls.update();
+
+// ─── Lighting ────────────────────────────────────────────────────────────────
+window._ambientLight = new THREE.AmbientLight(0x223355, 0.7);
+scene.add(window._ambientLight);
+
+window._sunLight = new THREE.DirectionalLight(0x8899cc, 0.9);
+window._sunLight.position.set(20, 40, 15);
+window._sunLight.castShadow = true;
+window._sunLight.shadow.mapSize.width = 2048;
+window._sunLight.shadow.mapSize.height = 2048;
+window._sunLight.shadow.camera.near = 0.5;
+window._sunLight.shadow.camera.far = 200;
+window._sunLight.shadow.camera.left = -40;
+window._sunLight.shadow.camera.right = 40;
+window._sunLight.shadow.camera.top = 40;
+window._sunLight.shadow.camera.bottom = -40;
+window._sunLight.shadow.bias = -0.0005;
+window._sunLight.shadow.normalBias = 0.02;
+scene.add(window._sunLight);
+
+const rimLight = new THREE.DirectionalLight(0x4466aa, 0.4);
+rimLight.position.set(-15, 10, -20);
+scene.add(rimLight);
+
+const fillLight = new THREE.PointLight(0x334466, 0.6, 80);
+fillLight.position.set(-15, 12, -15);
+scene.add(fillLight);
+
+// ─── PBR Material Helper ─────────────────────────────────────────────────────
+function pbrMat(color, roughness = 0.5, metalness = 0.1, emissive = 0x000000, emissiveIntensity = 0) {
+  return new THREE.MeshStandardMaterial({ color, roughness, metalness, emissive, emissiveIntensity });
+}
+
+// ─── Environment Map (PMREMGenerator) ───────────────────────────────────────
+const pmremGen = new THREE.PMREMGenerator(renderer);
+pmremGen.compileEquirectangularShader();
+const envScene = new THREE.Scene();
+envScene.background = new THREE.Color(0x1a1a2e);
+const envMap = pmremGen.fromScene(envScene, 0.04).texture;
+scene.environment = envMap;
+pmremGen.dispose();
+
+// ─── Ground ─────────────────────────────────────────────────────────────────
+function buildGround() {
+  const floorGeo = new THREE.PlaneGeometry(120, 120, 60, 60);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1208, roughness: 0.7, metalness: 0.15, envMapIntensity: 0.8,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  const grid = new THREE.GridHelper(120, 60, 0x1a3a1a, 0x0d1f0d);
+  grid.position.y = 0.01;
+  grid.material.opacity = 0.5;
+  grid.material.transparent = true;
+  scene.add(grid);
+
+  // Center desk
+  const desk = new THREE.Mesh(new THREE.BoxGeometry(20, 0.3, 10), pbrMat(0x2a1a0a, 0.75, 0.1));
+  desk.position.set(0, 1.8, 0);
+  desk.castShadow = true;
+  desk.receiveShadow = true;
+  scene.add(desk);
+
+  [[-9, -4.5], [9, -4.5], [-9, 4.5], [9, 4.5]].forEach(([x, z]) => {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.8, 0.3), pbrMat(0x1a0a00, 0.8, 0.2));
+    leg.position.set(x, 0.9, z);
+    leg.castShadow = true;
+    scene.add(leg);
+  });
+}
+
+// ─── Sky Dome + Stars ────────────────────────────────────────────────────────
+function buildSkyDome() {
+  const n = 3000, pos = new Float32Array(n * 3), col = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    const r = 180 + Math.random() * 100;
+    pos[i * 3]     = r * Math.sin(ph) * Math.cos(th);
+    pos[i * 3 + 1] = Math.abs(r * Math.cos(ph)) + 10;
+    pos[i * 3 + 2] = r * Math.sin(ph) * Math.sin(th);
+    const b = 0.4 + Math.random() * 0.6;
+    col[i * 3]     = b * (0.8 + Math.random() * 0.2);
+    col[i * 3 + 1] = b * (0.85 + Math.random() * 0.15);
+    col[i * 3 + 2] = b;
+  }
+  const sg = new THREE.BufferGeometry();
+  sg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  sg.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  scene.add(new THREE.Points(sg, new THREE.PointsMaterial({ size: 0.6, vertexColors: true })));
+
+  // Atmospheric glow sphere
+  const atmoMat = new THREE.ShaderMaterial({
+    side: THREE.BackSide,
+    transparent: true,
+    depthWrite: false,
+    uniforms: { uColor: { value: new THREE.Color(0x0a1428) } },
+    vertexShader: `
+      varying vec3 vWorldPosition;
+      void main() {
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        vWorldPosition = worldPos.xyz;
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor;
+      varying vec3 vWorldPosition;
+      void main() {
+        float h = normalize(vWorldPosition).y;
+        float alpha = smoothstep(-0.2, 0.5, h) * 0.35;
+        gl_FragColor = vec4(uColor, alpha);
+      }
+    `,
+  });
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(160, 32, 16), atmoMat));
+}
+
+// ─── Particle System (floating glowing shapes) ─────────────────────────────
+const particles = [];
+function buildParticles() {
+  const geometries = [
+    new THREE.OctahedronGeometry(0.3, 0),
+    new THREE.TetrahedronGeometry(0.35, 0),
+    new THREE.IcosahedronGeometry(0.25, 0),
+    new THREE.DodecahedronGeometry(0.25, 0),
+  ];
+  for (let i = 0; i < 25; i++) {
+    const geo = geometries[Math.floor(Math.random() * geometries.length)];
+    const hue = 0.5 + Math.random() * 0.3;
+    const mat = new THREE.MeshStandardMaterial({
+      color: new THREE.Color().setHSL(hue, 0.8, 0.5),
+      roughness: 0.2, metalness: 0.8,
+      emissive: new THREE.Color().setHSL(hue, 0.9, 0.3),
+      emissiveIntensity: 0.6,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    const angle = Math.random() * Math.PI * 2;
+    const radius = 8 + Math.random() * 12;
+    const height = 2 + Math.random() * 8;
+    mesh.position.set(Math.cos(angle) * radius, height, Math.sin(angle) * radius);
+    mesh.userData = {
+      orbitRadius: radius,
+      orbitSpeed: 0.003 + Math.random() * 0.004,
+      orbitAngle: angle,
+      orbitHeight: height,
+      floatPhase: Math.random() * Math.PI * 2,
+      floatSpeed: 0.5 + Math.random() * 0.5,
+      floatAmp: 0.3 + Math.random() * 0.5,
+    };
+    scene.add(mesh);
+    particles.push(mesh);
+  }
+}
+
+function updateParticles(time) {
+  particles.forEach(p => {
+    const ud = p.userData;
+    ud.orbitAngle += ud.orbitSpeed;
+    p.position.x = Math.cos(ud.orbitAngle) * ud.orbitRadius;
+    p.position.z = Math.sin(ud.orbitAngle) * ud.orbitRadius;
+    p.position.y = ud.orbitHeight + Math.sin(time * ud.floatSpeed + ud.floatPhase) * ud.floatAmp;
+    p.rotation.x += 0.008;
+    p.rotation.y += 0.012;
+  });
+}
+
+// ─── MacBook Pro ─────────────────────────────────────────────────────────────
+const macbookGroup = new THREE.Group();
+macbookGroup.userData = { type: 'device', id: 'macbook', url: 'http://127.0.0.1:18999/dashboard.html' };
+
+function buildMacbook() {
+  const g = macbookGroup;
+  const base = new THREE.Mesh(new THREE.BoxGeometry(4.2, 0.35, 3.0), pbrMat(0x2a2a2e, 0.4, 0.6));
+  base.position.set(0, 0.175, 0);
+  base.castShadow = true; base.receiveShadow = true;
+  g.add(base);
+  const kb = new THREE.Mesh(new THREE.BoxGeometry(3.8, 0.06, 2.4), pbrMat(0x1a1a1e, 0.6, 0.3));
+  kb.position.set(0, 0.37, 0.2);
+  g.add(kb);
+  const tp = new THREE.Mesh(new THREE.BoxGeometry(1.4, 0.04, 0.9), pbrMat(0x1e1e22, 0.5, 0.4));
+  tp.position.set(0, 0.38, -0.7);
+  g.add(tp);
+  const lid = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.0, 0.22), pbrMat(0x2a2a2e, 0.4, 0.6));
+  lid.position.set(0, 1.85, -1.6);
+  lid.castShadow = true;
+  g.add(lid);
+  const hinge = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 4.0, 8), pbrMat(0x555555, 0.3, 0.9));
+  hinge.rotation.x = Math.PI / 2;
+  hinge.position.set(0, 0.4, -1.5);
+  g.add(hinge);
+  const screenMat = new THREE.MeshStandardMaterial({ color: 0x001833, roughness: 0.1, metalness: 0.0, emissive: 0x003366, emissiveIntensity: 0.8 });
+  const screen = new THREE.Mesh(new THREE.BoxGeometry(3.7, 2.5, 0.06), screenMat);
+  screen.position.set(0, 1.85, -1.48);
+  g.add(screen);
+  const glowMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x00aaff, emissiveIntensity: 1.5, transparent: true, opacity: 0.15 });
+  const glow = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 2.8), glowMat);
+  glow.position.set(0, 1.85, -1.46);
+  g.add(glow);
+  const logoMat = new THREE.MeshStandardMaterial({ color: 0xdddddd, roughness: 0.2, metalness: 0.9, emissive: 0x00ccff, emissiveIntensity: 0.3 });
+  const logo = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 0.05, 16), logoMat);
+  logo.rotation.x = Math.PI / 2;
+  logo.position.set(0, 3.4, -1.6);
+  g.add(logo);
+  const sl = new THREE.PointLight(0x0088ff, 2.5, 8);
+  sl.position.set(0, 1.85, -0.8);
+  g.add(sl);
+  const kl = new THREE.PointLight(0x00ccff, 0.6, 3);
+  kl.position.set(0, 0.5, 0.2);
+  g.add(kl);
+  scene.add(g);
+}
+
+// ─── MacBook Label ────────────────────────────────────────────────────────────
+function makeTextCanvas(text, color) {
+  const c = document.createElement('canvas');
+  c.width = 320; c.height = 60;
+  const ctx = c.getContext('2d');
+  ctx.font = 'bold 26px Courier New';
+  ctx.fillStyle = color; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(text, 160, 30);
+  return new THREE.CanvasTexture(c);
+}
+
+const macbookLabel = new THREE.Group();
+macbookLabel.userData = { type: 'link', id: 'macbook-link', url: 'http://127.0.0.1:18999/dashboard.html' };
+macbookLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.55), new THREE.MeshBasicMaterial({ color: 0x001133, transparent: true, opacity: 0.85 })));
+const mlMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8, 0.55), new THREE.MeshBasicMaterial({ map: makeTextCanvas('▶ OpenClaw', '#00ffcc'), transparent: true }));
+mlMesh.position.z = 0.01;
+macbookLabel.add(mlMesh);
+macbookLabel.position.set(-5, 5.2, -2);
+scene.add(macbookLabel);
+
+// ─── Ubuntu Desktop (Tower + Monitor) ───────────────────────────────────────
+const ubuntuGroup = new THREE.Group();
+ubuntuGroup.userData = { type: 'device', id: 'ubuntu' };
+
+function buildUbuntu() {
+  const g = ubuntuGroup;
+  // Tower ATX case
+  const tower = new THREE.Mesh(new THREE.BoxGeometry(1.4, 4.2, 3.0), pbrMat(0x3a3a3a, 0.35, 0.7));
+  tower.position.set(0, 2.1, 0);
+  tower.castShadow = true; tower.receiveShadow = true;
+  g.add(tower);
+  // Front panel
+  const fp = new THREE.Mesh(new THREE.BoxGeometry(1.42, 0.8, 0.1), pbrMat(0x222222, 0.6, 0.3));
+  fp.position.set(0, 3.0, 1.56);
+  g.add(fp);
+  // Power button glow
+  const pb = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 0.08, 8), pbrMat(0x441111, 0.5, 0.2, 0xff3333, 0.5));
+  pb.rotation.x = Math.PI / 2;
+  pb.position.set(0, 3.4, 1.6);
+  g.add(pb);
+  // USB ports
+  [[-0.4, 2.8], [0, 2.8], [0.4, 2.8]].forEach(([x, y]) => {
+    const usb = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 0.06), pbrMat(0x111111, 0.8, 0.1));
+    usb.position.set(x, y, 1.58);
+    g.add(usb);
+  });
+  // Drive bays
+  [0x333333, 0x333333, 0x222222].forEach((c, i) => {
+    const bay = new THREE.Mesh(new THREE.BoxGeometry(1.0, 0.35, 0.1), pbrMat(c, 0.7, 0.2));
+    bay.position.set(0, 2.2 + i * 0.4, 1.56);
+    g.add(bay);
+  });
+  // Case feet
+  [[-0.5, -1.1], [0.5, -1.1], [-0.5, 1.1], [0.5, 1.1]].forEach(([x, z]) => {
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.2, 6), pbrMat(0x222222, 0.8, 0.2));
+    foot.position.set(x, -0.1, z);
+    g.add(foot);
+  });
+  // Monitor stand pole
+  const standPole = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 1.5, 8), pbrMat(0x2a2a2a, 0.4, 0.7));
+  standPole.position.set(0, 0.75, 0);
+  g.add(standPole);
+  // Monitor stand base
+  const standBase = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 0.15, 16), pbrMat(0x2a2a2a, 0.5, 0.6));
+  standBase.position.set(0, 0.075, 0);
+  g.add(standBase);
+  // Monitor bezel
+  const monitor = new THREE.Mesh(new THREE.BoxGeometry(4.2, 3.0, 0.3), pbrMat(0x1a1a1a, 0.5, 0.3));
+  monitor.position.set(0, 5.5, -2.0);
+  monitor.castShadow = true;
+  g.add(monitor);
+  // Monitor display
+  const monDispMat = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.1, metalness: 0.0, emissive: 0x223344, emissiveIntensity: 0.5 });
+  const monDisp = new THREE.Mesh(new THREE.BoxGeometry(3.7, 2.5, 0.06), monDispMat);
+  monDisp.position.set(0, 5.5, -1.84);
+  g.add(monDisp);
+  // Monitor glow
+  const monGlowMat = new THREE.MeshStandardMaterial({ color: 0x4466aa, emissive: 0x4466aa, emissiveIntensity: 0.8, transparent: true, opacity: 0.12 });
+  const monGlow = new THREE.Mesh(new THREE.PlaneGeometry(4.0, 2.8), monGlowMat);
+  monGlow.position.set(0, 5.5, -1.82);
+  g.add(monGlow);
+  // Monitor point light
+  const ml = new THREE.PointLight(0x4466aa, 1.5, 7);
+  ml.position.set(0, 5.5, -1.8);
+  g.add(ml);
+}
+
+// Add Ubuntu to scene
+scene.add(ubuntuGroup);
+
+// Build particles
+buildParticles();
+
+// Camera fly-in animation
+let flyInProgress = 0;
+const flyInDuration = 3.0; // seconds
+let flyInStarted = false;
+const flyInStart = { x: 45, y: 38, z: 45 };
+const flyInEnd = { x: 30, y: 24, z: 30 };
+
+function easeInOutCubic(t) {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+function startFlyIn() {
+  flyInStarted = true;
+  flyInProgress = 0;
+}
+
+function updateFlyIn(dt) {
+  if (!flyInStarted) return;
+  flyInProgress += dt / flyInDuration;
+  if (flyInProgress > 1) flyInProgress = 1;
+  const t = easeInOutCubic(flyInProgress);
+  camera.position.x = flyInStart.x + (flyInEnd.x - flyInStart.x) * t;
+  camera.position.y = flyInStart.y + (flyInEnd.y - flyInStart.y) * t;
+  camera.position.z = flyInStart.z + (flyInEnd.z - flyInStart.z) * t;
+}
+
+// ─── Status Cards (GPU/CPU/RAM indicators) ─────────────────────────────────
+function buildStatusCards() {
+  const cards = [
+    { label: 'GPU', value: 'RTX 2060', bar: 0.82, color: 0x00ffaa, x: -4, y: 0.3 },
+    { label: 'CPU', value: 'i9-12900K', bar: 0.65, color: 0xffaa00, x: 0, y: 0.3 },
+    { label: 'RAM', value: '64 GB', bar: 0.45, color: 0x00aaff, x: 4, y: 0.3 },
+  ];
+  cards.forEach(c => {
+    const g2 = new THREE.Group();
+    g2.position.set(c.x, c.y, 1.2);
+    const bg = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.2, 0.8),
+      new THREE.MeshBasicMaterial({ color: 0x0a0a14, transparent: true, opacity: 0.88 })
+    );
+    g2.add(bg);
+    // Label
+    const lbl = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.2, 0.3),
+      new THREE.MeshBasicMaterial({ color: c.color, transparent: true, opacity: 0.9 })
+    );
+    lbl.position.z = 0.01;
+    lbl.position.y = 0.2;
+    g2.add(lbl);
+    // Bar bg
+    const barBg = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0, 0.12),
+      new THREE.MeshBasicMaterial({ color: 0x1a1a2a })
+    );
+    barBg.position.z = 0.01;
+    barBg.position.y = -0.1;
+    g2.add(barBg);
+    // Bar fill
+    const barFill = new THREE.Mesh(
+      new THREE.PlaneGeometry(2.0 * c.bar, 0.12),
+      new THREE.MeshBasicMaterial({ color: c.color })
+    );
+    barFill.position.z = 0.02;
+    barFill.position.y = -0.1;
+    g2.add(barFill);
+    scene.add(g2);
+  });
+}
+buildStatusCards();
+
+// ─── Main Animate Loop ───────────────────────────────────────────────────────
+let lastTime = 0;
+
+function animate(time) {
+  requestAnimationFrame(animate);
+  const t = time * 0.001;
+  const dt = Math.min((t - lastTime), 0.1);
+  lastTime = t;
+
+  // Update particles
+  updateParticles(t);
+
+  // Camera fly-in
+  updateFlyIn(dt);
+
+  // Day/night sky
+  applySky(getCurrentSky());
+
+  // Render with bloom
+  composer.render();
+}
+
+animate(0);
+</script>
+</body>
+</html>
