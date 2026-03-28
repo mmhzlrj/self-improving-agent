@@ -72,6 +72,18 @@ Then create the log files (or copy from `assets/`):
 - `ERRORS.md` — command failures, exceptions
 - `FEATURE_REQUESTS.md` — user-requested capabilities
 
+### ⚠️ Dual-Write Rule (CRITICAL)
+
+**Every time you log to this skill's `.learnings/`, you MUST also update the workspace's `.learnings/`:**
+
+| This skill's `.learnings/` | Also update workspace |
+|---------------------------|----------------------|
+| `.learnings/ERRORS.md` | `~/.openclaw/workspace/.learnings/ERRORS.md` |
+| `.learnings/LEARNINGS.md` | `~/.openclaw/workspace/.learnings/LEARNINGS.md` |
+
+Both files must be synced AND pushed to their respective remotes after each update.
+**This prevents learnings from being siloed in one place.**
+
 ### Promotion Targets
 
 When learnings prove broadly applicable, promote them to workspace files:
