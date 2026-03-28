@@ -45,6 +45,87 @@
 
   #bubble-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; }
 
+  #transform-panel {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(8,10,18,0.95);
+    border: 2px solid #334;
+    border-radius: 6px;
+    padding: 14px 18px;
+    color: #c8d8f0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    z-index: 200;
+    display: none;
+    min-width: 340px;
+    box-shadow: 0 0 30px rgba(0,200,255,0.15);
+  }
+  #transform-panel.active { display: block; }
+  #transform-panel .panel-title {
+    font-size: 13px;
+    color: #7fd4ff;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #334;
+    padding-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #transform-panel .panel-title span { color: #aaa; font-size: 11px; flex: 1; }
+  #transform-panel .panel-btns { display: flex; gap: 6px; }
+  #transform-panel .panel-btn {
+    background: rgba(20,30,50,0.9);
+    border: 1px solid #334;
+    color: #c8d8f0;
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  #transform-panel .panel-btn:hover { border-color: #7fd4ff; color: #7fd4ff; }
+  #transform-panel .panel-btn.exit:hover { border-color: #ff6666; color: #ff6666; }
+  #transform-panel .panel-btn.save:hover { border-color: #44ff88; color: #44ff88; }
+  #transform-panel .model-name { color: #ffcc44; font-weight: bold; margin-bottom: 10px; font-size: 13px; }
+  #transform-panel .coords { display: flex; gap: 12px; margin-bottom: 10px; }
+  #transform-panel .coord-row { display: flex; flex-direction: column; gap: 4px; }
+  #transform-panel .coord-row label { color: #888; font-size: 11px; text-transform: uppercase; }
+  #transform-panel .coord-row input {
+    background: #0d1520;
+    border: 1px solid #334;
+    color: #c8d8f0;
+    width: 90px;
+    padding: 5px 8px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    text-align: center;
+  }
+  #transform-panel .coord-row input:focus { outline: none; border-color: #7fd4ff; }
+  #transform-panel .coord-row.x input { border-color: #ff4444; color: #ff6666; }
+  #transform-panel .coord-row.y input { border-color: #44ff44; color: #66ff66; }
+  #transform-panel .coord-row.z input { border-color: #4488ff; color: #6699ff; }
+  #transform-panel .hint { color: #556; font-size: 10px; margin-top: 6px; }
+  #edit-mode-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: rgba(8,10,18,0.9);
+    border: 2px solid #334;
+    color: #7fd4ff;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 200;
+    transition: all 0.2s;
+  }
+  #edit-mode-btn:hover { border-color: #7fd4ff; background: rgba(20,30,50,0.95); }
+  #edit-mode-btn.active { border-color: #ffcc44; color: #ffcc44; }
+
   #title-bar {
     position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
     background: rgba(8,10,18,0.88); border: 1px solid #2a3a4a;
@@ -113,12 +194,12 @@ const SUNRISE = 6, SUNSET = 18; // hours
 let dayMode = null; // null = auto, true = day, false = night
 
 const DAY_NIGHT_KEYFRAMES = [
-  { time: 0,  bg: 0x070B1A, fog: 0x0A0E1F, ambient: 0x182040, sun: 0x182038, ambientI: 0.15, sunI: 0.05 },    // 深夜
+  { time: 0,  bg: 0x070B1A, fog: 0x0A0E1F, ambient: 0x6080C0, sun: 0x4060A0, ambientI: 1.0, sunI: 1.0 },    // 深夜（明亮）
   { time: 6,  bg: 0x2A1A3A, fog: 0x3A2040, ambient: 0xC87840, sun: 0xFF9050, ambientI: 0.5, sunI: 0.9 },      // 日出
   { time: 8,  bg: 0x87CEEB, fog: 0xC8DFF0, ambient: 0xFFFFFF, sun: 0xFFFFF0, ambientI: 1.0, sunI: 1.8 },     // 上午
   { time: 12, bg: 0x5CB8E8, fog: 0xB0D4E8, ambient: 0xFFFFFF, sun: 0xFFE8B0, ambientI: 1.0, sunI: 2.0 },     // 正午
   { time: 17, bg: 0xD4845A, fog: 0xC89070, ambient: 0xC8A870, sun: 0xFF9050, ambientI: 0.7, sunI: 0.9 },     // 日落
-  { time: 19, bg: 0x0F1228, fog: 0x141830, ambient: 0x1A2040, sun: 0x2040A0, ambientI: 0.25, sunI: 0.2 },    // 黄昏
+  { time: 19, bg: 0x0F1228, fog: 0x141830, ambient: 0x1A2040, sun: 0x4060A0, ambientI: 1.0, sunI: 1.0 },       // 黄昏（调亮）
 ];
 
 function lerpVal(a, b, t) { return a + (b - a) * t; }
@@ -216,14 +297,44 @@ setInterval(function(){
 updateClock();
 </script>
 
+<button id="edit-mode-btn">✥ 编辑模型</button>
+
+<div id="transform-panel">
+  <div class="panel-title">
+    模型变换控制器
+    <span id="transform-mode-label">Translate</span>
+    <div class="panel-btns">
+      <button class="panel-btn save" id="save-btn">💾 保存</button>
+      <button class="panel-btn exit" id="exit-btn">✕ 退出</button>
+    </div>
+  </div>
+  <div class="model-name" id="selected-model-name">未选中</div>
+  <div class="coords">
+    <div class="coord-row x">
+      <label>X</label>
+      <input type="number" id="input-x" step="0.1" />
+    </div>
+    <div class="coord-row y">
+      <label>Y</label>
+      <input type="number" id="input-y" step="0.1" />
+    </div>
+    <div class="coord-row z">
+      <label>Z</label>
+      <input type="number" id="input-z" step="0.1" />
+    </div>
+  </div>
+  <div class="hint">💡 点击场景中的模型以选中，然后拖动坐标轴移动</div>
+</div>
+
 <div id="error-log" style="position:fixed;top:40px;left:10px;color:red;font-size:12px;z-index:999;max-width:90vw;white-space:pre-wrap;background:rgba(0,0,0,0.8);padding:8px;display:none;"></div>
 <script>
 window.onerror=function(m,s,l){var e=document.getElementById('error-log');e.style.display='block';e.textContent+='ERR: '+m+' L'+l+' | ';};
 window.addEventListener('unhandledrejection',function(ev){var e=document.getElementById('error-log');e.style.display='block';e.textContent+='REJECT: '+(ev.reason&&ev.reason.message||String(ev.reason))+' | ';});
 </script>
 <script type="module">
-import * as THREE from './three.module.js';
-import { OrbitControls } from './OrbitControls.js';
+import * as THREE from '/three.module.js';
+import { OrbitControls } from '/OrbitControls.js';
+import { TransformControls } from '/TransformControls.js';
 window._threeOk = true;
 
 // ─── Scene ────────────────────────────────────────────────────────────────────
@@ -255,6 +366,195 @@ controls.maxPolarAngle = Math.PI / 2.1;
 controls.target.set(0, 1, 0);
 controls.update();
 
+// ─── TransformControls ─────────────────────────────────────────────────────────
+const tc = new TransformControls(camera, renderer.domElement);
+tc.setSize(0.8);
+scene.add(tc);
+
+let editMode = false;
+let selectedObject = null;
+// raycaster 和 mouse 复用底部已声明的版本
+const editBtn = document.getElementById('edit-mode-btn');
+const panel = document.getElementById('transform-panel');
+const nameEl = document.getElementById('selected-model-name');
+const inputX = document.getElementById('input-x');
+const inputY = document.getElementById('input-y');
+const inputZ = document.getElementById('input-z');
+
+// 可选中的模型列表
+const selectable = [];
+
+function rebuildSelectable() {
+  selectable.length = 0;
+  // device groups
+  [macbookGroup, ubuntuGroup].forEach(g => {
+    if (g) selectable.push(g);
+  });
+  // NPC groups
+  npcs.forEach(npc => selectable.push(npc));
+  // LED wall
+  if (typeof ledScreen !== 'undefined') selectable.push(ledScreen);
+  // street lights poles
+  if (window._cityLight1) selectable.push(window._cityLight1);
+  if (window._cityLight2) selectable.push(window._cityLight2);
+  if (window._pole1) selectable.push(window._pole1);
+  if (window._pole2) selectable.push(window._pole2);
+  // street light groups
+  if (window.streetLightGroups) window.streetLightGroups.forEach(g => selectable.push(g));
+  // trees
+  if (window.treeGroups) window.treeGroups.forEach(g => selectable.push(g));
+}
+
+function setSelected(obj) {
+  if (selectedObject) tc.detach();
+  selectedObject = obj;
+  if (!obj) {
+    nameEl.textContent = '未选中';
+    inputX.value = '';
+    inputY.value = '';
+    inputZ.value = '';
+    return;
+  }
+  tc.attach(obj);
+  const name = obj.userData?.id || obj.userData?.name || obj.name || '未知';
+  nameEl.textContent = name;
+  inputX.value = obj.position.x.toFixed(3);
+  inputY.value = obj.position.y.toFixed(3);
+  inputZ.value = obj.position.z.toFixed(3);
+}
+
+function syncXYZFromObject() {
+  if (!selectedObject) return;
+  inputX.value = selectedObject.position.x.toFixed(3);
+  inputY.value = selectedObject.position.y.toFixed(3);
+  inputZ.value = selectedObject.position.z.toFixed(3);
+}
+
+function toggleEditMode() {
+  editMode = !editMode;
+  editBtn.classList.toggle('active', editMode);
+  panel.classList.toggle('active', editMode);
+  if (!editMode) {
+    tc.detach();
+    selectedObject = null;
+    nameEl.textContent = '未选中';
+    inputX.value = '';
+    inputY.value = '';
+    inputZ.value = '';
+    controls.enabled = true;
+  } else {
+    controls.enabled = false;
+    rebuildSelectable();
+  }
+}
+
+editBtn.addEventListener('click', toggleEditMode);
+
+// 退出按钮
+document.getElementById('exit-btn').addEventListener('click', () => {
+  if (editMode) toggleEditMode();
+});
+
+// 保存按钮：收集所有模型当前世界坐标，POST 到服务器保存到 world.html
+document.getElementById('save-btn').addEventListener('click', () => {
+  // 同步最终坐标
+  if (selectedObject) {
+    inputX.value = selectedObject.position.x.toFixed(3);
+    inputY.value = selectedObject.position.y.toFixed(3);
+    inputZ.value = selectedObject.position.z.toFixed(3);
+  }
+
+  // 收集所有 selectable 对象的位置
+  // nameMap: world.html 源码变量名 → Three.js Group 对象
+  // nameMap: 变量名 → 对象（用于保存坐标到源码）
+  const nameMap = { macbookGroup, ubuntuGroup, _pole1: window._pole1, _pole2: window._pole2 };
+  if (window.streetLightGroups) window.streetLightGroups.forEach((g, i) => { nameMap["streetLight" + i] = g; });
+  if (window.treeGroups) window.treeGroups.forEach((g, i) => { nameMap["tree" + i] = g; });
+  const posData = {};
+  selectable.forEach(obj => {
+    const varName = Object.entries(nameMap).find(([, v]) => v === obj)?.[0] ||
+                    obj.userData?.id || obj.name || null;
+    if (!varName) return;
+    posData[varName] = {
+      x: parseFloat(obj.position.x.toFixed(3)),
+      y: parseFloat(obj.position.y.toFixed(3)),
+      z: parseFloat(obj.position.z.toFixed(3))
+    };
+  });
+
+  // POST 到本地 save 端点
+  fetch('http://127.0.0.1:18999/save', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ positions: posData, timestamp: new Date().toISOString() })
+  }).then(r => r.ok ? showSaveMsg('✅ 已保存到 world.html（坐标已写入源码）', true) : showSaveMsg('❌ 保存失败', false))
+    .catch(() => {
+      // 服务器不支持则下载坐标文本，手动替换
+      const lines = Object.entries(posData).map(([id, p]) =>
+        id + ': x=' + p.x + '  y=' + p.y + '  z=' + p.z
+      ).join('\n');
+      const blob = new Blob(['// 世界坐标快照 ' + new Date().toLocaleString('zh-CN') + '\n' + lines], { type: 'text/plain' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+      a.download = 'world-positions-' + Date.now() + '.txt'; a.click();
+      showSaveMsg('⚠️ 服务器不支持保存，已下载坐标文件\n请手动替换 world.html 对应位置', false);
+    });
+});
+
+function showSaveMsg(text, ok) {
+  const m = document.createElement('div');
+  m.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,10,20,0.97);border:2px solid ' + (ok ? '#44ff88' : '#ffaa44') + ';color:' + (ok ? '#44ff88' : '#ffaa44') + ';padding:20px 32px;border-radius:8px;font-family:Courier New,monospace;font-size:13px;z-index:99999;line-height:1.8;text-align:center;';
+  m.innerHTML = text.replace(/\n/g, '<br>');
+  document.body.appendChild(m);
+  setTimeout(() => m.remove(), 4000);
+};
+
+// XYZ 输入 → 实时更新对象坐标
+function onXYZInput() {
+  if (!selectedObject) return;
+  const x = parseFloat(inputX.value);
+  const y = parseFloat(inputY.value);
+  const z = parseFloat(inputZ.value);
+  if (!isNaN(x)) selectedObject.position.x = x;
+  if (!isNaN(y)) selectedObject.position.y = y;
+  if (!isNaN(z)) selectedObject.position.z = z;
+}
+inputX.addEventListener('input', onXYZInput);
+inputY.addEventListener('input', onXYZInput);
+inputZ.addEventListener('input', onXYZInput);
+
+// TransformControls 拖动时同步 XYZ 输入
+tc.addEventListener('dragging-changed', e => {
+  controls.enabled = !e.value;
+});
+tc.addEventListener('change', () => {
+  if (selectedObject) {
+    inputX.value = selectedObject.position.x.toFixed(3);
+    inputY.value = selectedObject.position.y.toFixed(3);
+    inputZ.value = selectedObject.position.z.toFixed(3);
+  }
+});
+
+// 点击选中模型（编辑模式下）
+renderer.domElement.addEventListener('pointerdown', e => {
+  if (!editMode) return;
+  if (e.button !== 0) return;
+  // 忽略面板上的点击
+  if (e.target !== renderer.domElement) return;
+
+  const rect = renderer.domElement.getBoundingClientRect();
+  mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+  mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(selectable, true);
+  if (hits.length > 0) {
+    // 找到最近的选中对象（可能是子物体，向上找 group）
+    let obj = hits[0].object;
+    while (obj && !selectable.includes(obj) && obj.parent) obj = obj.parent;
+    if (obj && selectable.includes(obj)) setSelected(obj);
+  }
+});
+
 camera.position.set(0, 25, 35);
 const flyTarget = { x: 0, y: 8, z: 18 };
 let flyProgress = 0;
@@ -283,7 +583,7 @@ window._sunLight.shadow.camera.top = 30;
 window._sunLight.shadow.camera.bottom = -30;
 window._sunLight.shadow.bias = -0.001;
 scene.add(window._sunLight);
-const pLight = new THREE.PointLight(0x334466, 0.5, 60); pLight.position.set(-10, 10, -10); scene.add(pLight);
+const pLight = new THREE.PointLight(0x334466, 1.5, 60); pLight.position.set(-10, 10, -10); scene.add(pLight);
 
 // ─── Ground ───────────────────────────────────────────────────────────────────
 function buildGround() {
@@ -335,6 +635,12 @@ function buildStars() {
   g.setAttribute('color', new THREE.BufferAttribute(col,3));
   scene.add(new THREE.Points(g, new THREE.PointsMaterial({ size:0.5, vertexColors:true })));
 }
+function createStarField() { const geo = new THREE.BufferGeometry(); const positions = []; for (let i=0; i<200; i++) { positions.push((Math.random()-0.5)*100, Math.random()*40+10, (Math.random()-0.5)*100); } geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); const mat = new THREE.PointsMaterial({color:0xffffff, size:0.3, transparent:true, opacity:0.8}); starField = new THREE.Points(geo, mat); starField.visible = false; scene.add(starField); }
+function createClouds() { for (let i=0; i<4; i++) { const geo = new THREE.PlaneGeometry(8+Math.random()*6, 2+Math.random()*2); const mat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.6, side:THREE.DoubleSide}); const cloud = new THREE.Mesh(geo, mat); cloud.position.set((Math.random()-0.5)*40, 12+Math.random()*5, -15-Math.random()*20); cloud.rotation.x = -Math.PI/2; clouds.push(cloud); scene.add(cloud); } }
+let starField = null;
+const clouds = [];
+let moonMesh = null;
+function createMoon() { const geo = new THREE.CircleGeometry(1.5, 32); const mat = new THREE.MeshBasicMaterial({color:0xffffee, side:THREE.DoubleSide}); moonMesh = new THREE.Mesh(geo, mat); moonMesh.position.set(20, 25, -30); moonMesh.visible = false; scene.add(moonMesh); }
 
 function pxMat(c) { return new THREE.MeshStandardMaterial({ color: c, roughness: 0.45, metalness: 0.15 }); }
 function pxMatBasic(c) { return new THREE.MeshBasicMaterial({ color: c }); }
@@ -360,7 +666,7 @@ function initLEDWall() {
     new THREE.PlaneGeometry(wallW, wallH),
     new THREE.MeshBasicMaterial({ map: ledTexture })
   );
-  ledScreen.position.set(5, 5, -12);
+  ledScreen.position.set(5, 4, -12);
   scene.add(ledScreen);
 
   // LED 边框
@@ -378,14 +684,26 @@ function initLEDWall() {
   rightFrame.position.set(15.1, wallH / 2, -12.15);
   scene.add(rightFrame);
 
-  // 支架（2根）
+  // 支架（2根，从地面延伸到屏幕底部）
   const poleMat = pxMat(0x1a1a1a);
-  const pole1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.3), poleMat);
-  pole1.position.set(-5, -0.25, -12);
+  const pole1 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 10, 0.3), poleMat);
+  pole1.position.set(-5, 5, -12);
   scene.add(pole1);
-  const pole2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.5, 0.3), poleMat);
-  pole2.position.set(15, -0.25, -12);
+  const pole2 = new THREE.Mesh(new THREE.BoxGeometry(0.3, 10, 0.3), poleMat);
+  pole2.position.set(15, 5, -12);
   scene.add(pole2);
+  window._pole1 = pole1;
+  window._pole2 = pole2;
+  // 路灯点光源（暖黄，调亮）
+  window._cityLight1 = new THREE.PointLight(0xffffaa, 15.0, 45); window._cityLight1.position.set(-5, 9.5, -12); scene.add(window._cityLight1);
+  window._cityLight2 = new THREE.PointLight(0xffffaa, 15.0, 45); window._cityLight2.position.set(15, 9.5, -12); scene.add(window._cityLight2);
+
+// LED 幕墙前方区域检查结果（z>-12 且 x 在 0-10 之间）：
+// MacBook 主体: x=0, y=0, z=0
+// Ubuntu 工作站主体: x=10, y=0, z=-2
+// 摄像头: x=0, y=25, z=35
+// MacBook 屏幕/键盘/LOGO 等子物体: x≈0, z=-1.5~0.2, y=0.15~3.8
+// Ubuntu 子物体: x≈0~2, z=0~1.76, y=0.25~3.8
 }
 
 function drawLEDInit() {
@@ -408,15 +726,167 @@ function drawLEDInit() {
   ledCtx.fillText('Loading...', 960, 150);
 }
 
+function drawTaskQueue(ctx, data) {
+  if (!data || !data.tasks) return;
+
+  // 像素网格背景
+  ctx.fillStyle = '#0a0a1a';
+  ctx.fillRect(0, 0, 1920, 1080);
+  ctx.fillStyle = '#111128';
+  for (let x = 0; x < 1920; x += 8) {
+    for (let y = 0; y < 1080; y += 8) {
+      ctx.fillRect(x, y, 6, 6);
+    }
+  }
+
+  // 标题
+  ctx.font = 'bold 48px monospace';
+  ctx.fillStyle = '#00ddff';
+  ctx.textAlign = 'center';
+  ctx.fillText('0-1 项目看板', 960, 70);
+
+  // 分隔线
+  ctx.strokeStyle = '#334466';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(60, 100); ctx.lineTo(1860, 100); ctx.stroke();
+
+  // 统计栏
+  const tasks = data.tasks;
+  const total = tasks.length;
+  const completed = tasks.filter(t => t.status === 'completed').length;
+  const notStarted = tasks.filter(t => t.status === 'not-started').length;
+  const inProgress = tasks.filter(t => ['in-progress', 'running'].includes(t.status)).length;
+  const planning = tasks.filter(t => t.status === 'planning').length;
+  const failed = tasks.filter(t => t.status === 'failed').length;
+  const auto = tasks.filter(t => t.mode === 'auto').length;
+  const interactive = tasks.filter(t => t.mode === 'interactive').length;
+
+  const stats = [
+    { label: '总任务', val: total, color: '#ffffff' },
+    { label: '✅完成', val: completed, color: '#44ff44' },
+    { label: '🔄进行', val: inProgress, color: '#ffaa00' },
+    { label: '📋待办', val: notStarted, color: '#ff4444' },
+    { label: '✏️规划', val: planning, color: '#4488ff' },
+    { label: '🤖自动', val: auto, color: '#00cec9' },
+    { label: '👤互动', val: interactive, color: '#a29bfe' },
+  ];
+  ctx.font = 'bold 22px monospace';
+  ctx.textAlign = 'left';
+  let sx = 60;
+  stats.forEach(s => {
+    ctx.fillStyle = s.color;
+    ctx.fillText(s.label + ' ' + s.val, sx, 140);
+    sx += 240;
+  });
+
+  ctx.strokeStyle = '#334466';
+  ctx.beginPath();
+  ctx.moveTo(60, 158); ctx.lineTo(1860, 158); ctx.stroke();
+
+  // 按优先级分组渲染
+  const PRIORITY_ORDER = ['P0', 'P1', 'P2', 'P3'];
+  const PRIORITY_COLORS = { P0: '#ff4757', P1: '#ffa502', P2: '#2ed573', P3: '#70a1ff' };
+  const STATUS_COLORS = {
+    'completed': '#44ff44',
+    'completed-with-issues': '#ffaa00',
+    'in-progress': '#ffaa00',
+    'running': '#ffaa00',
+    'not-started': '#555566',
+    'planning': '#4488ff',
+    'failed': '#ff4444',
+  };
+
+  const groups = {};
+  PRIORITY_ORDER.forEach(p => { groups[p] = []; });
+  tasks.forEach(t => {
+    const p = t.priority || 'P3';
+    if (!groups[p]) groups[p] = [];
+    groups[p].push(t);
+  });
+
+  let y = 188;
+  PRIORITY_ORDER.forEach(p => {
+    const pts = groups[p];
+    if (!pts || pts.length === 0) return;
+    if (y > 960) return;
+
+    // 优先级标题
+    ctx.font = 'bold 24px monospace';
+    ctx.fillStyle = PRIORITY_COLORS[p];
+    ctx.textAlign = 'left';
+    ctx.fillText(p + '  ' + pts.length + '个任务', 60, y);
+
+    // 模式标签
+    const autoCnt = pts.filter(t => t.mode === 'auto').length;
+    const intCnt = pts.filter(t => t.mode === 'interactive').length;
+    ctx.font = '20px monospace';
+    ctx.fillStyle = '#00cec9';
+    ctx.fillText('🤖' + autoCnt, 240, y);
+    ctx.fillStyle = '#a29bfe';
+    ctx.fillText('👤' + intCnt, 330, y);
+
+    // 状态计数
+    const done = pts.filter(t => ['completed', 'completed-with-issues'].includes(t.status)).length;
+    ctx.fillStyle = '#556677';
+    ctx.fillText('已完成 ' + done + '/' + pts.length, 430, y);
+
+    y += 38;
+
+    // 每个任务一行
+    pts.forEach(t => {
+      if (y > 960) return;
+      const sColor = STATUS_COLORS[t.status] || '#555566';
+      ctx.fillStyle = '#334455';
+      ctx.font = '22px monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(t.id || '', 60, y);
+      ctx.fillStyle = '#c8d8f0';
+      ctx.font = '22px monospace';
+      ctx.fillText((t.name || '').substring(0, 36), 130, y);
+      // 状态色块
+      const statusText = t.status === 'completed-with-issues' ? '⚠完成' :
+                         t.status === 'completed' ? '✅完成' :
+                         t.status === 'not-started' ? '⏳待办' :
+                         t.status === 'in-progress' ? '🔄进行' :
+                         t.status === 'planning' ? '✏️规划' :
+                         t.status === 'failed' ? '❌失败' : t.status || '';
+      ctx.fillStyle = sColor;
+      ctx.font = 'bold 20px monospace';
+      ctx.textAlign = 'right';
+      ctx.fillText(statusText, 1860, y);
+      ctx.textAlign = 'left';
+      y += 36;
+    });
+    y += 10;
+  });
+
+  // 整体进度条
+  const ratio = total > 0 ? completed / total : 0;
+  ctx.fillStyle = '#1a1a2a';
+  ctx.fillRect(60, 996, 1800, 16);
+  ctx.fillStyle = '#00ddff';
+  ctx.fillRect(60, 996, 1800 * ratio, 16);
+  ctx.font = 'bold 18px monospace';
+  ctx.fillStyle = '#00ddff';
+  ctx.textAlign = 'left';
+  ctx.fillText('整体进度 ' + completed + '/' + total + '  (' + Math.round(ratio * 100) + '%)', 60, 1038);
+
+  // 时间戳
+  ctx.fillStyle = '#334455';
+  ctx.font = '18px monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(new Date().toLocaleString('zh-CN'), 1860, 1038);
+}
+
 function updateLEDScreen() {
-  fetch('/api/open?file=harness/robot/project-board.json')
+  fetch('/project-board.json')
     .then(r => r.json())
     .then(data => {
-      drawDashboard(ledCtx, data);
+      drawTaskQueue(ledCtx, data);
       if (ledTexture) ledTexture.needsUpdate = true;
     })
     .catch(() => {
-      // 网络错误时只更新时间戳
       ledCtx.fillStyle = '#0a0a1a';
       ledCtx.fillRect(0, 0, 1920, 1080);
       ledCtx.fillStyle = '#111128';
@@ -432,8 +902,8 @@ function updateLEDScreen() {
       ledCtx.font = '28px monospace';
       ledCtx.fillStyle = '#ff4444';
       ledCtx.fillText('无法连接服务器', 960, 160);
-      ledCtx.fillStyle = '#334455';
       ledCtx.font = '20px monospace';
+      ledCtx.fillStyle = '#334455';
       ledCtx.textAlign = 'right';
       ledCtx.fillText(new Date().toLocaleString(), 1800, 1060);
       if (ledTexture) ledTexture.needsUpdate = true;
@@ -510,13 +980,28 @@ function drawDashboard(ctx, data) {
   ctx.font = '20px monospace';
   ctx.textAlign = 'right';
   ctx.fillText(new Date().toLocaleString(), 1800, 1060);
+
+  // 整体进度条（y=1000）
+  const total = data.tasks.length;
+  const successCount = data.tasks.filter(t => t.status === 'success').length;
+  const ratio = total > 0 ? successCount / total : 0;
+  ctx.fillStyle = '#1a1a2a';
+  ctx.fillRect(80, 1000, 1760, 20);
+  ctx.fillStyle = '#44ff44';
+  ctx.fillRect(80, 1000, 1760 * ratio, 20);
+  ctx.fillStyle = '#00ddff';
+  ctx.font = 'bold 20px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`进度 ${successCount}/${total}`, 80, 998);
+  ctx.textAlign = 'right';
+  ctx.fillText(new Date().toLocaleString(), 1800, 1060);
 }
 
 // ─── MacBook ──────────────────────────────────────────────────────────────────
 const macbookGroup = new THREE.Group();
 macbookGroup.userData = { type:'device', id:'macbook', url:'http://127.0.0.1:18999/dashboard.html' };
 // MacBook group 位置保持在 y=0（地砖上）
-macbookGroup.position.set(0, 0, 0);
+macbookGroup.position.set(-6.1, 0, 0);
 
 function buildMacbook() {
   const g = macbookGroup;
@@ -569,12 +1054,12 @@ macbookLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.Mes
 const mlMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('▶ OpenClaw','#00ffcc'), transparent:true }));
 mlMesh.position.z = 0.01; macbookLabel.add(mlMesh);
 macbookLabel.position.set(0, 3.6, -1.5);
-scene.add(macbookLabel);
+macbookGroup.add(macbookLabel);
 
 // ─── Ubuntu ───────────────────────────────────────────────────────────────────
 const ubuntuGroup = new THREE.Group();
 ubuntuGroup.userData = { type:'device', id:'ubuntu', url:'' };
-ubuntuGroup.position.set(10, 0, -2);
+ubuntuGroup.position.set(-10.96, -1.4, 6.186);
 
 // ─── Ubuntu Label ─────────────────────────────────────────────────────────────
 const ubuntuLabel = new THREE.Group();
@@ -582,33 +1067,97 @@ ubuntuLabel.userData = { type:'link', id:'ubuntu-link', url:'' };
 ubuntuLabel.add(new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ color:0x001133, transparent:true, opacity:0.85 })));
 const ulMesh = new THREE.Mesh(new THREE.PlaneGeometry(2.8,0.55), new THREE.MeshBasicMaterial({ map:makeTextCanvas('Ubuntu Desktop','#ff9900'), transparent:true }));
 ulMesh.position.z = 0.01; ubuntuLabel.add(ulMesh);
-ubuntuLabel.position.set(0, 4.8, -0.44);
-scene.add(ubuntuLabel);
+ubuntuLabel.position.set(-0.7, 4.88, -0.44);
+ubuntuGroup.add(ubuntuLabel);
 
 // ─── buildUbuntu ───────────────────────────────────────────────────────────────
 function buildUbuntu() {
   const g = ubuntuGroup;
   // 桌面
-  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(4.0,0.15,1.5), pxMat(0x2e2e2e)); _m.position.set(0,1.58,0); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
-  // 主机箱 - 放在桌面右侧
-  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.2,3.5,2.5), pxMat(0x3a3a3a)); _m.position.set(2.0,1.75,0.5); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
-  // 光驱
-  const d1 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d1.position.set(2.0,2.5,1.76); d1.castShadow=true; d1.receiveShadow=true; g.add(d1);
-  const d2 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d2.position.set(2.0,2.1,1.76); d2.castShadow=true; d2.receiveShadow=true; g.add(d2);
-  // 电源按钮
-  const pb = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.1), pxMat(0x441111)); pb.position.set(2.0,3.3,1.76); pb.castShadow=true; pb.receiveShadow=true; g.add(pb);
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(8.0,0.15,3.0), pxMat(0x2e2e2e)); _m.position.set(0,1.58,0); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 主机箱 - 坐在桌面右侧（底部对齐桌面顶面 y=1.655，中心 y=1.655+0.75=2.405）
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.2,1.5,2.5), pxMat(0x3a3a3a)); _m.position.set(2.0,2.405,0.0); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  // 光驱（跟随机箱上移 +1.655）
+  const d1 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d1.position.set(2.0,3.055,1.26); d1.castShadow=true; d1.receiveShadow=true; g.add(d1);
+  const d2 = new THREE.Mesh(new THREE.BoxGeometry(1,0.3,0.1), pxMat(0x222222)); d2.position.set(2.0,2.755,1.26); d2.castShadow=true; d2.receiveShadow=true; g.add(d2);
+  // 电源按钮（跟随机箱上移 +1.655）
+  const pb = new THREE.Mesh(new THREE.BoxGeometry(0.3,0.15,0.1), pxMat(0x441111)); pb.position.set(2.0,3.005,1.26); pb.castShadow=true; pb.receiveShadow=true; g.add(pb);
   // 显示器支架底座
-  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.1,0.8), pxMat(0x2a2a2a)); _m.position.set(0,1.705,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(1.5,0.1,0.8), pxMat(0x2a2a2a)); _m.position.set(-0.7,1.63,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
   // 显示器支架立柱
-  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(0.3,1.0,0.3), pxMat(0x2a2a2a)); _m.position.set(0,2.255,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(0.3,1.0,0.3), pxMat(0x2a2a2a)); _m.position.set(-0.7,2.13,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
   // 显示器外壳
-  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,0.3), pxMat(0x2a2a2a)); _m.position.set(0,4.005,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
+  g.add((function(){ var _m=new THREE.Mesh(new THREE.BoxGeometry(3.5,2.5,0.3), pxMat(0x2a2a2a)); _m.position.set(-0.7,3.38,-0.6); _m.castShadow=true; _m.receiveShadow=true; return _m; })());
   // 显示器屏幕
-  const ms = new THREE.Mesh(new THREE.BoxGeometry(3,2,0.05), pxMat(0x0a0a0a)); ms.position.set(0,4.005,-0.44); ms.castShadow=true; ms.receiveShadow=true; g.add(ms);
-  // 状态指示灯
+  const ms = new THREE.Mesh(new THREE.BoxGeometry(3,2,0.05), pxMat(0x0a0a0a)); ms.position.set(-0.7,3.38,-0.44); ms.castShadow=true; ms.receiveShadow=true; g.add(ms);
+  // 状态指示灯（跟随机箱上移 +1.655）
   const ubStatus = new THREE.Mesh(new THREE.SphereGeometry(0.2,16,16), new THREE.MeshBasicMaterial({color:0xff4444}));
-  ubStatus.position.set(0,5.6,0); g.add(ubStatus);
+  ubStatus.position.set(0,3.205,-0.5); g.add(ubStatus);
   scene.add(g);
+}
+
+// ─── NPC 状态气泡 ─────────────────────────────────────────────────────────────
+function makeStatusSprite(text, color) {
+  const c = document.createElement('canvas');
+  c.width = 320; c.height = 72;
+  const ctx = c.getContext('2d');
+  // 气泡背景
+  ctx.fillStyle = 'rgba(10,12,20,0.9)';
+  const bw = 310, bh = 62, bx = 5, by = 5, br = 8;
+  ctx.beginPath();
+  ctx.moveTo(bx+br,by);
+  ctx.lineTo(bx+bw-br,by);
+  ctx.quadraticCurveTo(bx+bw,by,bx+bw,by+br);
+  ctx.lineTo(bx+bw,by+bh-br);
+  ctx.quadraticCurveTo(bx+bw,by+bh,bx+bw-br,by+bh);
+  ctx.lineTo(bx+br,by+bh);
+  ctx.quadraticCurveTo(bx,by+bh,bx,by+bh-br);
+  ctx.lineTo(bx,by+br);
+  ctx.quadraticCurveTo(bx,by,bx+br,by);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  // 文字
+  ctx.font = 'bold 24px Courier New';
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, 160, 36);
+  const tex = new THREE.CanvasTexture(c);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true }));
+  sprite.scale.set(2.8, 0.65, 1);
+  return sprite;
+}
+
+function updateNPCStatus(npc) {
+  const pos = npc.position;
+  const macDist = Math.sqrt(pos.x * pos.x + pos.z * pos.z);
+  const ubuntuPos = ubuntuGroup.position;
+  const ubuntuDist = Math.sqrt((pos.x - ubuntuPos.x) ** 2 + (pos.z - ubuntuPos.z) ** 2);
+  let text, color;
+  if (macDist < 8) {
+    text = '编码中...'; color = '#44ff88';
+  } else if (ubuntuDist < 8) {
+    text = '待接入'; color = '#ffaa44';
+  } else {
+    text = '巡检中'; color = '#44aaff';
+  }
+  if (!npc.userData.statusSprite) {
+    npc.userData.statusSprite = makeStatusSprite(text, color);
+    npc.userData.statusSprite.position.y = 2.1;
+    npc.add(npc.userData.statusSprite);
+    npc.userData._lastStatus = text;
+  } else {
+    if (npc.userData._lastStatus !== text) {
+      npc.remove(npc.userData.statusSprite);
+      npc.userData.statusSprite = makeStatusSprite(text, color);
+      npc.userData.statusSprite.position.y = 2.1;
+      npc.add(npc.userData.statusSprite);
+      npc.userData._lastStatus = text;
+    }
+  }
 }
 
 // ─── NPC ───────────────────────────────────────────────────────────────────────
@@ -631,14 +1180,35 @@ function createNPC(x, z) {
   const armL = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.6,0.2), pxMat(0x4488cc)); armL.position.set(-0.35,0.9,0); armL.castShadow=true; armL.receiveShadow=true;
   const armR = new THREE.Mesh(new THREE.BoxGeometry(0.15,0.6,0.2), pxMat(0x4488cc)); armR.position.set(0.35,0.9,0); armR.castShadow=true; armR.receiveShadow=true;
   npc.add(body, head, legL, legR, armL, armR);
+  npc.userData.armL = armL;
+  npc.userData.armR = armR;
+  npc.userData.legL = legL;
+  npc.userData.legR = legR;
   npc.position.set(x, 0, z);
   scene.add(npc);
   npcs.push(npc);
 }
-createNPC(-6, 3);
-createNPC(6, 5);
+createNPC(-6, 3); npcs[0].userData.workTarget = {x:0, z:1}; npcs[0].userData.workType = 'coding';
+createNPC(6, 5); npcs[1].userData.workTarget = {x:10, z:-0.5}; npcs[1].userData.workType = 'standby';
 
 // ─── 树 ────────────────────────────────────────────────────────────────────────
+function moveNPCToWork(npc) {
+  if (!npc.userData.workTarget) return;
+  const t = npc.userData.workTarget;
+  const dx = t.x - npc.position.x;
+  const dz = t.z - npc.position.z;
+  const dist = Math.sqrt(dx*dx + dz*dz);
+  if (dist > 0.1) {
+    npc.position.x += dx * 0.02;
+    npc.position.z += dz * 0.02;
+    // 面向移动方向
+    npc.rotation.y = Math.atan2(dx, dz);
+  } else {
+    // 面向设备方向
+    npc.rotation.y = Math.atan2(dx, dz);
+  }
+}
+
 function createTree(x, z) {
   const tree = new THREE.Group();
   // 树干
@@ -654,8 +1224,12 @@ function createTree(x, z) {
   });
   tree.position.set(x, 0, z);
   scene.add(tree);
+  if (!window.treeGroups) window.treeGroups = [];
+  window.treeGroups.push(tree);
 }
-createTree(-4, -5); createTree(4, -6); createTree(12, -5); createTree(-12, -4); createTree(0, -8);
+// 树位置数组（可编辑，保存时会写回这里）
+window._treePositions = [[15.451,0],[44,0],[13.504,0],[-12,0],[-9.4,0]];
+window._treePositions.forEach(p => createTree(p[0], p[1]));
 
 // ─── 路灯 ─────────────────────────────────────────────────────────────────────
 function createStreetLight(x, z) {
@@ -670,13 +1244,17 @@ function createStreetLight(x, z) {
   const bulb = new THREE.Mesh(new THREE.SphereGeometry(0.12,8,8), new THREE.MeshBasicMaterial({color:0xffffaa}));
   bulb.position.y = 5.0;
   // PointLight
-  const light = new THREE.PointLight(0xffffcc, 1.0, 8);
+  const light = new THREE.PointLight(0xffffcc, 10.0, 18);
   light.position.y = 5.0;
   group.add(pole, head, bulb, light);
   group.position.set(x, 0, z);
   scene.add(group);
+  if (!window.streetLightGroups) window.streetLightGroups = [];
+  window.streetLightGroups.push(group);
 }
-createStreetLight(-5, 1); createStreetLight(5, 1); createStreetLight(-10, 3); createStreetLight(10, 3);
+// 路灯位置数组（可编辑，保存时会写回这里）
+window._streetLightPositions = [[-8.264,-12.117],[17.408,1],[-10,3],[13.861,3]];
+window._streetLightPositions.forEach(p => createStreetLight(p[0], p[1]));
 
 // ─── 大气层 ───────────────────────────────────────────────────────────────────
 const atmosphereVS = `
@@ -702,6 +1280,7 @@ scene.add(window._atmosphere);
 
 // ─── 初始化 ───────────────────────────────────────────────────────────────────
 buildGround(); buildStars(); initLEDWall();
+createStarField(); createClouds(); createMoon();
 buildMacbook(); buildUbuntu();
 
 // LED 首次更新延迟触发
@@ -713,6 +1292,7 @@ const mouse = new THREE.Vector2();
 const clickables = [macbookGroup, ubuntuGroup];
 
 renderer.domElement.addEventListener('click', (e) => {
+  if (editMode) return; // 编辑模式下不响应 URL 点击
   mouse.x = (e.clientX / innerWidth) * 2 - 1;
   mouse.y = -(e.clientY / innerHeight) * 2 + 1;
   raycaster.setFromCamera(mouse, camera);
@@ -732,18 +1312,62 @@ function animate() {
   updateCameraFlyIn();
   applySky(getCurrentSky());
 
-  // LED 幕墙更新（每 10 秒）
-  if (time - (window._lastLEDUpdate || 0) > 10) {
+  // 深夜路灯强制提亮（覆盖 keyframe，绕过解析问题）
+  const h = new Date().getHours() + new Date().getMinutes() / 60;
+  if (starField) starField.visible = (h < 6 || h >= 19);
+  if (moonMesh) moonMesh.visible = (h < 6 || h >= 19);
+  if (h < 6 || h >= 19) {
+    if (window._ambientLight) {
+      window._ambientLight.intensity = 2.0;
+      window._ambientLight.color.set(0x6080c0);
+    }
+    if (window._sunLight) {
+      window._sunLight.intensity = 2.0;
+      window._sunLight.color.set(0x4060a0);
+    }
+    // 城市区域两盏高路灯
+    if (window._cityLight1) { window._cityLight1.intensity = 15.0; }
+    if (window._cityLight2) { window._cityLight2.intensity = 15.0; }
+    // 每根灯柱的 PointLight（在 scene.children 里找）
+    scene.children.forEach(c => {
+      if (c.isPointLight && c.color && c.color.r > 0.9 && c.color.g > 0.9) {
+        c.intensity = 10.0;
+      }
+    });
+  }
+
+  // LED 幕墙更新（每 5 秒）
+  if (time - (window._lastLEDUpdate || 0) > 5) {
     window._lastLEDUpdate = time;
     updateLEDScreen();
   }
 
-  // NPC idle 动画
+  // NPC idle 动画 + 状态更新
   npcs.forEach(npc => {
     const body = npc.userData.body;
     const head = npc.userData.head;
+    const armL = npc.userData.armL;
+    const armR = npc.userData.armR;
     if (body) body.position.y = (npc.userData.baseBodyY || 0) + Math.sin(time * 2 + npc.id * 10) * 0.03;
     if (head) head.rotation.y = Math.sin(time * 1.5 + npc.id * 5) * 0.1;
+    // 打字手臂动画：当距离 workTarget < 0.5 且 workType=coding 时
+    const wt = npc.userData.workTarget;
+    const dist = wt ? Math.hypot(npc.position.x - wt.x, npc.position.z - wt.z) : 999;
+    const isCoding = npc.userData.workType === 'coding' && dist < 0.5;
+    if (armL) armL.rotation.x = isCoding ? Math.sin(time * 8 + npc.id * 3) * 0.4 : 0;
+    if (armR) armR.rotation.x = isCoding ? Math.sin(time * 8 + npc.id * 3 + Math.PI) * 0.4 : 0;
+    // 行走腿部动画：dist > 0.1 时左右腿 position.z 交替前后摆动
+    const legL = npc.userData.legL;
+    const legR = npc.userData.legR;
+    if (dist > 0.1) {
+      if (legL) legL.position.z = Math.sin(time * 10 + npc.id * 7) * 0.15;
+      if (legR) legR.position.z = Math.sin(time * 10 + npc.id * 7 + Math.PI) * 0.15;
+    } else {
+      if (legL) legL.position.z = 0;
+      if (legR) legR.position.z = 0;
+    }
+    moveNPCToWork(npc);
+    updateNPCStatus(npc);
   });
 
   // MacBook 状态指示器脉冲
@@ -753,6 +1377,7 @@ function animate() {
     window._macPulse.material.opacity = 0.3 - Math.sin(time * 3) * 0.2;
   }
 
+  clouds.forEach((c,i) => { c.position.x += 0.005 * (i%2===0 ? 1 : -1); if (Math.abs(c.position.x) > 30) c.position.x *= -1; });
   controls.update();
   renderer.render(scene, camera);
 }

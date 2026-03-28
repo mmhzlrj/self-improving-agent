@@ -1,0 +1,7 @@
+{"ts":"2026-03-28T01:00:00+08:00","version":"v3.1","quota_remaining":14252933,"auto_pending":[],"interactive_not_started":["T-001","T-002","T-003","T-004","T-005","T-006","T-007"],"mode":"no-auto-tasks","summary":"all auto tasks completed, stopping"}
+{"ts":"2026-03-28T05:32:00+08:00","action":"night-start","quota_ok":true,"auto_pending":0,"dispatched":0,"note":"all auto tasks completed, no dispatch needed"}
+{"ts":"2026-03-28T06:00:00+08:00","version":"v3.1","quota_remaining":17,"quota_used":583,"auto_pending":[],"interactive_not_started":["T-001","T-002","T-003","T-004","T-005","T-006","T-007"],"mode":"quota_exhausted","summary":"all auto tasks completed; quota 17/600, stop"}
+{"ts":"2026-03-28T06:30:00+08:00","version":"v3.1","quota_remaining":12349730,"auto_pending":[],"interactive_not_started":["T-001","T-002","T-003","T-004","T-005","T-006","T-007"],"mode":"recheck-no-tasks","summary":"06:00 final-summary already generated; re-verified no auto+pending tasks exist, stopping"}
+{"ts":"2026-03-28T00:00:00+08:00","event":"orchestrator-start","version":"v3.1","date":"2026-03-28"}
+{"ts":"2026-03-28T00:00:01+08:00","event":"task-scan","result":"no-pending-auto-tasks"}
+{"ts":"2026-03-28T00:00:01+08:00","event":"orchestrator-stop","reason":"no-pending-tasks","tasks-total":9,"tasks-auto":6,"tasks-auto-completed":6,"tasks-auto-failed":0}

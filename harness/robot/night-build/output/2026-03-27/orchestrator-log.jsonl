@@ -1,0 +1,2 @@
+{"ts":"2026-03-28T07:00:00+08:00","version":"v3.1","quota_remaining":258,"auto_pending":[],"interactive_not_started":["T-001","T-002","T-003","T-004","T-005","T-006","T-007"],"mode":"no-auto-tasks","summary":"晨间确认：额度258次（150-299区间仅派小任务），无待处理auto任务，所有auto任务已完成"}
+{"ts":"2026-03-28T07:30:00+08:00","version":"v3.1","quota_check":{"MiniMax-M*":{"remains_time":8982956,"interval_usage":214,"interval_total":600}},"quota_decision":"≥300 → 派下一个 auto+pending 任务","auto_pending":[],"mode":"no-auto-tasks","summary":"所有 auto 任务已完成，额度充足但无任务可执行，停止"}

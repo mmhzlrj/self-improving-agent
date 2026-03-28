@@ -2231,6 +2231,25 @@ ffmpeg -i rtsp://<esp32-ip>:8554/stream \
 - 最后更新：2026-03-26（已更新：烧录底座工作流、ESP32-CAM-RTSP 固件优先推荐）
 - 补充时间：2026-03-27（基于映射报告 v2）
 
+## 映射报告验证更新（2026-03-27）
+
+来源：Cross-Verification-N05.md（2026-03-27 夜间构建 N-02 产出）
+
+### ✅ 已验证的正确信息
+- ESP32-Cam 固件烧录流程本身正确
+- RTSP 固件烧录到 ESP32-Cam 并输出 RTSP 流是正确的（ESP32 端）
+- 烧录底座工作流、降频配置、静态 IP 等章节均无需修正
+
+### ❌ 需要修正的内容
+- **补充 1（Camera Node 配置）中的 Camera Node RTSP 描述有误**
+  - ❌ 报告原文称"OpenClaw Camera Node 接收配置"中包含 `rtsp: { enabled: true, url: "rtsp://..." }` 并说"需确认 Gateway 是否内建 RTSP 解码器"
+  - **实际情况**：OpenClaw 官方 Camera Node 文档（`/nodes/camera`）完全**不包含 RTSP 支持**。Camera Node 仅支持：
+    - iOS/Android/macOS 原生摄像头捕获（`camera.snap` 返回 jpg，`camera.clip` 返回 mp4）
+    - macOS Screen Recording（`screen.record`）
+    - 照片 payload guard 5MB（base64 压缩到 5MB 以下）
+  - **修正方案**：删除补充 1 中关于 Camera Node RTSP 配置的内容。如需接入 ESP32 RTSP 流，OpenClaw 官方无内置方案，应作为外部工具独立处理。
+  - **补充 2（FFmpeg 中转方案）方向正确**，可保留但需注明"非 OpenClaw 内置功能"
+
 **上下文更新（2026-03-26）**：
 - ✅ ESP32-Cam 为标准双排针开发板（AI-Thinker 兼容）
 - ✅ 已持有配套烧录底座（母座），烧录时板子插进底座即可

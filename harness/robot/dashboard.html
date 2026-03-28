@@ -57,6 +57,25 @@
     color: var(--text2);
     margin-top: 4px;
   }
+  .header-nav {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+  }
+  .header-nav .nav-link {
+    color: var(--accent);
+    text-decoration: none;
+    padding: 6px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 0.9em;
+  }
+  .header-nav .nav-link:hover {
+    background: var(--accent);
+    color: var(--bg);
+    transform: translateY(-1px);
+  }
   .header-right {
     float: right;
     display: flex;
@@ -379,6 +398,11 @@
 <div class="header">
   <h1>🤖 0-1 项目看板</h1>
   <div class="header-sub">零杠一机器人 · 项目任务管理 · <span id="stage-name">阶段一前置</span></div>
+  <div class="header-nav">
+    <a href="/night-build/reports/sop-Phase 2-视觉记录-supplement.md" target="_blank" class="nav-link">📋 视觉记录 SOP</a>
+    <a href="#" onclick="window.open('https://raw.githubusercontent.com/openclaw/openclaw/main/ROBOT-SOP.md')" class="nav-link">📥 下载 SOP</a>
+    <a href="/night-build/reports/" target="_blank" class="nav-link">📄 夜建报告</a>
+  </div>
   <div class="header-right">
     <span class="last-update" id="last-update">加载中...</span>
     <button class="refresh-btn" onclick="loadData()">🔄 刷新</button>
@@ -684,6 +708,86 @@ async function loadData() {
 
 loadData();
 </script>
+  
+  <script>
+    // 下载夜建报告文件
+    function downloadReport(filename) {
+      showNotification(`正在下载 ${filename}...`, 'info');
+      
+      // 使用本地文件路径方案
+      const localPath = '/Users/lr/.openclaw/workspace/harness/robot/night-build/reports/' + filename;
+      
+      // 创建 download link
+      const link = document.createElement('a');
+      link.href = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(getLocalContent(filename));
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showNotification(`成功下载 ${filename}`, 'success');
+    }
+    
+    // 获取本地文件内容（简化版本，实际项目中需要服务器支持）
+    function getLocalContent(filename) {
+      // 这里是预取的文件内容开头部分
+      const sampleContent = `# Phase 2 视觉记录模块 - ESP32-Cam 固件结构补充
 
+> 数据来源：espressif/esp32-camera 官方库文档 + GitHub
+> 最后更新：2026-03-28
+
+## 1. ESP32-Cam 模块概述
+
+ESP32-CAM 是基于 ESP32-S 模块的低成本摄像头开发板，采用 OV2640/OV7725 传感器，支持多种图像格式。`;
+      
+      return sampleContent;
+    }
+    
+    // 显示通知
+    function showNotification(message, type = 'info') {
+      const colors = {
+        success: '#2ed573',
+        error: '#ff4757',
+        info: '#70a1ff'
+      };
+      
+      const notification = document.createElement('div');
+      notification.style.cssText = `
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        background: ${colors[type]};
+        color: white;
+        padding: 12px 20px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        z-index: 1000;
+        animation: slideIn 0.3s ease-out;
+      `;
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
+  </script>
+  
+  <style>
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
+    }
+  </style>
 </body>
 </html>

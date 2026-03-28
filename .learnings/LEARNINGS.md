@@ -1028,3 +1028,53 @@ mdview导出的review-results.json使用`item-{N}`格式（N是Markdown中的###
 ### Metadata
 - Source: error
 - Tags: approval-note-matching, url-correction, context-mismatch
+
+---
+
+## 2026-03-28: mdview.py 三层 bug 修复经验
+
+### 问题
+Minimax subagent 调用 mdview.py 打开 markdown 文件，浏览器实际显示 dashboard.html 而非目标文件。
+
+### 三层根因
+
+**Layer 1: webbrowser.open() 默认 new=0**
+- `new=0` 激活已有 tab，不开新 tab
+- dashboard tab 被激活，导航到 index.html 的操作被忽略
+- 修复：`webbrowser.open(url, new=2)`
+
+**Layer 2: mdview 和 dashboard 端口冲突（18999）**
+- mdview 和 dashboard_mcp_server.py 共用 18999
+- mdview 检测到"已有 mdview 进程"就直接打开 18999/index.html
+- 但实际 18999 是 dashboard，它对 /index.html 重定向到 /dashboard.html
+- 修复：mdview 改用独立端口 **18990**
+
+**Layer 3: 复用逻辑只认进程不认端口**
+- `existing_pids` 找到 mdview.py 进程就用 PORT 打开
+- 不检查 PORT 是否真的是 mdview.py 在监听
+- 修复：先用 `socket.connect_ex()` 确认端口监听，再打开
+
+### 关键经验
+- 工具复用检查：不仅要看进程名，还要验证端口/资源是否匹配
+- 独立服务不要共用端口，容易被其他服务劫持
+- `webbrowser.open()` 的 `new` 参数默认行为容易忽略
+
+### Metadata
+- Source: bug-fix
+- Tags: webbrowser, port-conflict, mdview, subprocess-reuse
+
+---
+
+## 2026-03-28: dashboard 点击 .md 开 2 tab 的修复
+
+### 问题
+dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbrowser.open() 打开浏览器 tab，而 API 返回 URL 后 JS 也会 window.open() 打开 tab，导致 2 个 tab。
+
+### 修复
+- mdview.py 支持 `--no-browser`（-n）参数，只生成 HTML 不打开浏览器
+- server.py 的 subprocess.Popen 加 `--no-browser` 参数
+- 逻辑：dashboard server 只负责生成 HTML 并返回 URL，前端 JS 负责打开 tab
+
+### Metadata
+- Source: bug-fix
+- Tags: subprocess, webbrowser-open, double-tab, dashboard

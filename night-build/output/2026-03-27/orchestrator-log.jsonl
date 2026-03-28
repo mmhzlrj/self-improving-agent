@@ -1,3 +1,7 @@
 {"time":"2026-03-27T01:30:00+08:00","event":"dispatch","tasks":["T-011","T-012"],"quota":{"remains_time_ms":1699488,"interval_remaining":29},"note":"T-011:映射验证 T-012:INDEX生成"}
 {"time":"2026-03-27T01:37:00+08:00","event":"dispatch","tasks":["T-010"],"quota":{"remains_time_ms":1320047,"interval_remaining":539},"note":"T-010:报告回补，继承T-011验证错误"}
 {"time":"2026-03-27T01:40:00+08:00","event":"final-summary","output":"night-build/output/2026-03-27/final-summary.md","auto_tasks_completed":3,"all_auto_tasks_done":true}
+{"ts":"2026-03-27T20:00:00+08:00","event":"night-orchestrator-run","version":"v3.1","remaining_quota":2,"remaining_percent":0.33,"decision":"stop_no_tasks","reason":"all auto tasks completed","tasks_scanned":13,"auto_pending":0,"auto_completed":5,"interactive_planning":7}
+{"time":"2026-03-27T23:00:00+08:00","event":"final-summary","output":"night-build/output/2026-03-27/final-summary-night.md","auto_tasks_completed":0,"all_auto_tasks_done":true,"decision":"stop_no_tasks","reason":"all auto tasks already completed in previous runs","tasks_scanned":13,"auto_pending":0,"interactive_pending":7}
+{"ts":"2026-03-27T02:00:00+08:00","quota_remaining":521,"status":"no_pending_tasks","message":"所有 auto 任务已完成，无 pending 任务"}
+{"ts":"2026-03-27T02:00:05+08:00","status":"stopped","reason":"no auto+pending tasks in project-board.json","output":"night-build/output/2026-03-27/final-summary.md"}

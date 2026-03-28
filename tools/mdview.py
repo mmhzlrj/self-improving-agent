@@ -27,7 +27,7 @@ MD_EXTENSIONS = [
     'extra', 'codehilite', 'tables', 'fenced_code', 'nl2br'
 ]
 
-PORT = 18999
+PORT = 18990  # 独立端口，不与 dashboard 服务器 (18999) 冲突
 
 # ============ 通用 CSS ============
 BASE_CSS = """
@@ -646,6 +646,7 @@ def main():
     parser = argparse.ArgumentParser(description='Markdown \u6587\u4ef6\u9884\u89c8\u5668')
     parser.add_argument('filepath', help='Markdown \u6587\u4ef6\u8def\u5f84')
     parser.add_argument('--review', '-r', action='store_true', help='\u5ba1\u6279\u6a21\u5f04\uff08\u5e26\u91c7\u7eb3/\u4e0d\u91c7\u7eb3\u6309\u94ae\uff09')
+    parser.add_argument('--no-browser', '-n', action='store_true', help='\u751f\u6210 HTML \u4f46\u4e0d\u6253\u5f00\u6d4f\u89c8\u5668\uff08API \u8c03\u7528\u65f6\uff09')
     args = parser.parse_args()
 
     filepath = os.path.expanduser(args.filepath)
@@ -669,27 +670,40 @@ def main():
     with open(out_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
-    # 检查是否已有 mdview 进程在运行
-    existing_pids = []
+    # 先检查目标端口是否已经在监听
+    import socket
+    port_in_use = False
+    server_pid = None
     try:
-        result = subprocess.run(['ps', 'aux'], capture_output=True, text=True, timeout=5)
-        for line in result.stdout.splitlines():
-            if 'mdview.py' in line and 'grep' not in line:
-                parts = line.split()
-                if len(parts) >= 2:
-                    pid = int(parts[1])
-                    if pid != os.getpid():
-                        existing_pids.append(pid)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(1)
+        r = s.connect_ex(('127.0.0.1', PORT))
+        s.close()
+        if r == 0:
+            port_in_use = True
+            # 端口被占用，查找是哪个 PID
+            try:
+                result = subprocess.run(['ps', 'aux'], capture_output=True, text=True, timeout=5)
+                for line in result.stdout.splitlines():
+                    if 'mdview.py' in line and 'grep' not in line and str(os.getpid()) not in line:
+                        parts = line.split()
+                        if len(parts) >= 2:
+                            pid = int(parts[1])
+                            server_pid = pid
+                            break
+            except Exception:
+                pass
     except Exception:
         pass
 
-    if existing_pids:
-        # 已有 mdview 进程在运行，直接打开 URL（HTML 文件已更新）
-        webbrowser.open(f'http://127.0.0.1:{PORT}/index.html')
+    if port_in_use and server_pid is not None:
+        # 已有 mdview 服务器在运行（端口匹配），直接打开 URL（HTML 文件已更新）
+        if not args.no_browser:
+            webbrowser.open(f'http://127.0.0.1:{PORT}/index.html', new=2)
         filename = os.path.basename(filepath)
         print(f"\u2705 \u5df2\u6253\u5f00\uff08{mode_label}\uff09: {filename}")
         print(f"   URL: http://127.0.0.1:{PORT}/index.html")
-        print(f"   \u2139\ufe0f  \u590d\u7528\u5df2\u6709\u670d\u52a1\u5668\uff0c\u672a\u542f\u52a8\u65b0\u8fdb\u7a0b")
+        print(f"   \u2139\ufe0f  \u590d\u7528\u5df2\u6709\u670d\u52a1\u5668\uff08PID {server_pid}\uff09\uff0c\u5728\u65b0\u6807\u7b7e\u9875\u6253\u5f00")
         return  # 直接退出，不启动新服务器
 
     # 没有已有进程，启动新服务器
@@ -707,11 +721,14 @@ def main():
     except Exception:
         print(f"\u274c \u670d\u52a1\u5668\u672a\u6210\u529f\u542f\u52a8")
         os._exit(1)  # 强制退出整个进程，防止僵尸
-    webbrowser.open(f'http://127.0.0.1:{PORT}/index.html')
+    if not args.no_browser:
+        webbrowser.open(f'http://127.0.0.1:{PORT}/index.html', new=2)
 
     filename = os.path.basename(filepath)
     print(f"\u2705 \u5df2\u6253\u5f00\uff08{mode_label}\uff09: {filename}")
     print(f"   URL: http://127.0.0.1:{PORT}/index.html")
+    if args.no_browser:
+        print(f"   \u2139\ufe0f  API \u8c03\u7528\u6a21\u5f0f\uff0c\u672a\u6253\u5f00\u6d4f\u89c8\u5668")
 
     # Keep server alive
     try:

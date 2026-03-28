@@ -1454,6 +1454,31 @@ bun install -g openclaw   # 会导致启动失败！
 
 *文档生成时间：2026-03-26*
 *补充时间：2026-03-27（基于映射报告 v2）*
+
+## 映射报告验证更新（2026-03-27）
+
+来源：Cross-Verification-N05.md（2026-03-27 夜间构建 N-02 产出）
+
+### ✅ 已验证的正确信息
+- Gateway 端口 18789，WebSocket + HTTP 同端口复用 ✅
+- Sub-agent `maxSpawnDepth` 默认 1，范围 1-5 ✅
+- Sub-agent `maxChildrenPerAgent` 默认 5，`maxConcurrent` 默认 8，`archiveAfterMinutes` 默认 60 ✅
+- `exec host` 支持 `sandbox` / `node` / `gateway` 三选一 ✅
+- Nodes 通过 WebSocket 与 Gateway 双向连接 ✅
+- `compaction reserveTokensFloor = 20000`，`memory_flush softThresholdTokens = 4000` ✅
+- cron `sessionRetention` 默认 24h，`maxConcurrentRuns` 默认 1 ✅
+- Node.js ≥ 22.14 推荐 24，npm 全局安装 ✅
+
+### ❌ 需要修正的内容
+- **补充 1（多 Agent 并行感知处理）中的 sub-agent 参数描述需补充**：
+  - `maxSpawnDepth` 文档推荐值为 **Depth 2**（不只是"可设为 2"），实际建议 1-5
+  - Sub-agent context **只注入 AGENTS.md + TOOLS.md**（不注入 SOUL.md / MEMORY.md / IDENTITY.md / USER.md / HEARTBEAT.md / BOOTSTRAP.md），需要在设计架构时注意上下文缺失
+- **DM pairing 机制**（节点接入时涉及 pairing）：
+  - Pairing code **有效期 1 小时**，超时需重新生成
+  - Pending pairing 上限 **3 个/频道**，超出后新请求被拒绝
+  - 这影响 Nano 节点接入失败时的重试策略设计
+- **补充 3（禁止 Bun 安装 OpenClaw）** 方向正确，无需修正 ✅
+
 *维护建议：每 3 个月检查 OpenClaw 更新和 JetPack 新版本兼容性*
 
 ---

@@ -1382,7 +1382,34 @@ nc -zv <mac-ip> 18789                    # 端口测试
 
 ---
 
-## 补充内容（基于映射报告 v2）
+## 映射报告验证更新（2026-03-27）
+
+来源：Cross-Verification-N05.md（2026-03-27 夜间构建 N-02 产出）
+
+### ✅ 已验证的正确信息
+- Gateway 默认端口 18789 ✅
+- Gateway multiplexing WebSocket + HTTP 同端口 ✅
+- LM Studio 默认端口 `http://127.0.0.1:1234/v1` ✅
+- MiniMax M2.5 GS32 contextWindow = 196608，maxTokens = 8192 ✅
+- Sub-agent `maxSpawnDepth` 默认 1（范围 1-5，推荐 Depth 2）✅
+- Sub-agent `maxChildrenPerAgent` 默认 5，`maxConcurrent` 默认 8 ✅
+- Sub-agent `archiveAfterMinutes` 默认 60 分钟 ✅
+- `exec` 工具 `host` 支持 `sandbox` / `node` / `gateway` ✅
+- Session key 格式 `agent:<id>:main` / `agent:<id>:subagent:<uuid>` ✅
+- DM pairing 为默认策略（需手动审批）✅
+
+### ❌ 需要补充/修正的内容
+- **Heartbeat 默认 30 分钟**：`every: "30m"`，未在当前报告中明确提及
+  - 建议在 Gateway 配置章节补充：heartbeat 默认 30 分钟，如需调整可通过 `openclaw config set gateway.heartbeat.every "5m"` 配置
+- **Ollama 集成警告**：`/v1` 路径会破坏 tool calling，应使用 `http://127.0.0.1:11434`（无后缀）
+  - 当前报告未明确提及此陷阱，补充内容中 RTX 2060 接入方案提到了 Ollama 但未注明此问题
+- **Sub-agent context 只注入 AGENTS.md + TOOLS.md**（无 SOUL / MEMORY / IDENTITY）
+  - 设计多 Agent 协作架构时需注意 sub-agent 缺失这些上下文文件
+- **DM pairing code 有效期 1 小时**，pending 上限 **3 个/频道**
+  - 在 §7.6 Pairing 审批问题章节补充：pairing code 有效期 1 小时，超时需重新发起；pending 上限 3 个/频道，超出后新请求被拒绝
+
+### ⚠️ 外部硬件声明（无法通过 OpenClaw 文档验证）
+- BearPi-Pico H3863 芯片规格（星闪 49μs / 240MHz）属于硬件参数，非 OpenClaw 软件功能，需对照 BearPi 官方文档或实测验证
 
 ### 补充 1：RTX 2060 GPU 接入方式（重要澄清）
 

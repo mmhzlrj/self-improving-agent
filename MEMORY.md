@@ -464,6 +464,20 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - timeout 设 5 分钟，别卡到自然超时浪费调用次数
 - 刚才教训：3 个 subagent 同时跑文件编辑 → 全部超时卡死，浪费约 226k tokens 的调用
 
+### Subagent read 工具问题（重要，2026-03-26 A/B 测试确认）
+- **MiniMax read 工具按字符数截断，非按行数**：limit=300 实际可能只返回 224 行（代码密集区更少）
+- **offset=1 时行号偏移 7-14 行**，offset>1000 时正确
+- **500 行输入后半段信息丢失**，300 行稳定（代码区除外），1000 行不可靠
+- **结论：subagent 永远用 exec+sed/grep/awk 读取文件，不用 read 工具**
+- 详见：`harness/robot/night-build/best-practices.md`
+
+### Subagent 任务管理规范（2026-03-27 补充）
+- **每个 subagent prompt 必须要求完成后更新 task-queue.json**
+- **任务描述越详细效果越好**：给出文件路径、具体参数、步骤编号、验证方法
+- **用 attachments 传入关键文件内容**，减少 subagent 的 read 调用浪费
+- **cron 自动调度消除间隔**，手动派发间隔浪费大量配额
+- 详见：`harness/robot/night-build/best-practices.md` v0.6
+
 ---
 
 ## 0-1 机器人项目核心摘要（2026-03-26 整理）

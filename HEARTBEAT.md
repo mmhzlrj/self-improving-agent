@@ -27,8 +27,8 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-26 11:00 CST (03:00 UTC)
-# MiniMax 套餐状态：周期（10:00-15:00），剩余 600/600，已用 0.0%
+# Last check: 2026-03-28 17:29 CST (09:29 UTC)
+# MiniMax 套餐状态：周期（15:00-20:00），剩余 460/600，已用 23.3%
 # 阈值状态：无触发
 
 ## MiniMax Coding Plan 额度监控

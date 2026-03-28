@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <title>project-board</title>
+    <title>Phase-0-Gateway-Docking</title>
     <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -83,179 +83,1252 @@ table.toc-table tr.toc-chapter td { border-top: 1px solid #e5e7eb; padding-top: 
 </head>
 <body>
 <div class="container">
-<p>{<br />
-  "version": 3,<br />
-  "date": "2026-03-27",<br />
-  "project": "0-1 机器人项目",<br />
-  "description": "项目任务看板 — 白天互动任务 + 夜间自主任务统一管理",<br />
-  "rules": {<br />
-    "每次会话开始时": "读取此文件获取当前项目状态",<br />
-    "每次完成任务后": "立即更新此文件",<br />
-    "每天 20:05": "Night Build 读取此文件，提取 mode=auto 的 pending 任务",<br />
-    "每天 09:50": "晨间总结，标注昨晚完成了什么",<br />
-    "白天任务": "mode=interactive，需要用户确认方向/决策",<br />
-    "夜间任务": "mode=auto，subagent 自主执行，产出文档"<br />
-  },</p>
-<p>"当前阶段": {<br />
-    "名称": "阶段一前置",<br />
-    "目标": "打通基础链路，让硬件能和 OpenClaw 通信",<br />
-    "blocker": "Phase 0（Ubuntu 台机对接 Gateway）未完成"<br />
-  },</p>
-<p>"tasks": [<br />
-    {<br />
-      "id": "T-001",<br />
-      "name": "Phase 0：Ubuntu 台机对接 Gateway",<br />
-      "priority": "P0",<br />
-      "mode": "interactive",<br />
-      "status": "not-started",<br />
-      "reason": "需要用户亲自操作台式机，实时确认网络配置、SSH 连接、openclaw node run 等步骤",<br />
-      "deliverable": "台机作为 OpenClaw Node 成功连接 Gateway",<br />
-      "depends_on": [],<br />
-      "refs": ["harness/robot/night-build/reports/Phase-0-Gateway-Docking.md"]<br />
-    },<br />
-    {<br />
-      "id": "T-002",<br />
-      "name": "Jetson Nano 系统环境搭建",<br />
-      "priority": "P0",<br />
-      "mode": "interactive",<br />
-      "status": "not-started",<br />
-      "reason": "需要用户物理连接 Jetson Nano，和我实时确认系统配置、网络、swap 等",<br />
-      "deliverable": "Jetson Nano 可 SSH 访问，系统环境就绪（swap/zram 已配置）",<br />
-      "depends_on": [],<br />
-      "refs": ["harness/robot/night-build/reports/Jetson-Nano-OpenClaw-Setup.md"],<br />
-      "note": "Jetson 是 Phase 0-2 的核心节点，优先级高于 ESP32"<br />
-    },<br />
-    {<br />
-      "id": "T-003",<br />
-      "name": "蓝牙耳机采购",<br />
-      "priority": "P1",<br />
-      "mode": "interactive",<br />
-      "status": "not-started",<br />
-      "reason": "需要用户决定买哪个型号、预算多少",<br />
-      "deliverable": "确认蓝牙耳机型号，下单",<br />
-      "depends_on": ["T-002"],<br />
-      "note": "用户已审批确认：改为购买蓝牙耳机（审批 #151 #152，2026-03-26）"<br />
-    },<br />
-    {<br />
-      "id": "T-004",<br />
-      "name": "ESP32-Cam 固件烧录",<br />
-      "priority": "P1",<br />
-      "mode": "interactive",<br />
-      "status": "not-started",<br />
-      "reason": "需要用户物理操作（插拔板子、按按钮），我指导步骤",<br />
-      "deliverable": "ESP32-Cam 输出 RTSP 视频流",<br />
-      "depends_on": [],<br />
-      "refs": ["harness/robot/night-build/reports/ESP32-Cam-Firmware-Flashing.md"],<br />
-      "note": "Phase 2 的前置任务，依赖 Jetson Nano 完成后接收 RTSP 流"<br />
-    },<br />
-    {<br />
-      "id": "T-005",<br />
-      "name": "Cyber Bricks MQTT 指令控制实测",<br />
-      "priority": "P1",<br />
-      "mode": "interactive",<br />
-      "status": "not-started",<br />
-      "reason": "需要用户物理连接 Cyber Bricks，我发 MQTT 指令测试",<br />
-      "deliverable": "确认 Cyber Bricks 能通过 MQTT 接收并执行动作指令",<br />
-      "depends_on": [],<br />
-      "refs": ["harness/robot/ROBOT-SOP.md"]<br />
-    },<br />
-    {<br />
-      "id": "T-006",<br />
-      "name": "贵庚记忆系统架构设计",<br />
-      "priority": "P1",<br />
-      "mode": "interactive",<br />
-      "status": "planning",<br />
-      "reason": "核心系统，需要和用户讨论数据模型、存储格式、检索策略",<br />
-      "deliverable": "贵庚系统设计文档 v1",<br />
-      "depends_on": []<br />
-    },<br />
-    {<br />
-      "id": "T-007",<br />
-      "name": "星闪 H3863 SLE 通信测试方案",<br />
-      "priority": "P2",<br />
-      "mode": "interactive",<br />
-      "status": "planning",<br />
-      "reason": "需要用户确认是否有两块 H3863 可以做点对点测试",<br />
-      "deliverable": "测试 SOP 文档",<br />
-      "depends_on": []<br />
-    },</p>
-<div class="codehilite"><pre><span></span><code>{
-  &quot;id&quot;: &quot;T-010&quot;,
-  &quot;name&quot;: &quot;补全 Phase 0 / ESP32 / Jetson 报告&quot;,
-  &quot;priority&quot;: &quot;P2&quot;,
-  &quot;mode&quot;: &quot;auto&quot;,
-  &quot;status&quot;: &quot;completed&quot;,
-  &quot;completed_at&quot;: &quot;2026-03-27T01:40:00+08:00&quot;,
-  &quot;output&quot;: [&quot;reports/Phase-0-Gateway-Docking.md&quot;, &quot;reports/ESP32-Cam-Firmware-Flashing.md&quot;, &quot;reports/Jetson-Nano-OpenClaw-Setup.md&quot;],
-  &quot;reason&quot;: &quot;基于映射报告 v2 的新发现回补已有报告&quot;,
-  &quot;deliverable&quot;: &quot;三份报告末尾追加补充内容&quot;,
-  &quot;depends_on&quot;: [],
-  &quot;refs&quot;: [
-    &quot;harness/robot/night-build/reports/OpenClaw-Features-0-1-Mapping-v2.md&quot;,
-    &quot;harness/robot/night-build/reports/Phase-0-Gateway-Docking.md&quot;,
-    &quot;harness/robot/night-build/reports/ESP32-Cam-Firmware-Flashing.md&quot;,
-    &quot;harness/robot/night-build/reports/Jetson-Nano-OpenClaw-Setup.md&quot;
-  ],
-  &quot;note&quot;: &quot;三份报告均追加补充章节，未传播Genesis=Apple错误&quot;
-},
-{
-  &quot;id&quot;: &quot;T-011&quot;,
-  &quot;name&quot;: &quot;映射报告五平台交叉验证&quot;,
-  &quot;priority&quot;: &quot;P2&quot;,
-  &quot;mode&quot;: &quot;auto&quot;,
-  &quot;status&quot;: &quot;completed&quot;,
-  &quot;completed_at&quot;: &quot;2026-03-27T01:37:00+08:00&quot;,
-  &quot;output&quot;: [&quot;night-build/output/2026-03-27/Mapping-Verification.md&quot;],
-  &quot;reason&quot;: &quot;映射报告 v2 未经验证，可能有事实性错误&quot;,
-  &quot;deliverable&quot;: &quot;Mapping-Verification.md&quot;,
-  &quot;depends_on&quot;: [],
-  &quot;refs&quot;: [&quot;harness/robot/night-build/reports/OpenClaw-Features-0-1-Mapping-v2.md&quot;],
-  &quot;note&quot;: &quot;18条声明验证，3条错误：Genesis≠Apple/Ollama URL/发布日期&quot;,
-  &quot;auto_prompt&quot;: &quot;读取映射报告 v2，提取所有事实性声明（型号、规格、URL、来源），用 DeepSeek/豆包/Kimi/GLM/千问 并行验证。输出：每条声明的验证结果（正确/错误/不确定），错误项给出修正。&quot;
-},
-{
-  &quot;id&quot;: &quot;T-012&quot;,
-  &quot;name&quot;: &quot;生成 Night Build 产出 INDEX&quot;,
-  &quot;priority&quot;: &quot;P3&quot;,
-  &quot;mode&quot;: &quot;auto&quot;,
-  &quot;status&quot;: &quot;completed&quot;,
-  &quot;completed_at&quot;: &quot;2026-03-27T01:34:00+08:00&quot;,
-  &quot;output&quot;: [&quot;harness/robot/night-build/reports/INDEX.md&quot;],
-  &quot;note&quot;: &quot;subagent 路径错误，父 agent 修正并完成&quot;
-},
-{
-  &quot;id&quot;: &quot;T-013&quot;,
-  &quot;name&quot;: &quot;Jetson Nano 自定义镜像可行性深入调研&quot;,
-  &quot;priority&quot;: &quot;P2&quot;,
-  &quot;mode&quot;: &quot;auto&quot;,
-  &quot;status&quot;: &quot;completed&quot;,
-  &quot;completed_at&quot;: &quot;2026-03-26T22:38:00+08:00&quot;,
-  &quot;output&quot;: [&quot;reports/Jetson-Nano-Custom-Image-Research.md&quot;, &quot;reports/Jetson-Nano-OpenClaw-Setup.md&quot;]
-},
-{
-  &quot;id&quot;: &quot;T-014&quot;,
-  &quot;name&quot;: &quot;OpenClaw × ROBOT-SOP 映射报告&quot;,
-  &quot;priority&quot;: &quot;P2&quot;,
-  &quot;mode&quot;: &quot;auto&quot;,
-  &quot;status&quot;: &quot;completed-with-issues&quot;,
-  &quot;completed_at&quot;: &quot;2026-03-27T01:53:00+08:00&quot;,
-  &quot;output&quot;: [&quot;reports/OpenClaw-Features-0-1-Mapping-v2.md&quot;],
-  &quot;note&quot;: &quot;151KB，含已知错误（Genesis=Apple），未经交叉验证&quot;
-},
-{
-  &quot;id&quot;: &quot;T-015&quot;,
-  &quot;name&quot;: &quot;ROBOT-SOP v3.24 全文审核&quot;,
-  &quot;priority&quot;: &quot;P2&quot;,
-  &quot;mode&quot;: &quot;auto&quot;,
-  &quot;status&quot;: &quot;completed&quot;,
-  &quot;completed_at&quot;: &quot;2026-03-26T12:22:00+08:00&quot;,
-  &quot;output&quot;: [&quot;output/2026-03-26/full-review/FINAL-REPORT.md&quot;],
-  &quot;note&quot;: &quot;187问题→81采纳→37处修改，五平台交叉验证完成&quot;
-}
+<h1>Phase 0：Ubuntu 台机对接 OpenClaw Gateway</h1>
+<h2>百科全书级操作手册</h2>
+<hr />
+<h2>1. 任务概述</h2>
+<h3>Phase 0 是什么</h3>
+<p>Phase 0 是将 Ubuntu 台机配置为 <strong>OpenClaw Node（节点）</strong>，通过 LAN 连接 MacBook Pro 上运行的 OpenClaw Gateway，使 Ubuntu 机器能够接受来自 Gateway 的任务调度和执行指令。</p>
+<h3>要达成什么状态</h3>
+<div class="codehilite"><pre><span></span><code>┌─────────────────────────────────────────────────────────────┐
+│                      MacBook Pro                            │
+│                  OpenClaw Gateway                           │
+│                   端口: 18789                                │
+│                   Bind: LAN                                 │
+│                   Token: 已配置                              │
+└──────────────────────┬──────────────────────────────────────┘
+                       │  同一局域网 (LAN)
+                       │  TCP 18789
+                       ▼
+┌─────────────────────────────────────────────────────────────┐
+│                      Ubuntu 台机                             │
+│               OpenClaw Node (早期版本需升级)                 │
+│           openclaw node run --host &lt;mac-ip&gt; --port 18789   │
+└─────────────────────────────────────────────────────────────┘
 </code></pre></div>
 
-<p>]<br />
-}</p>
+<p><strong>验收标准</strong>：<br />
+- Ubuntu 上 <code>openclaw nodes status</code> 显示 <code>connected</code><br />
+- Mac 上 <code>openclaw devices list</code> 显示该 Ubuntu 节点已连接且已 approved<br />
+- Ubuntu 可接受并执行 Gateway 下发的任务</p>
+<hr />
+<h2>2. 前置条件：Ubuntu 24.04 环境检查</h2>
+<h3>Step A - 确认网络连通性（Ubuntu 侧执行）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 检查本机 IP 地址（确认在 LAN 内）</span>
+ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;inet &quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;127.0.0.1&quot;</span>
+
+<span class="c1"># 示例输出：inet 192.168.1.100/24 brd 192.168.1.255 scope global dynamic</span>
+<span class="c1"># 记录这个 IP，后面用 &lt;ubuntu-ip&gt; 代替</span>
+
+<span class="c1"># 从 Ubuntu ping Mac（先获取 Mac 的 IP，见下方&quot;Mac 侧&quot;章节）</span>
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">3</span><span class="w"> </span>&lt;mac-ip&gt;
+
+<span class="c1"># 检查端口连通性</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+<span class="c1"># 期望输出：Connection to &lt;mac-ip&gt; 18789 port [tcp/*] succeeded!</span>
+</code></pre></div>
+
+<h3>Step B - 确认 SSH 客户端已安装（Ubuntu 侧执行）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 24.04 通常已预装 openssh-client</span>
+which<span class="w"> </span>ssh
+ssh<span class="w"> </span>-V
+<span class="c1"># 期望输出：OpenSSH_9.x 或更高版本</span>
+</code></pre></div>
+
+<h3>Step C - 确认 openclaw CLI 已安装（Ubuntu 侧执行）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 检查 openclaw 是否存在</span>
+which<span class="w"> </span>openclaw
+
+<span class="c1"># 如果不存在，安装它</span>
+<span class="c1"># 方法1：npm 全局安装</span>
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>openclaw
+
+<span class="c1"># 方法2：下载官方二进制</span>
+<span class="c1"># 访问 https://github.com/xxx/openclaw/releases 下载 Linux 版本</span>
+
+<span class="c1"># 检查版本（确认不是过旧的早期版本）</span>
+openclaw<span class="w"> </span>--version
+
+<span class="c1"># 预期：2026.3.x 或接近 Mac 的版本（2026.3.13）</span>
+<span class="c1"># 如果版本差距过大，见「5. Ubuntu 侧 openclaw 升级/配置」章节</span>
+</code></pre></div>
+
+<h3>Step D - 确认 SSH 服务可访问 Mac（Ubuntu 侧执行）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 测试 SSH 到 Mac（Mac 必须开启远程登录：系统设置 → 通用 → 共享 → 远程登录）</span>
+ssh<span class="w"> </span>-o<span class="w"> </span><span class="nv">ConnectTimeout</span><span class="o">=</span><span class="m">5</span><span class="w"> </span>-o<span class="w"> </span><span class="nv">StrictHostKeyChecking</span><span class="o">=</span>no<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;echo &#39;SSH OK&#39;&quot;</span>
+<span class="c1"># 如果失败，见「3. SSH 配置」章节</span>
+</code></pre></div>
+
+<hr />
+<h2>3. SSH 配置（从零开始）</h2>
+<blockquote>
+<p><strong>目标</strong>：在 Ubuntu 和 Mac 之间配置基于密钥的免密码 SSH 登录。<br />
+Ubuntu 作为客户端，Mac 作为服务器（开启远程登录）。</p>
+</blockquote>
+<h3>3.1 Mac 侧：开启远程登录</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 方法1：命令行（需要管理员权限）</span>
+sudo<span class="w"> </span>launchctl<span class="w"> </span>load<span class="w"> </span>-w<span class="w"> </span>/System/Library/LaunchDaemons/ssh.plist
+
+<span class="c1"># 方法2：macOS 系统设置</span>
+<span class="c1"># → 系统设置 → 通用 → 共享 → 开启&quot;远程登录&quot;</span>
+<span class="c1"># → 允许访问：仅当前用户 或 所有用户</span>
+</code></pre></div>
+
+<p><strong>验证 Mac SSH 状态</strong>：</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>launchctl<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>ssh
+<span class="c1"># 预期：- 0 com.openssh.sshd（存在即为运行中）</span>
+
+<span class="c1"># 测试 Mac 本地 SSH</span>
+ssh<span class="w"> </span>-o<span class="w"> </span><span class="nv">ConnectTimeout</span><span class="o">=</span><span class="m">5</span><span class="w"> </span>localhost
+<span class="c1"># 如果失败：sudo systemsetup -f setremotelogin on</span>
+</code></pre></div>
+
+<h3>3.2 Ubuntu 侧：生成 SSH 密钥对</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 检查是否已有密钥</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.ssh/
+
+<span class="c1"># 如果已有 id_ed25519 或 id_rsa，跳过此步</span>
+
+<span class="c1"># 生成新的 ED25519 密钥（推荐）</span>
+ssh-keygen<span class="w"> </span>-t<span class="w"> </span>ed25519<span class="w"> </span>-C<span class="w"> </span><span class="s2">&quot;ubuntu-node-</span><span class="k">$(</span>hostname<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>-f<span class="w"> </span>~/.ssh/id_ed25519<span class="w"> </span>-N<span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+<span class="c1"># 密钥存放位置：</span>
+<span class="c1">#   公钥：~/.ssh/id_ed25519.pub</span>
+<span class="c1">#   私钥：~/.ssh/id_ed25519</span>
+</code></pre></div>
+
+<h3>3.3 Ubuntu 侧：将公钥复制到 Mac</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 方法1：ssh-copy-id（最简单）</span>
+ssh-copy-id<span class="w"> </span>-i<span class="w"> </span>~/.ssh/id_ed25519.pub<span class="w"> </span>lr@&lt;mac-ip&gt;
+
+<span class="c1"># 方法2：手动复制</span>
+<span class="c1"># Step A - 查看公钥</span>
+cat<span class="w"> </span>~/.ssh/id_ed25519.pub
+<span class="c1"># 输出类似：ssh-ed25519 AAAA...xxx ubuntu-node-hostname</span>
+
+<span class="c1"># Step B - 手动追加到 Mac 的 ~/.ssh/authorized_keys</span>
+<span class="c1"># 先 SSH 到 Mac（需要输入密码，这是最后一次）</span>
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;mkdir -p ~/.ssh &amp;&amp; chmod 700 ~/.ssh&quot;</span>
+
+<span class="c1"># Step C - 用 scp 或管道复制公钥</span>
+<span class="c1"># 在 Ubuntu 上执行：</span>
+cat<span class="w"> </span>~/.ssh/id_ed25519.pub<span class="w"> </span><span class="p">|</span><span class="w"> </span>ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;cat &gt;&gt; ~/.ssh/authorized_keys&quot;</span>
+
+<span class="c1"># Step D - 设置正确权限（Mac 侧执行）</span>
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;chmod 600 ~/.ssh/authorized_keys &amp;&amp; chmod 700 ~/.ssh&quot;</span>
+</code></pre></div>
+
+<h3>3.4 验证无密码登录</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 从 Ubuntu SSH 到 Mac，应该不再需要密码</span>
+ssh<span class="w"> </span>-o<span class="w"> </span><span class="nv">ConnectTimeout</span><span class="o">=</span><span class="m">5</span><span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;echo &#39;Passwordless SSH OK&#39;&quot;</span>
+<span class="c1"># 预期输出：Passwordless SSH OK</span>
+</code></pre></div>
+
+<h3>3.5 SSH 配置优化（可选但推荐）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上编辑 ~/.ssh/config</span>
+cat<span class="w"> </span>&gt;&gt;<span class="w"> </span>~/.ssh/config<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">Host macbook</span>
+<span class="s">    HostName &lt;mac-ip&gt;</span>
+<span class="s">    User lr</span>
+<span class="s">    IdentityFile ~/.ssh/id_ed25519</span>
+<span class="s">    AddKeysToAgent yes</span>
+<span class="s">    ServerAliveInterval 60</span>
+<span class="s">    ServerAliveCountMax 3</span>
+<span class="s">EOF</span>
+
+<span class="c1"># 之后可以用简化命令</span>
+ssh<span class="w"> </span>macbook<span class="w"> </span><span class="s2">&quot;echo OK&quot;</span>
+</code></pre></div>
+
+<hr />
+<h2>4. Gateway 配置：Mac 侧</h2>
+<blockquote>
+<p><strong>关键问题</strong>：Mac 的 OpenClaw Gateway 当前 <code>bind: "loopback"</code>，只允许本机进程连接。Ubuntu 在另一台机器上，必须改为 <code>bind: "lan"</code>。</p>
+</blockquote>
+<h3>4.1 检查当前 Gateway 配置</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.port
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.auth.mode
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.auth.token
+
+<span class="c1"># 当前值（已知）：</span>
+<span class="c1"># gateway.bind = &quot;loopback&quot;      ← 这是问题所在！</span>
+<span class="c1"># gateway.port = 18789</span>
+<span class="c1"># gateway.auth.mode = &quot;token&quot;</span>
+<span class="c1"># gateway.auth.token = &quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+</code></pre></div>
+
+<h3>4.2 修改 Gateway Bind 地址</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Step A - 备份当前配置</span>
+cp<span class="w"> </span>~/.openclaw/openclaw.json<span class="w"> </span>~/.openclaw/openclaw.json.bak.<span class="k">$(</span>date<span class="w"> </span>+%Y%m%d%H%M%S<span class="k">)</span>
+
+<span class="c1"># Step B - 修改 bind 为 lan</span>
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.bind<span class="w"> </span>lan
+
+<span class="c1"># Step C - 验证修改</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+<span class="c1"># 预期输出：lan</span>
+
+<span class="c1"># Step D - 重启 Gateway 使配置生效</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+
+<span class="c1"># 或者如果 gateway 是 systemd 服务：</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>openclaw
+</code></pre></div>
+
+<h3>4.3 确认 Mac 的 LAN IP 地址</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+ipconfig<span class="w"> </span>getifaddr<span class="w"> </span>en0
+<span class="c1"># 或</span>
+ip<span class="w"> </span>addr<span class="w"> </span>show<span class="w"> </span>en0<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;inet &quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span>
+
+<span class="c1"># 示例输出：192.168.1.101</span>
+<span class="c1"># 记录这个 IP，后面作为 &lt;mac-ip&gt;</span>
+</code></pre></div>
+
+<h3>4.4 验证 Gateway 监听状态</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 确认 Gateway 在 LAN 接口上监听</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:18789<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>LISTEN
+<span class="c1"># 预期输出包含 0.0.0.0:18789 或 192.168.1.101:18789</span>
+<span class="c1"># 注意：127.0.0.1:18789 = loopback only（错误）</span>
+<span class="c1">#      0.0.0.0:18789 或 &lt;lan-ip&gt;:18789 = LAN 监听（正确）</span>
+
+<span class="c1"># 如果看到的是 127.0.0.1，重启 Gateway 后再检查</span>
+</code></pre></div>
+
+<h3>4.5 生成配对 QR/代码（可选，用于验证）</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 查看当前 gateway 的连接信息</span>
+openclaw<span class="w"> </span>qr<span class="w"> </span>--json
+
+<span class="c1"># 检查输出中的 gatewayUrl 和 urlSource</span>
+<span class="c1"># urlSource 应该是 &quot;gateway.bind=lan&quot; 才正确</span>
+</code></pre></div>
+
+<hr />
+<h2>5. Ubuntu 侧 openclaw 升级/配置</h2>
+<h3>5.1 检查当前版本</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上执行</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<h3>5.2 升级路径选择</h3>
+<p><strong>场景 A：openclaw 已安装但版本较旧</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># npm 升级</span>
+npm<span class="w"> </span>update<span class="w"> </span>-g<span class="w"> </span>openclaw
+
+<span class="c1"># 或重新安装</span>
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>openclaw@latest
+
+<span class="c1"># 验证版本</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<p><strong>场景 B：openclaw 完全不存在</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 方法1：npm 安装（需要 Node.js 18+）</span>
+<span class="c1"># 检查 Node.js 版本</span>
+node<span class="w"> </span>-v
+<span class="c1"># 如果低于 18，先安装 Node.js</span>
+curl<span class="w"> </span>-fsSL<span class="w"> </span>https://deb.nodesource.com/setup_20.x<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>-E<span class="w"> </span>bash<span class="w"> </span>-
+sudo<span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>nodejs
+
+<span class="c1"># 然后安装 openclaw</span>
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>openclaw
+
+<span class="c1"># 方法2：下载官方二进制（推荐，生产环境）</span>
+<span class="c1"># 访问 GitHub releases 页面下载 Linux x64 二进制</span>
+<span class="c1"># https://github.com/openclaw/openclaw/releases</span>
+
+<span class="c1"># 以 GitHub releases 下载为例：</span>
+<span class="nb">cd</span><span class="w"> </span>/tmp
+wget<span class="w"> </span>https://github.com/openclaw/openclaw/releases/download/v2026.3.13/openclaw-linux-x64.tar.gz
+tar<span class="w"> </span>-xzf<span class="w"> </span>openclaw-linux-x64.tar.gz
+sudo<span class="w"> </span>mv<span class="w"> </span>openclaw<span class="w"> </span>/usr/local/bin/
+sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/openclaw
+
+<span class="c1"># 验证</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<p><strong>场景 C：使用 nvm 管理版本</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 安装 nvm（如果尚未安装）</span>
+curl<span class="w"> </span>-o-<span class="w"> </span>https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>bash
+<span class="nb">source</span><span class="w"> </span>~/.bashrc
+
+<span class="c1"># 安装并使用最新 LTS Node.js</span>
+nvm<span class="w"> </span>install<span class="w"> </span>--lts
+nvm<span class="w"> </span>use<span class="w"> </span>--lts
+
+<span class="c1"># 安装 openclaw</span>
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>openclaw
+
+<span class="c1"># 验证</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<h3>5.3 Ubuntu 侧基础配置</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 登录/认证（如果是首次在这台机器上使用 openclaw）</span>
+openclaw<span class="w"> </span>auth<span class="w"> </span>login
+
+<span class="c1"># 配置默认模型（可选）</span>
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>agents.defaults.model<span class="w"> </span><span class="s2">&quot;minimax/MiniMax-M2.7&quot;</span>
+
+<span class="c1"># 检查节点状态</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+<span class="c1"># 预期：Not connected（尚未连接）</span>
+</code></pre></div>
+
+<hr />
+<h2>6. 完整对接流程</h2>
+<h3>流程图</h3>
+<div class="codehilite"><pre><span></span><code>┌─────────────────────────────────────────────────────────────────┐
+│                     Phase 0 执行流程                             │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  [1] Mac 侧准备                                                   │
+│      ├─ 开启远程登录（SSH）                                       │
+│      ├─ 检查 gateway.bind（当前=loopback，需改为 lan）           │
+│      └─ 获取 Mac LAN IP                                          │
+│                                                                  │
+│  [2] Ubuntu 侧准备                                               │
+│      ├─ 网络连通性测试                                            │
+│      ├─ 安装/升级 openclaw                                       │
+│      └─ SSH 密钥配置（无密码登录 Mac）                            │
+│                                                                  │
+│  [3] Gateway 配置修正（Mac 侧）                                   │
+│      ├─ 备份 openclaw.json                                       │
+│      ├─ openclaw config set gateway.bind lan                    │
+│      └─ openclaw gateway restart                                 │
+│                                                                  │
+│  [4] 启动 Node 连接（Ubuntu 侧）                                  │
+│      ├─ openclaw node run --host &lt;mac-ip&gt; --port 18789          │
+│      └─ 输入 Token 或通过配置文件指定                             │
+│                                                                  │
+│  [5] 配对审批（Mac 侧）                                           │
+│      ├─ openclaw devices list                                    │
+│      ├─ openclaw devices approve --latest                       │
+│      └─ 验证连接状态                                              │
+│                                                                  │
+│  [6] 验证对接成功                                                 │
+│      └─ 双向确认 connected 状态                                   │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+</code></pre></div>
+
+<h3>Step-by-Step 执行命令</h3>
+<h4>Step 1：Mac 侧 - 开启远程登录</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+sudo<span class="w"> </span>launchctl<span class="w"> </span>load<span class="w"> </span>-w<span class="w"> </span>/System/Library/LaunchDaemons/ssh.plist
+
+<span class="c1"># 验证</span>
+sudo<span class="w"> </span>launchctl<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>sshd
+</code></pre></div>
+
+<h4>Step 2：Mac 侧 - 检查并修改 Gateway Bind</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+<span class="c1"># 当前输出：loopback</span>
+
+<span class="c1"># 修改为 lan</span>
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.bind<span class="w"> </span>lan
+
+<span class="c1"># 验证</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+<span class="c1"># 预期输出：lan</span>
+
+<span class="c1"># 重启 Gateway</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+
+<span class="c1"># 如果是 systemd 服务</span>
+<span class="c1"># sudo systemctl restart openclaw</span>
+</code></pre></div>
+
+<h4>Step 3：Mac 侧 - 获取 LAN IP</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+ipconfig<span class="w"> </span>getifaddr<span class="w"> </span>en0
+<span class="c1"># 记录输出，例如：192.168.1.101</span>
+<span class="c1"># 后续命令中用 &lt;mac-ip&gt; 代替此地址</span>
+</code></pre></div>
+
+<h4>Step 4：Ubuntu 侧 - 网络连通性测试</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上执行</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+<span class="c1"># 预期：succeeded!</span>
+
+<span class="c1"># 如果失败：检查防火墙</span>
+sudo<span class="w"> </span>ufw<span class="w"> </span>status
+<span class="c1"># 如果启用：sudo ufw allow 18789/tcp</span>
+</code></pre></div>
+
+<h4>Step 5：Ubuntu 侧 - SSH 无密码配置</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上执行</span>
+<span class="c1"># 确认有密钥</span>
+ls<span class="w"> </span>~/.ssh/id_ed25519.pub<span class="w"> </span><span class="o">||</span><span class="w"> </span>ssh-keygen<span class="w"> </span>-t<span class="w"> </span>ed25519<span class="w"> </span>-C<span class="w"> </span><span class="s2">&quot;ubuntu-node-</span><span class="k">$(</span>hostname<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>-f<span class="w"> </span>~/.ssh/id_ed25519<span class="w"> </span>-N<span class="w"> </span><span class="s2">&quot;&quot;</span>
+
+<span class="c1"># 复制公钥到 Mac</span>
+ssh-copy-id<span class="w"> </span>-i<span class="w"> </span>~/.ssh/id_ed25519.pub<span class="w"> </span>lr@&lt;mac-ip&gt;
+
+<span class="c1"># 验证无密码登录</span>
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;echo &#39;SSH OK&#39;&quot;</span>
+</code></pre></div>
+
+<h4>Step 6：Ubuntu 侧 - 升级 openclaw（如需要）</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上执行</span>
+openclaw<span class="w"> </span>--version
+
+<span class="c1"># 如果版本低于 2026.3.0，升级</span>
+npm<span class="w"> </span>update<span class="w"> </span>-g<span class="w"> </span>openclaw
+
+<span class="c1"># 或重装</span>
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>openclaw@latest
+
+<span class="c1"># 验证</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<h4>Step 7：Ubuntu 侧 - 创建 Token 配置文件（避免每次输入）</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上执行</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>~/.openclaw
+
+cat<span class="w"> </span>&gt;<span class="w"> </span>~/.openclaw/node.json<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">{</span>
+<span class="s">  &quot;gateway&quot;: {</span>
+<span class="s">    &quot;host&quot;: &quot;&lt;mac-ip&gt;&quot;,</span>
+<span class="s">    &quot;port&quot;: 18789,</span>
+<span class="s">    &quot;auth&quot;: {</span>
+<span class="s">      &quot;token&quot;: &quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+<span class="s">    }</span>
+<span class="s">  }</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+
+<span class="c1"># 或直接通过环境变量</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">OPENCLAW_GATEWAY_TOKEN</span><span class="o">=</span><span class="s2">&quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+</code></pre></div>
+
+<h4>Step 8：Ubuntu 侧 - 启动 Node 连接</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Ubuntu 上执行</span>
+<span class="c1"># 方式1：命令行参数</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--token<span class="w"> </span><span class="s2">&quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+
+<span class="c1"># 方式2：使用配置文件（已在上一步创建）</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run
+
+<span class="c1"># 方式3：交互式启动（首次推荐，可看到实时日志）</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span>
+
+<span class="c1"># 预期输出：</span>
+<span class="c1"># [OpenClaw] Node connecting to gateway at &lt;mac-ip&gt;:18789</span>
+<span class="c1"># [OpenClaw] Node connected successfully</span>
+<span class="c1"># [OpenClaw] Waiting for pairing approval from gateway...</span>
+</code></pre></div>
+
+<h4>Step 9：Mac 侧 - 审批配对请求</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+<span class="c1"># 查看待审批设备</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+
+<span class="c1"># 审批最新的配对请求</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>approve<span class="w"> </span>--latest
+
+<span class="c1"># 或者指定设备 ID</span>
+<span class="c1"># openclaw devices approve &lt;device-id&gt;</span>
+
+<span class="c1"># 验证审批结果</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 预期：Ubuntu 节点状态变为 &quot;approved&quot; 或 &quot;connected&quot;</span>
+</code></pre></div>
+
+<h4>Step 10：验证对接成功</h4>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 Mac 上执行</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+<span class="c1"># 预期：显示已连接的节点信息</span>
+
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 预期：Ubuntu 节点状态为 connected</span>
+
+<span class="c1"># 在 Ubuntu 上执行</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+<span class="c1"># 预期：显示 connected 到 gateway</span>
+
+<span class="c1"># 测试任务下发（可选）</span>
+<span class="c1"># 在 Mac 上执行测试任务</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--test
+</code></pre></div>
+
+<hr />
+<h2>7. 所有可能遇到的问题/意外</h2>
+<h3>7.1 SSH 连接失败</h3>
+<h4>问题 7.1.1：Mac SSH 服务未开启</h4>
+<p><strong>症状</strong>：<code>Connection refused</code> 或 <code>Connection timed out</code></p>
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧执行</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">22</span>
+<span class="c1"># 预期：succeeded! 如果失败，继续 Step B</span>
+</code></pre></div>
+
+<p><strong>Step B - 开启 Mac SSH</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 方法1：命令行</span>
+sudo<span class="w"> </span>launchctl<span class="w"> </span>load<span class="w"> </span>-w<span class="w"> </span>/System/Library/LaunchDaemons/ssh.plist
+
+<span class="c1"># 方法2：系统偏好设置（macOS 旧版）</span>
+<span class="c1"># 苹果菜单 → 系统偏好设置 → 共享 → 勾选&quot;远程登录&quot;</span>
+
+<span class="c1"># 方法3：系统设置（macOS Ventura+）</span>
+<span class="c1"># 系统设置 → 通用 → 共享 → 开启&quot;远程登录&quot;</span>
+</code></pre></div>
+
+<p><strong>Step C - 验证服务状态</strong>：</p>
+<div class="codehilite"><pre><span></span><code>sudo<span class="w"> </span>launchctl<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>sshd
+<span class="c1"># 预期：- 0 com.openssh.sshd</span>
+</code></pre></div>
+
+<p><strong>Step D - 再次测试连接</strong>：</p>
+<div class="codehilite"><pre><span></span><code>nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">22</span>
+<span class="c1"># 预期：succeeded!</span>
+</code></pre></div>
+
+<hr />
+<h4>问题 7.1.2：SSH 密钥认证失败</h4>
+<p><strong>症状</strong>：仍然提示输入密码，或 <code>Permission denied (publickey)</code></p>
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧执行</span>
+ssh<span class="w"> </span>-v<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;echo test&quot;</span><span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;publickey\|permission denied&quot;</span>
+<span class="c1"># 查看详细日志</span>
+</code></pre></div>
+
+<p><strong>Step B - 检查密钥权限</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+ls<span class="w"> </span>-la<span class="w"> </span>~/.ssh/
+<span class="c1"># 预期：id_ed25519 权限 600，id_ed25519.pub 权限 644</span>
+
+<span class="c1"># 如果权限不对</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.ssh/id_ed25519
+chmod<span class="w"> </span><span class="m">644</span><span class="w"> </span>~/.ssh/id_ed25519.pub
+</code></pre></div>
+
+<p><strong>Step C - 检查 Mac authorized_keys</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧测试</span>
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;ls -la ~/.ssh/ &amp;&amp; cat ~/.ssh/authorized_keys&quot;</span>
+<span class="c1"># 检查公钥是否在 authorized_keys 中</span>
+</code></pre></div>
+
+<p><strong>Step D - 重新添加密钥</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+ssh-copy-id<span class="w"> </span>-i<span class="w"> </span>~/.ssh/id_ed25519.pub<span class="w"> </span>lr@&lt;mac-ip&gt;
+
+<span class="c1"># 或手动</span>
+cat<span class="w"> </span>~/.ssh/id_ed25519.pub<span class="w"> </span><span class="p">|</span><span class="w"> </span>ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;mkdir -p ~/.ssh &amp;&amp; cat &gt;&gt; ~/.ssh/authorized_keys&quot;</span>
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;chmod 700 ~/.ssh &amp;&amp; chmod 600 ~/.ssh/authorized_keys&quot;</span>
+</code></pre></div>
+
+<hr />
+<h4>问题 7.1.3：SSH 连接超时</h4>
+<p><strong>症状</strong>：<code>Connection timed out</code></p>
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+ping<span class="w"> </span>-c<span class="w"> </span><span class="m">3</span><span class="w"> </span>&lt;mac-ip&gt;
+<span class="c1"># 如果 ping 不通，网络层面有问题</span>
+</code></pre></div>
+
+<p><strong>Step B - 检查网络</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 确认 Mac 和 Ubuntu 在同一子网</span>
+<span class="c1"># Mac: ipconfig getifaddr en0</span>
+<span class="c1"># Ubuntu: ip addr show | grep &quot;inet &quot;</span>
+
+<span class="c1"># 检查路由器/交换机</span>
+<span class="c1"># 如果在不同 VLAN，需要网络设备配置</span>
+</code></pre></div>
+
+<p><strong>Step C - 检查 Mac 防火墙</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+sudo<span class="w"> </span>/usr/libexec/ApplicationFirewall/socketfilterfw<span class="w"> </span>--getglobalstate
+<span class="c1"># 如果开启：sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate off</span>
+</code></pre></div>
+
+<p><strong>Step D - 确认 SSH 端口</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:22<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>LISTEN
+<span class="c1"># 确认在 0.0.0.0:22 或 &lt;lan-ip&gt;:22 监听</span>
+<span class="c1"># 如果只在 127.0.0.1:22，需要修改 SSH 配置</span>
+</code></pre></div>
+
+<hr />
+<h3>7.2 Gateway Bind 地址问题（loopback vs lan）</h3>
+<h4>问题 7.2.1：Gateway 绑定在 loopback，Ubuntu 无法连接</h4>
+<p><strong>症状</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="k">connection</span><span class="w"> </span><span class="nl">failed</span><span class="p">:</span><span class="w"> </span><span class="n">ECONNREFUSED</span>
+<span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Gateway</span><span class="w"> </span><span class="k">at</span><span class="w"> </span><span class="o">&lt;</span><span class="n">mac</span><span class="o">-</span><span class="n">ip</span><span class="o">&gt;</span><span class="err">:</span><span class="mi">18789</span><span class="w"> </span><span class="n">refused</span><span class="w"> </span><span class="k">connection</span>
+</code></pre></div>
+
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+<span class="c1"># 预期：loopback（这就是问题！）</span>
+
+<span class="c1"># 检查监听地址</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:18789<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>LISTEN
+<span class="c1"># 预期：只有 127.0.0.1:18789 或 ::1:18789</span>
+</code></pre></div>
+
+<p><strong>Step B - 修改 Bind 配置</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.bind<span class="w"> </span>lan
+
+<span class="c1"># 验证</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+<span class="c1"># 预期：lan</span>
+</code></pre></div>
+
+<p><strong>Step C - 重启 Gateway</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+
+<span class="c1"># 检查是否监听在 LAN 接口</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:18789<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>LISTEN
+<span class="c1"># 预期：0.0.0.0:18789 或 &lt;lan-ip&gt;:18789</span>
+</code></pre></div>
+
+<p><strong>Step D - 验证修复</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+<span class="c1"># 预期：succeeded!</span>
+
+<span class="c1"># 重新启动 node</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--token<span class="w"> </span><span class="s2">&quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+</code></pre></div>
+
+<hr />
+<h3>7.3 Token 不匹配</h3>
+<h4>问题 7.3.1：Token 被拒绝</h4>
+<p><strong>症状</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Authentication</span><span class="w"> </span><span class="nl">failed</span><span class="p">:</span><span class="w"> </span><span class="n">Invalid</span><span class="w"> </span><span class="n">token</span>
+<span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Gateway</span><span class="w"> </span><span class="n">rejected</span><span class="w"> </span><span class="k">connection</span><span class="err">:</span><span class="w"> </span><span class="mi">401</span><span class="w"> </span><span class="n">Unauthorized</span>
+</code></pre></div>
+
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧 - 确认正确的 token</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.auth.token
+<span class="c1"># 预期：235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000</span>
+
+<span class="c1"># Ubuntu 侧 - 检查使用的 token</span>
+<span class="c1"># 检查配置文件</span>
+cat<span class="w"> </span>~/.openclaw/node.json<span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>token
+</code></pre></div>
+
+<p><strong>Step B - 确认 Token 一致</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+<span class="c1"># 确保使用的 token 与 Mac 侧一致</span>
+<span class="c1"># Token: 235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000</span>
+
+<span class="c1"># 如果不确定，可以在命令行明确指定</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--token<span class="w"> </span><span class="s2">&quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+</code></pre></div>
+
+<p><strong>Step C - 检查 Token 模式</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.auth.mode
+<span class="c1"># 预期：token</span>
+
+<span class="c1"># 如果是其他模式（如 password），需要调整</span>
+</code></pre></div>
+
+<p><strong>Step D - 重新生成 Token（如需要）</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧 - 谨慎操作，会影响所有使用旧 token 的设备</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>regenerate-token
+
+<span class="c1"># 获取新 token</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.auth.token
+
+<span class="c1"># 通知所有节点使用新 token</span>
+</code></pre></div>
+
+<hr />
+<h3>7.4 防火墙阻挡</h3>
+<h4>问题 7.4.1：Ubuntu 防火墙阻止连接</h4>
+<p><strong>症状</strong>：<code>Connection timed out</code> 或 <code>No route to host</code></p>
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+sudo<span class="w"> </span>ufw<span class="w"> </span>status
+<span class="c1"># 如果是 active，继续 Step B</span>
+</code></pre></div>
+
+<p><strong>Step B - 开放必要端口</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+<span class="c1"># 开放 SSH（22端口）</span>
+sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">22</span>/tcp
+
+<span class="c1"># 开放 Gateway 端口（18789）</span>
+sudo<span class="w"> </span>ufw<span class="w"> </span>allow<span class="w"> </span><span class="m">18789</span>/tcp
+
+<span class="c1"># 开放后验证</span>
+sudo<span class="w"> </span>ufw<span class="w"> </span>status
+</code></pre></div>
+
+<p><strong>Step C - 如果不需要防火墙</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+sudo<span class="w"> </span>ufw<span class="w"> </span>disable
+<span class="c1"># 注意：生产环境不建议完全禁用防火墙</span>
+</code></pre></div>
+
+<p><strong>Step D - 验证连接</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+<span class="c1"># 预期：succeeded!</span>
+</code></pre></div>
+
+<hr />
+<h4>问题 7.4.2：Mac 防火墙阻止入站连接</h4>
+<p><strong>症状</strong>：Ubuntu 无法连接到 Mac 的 18789 端口</p>
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧 - 检查防火墙</span>
+sudo<span class="w"> </span>/usr/libexec/ApplicationFirewall/socketfilterfw<span class="w"> </span>--getglobalstate
+</code></pre></div>
+
+<p><strong>Step B - 添加 SSH 和 openclaw 到防火墙例外</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+<span class="c1"># 添加 SSH</span>
+sudo<span class="w"> </span>/usr/libexec/ApplicationFirewall/socketfilterfw<span class="w"> </span>--add<span class="w"> </span>/usr/sbin/sshd
+sudo<span class="w"> </span>/usr/libexec/ApplicationFirewall/socketfilterfw<span class="w"> </span>--unblock<span class="w"> </span>/usr/sbin/sshd
+
+<span class="c1"># 添加 openclaw（需要找到 openclaw 二进制路径）</span>
+which<span class="w"> </span>openclaw
+<span class="c1"># 假设输出：/usr/local/bin/openclaw</span>
+sudo<span class="w"> </span>/usr/libexec/ApplicationFirewall/socketfilterfw<span class="w"> </span>--add<span class="w"> </span>/usr/local/bin/openclaw
+sudo<span class="w"> </span>/usr/libexec/ApplicationFirewall/socketfilterfw<span class="w"> </span>--unblock<span class="w"> </span>/usr/local/bin/openclaw
+</code></pre></div>
+
+<p><strong>Step C - 重启 Firewall</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+sudo<span class="w"> </span>launchctl<span class="w"> </span>unload<span class="w"> </span>/System/Library/LaunchDaemons/com.apple.alf.agent.plist
+sudo<span class="w"> </span>launchctl<span class="w"> </span>load<span class="w"> </span>/System/Library/LaunchDaemons/com.apple.alf.agent.plist
+</code></pre></div>
+
+<p><strong>Step D - 验证</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+</code></pre></div>
+
+<hr />
+<h3>7.5 openclaw 版本兼容问题</h3>
+<h4>问题 7.5.1：Ubuntu 上的 openclaw 版本过旧</h4>
+<p><strong>症状</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="n">failed</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">connect</span><span class="err">:</span><span class="w"> </span><span class="n">Protocol</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="n">mismatch</span>
+<span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Gateway</span><span class="w"> </span><span class="n">requires</span><span class="w"> </span><span class="n">version</span><span class="w"> </span><span class="mf">2026.3</span><span class="p">.</span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="n">node</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="mf">2025.</span><span class="n">x</span>
+</code></pre></div>
+
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+openclaw<span class="w"> </span>--version
+<span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>--version
+
+<span class="c1"># 对比两个版本</span>
+</code></pre></div>
+
+<p><strong>Step B - Ubuntu 升级 openclaw</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+npm<span class="w"> </span>update<span class="w"> </span>-g<span class="w"> </span>openclaw
+
+<span class="c1"># 或指定版本</span>
+npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>openclaw@2026.3.13
+
+<span class="c1"># 验证</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<p><strong>Step C - 如果 npm 不可用，手动下载</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+<span class="nb">cd</span><span class="w"> </span>/tmp
+wget<span class="w"> </span>https://github.com/openclaw/openclaw/releases/download/v2026.3.13/openclaw-linux-x64.tar.gz
+tar<span class="w"> </span>-xzf<span class="w"> </span>openclaw-linux-x64.tar.gz
+sudo<span class="w"> </span>mv<span class="w"> </span>openclaw<span class="w"> </span>/usr/local/bin/
+sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span>/usr/local/bin/openclaw
+
+<span class="c1"># 验证</span>
+/usr/local/bin/openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<p><strong>Step D - 清理旧版本缓存</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+npm<span class="w"> </span>cache<span class="w"> </span>clean<span class="w"> </span>--force
+<span class="nb">hash</span><span class="w"> </span>-r
+<span class="c1"># 重新测试</span>
+openclaw<span class="w"> </span>--version
+</code></pre></div>
+
+<hr />
+<h3>7.6 Pairing 审批问题</h3>
+<h4>问题 7.6.1：Node 连接成功但显示 "pairing required"</h4>
+<p><strong>症状</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Node</span><span class="w"> </span><span class="n">connected</span><span class="w"> </span><span class="n">successfully</span>
+<span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Waiting</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">pairing</span><span class="w"> </span><span class="n">approval</span><span class="w"> </span><span class="k">from</span><span class="w"> </span><span class="n">gateway</span><span class="p">...</span>
+<span class="o">[</span><span class="n">OpenClaw</span><span class="o">]</span><span class="w"> </span><span class="n">Gateway</span><span class="w"> </span><span class="n">requires</span><span class="w"> </span><span class="n">pairing</span><span class="w"> </span><span class="n">approval</span><span class="p">.</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="s1">&#39;openclaw devices approve &lt;device-id&gt;&#39;</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">gateway</span><span class="p">.</span>
+</code></pre></div>
+
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 查看是否有 pending 状态的设备</span>
+</code></pre></div>
+
+<p><strong>Step B - 审批设备</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+<span class="c1"># 列出所有设备</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+
+<span class="c1"># 审批最新的设备</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>approve<span class="w"> </span>--latest
+
+<span class="c1"># 或指定设备 ID</span>
+<span class="c1"># openclaw devices approve &lt;device-id&gt;</span>
+</code></pre></div>
+
+<p><strong>Step C - 检查审批结果</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 确认设备状态变为 approved 或 connected</span>
+</code></pre></div>
+
+<p><strong>Step D - 节点侧验证</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+<span class="c1"># Node 会自动检测到审批完成</span>
+<span class="c1"># 等待几秒后检查状态</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+<span class="c1"># 预期：connected</span>
+</code></pre></div>
+
+<hr />
+<h4>问题 7.6.2：配对请求未出现在列表中</h4>
+<p><strong>症状</strong>：<code>openclaw devices list</code> 显示空或没有新设备</p>
+<p><strong>Step A - 确认节点正在运行</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>openclaw<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>node
+<span class="c1"># 确认 node 进程存在</span>
+</code></pre></div>
+
+<p><strong>Step B - 检查节点日志</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+<span class="c1"># 如果 node 在前台运行，查看日志输出</span>
+<span class="c1"># 如果是 systemd 服务</span>
+journalctl<span class="w"> </span>-u<span class="w"> </span>openclaw-node<span class="w"> </span>-f
+
+<span class="c1"># 检查是否有连接错误</span>
+</code></pre></div>
+
+<p><strong>Step C - 重新启动节点</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+<span class="c1"># 停止现有 node</span>
+pkill<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;openclaw node&quot;</span>
+
+<span class="c1"># 重新启动</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--token<span class="w"> </span><span class="s2">&quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+
+<span class="c1"># 立即在 Mac 侧检查设备列表</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+</code></pre></div>
+
+<p><strong>Step D - 检查时间同步</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 确保 Mac 和 Ubuntu 时间一致</span>
+<span class="c1"># 时间差过大可能导致 token 验证失败</span>
+<span class="c1"># Ubuntu 侧</span>
+sudo<span class="w"> </span>timedatectl<span class="w"> </span>status
+sudo<span class="w"> </span>timedatectl<span class="w"> </span>set-ntp<span class="w"> </span><span class="nb">true</span>
+
+<span class="c1"># Mac 侧</span>
+<span class="c1"># 系统偏好设置 → 日期与时间 → 勾选自动设置</span>
+</code></pre></div>
+
+<hr />
+<h3>7.7 systemd 服务问题</h3>
+<h4>问题 7.7.1：openclaw-node 服务启动失败</h4>
+<p><strong>症状</strong>：<code>systemctl start openclaw-node</code> 失败或 <code>journalctl -u openclaw-node</code> 显示错误</p>
+<p><strong>Step A - 诊断</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>openclaw-node
+journalctl<span class="w"> </span>-u<span class="w"> </span>openclaw-node<span class="w"> </span>-n<span class="w"> </span><span class="m">50</span>
+</code></pre></div>
+
+<p><strong>Step B - 常见错误及修复</strong>：</p>
+<p><strong>错误 1：Unit 文件不存在</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 创建 systemd service 文件</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/tmp/openclaw-node.service<span class="w"> </span><span class="s">&lt;&lt; &#39;EOF&#39;</span>
+<span class="s">[Unit]</span>
+<span class="s">Description=OpenClaw Node Service</span>
+<span class="s">After=network.target</span>
+
+<span class="s">[Service]</span>
+<span class="s">Type=simple</span>
+<span class="s">User=lr</span>
+<span class="s">ExecStart=/usr/local/bin/openclaw node run --host &lt;mac-ip&gt; --port 18789 --token &quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+<span class="s">Restart=on-failure</span>
+<span class="s">RestartSec=10</span>
+
+<span class="s">[Install]</span>
+<span class="s">WantedBy=multi-user.target</span>
+<span class="s">EOF</span>
+
+sudo<span class="w"> </span>mv<span class="w"> </span>/tmp/openclaw-node.service<span class="w"> </span>/etc/systemd/system/openclaw-node.service
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>systemctl<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>openclaw-node
+</code></pre></div>
+
+<p><strong>错误 2：权限问题</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 检查 openclaw 二进制权限</span>
+ls<span class="w"> </span>-la<span class="w"> </span><span class="k">$(</span>which<span class="w"> </span>openclaw<span class="k">)</span>
+<span class="c1"># 如果没有执行权限</span>
+sudo<span class="w"> </span>chmod<span class="w"> </span>+x<span class="w"> </span><span class="k">$(</span>which<span class="w"> </span>openclaw<span class="k">)</span>
+
+<span class="c1"># 检查 node.json 配置权限</span>
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>~/.openclaw/node.json
+</code></pre></div>
+
+<p><strong>错误 3：环境变量问题</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 在 service 文件中指定环境变量</span>
+<span class="c1"># 编辑 /etc/systemd/system/openclaw-node.service</span>
+<span class="c1"># 在 [Service] 下添加：</span>
+<span class="nv">Environment</span><span class="o">=</span><span class="s2">&quot;OPENCLAW_GATEWAY_TOKEN=235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+<span class="nv">Environment</span><span class="o">=</span><span class="s2">&quot;PATH=/usr/local/bin:/usr/bin:/bin&quot;</span>
+</code></pre></div>
+
+<p><strong>Step C - 重启服务</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>systemctl<span class="w"> </span>restart<span class="w"> </span>openclaw-node
+
+<span class="c1"># 检查状态</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>openclaw-node
+</code></pre></div>
+
+<p><strong>Step D - 验证服务运行</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧</span>
+ps<span class="w"> </span>aux<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>openclaw
+<span class="c1"># 或</span>
+sudo<span class="w"> </span>systemctl<span class="w"> </span>status<span class="w"> </span>openclaw-node
+<span class="c1"># 预期：active (running)</span>
+</code></pre></div>
+
+<hr />
+<h2>8. 验证方法</h2>
+<h3>8.1 Mac 侧验证</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 检查 Gateway 状态</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>status
+<span class="c1"># 预期：running, bind: lan, port: 18789</span>
+
+<span class="c1"># 检查已连接设备</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+<span class="c1"># 预期：显示 Ubuntu 节点，状态为 connected 或 approved</span>
+
+<span class="c1"># 检查节点列表</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+<span class="c1"># 预期：显示已连接的节点信息</span>
+
+<span class="c1"># 查看实时日志（可选）</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>logs<span class="w"> </span>--follow
+</code></pre></div>
+
+<h3>8.2 Ubuntu 侧验证</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 检查节点状态</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+<span class="c1"># 预期：connected to &lt;mac-ip&gt;:18789</span>
+
+<span class="c1"># 测试任务下发（从 Mac）</span>
+<span class="c1"># 在 Mac 上执行</span>
+openclaw<span class="w"> </span>node<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>--node<span class="w"> </span>&lt;node-id&gt;<span class="w"> </span>--<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello from Gateway&quot;</span>
+
+<span class="c1"># Ubuntu 侧查看输出</span>
+<span class="c1"># 预期：在 Mac 侧看到 &quot;Hello from Gateway&quot;</span>
+</code></pre></div>
+
+<h3>8.3 网络层面验证</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Ubuntu 侧 - 端口连通性</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+<span class="c1"># 预期：succeeded!</span>
+
+<span class="c1"># Mac 侧 - 确认监听</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:18789<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>LISTEN
+<span class="c1"># 预期：0.0.0.0:18789 或 &lt;mac-ip&gt;:18789</span>
+</code></pre></div>
+
+<h3>8.4 完整流程验证</h3>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. Mac 重启 Gateway</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+
+<span class="c1"># 2. Ubuntu 启动 Node</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--token<span class="w"> </span><span class="s2">&quot;235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000&quot;</span>
+
+<span class="c1"># 3. Mac 审批</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list
+openclaw<span class="w"> </span>devices<span class="w"> </span>approve<span class="w"> </span>--latest
+
+<span class="c1"># 4. 双向验证</span>
+<span class="c1"># Mac: openclaw nodes status</span>
+<span class="c1"># Ubuntu: openclaw nodes status</span>
+
+<span class="c1"># 预期：两边都显示 connected</span>
+</code></pre></div>
+
+<hr />
+<h2>9. 风险点</h2>
+<h3>高风险（可能搞崩环境）</h3>
+<h4>风险 1：修改 Mac openclaw.json 格式错误</h4>
+<p><strong>风险描述</strong>：<br />
+手动编辑 <code>~/.openclaw/openclaw.json</code> 可能导致 JSON 语法错误，使 Gateway 无法启动。</p>
+<p><strong>预防措施</strong>：<br />
+- 永远使用 <code>openclaw config set</code> 命令修改配置，而不是直接编辑 JSON<br />
+- 修改前务必备份：<code>cp ~/.openclaw/openclaw.json ~/.openclaw/openclaw.json.bak.$(date +%Y%m%d)</code></p>
+<p><strong>修复方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 恢复备份</span>
+cp<span class="w"> </span>~/.openclaw/openclaw.json.bak.20260326<span class="w"> </span>~/.openclaw/openclaw.json
+openclaw<span class="w"> </span>gateway<span class="w"> </span>restart
+</code></pre></div>
+
+<h4>风险 2：Gateway 绑定到 0.0.0.0 暴露公网</h4>
+<p><strong>风险描述</strong>：<br />
+设置为 <code>bind: lan</code> 后，如果 Mac 有公网 IP 或在 DMZ，Gateway 可能被公网访问。</p>
+<p><strong>预防措施</strong>：<br />
+- 仅在受信任的 LAN 环境下操作<br />
+- 使用 token 认证<br />
+- 考虑使用 <code>gateway.auth.allowTailscale: true</code> 限制仅 Tailscale 用户访问</p>
+<p><strong>检查方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 确认 Mac 没有公网直连</span>
+ipconfig<span class="w"> </span>getifaddr<span class="w"> </span>en0
+<span class="c1"># 确认是私有 IP（192.168.x.x, 10.x.x.x, 172.16-31.x.x）</span>
+</code></pre></div>
+
+<h4>风险 3：SSH 配置错误导致 Mac 无法远程登录</h4>
+<p><strong>风险描述</strong>：<br />
+修改 <code>/etc/ssh/sshd_config</code> 错误可能导致 SSH 服务无法启动，或 Mac 被锁在系统偏好设置界面。</p>
+<p><strong>预防措施</strong>：<br />
+- 永远保留当前配置的备份<br />
+- 使用 <code>openclaw config</code> 而不是直接编辑 sshd_config<br />
+- 修改前通过 <code>sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup</code> 备份</p>
+<p><strong>修复方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 如果 SSH 配置出错，恢复备份</span>
+sudo<span class="w"> </span>cp<span class="w"> </span>/etc/ssh/sshd_config.backup<span class="w"> </span>/etc/ssh/sshd_config
+sudo<span class="w"> </span>launchctl<span class="w"> </span>unload<span class="w"> </span>/System/Library/LaunchDaemons/ssh.plist
+sudo<span class="w"> </span>launchctl<span class="w"> </span>load<span class="w"> </span>/System/Library/LaunchDaemons/ssh.plist
+</code></pre></div>
+
+<h3>中等风险</h3>
+<h4>风险 4：Ubuntu 升级 openclaw 导致环境冲突</h4>
+<p>**claw 环境冲突</p>
+<p><strong>风险描述</strong>：<br />
+npm 全局安装可能与系统现有的 Node.js 版本冲突。</p>
+<p><strong>预防措施</strong>：<br />
+- 升级前记录当前 openclaw 路径：<code>which openclaw</code><br />
+- 记录当前配置：<code>openclaw config export &gt; ~/openclaw-config-backup.json</code></p>
+<p><strong>修复方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 如果升级后出问题，恢复路径</span>
+<span class="nb">hash</span><span class="w"> </span>-r
+<span class="c1"># 或重新指定路径</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">PATH</span><span class="o">=</span><span class="s2">&quot;/usr/local/bin:</span><span class="nv">$PATH</span><span class="s2">&quot;</span>
+</code></pre></div>
+
+<h4>风险 5：systemd 服务配置错误导致开机失败</h4>
+<p><strong>风险描述</strong>：<br />
+错误的 systemd service 文件可能导致系统启动变慢或进入紧急模式。</p>
+<p><strong>预防措施</strong>：<br />
+- 在创建 service 文件前先备份现有配置<br />
+- 使用 <code>systemd-analyze verify</code> 检查语法</p>
+<p><strong>修复方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 如果系统启动受影响</span>
+<span class="c1"># 1. 重启时在 GRUB 菜单按 e</span>
+<span class="c1"># 2. 在 linux 行末尾添加 systemd.unit=emergency.target</span>
+<span class="c1"># 3. 按 Ctrl+X 启动</span>
+<span class="c1"># 4. 修复或删除错误的 service 文件</span>
+sudo<span class="w"> </span>rm<span class="w"> </span>/etc/systemd/system/openclaw-node.service
+sudo<span class="w"> </span>systemctl<span class="w"> </span>daemon-reload
+sudo<span class="w"> </span>reboot
+</code></pre></div>
+
+<h3>低风险</h3>
+<h4>风险 6：Token 泄露</h4>
+<p><strong>风险描述</strong>：<br />
+Token 出现在日志、shell 历史或配置文件中被他人获取。</p>
+<p><strong>预防措施</strong>：<br />
+- 使用环境变量代替配置文件中的明文 token<br />
+- 定期更换 token<br />
+- 不要将 token 提交到 git 仓库</p>
+<p><strong>修复方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 重新生成 token</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>regenerate-token
+<span class="c1"># 更新所有使用旧 token 的节点</span>
+</code></pre></div>
+
+<h4>风险 7：端口冲突</h4>
+<p><strong>风险描述</strong>：<br />
+18789 端口被其他程序占用。</p>
+<p><strong>预防措施</strong>：<br />
+- 执行前检查端口占用：<code>sudo lsof -i :18789</code></p>
+<p><strong>修复方法</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 找出占用端口的进程</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:18789
+
+<span class="c1"># 停止该进程或使用其他端口</span>
+<span class="c1"># 如果要使用其他端口：</span>
+<span class="c1"># Mac 侧：openclaw config set gateway.port 18790</span>
+<span class="c1"># Ubuntu 侧：openclaw node run --host &lt;mac-ip&gt; --port 18790</span>
+</code></pre></div>
+
+<hr />
+<h2>附录 A：快速检查清单</h2>
+<p>在开始 Phase 0 之前，在 Mac 上执行以下检查：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 确认 Gateway 正在运行</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>status
+
+<span class="c1"># 2. 确认 bind 设置</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind
+<span class="c1"># 如果是 loopback，需要改为 lan</span>
+
+<span class="c1"># 3. 确认 token</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.auth.token
+<span class="c1"># 应该显示：235bf68c2288bfde322b8567509fb0e4d8eb368ec3c70000</span>
+
+<span class="c1"># 4. 确认 Mac LAN IP</span>
+ipconfig<span class="w"> </span>getifaddr<span class="w"> </span>en0
+<span class="c1"># 记录这个 IP</span>
+
+<span class="c1"># 5. 确认 SSH 已开启</span>
+sudo<span class="w"> </span>launchctl<span class="w"> </span>list<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>sshd
+</code></pre></div>
+
+<p>在 Ubuntu 上执行以下检查：</p>
+<div class="codehilite"><pre><span></span><code><span class="c1"># 1. 确认网络可达 Mac</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">22</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span>
+
+<span class="c1"># 2. 确认 SSH 无密码登录可用</span>
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;echo OK&quot;</span>
+
+<span class="c1"># 3. 确认 openclaw 版本</span>
+openclaw<span class="w"> </span>--version
+<span class="c1"># 如果低于 2026.3.0，先升级</span>
+
+<span class="c1"># 4. 确认可以运行 node 命令</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>--help
+</code></pre></div>
+
+<hr />
+<h2>附录 B：相关配置文件路径</h2>
+<table>
+<thead>
+<tr>
+<th>文件</th>
+<th>Mac 路径</th>
+<th>Ubuntu 路径</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>openclaw.json</td>
+<td>~/.openclaw/openclaw.json</td>
+<td>~/.openclaw/openclaw.json</td>
+</tr>
+<tr>
+<td>node.json</td>
+<td>N/A</td>
+<td>~/.openclaw/node.json</td>
+</tr>
+<tr>
+<td>SSH 密钥</td>
+<td>~/.ssh/id_ed25519 (~/.ssh/id_ed25519.pub)</td>
+<td>~/.ssh/id_ed25519 (~/.ssh/id_ed25519.pub)</td>
+</tr>
+<tr>
+<td>authorized_keys</td>
+<td>~/.ssh/authorized_keys (Mac)</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>systemd service</td>
+<td>N/A</td>
+<td>/etc/systemd/system/openclaw-node.service</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>附录 C：关键命令速查</h2>
+<div class="codehilite"><pre><span></span><code><span class="c1"># Mac 侧</span>
+openclaw<span class="w"> </span>config<span class="w"> </span>get<span class="w"> </span>gateway.bind<span class="w">          </span><span class="c1"># 查看当前 bind</span>
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.bind<span class="w"> </span>lan<span class="w">      </span><span class="c1"># 修改为 LAN</span>
+openclaw<span class="w"> </span>gateway<span class="w"> </span>restart<span class="w">                  </span><span class="c1"># 重启 Gateway</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>list<span class="w">                     </span><span class="c1"># 查看设备列表</span>
+openclaw<span class="w"> </span>devices<span class="w"> </span>approve<span class="w"> </span>--latest<span class="w">         </span><span class="c1"># 审批最新设备</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status<span class="w">                     </span><span class="c1"># 查看节点状态</span>
+sudo<span class="w"> </span>lsof<span class="w"> </span>-i<span class="w"> </span>:18789<span class="w">                       </span><span class="c1"># 检查端口监听</span>
+
+<span class="c1"># Ubuntu 侧</span>
+openclaw<span class="w"> </span>node<span class="w"> </span>run<span class="w"> </span>--host<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span>--port<span class="w"> </span><span class="m">18789</span><span class="w"> </span>--token<span class="w"> </span><span class="s2">&quot;TOKEN&quot;</span>
+openclaw<span class="w"> </span>nodes<span class="w"> </span>status
+ssh<span class="w"> </span>lr@&lt;mac-ip&gt;<span class="w"> </span><span class="s2">&quot;echo OK&quot;</span><span class="w">                </span><span class="c1"># SSH 测试</span>
+nc<span class="w"> </span>-zv<span class="w"> </span>&lt;mac-ip&gt;<span class="w"> </span><span class="m">18789</span><span class="w">                    </span><span class="c1"># 端口测试</span>
+</code></pre></div>
+
+<hr />
+<p><em>文档版本：Phase-0-Gateway-Docking v1.1</em><br />
+<em>生成时间：2026-03-26</em><br />
+<em>补充时间：2026-03-27（基于映射报告 v2）</em><br />
+<em>目标：Ubuntu 24.04 台机 → MacBook Pro Gateway (LAN)</em></p>
+<hr />
+<h2>映射报告验证更新（2026-03-27）</h2>
+<p>来源：Cross-Verification-N05.md（2026-03-27 夜间构建 N-02 产出）</p>
+<h3>✅ 已验证的正确信息</h3>
+<ul>
+<li>Gateway 默认端口 18789 ✅</li>
+<li>Gateway multiplexing WebSocket + HTTP 同端口 ✅</li>
+<li>LM Studio 默认端口 <code>http://127.0.0.1:1234/v1</code> ✅</li>
+<li>MiniMax M2.5 GS32 contextWindow = 196608，maxTokens = 8192 ✅</li>
+<li>Sub-agent <code>maxSpawnDepth</code> 默认 1（范围 1-5，推荐 Depth 2）✅</li>
+<li>Sub-agent <code>maxChildrenPerAgent</code> 默认 5，<code>maxConcurrent</code> 默认 8 ✅</li>
+<li>Sub-agent <code>archiveAfterMinutes</code> 默认 60 分钟 ✅</li>
+<li><code>exec</code> 工具 <code>host</code> 支持 <code>sandbox</code> / <code>node</code> / <code>gateway</code> ✅</li>
+<li>Session key 格式 <code>agent:&lt;id&gt;:main</code> / <code>agent:&lt;id&gt;:subagent:&lt;uuid&gt;</code> ✅</li>
+<li>DM pairing 为默认策略（需手动审批）✅</li>
+</ul>
+<h3>❌ 需要补充/修正的内容</h3>
+<ul>
+<li><strong>Heartbeat 默认 30 分钟</strong>：<code>every: "30m"</code>，未在当前报告中明确提及</li>
+<li>建议在 Gateway 配置章节补充：heartbeat 默认 30 分钟，如需调整可通过 <code>openclaw config set gateway.heartbeat.every "5m"</code> 配置</li>
+<li><strong>Ollama 集成警告</strong>：<code>/v1</code> 路径会破坏 tool calling，应使用 <code>http://127.0.0.1:11434</code>（无后缀）</li>
+<li>当前报告未明确提及此陷阱，补充内容中 RTX 2060 接入方案提到了 Ollama 但未注明此问题</li>
+<li><strong>Sub-agent context 只注入 AGENTS.md + TOOLS.md</strong>（无 SOUL / MEMORY / IDENTITY）</li>
+<li>设计多 Agent 协作架构时需注意 sub-agent 缺失这些上下文文件</li>
+<li><strong>DM pairing code 有效期 1 小时</strong>，pending 上限 <strong>3 个/频道</strong></li>
+<li>在 §7.6 Pairing 审批问题章节补充：pairing code 有效期 1 小时，超时需重新发起；pending 上限 3 个/频道，超出后新请求被拒绝</li>
+</ul>
+<h3>⚠️ 外部硬件声明（无法通过 OpenClaw 文档验证）</h3>
+<ul>
+<li>BearPi-Pico H3863 芯片规格（星闪 49μs / 240MHz）属于硬件参数，非 OpenClaw 软件功能，需对照 BearPi 官方文档或实测验证</li>
+</ul>
+<h3>补充 1：RTX 2060 GPU 接入方式（重要澄清）</h3>
+<p>映射报告 v2 明确了 Gateway 与 GPU 的关系：</p>
+<blockquote>
+<p><strong>Gateway 本身不直接管理 GPU</strong>，而是通过 <code>exec</code> 工具调用 Ollama/LM Studio 等外部推理引擎来使用 RTX 2060。</p>
+</blockquote>
+<p><strong>正确架构</strong>：</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">Gateway</span>（<span class="nv">MacBook</span><span class="w"> </span><span class="nv">Pro</span>）
+<span class="w">  </span>└──<span class="w"> </span><span class="k">exec</span><span class="w"> </span>工具
+<span class="w">        </span>└──<span class="w"> </span><span class="nv">SSH</span><span class="o">/</span>本地调用<span class="w"> </span><span class="nv">Ollama</span><span class="o">/</span><span class="nv">LM</span><span class="w"> </span><span class="nv">Studio</span>
+<span class="w">              </span>└──<span class="w"> </span><span class="nv">RTX</span><span class="w"> </span><span class="mi">2060</span><span class="w"> </span><span class="nv">GPU</span><span class="w"> </span>推理
+</code></pre></div>
+
+<p><strong>具体操作</strong>：<br />
+1. 在 Ubuntu 台式机上安装 Ollama 或 LM Studio<br />
+2. 下载量化模型（如 Qwen2.5-7B INT4）到本地<br />
+3. Gateway 通过 <code>exec(command="ollama run qwen2.5:7b ...", host="node")</code> 调用</p>
+<p><strong>不要期望</strong>：Gateway 直接加载模型到 RTX 2060——这需要外部推理服务。</p>
+<h3>补充 2：Tailscale "serve" 模式（替代 LAN 绑定）</h3>
+<p>如果 MacBook Pro 和 Ubuntu 台式机都加入了同一个 Tailscale 网络，可以：</p>
+<p><strong>Mac 侧配置</strong>（更安全的方案）：</p>
+<div class="codehilite"><pre><span></span><code>openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.bind<span class="w"> </span><span class="s2">&quot;loopback&quot;</span><span class="w">      </span><span class="c1"># 不暴露到 LAN</span>
+openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.tailscale.mode<span class="w"> </span><span class="s2">&quot;serve&quot;</span><span class="w">  </span><span class="c1"># 仅 Tailscale 可访问</span>
+</code></pre></div>
+
+<p><strong>优势</strong>：<br />
+- Gateway 不暴露到局域网（更安全）<br />
+- 即使 Mac 在 NAT 后也能被 Ubuntu 访问<br />
+- 替代 <code>gateway.bind "lan"</code> 的方案</p>
 </div>
 </body>
 </html>

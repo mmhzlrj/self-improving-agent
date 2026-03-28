@@ -1,0 +1,29 @@
+{
+  "version": "v3",
+  "date": "2026-03-27",
+  "startup_time": "2026-03-27T20:05:00+08:00",
+  "phase": "night-build-v3",
+  "status": "STARTED",
+  "minimax_quota": {
+    "model": "MiniMax-M*",
+    "remains_time_ms": 14086422,
+    "remains_time_min": 234.77,
+    "threshold_min": 60,
+    "current_interval_total_count": 600,
+    "current_interval_usage_count": 595,
+    "current_interval_remaining_count": 5,
+    "weekly_remains_time_ms": 186886422,
+    "verdict": "ABOVE_THRESHOLD",
+    "note": "remains_time 234min > 60min threshold — proceed"
+  },
+  "task_queue": {
+    "failed_tasks_to_reset": [],
+    "no_failed_found": true,
+    "pending_tasks": ["N-03", "N-04", "N-05"]
+  },
+  "output_dir": "harness/robot/night-build/output/2026-03-27/",
+  "sop_reference": "harness/robot/night-build/reference/ROBOT-SOP.md",
+  "sop_exists": true,
+  "cron_trigger": "0-1 Night Build Start v3",
+  "cron_id": "3d80f07e-a814-4ff0-8a6f-dc3a5c276b29"
+}
