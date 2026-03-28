@@ -313,6 +313,12 @@ browser(action=open, profile="chrome", url="https://www.doubao.com/chat/")
 3. **错误记录** - 任何错误、纠正、知识盲区
 4. **过程** - 做事的步骤和进展
 
+> ⚠️ **记录错误经验时，必须同步更新两个地方：**
+> - `~/.openclaw/workspace/.learnings/ERRORS.md`（workspace 本地）
+> - `~/.openclaw/workspace/skills/self-improving-agent/.learnings/ERRORS.md`（self-improving-agent submodule）
+> - 两边都 push 到各自 remote
+> **这条规则由 2026-03-28 教训总结而来：之前已两次忘记同步。**
+
 **任何操作都要详细记录：**
 - 📋 **操作步骤** - 每一步做了什么
 - 🔧 **工具/脚本** - 具体用了什么，怎么用的
