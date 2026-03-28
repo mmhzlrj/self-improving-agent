@@ -597,3 +597,59 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 ### 计划
 - 写一个 before_prompt_build hook: 检测 Ubuntu 节点状态，如果在线则自动注入 GPU/semantic cache 上下文
 - 实现: ~/semantic_memory_context.md 每次新 session 前更新
+
+---
+
+## 2026-03-28 重大进展总结
+
+### 1. Ubuntu Node 配对 MacBook Gateway ✅
+- Ubuntu (192.168.1.18) 作为 node 连接到 MacBook (192.168.1.13) Gateway
+- 配对流程：node run → devices list → devices approve
+- systemd 服务需显式声明 `Environment=OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1`
+- 教训：Gateway 配置变更需重启生效；systemd 不继承 shell 环境变量
+
+### 2. rl-training-headers 插件 ✅
+- MacBook OpenClaw 已启用
+- 注入 X-Session-Id, X-Turn-Type headers
+- 为 OpenClaw-RL 实时训练准备
+
+### 3. Semantic Cache 系统 ✅
+- Ubuntu 32GB RAM 作为语义缓存
+- sentence-transformers (all-MiniLM-L6-v2) + FAISS
+- 服务：http://192.168.1.18:5050
+- 索引：1166 条聊天记录
+- MacBook 可通过 skill 脚本调用检索
+
+### 4. Smart Context Hook ✅
+- 脚本：~/.openclaw/workspace/scripts/smart_context_hook.py
+- 功能：检测 Ubuntu 节点是否在线，在线则获取语义上下文
+- 触发：每小时 cron + HEARTBEAT
+- 输出：~/.openclaw/workspace/semantic-memory.md
+
+### 5. Ubuntu NAS 备份 ✅
+- 脚本：~/backup_chat_records.py
+- 每天 02:00 自动备份聊天记录
+- 备份目录：~/.semantic_cache/backups/
+- 格式：chat_backup_YYYY-MM-DD.json
+
+### 6. Ubuntu 环境准备 ✅
+- PyTorch 2.7.0 + CUDA (RTX 2060)
+- sentence-transformers 5.3.0
+- faiss-cpu 1.13.2
+- flask 3.1.3
+
+### 待完成
+- OpenClaw-RL Server（GitHub 下载失败，需等网络）
+- 节点在线检测 Hook（计划中）
+
+### 经验教训
+1. GitHub 访问受限时用 gh api 或 tarball 下载
+2. PyTorch 不需要装 CUDA Toolkit，conda 自带
+3. sentence-transformers 5.x 不支持 show_progress 参数
+4. 远程传文件用 scp，不用 subagent heredoc
+5. systemd 服务需显式声明环境变量
+6. Gateway 配置变更需重启才能生效
+
+### Git 推送失败
+- workspace git push 因 openclaw-zero-token submodule 问题失败
+- 文件已保存在本地，需手动解决 submodule 后推送
