@@ -43,6 +43,34 @@ Minimax subagent 调用 mdview.py 打开 markdown 文件后，浏览器实际显
 
 ---
 
+## 2026-03-28: Ubuntu node 连接 MacBook Gateway 配对失败
+
+### 错误描述
+Ubuntu (192.168.1.18) 作为 node 连接到 MacBook Gateway (192.168.1.13) 时多次失败。
+
+### 错误链
+
+1. **SECURITY ERROR**: 不允许明文 ws:// 连接
+   - 解决：`OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1`
+
+2. **ECONNREFUSED 192.168.1.13:18789**: MacBook Gateway 只监听 127.0.0.1
+   - 根因：Gateway 配置 `bind=lan` 后需要重启才能生效
+   - 解决：`openclaw gateway restart`
+
+3. **pairing required**: Node 需要配对
+   - 解决：`openclaw devices approve --latest`
+
+4. **systemd 服务 disconnected**: 环境变量未传递
+   - 根因：systemd 服务不继承 shell 环境变量
+   - 解决：在 `~/.config/systemd/user/openclaw-node.service` 的 `[Service]` 添加 `Environment=OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1`
+
+### 教训
+- Gateway 配置变更（bind/port 等）需要重启服务才能生效
+- systemd 服务需要显式声明环境变量，不能依赖 shell 里的设置
+- Node 配对流程：`node run` → `devices list` → `devices approve`
+
+---
+
 ## 2026-03-28: dashboard 点击 .md 文件打开 2 个 tab
 
 ### 错误描述
