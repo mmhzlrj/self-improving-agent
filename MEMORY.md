@@ -553,3 +553,47 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 - **安全哲学**：数据自毁机制，失联30天触发，宁毁不屈；记忆主人是唯一真理仲裁者
 - **不追求最新**：Jetson Thor Nano 8G/16G要等Q3-Q4 2026，RTX 5050要等2026-06
 - **细节控**：v3.30文档81条采纳修改/37处实际修订，来源链接逐一核实
+
+## 2026-03-28 Semantic Memory 系统
+
+### 架构
+- Ubuntu (192.168.1.18) 32GB RAM 作为语义缓存节点
+- Semantic Cache Server: http://192.168.1.18:5050
+- sentence-transformers (all-MiniLM-L6-v2) + FAISS
+- 索引量: 1166 条聊天记录
+- 技能脚本: ~/.openclaw/workspace/skills/semantic-memory/
+- 上下文文件: ~/.openclaw/workspace/semantic-memory.md (每小时自动更新)
+
+### Ubuntu 节点能力
+- GPU: RTX 2060 6GB (CUDA 可用)
+- PyTorch 2.7.0
+- 端口: 5050 (语义缓存), 22 (SSH)
+
+### rl-training-headers 插件
+- MacBook 已安装并启用
+- 注入 X-Session-Id, X-Turn-Type headers
+- 等待 OpenClaw-RL Server 搭建完成
+
+### 待完成
+- OpenClaw-RL Server (GitHub 下载失败，等网络)
+- OpenClaw Hook 智能化 (Ubuntu 节点在线检测)
+- Ubuntu 本地备份聊天记录 (NAS 形态)
+
+## 2026-03-28 调研: OpenClaw Hook 系统
+
+### 可用 Hooks
+- boot-md: gateway 启动时运行 BOOT.md
+- session-memory: /new 或 /reset 时保存上下文
+- command-logger: 记录命令事件
+- self-improvement: bootstrap 时注入学习提醒
+- rl-training-headers: 注入 X-Session-Id headers
+
+### 关键事件
+- agent:bootstrap: agent 启动时
+- before_prompt_build: 构建 prompt 前
+- agent_end: agent 结束时
+- command:new, command:reset: 新会话
+
+### 计划
+- 写一个 before_prompt_build hook: 检测 Ubuntu 节点状态，如果在线则自动注入 GPU/semantic cache 上下文
+- 实现: ~/semantic_memory_context.md 每次新 session 前更新

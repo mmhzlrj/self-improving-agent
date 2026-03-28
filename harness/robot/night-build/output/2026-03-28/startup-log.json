@@ -1,0 +1,23 @@
+{
+  "date": "2026-03-28",
+  "trigger": "cron: 0-1 Night Build Start v3",
+  "version": "v3.1",
+  "decision": "STOP_NO_QUOTA",
+  "reason": "MiniMax-M* remaining_count=13 < 60",
+  "minimax_quota": {
+    "model": "MiniMax-M*",
+    "interval_total": 600,
+    "interval_used": 587,
+    "remaining_count": 13,
+    "remaining_time": 14088418,
+    "threshold": 60
+  },
+  "task_queue": {
+    "total": 1800,
+    "failed": 1,
+    "pending": 1713,
+    "running": 2,
+    "completed": 0
+  },
+  "created_at": "2026-03-28T20:05:00+08:00"
+}

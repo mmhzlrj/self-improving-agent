@@ -27,8 +27,8 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-28 17:29 CST (09:29 UTC)
-# MiniMax 套餐状态：周期（15:00-20:00），剩余 460/600，已用 23.3%
+# Last check: 2026-03-28 20:03 CST (12:03 UTC)
+# MiniMax 套餐状态：周期（20:00-00:00），已用 6/600 (1.0%)，剩余 594
 # 阈值状态：无触发
 
 ## MiniMax Coding Plan 额度监控
@@ -92,3 +92,20 @@ for m in data['model_remains']:
 - 90%：⚠️ MiniMax 套餐剩余不足 10%
 - 95%：🔴 MiniMax 套餐剩余不足 5%
 - 99%：🚨 MiniMax 套餐即将用完！
+
+## Ubuntu 节点 + Semantic Memory 检查
+
+每次心跳时，如果距离上次检查已超过 10 分钟，运行一次：
+
+```bash
+python3 ~/.openclaw/workspace/scripts/smart_context_hook.py
+```
+
+**作用**：
+- 检查 Ubuntu 节点（192.168.1.18）是否在线
+- 在线 → 从 Semantic Cache 获取相关上下文，更新 semantic-memory.md
+- 离线 → 记录离线状态
+
+**注意**：
+- 这个检查是静默的，不主动通知用户
+- 只在 heartbeat 时运行，不阻塞主对话响应
