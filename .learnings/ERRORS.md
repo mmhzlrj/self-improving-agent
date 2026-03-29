@@ -1251,3 +1251,13 @@ subagent 里用 heredoc 写多行脚本到远程服务器失败
 - 遇到问题用嘴解释，而不是用手找答案
 - 对自己的"记忆"过度自信，忽视文件系统这个事实来源
 
+
+### 7. 不知道飞书能直接发视频到用户手机
+   - 不知道 `openclaw message send --channel feishu --media <path>` 可以直接发视频
+   - 浪费很多时间查 API
+
+### 做对的地方（最后）
+- 用 `openclaw message send` 命令直接发送到飞书成功
+- 发送视频格式：`--channel feishu --media <本地路径>`
+- 目标用户：`--target ou_18ed3541348294718c48833176aea3b8`
+
