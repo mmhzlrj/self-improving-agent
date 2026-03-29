@@ -89,6 +89,17 @@
       "auto_prompt": "T-030 完成后执行：1) sed -i 's/device=\"cpu\"/device=\"cuda\"/' /home/jet/semantic_cache/server.py 2) kill 并重启 server.py 3) curl /health 验证 4) curl /search 测试 5 个查询验证正常 6) 记录结果"
     },
     {
+      "id": "T-034",
+      "name": "调研 Google Turbo Clock 压缩算法（对0-1项目的影响）",
+      "priority": "P2",
+      "mode": "auto",
+      "status": "pending",
+      "reason": "用户提到谷歌新出了 Turbo Clock 压缩算法，可能大幅减少内存/显存使用，需调研技术细节和适用性",
+      "deliverable": "调研报告：算法原理、VRAM/内存节省幅度、对 Jetson Nano 2GB + RTX 2060 6GB 的适用性、是否可集成到 ComfyUI/OpenClaw",
+      "depends_on": [],
+      "auto_prompt": "Deep Research 调研 Google Turbo Clock 压缩算法。搜索关键词：'Google Turbo Clock compression'、'Turbo Clock memory reduction'、'Turbo Clock GPU VRAM'、'谷歌 Turbo Clock 压缩'。需要确认：1) 这是什么技术（论文/产品/框架）2) 原理是什么 3) 对显存/内存的实际节省幅度 4) 是否开源 5) 对我们的硬件（Jetson Nano 2GB + RTX 2060 6GB）有什么帮助 6) 能否集成到 ComfyUI 推理或 OpenClaw 运行中。注意：如果搜索不到 Turbo Clock，尝试搜索类似的 Google 压缩算法（如 Clockwork、TurboSparse、PowerInfer 等最新 2025-2026 发布的技术）"
+    },
+    {
       "id": "T-032",
       "name": "zhiku 脚本修复验证 + 全面测试",
       "priority": "P2",

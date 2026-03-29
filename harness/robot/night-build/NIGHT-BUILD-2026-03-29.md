@@ -181,9 +181,40 @@ T-030 (AnimateDiff 部署) → T-031 (切回 CUDA)
        ↕ 并行
 T-032 (zhiku 修复)
 T-033 (清理磁盘)
+T-034 (Turbo Clock 调研)
 ```
 
-T-030 和 T-032/T-033 可以并行，T-030 完成后执行 T-031。
+T-030 和 T-032/T-033/T-034 可以并行，T-030 完成后执行 T-031。
+
+---
+
+### T-034: 调研 Google Turbo Clock 压缩算法
+
+**用户原话**: "谷歌最近好像新出了一个 Turbo Clock 的压缩算法，可以大幅度减少内存还是显存的使用"
+
+#### 背景
+用户不确定具体名称，需要先确认技术是否存在，然后评估对 0-1 项目的影响。
+
+#### 搜索方向
+1. "Google Turbo Clock compression algorithm"
+2. "Google Turbo Clock memory VRAM reduction"
+3. "谷歌 Turbo Clock 压缩算法"
+4. 如果搜不到 Turbo Clock，搜索类似技术：
+   - "Google Clockwork compression"
+   - "TurboSparse Google"
+   - "PowerInfer Google compression"
+   - "Google latest compression algorithm 2025 2026"
+   - "LLM inference memory optimization Google 2026"
+
+#### 评估维度
+- 算法原理（压缩什么：权重、激活、KV Cache？）
+- 对 VRAM 的实际节省幅度
+- 对我们硬件的适用性：Jetson Nano 2GB（CPU推理为主）+ RTX 2060 6GB（GPU推理）
+- 能否集成到 ComfyUI（AnimateDiff 推理）或 OpenClaw
+- 是否开源、是否需要特定硬件支持
+
+#### 输出
+调研报告写入 `harness/robot/night-build/reports/Turbo-Clock-Research.md`
 
 ---
 
