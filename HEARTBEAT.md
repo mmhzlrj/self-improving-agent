@@ -27,8 +27,8 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-28 20:03 CST (12:03 UTC)
-# MiniMax 套餐状态：周期（20:00-00:00），已用 6/600 (1.0%)，剩余 594
+# Last check: 2026-03-29 04:57 CST (20:57 UTC)
+# MiniMax 套餐状态：周期（00:00-05:00），已用 259/600 (43.2%)，剩余 341
 # 阈值状态：无触发
 
 ## MiniMax Coding Plan 额度监控
@@ -95,17 +95,28 @@ for m in data['model_remains']:
 
 ## Ubuntu 节点 + Semantic Memory 检查
 
-每次心跳时，如果距离上次检查已超过 10 分钟，运行一次：
+每次心跳时运行：
+1. 同步 MacBook 新 sessions 到 Ubuntu（rsync）
+2. 检查 Ubuntu 节点是否在线
+3. 在线 → 重启 Semantic Cache 服务器（重新加载所有 sessions）
+4. 获取相关上下文，更新 semantic-memory.md
+5. 离线 → 记录离线状态
 
 ```bash
+# 1. 同步 sessions（静默）
+rsync -avz --ignore-existing ~/.openclaw/agents/main/sessions/ jet@192.168.1.18:~/.openclaw/agents/main/sessions/ 2>/dev/null
+
+# 2. 检查 Ubuntu 在线
+ping -c 1 -W 2 192.168.1.18 > /dev/null 2>&1 || exit
+
+# 3. 重启 Semantic Cache 服务器（重新加载 sessions）
+ssh jet@192.168.1.18 'pkill -f "python3.*server.py" 2>/dev/null; sleep 2; cd /home/jet/semantic_cache && ~/miniconda/bin/python server.py > semantic_cache.log 2>&1 &'
+
+# 4. 等待服务就绪
+sleep 3
+
+# 5. 获取上下文
 python3 ~/.openclaw/workspace/scripts/smart_context_hook.py
 ```
 
-**作用**：
-- 检查 Ubuntu 节点（192.168.1.18）是否在线
-- 在线 → 从 Semantic Cache 获取相关上下文，更新 semantic-memory.md
-- 离线 → 记录离线状态
-
-**注意**：
-- 这个检查是静默的，不主动通知用户
-- 只在 heartbeat 时运行，不阻塞主对话响应
+**注意**：静默执行，不主动通知用户。

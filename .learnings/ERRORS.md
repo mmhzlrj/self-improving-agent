@@ -226,3 +226,28 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 - 发送视频格式：`--channel feishu --media <本地路径>`
 - 目标用户：`--target ou_18ed3541348294718c48833176aea3b8`
 
+
+## 2026-03-29: Chrome 146 扩展加载完全失败
+
+### 错误
+- 尝试用 `--load-extension` 在 Chrome 146 上加载 Browser Relay 扩展
+- 全新 profile 能加载但 Chrome 自动禁用（state=None）
+- 已有 profile 的 Secure Preferences 完整性校验导致扩展注册被重置
+- 浪费了约 2 小时尝试各种方法
+
+### 教训
+- Chrome 146+ 完全阻止命令行加载未打包扩展
+- 应该先检查 Chrome 版本和文档，而不是直接试
+- OpenClaw 托管浏览器（18800）是更好的方案，应该优先考虑
+
+## 2026-03-29: Semantic Cache 索引问题
+
+### 错误
+- 语义缓存服务器只在启动时加载 sessions
+- 新的聊天记录不会被自动索引
+- sync_and_reindex.py 是空脚本，没有实现
+- 导致 memory_search 找不到今天的记录
+
+### 教训
+- 需要重启服务器或实现 reindex API 才能搜索新内容
+- HEARTBEAT 里的同步逻辑需要补充 reindex 步骤

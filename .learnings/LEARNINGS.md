@@ -1078,3 +1078,59 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 ### Metadata
 - Source: bug-fix
 - Tags: subprocess, webbrowser-open, double-tab, dashboard
+
+## 2026-03-29: OpenClaw 托管浏览器替代 Browser Relay 扩展
+
+### 发现
+- `openclaw browser --browser-profile openclaw start` 启动独立 Chrome 实例
+- 端口 18800，独立 profile（`~/.openclaw/browser/openclaw/user-data`）
+- 不需要任何 Chrome 扩展，直接通过 CDP 控制
+- 比 Browser Relay 扩展方案稳定得多
+
+### 好处
+- 不受 Chrome 扩展安全策略限制
+- Gateway 启动自动拉起
+- 可以保持多个 AI Chat 页面登录态
+
+### 配置
+- auto-start-services Hook 自动启动
+- 5 个 MCP server 的 CDP 端口统一为 18800
+
+## 2026-03-29: GLM SSE 超时保护
+
+### 问题
+- GLM 的 SSE 流 `reader.read()` 的 `done` 标志永远不返回 true
+- 导致 `while(true)` 无限循环，工具卡死
+
+### 解决方案
+- 加 `STALE_TIMEOUT = 8000`（8秒无新数据自动退出）
+- 追踪 `lastDataTime`，每次收到数据更新时间戳
+
+### 代码位置
+- `~/.openclaw/extensions/glm-mcp-server/glm-mcp-server.mjs`
+
+## 2026-03-29: Chrome 实例精简
+
+### 改进
+- 从 3 个 Chrome 实例降到 2 个（主 Chrome + OpenClaw 托管浏览器）
+- 去掉 Chrome-Debug-Profile（9223），全部迁移到 18800
+- 用户明确要求：不在主 Chrome 加载扩展（Minimax 会误关）
+
+### 配置变更
+- 5 个 MCP server 的 CDP 端口 9223 → 18800
+- auto-start-services Hook 去掉 9223 相关代码
+- 如果恢复 Chrome-Debug-Profile，所有 server.mjs 要改回 9223
+
+## 2026-03-29: SVD 视频生成经验
+
+### 关键参数
+- RTX 2060 6GB，实际可用 5.6GB
+- 1080×1920 竖屏上限约 16 帧/批
+- 15帧/批 @30fps = 每批0.5秒
+- 每批约 200 秒（3.3 分钟）
+- 17帧 OOM
+
+### 教训
+- VRAM 需求比官方文档高，实际测试为准
+- CPU offload 可以降低 VRAM 但更慢
+- qwen_inference_server 会占用 1GB VRAM，需要提前检查
