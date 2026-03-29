@@ -160,3 +160,24 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 ### 解决
 用 `write` 工具写到本地 → `scp` 传到远程
 
+
+## 2026-03-29 Semantic Memory 索引失效 + 路径依赖错误
+
+### 错误
+1. Semantic Cache 服务器只在启动时加载 sessions，新 sessions 永远不被索引
+2. 搜索结果为空时，没有第一时间用 `find`/`grep` 全局搜索文件系统
+3. 坚持依赖有 bug 的索引系统，浪费大量时间
+
+### 影响
+- 找不到 `robot_0_1_final.mp4`（15秒视频，1.9MB）
+- 用户提醒多次后仍然狡辩，没有及时承认错误并用备用方法
+
+### 教训
+1. **语义缓存只做辅助，文件系统是兜底**：搜索为空时，立即用 `find ~/Movies ~/.openclaw ~/Downloads` 找视频文件
+2. **索引系统必须动态加载**：HEARTBEAT 每次 rsync 后重启 Semantic Cache 服务器
+3. **Interactive Card 内容拿不到**：飞书 Interactive Card 内容无法通过 API 获取，只能看到文件路径
+
+### 修复
+- HEARTBEAT.md 已更新：rsync 后重启 Semantic Cache 服务器
+- 后续搜索时优先搜文件系统
+
