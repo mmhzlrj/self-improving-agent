@@ -318,3 +318,43 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 - 不要在 SSH session 中 pkill 带有通配符的进程名
 - 正确做法：先用 `pgrep` 找到具体 PID，再用 `kill <pid>` 精确杀
 - 或者用 `nohup ... & disown` 启动进程，确保不受 SSH 断连影响
+
+---
+
+## 2026-03-29: context_after 永远为空的 bug
+
+### 错误
+- context window 功能中，`context_before` 正常返回，但 `context_after` 始终为空数组
+- 即使确认 session 中有后续消息（离线测试能找到），search API 仍然返回空
+
+### 根因
+- `context_before` 和 `context_after` 在同一个 for 循环中收集
+- text_store 按时间顺序排列，循环先遇到 before 消息
+- `if len(ctx_b) >= 2: break` 提前跳出整个循环
+- context_after 的消息排在 text_store 后面，永远没机会被遍历到
+
+### 修复
+```python
+# 旧代码（bug）
+for e2 in text_store:
+    if -context_window <= diff < 0:
+        ctx_b.append(...)
+        if len(ctx_b) >= 2: break  # ← 跳出整个循环
+    elif 0 <= diff <= context_window:
+        ctx_a.append(...)
+
+# 新代码（修复）
+for e2 in text_store:
+    if -context_window <= diff < 0:
+        ctx_b.append(...)
+    elif 0 <= diff <= context_window:
+        ctx_a.append(...)
+# 遍历完后截断
+ctx_b = ctx_b[-2:]
+ctx_a = ctx_a[:2]
+```
+
+### 教训
+- 同一循环中收集两类数据并分别 break 是经典 bug 模式
+- 正确做法：完整遍历后再截断/排序，不要在循环中 break
+- server.py 中有两处相同代码（semantic 模式和 hybrid 模式），都要修

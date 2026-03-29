@@ -1195,6 +1195,23 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 - 云端 API（可灵/Kling/Luma/Runway）
 - MiniMax 视频生成 API（需确认 Coding Plan 是否支持）
 
+### 7 项优化最终状态（2026-03-29 21:06 全部通过）
+
+| # | 优化 | 测试结果 | 修复过程 |
+|---|------|---------|---------|
+| 1 权重调优 | ✅ | — |
+| 2 角色过滤 | ✅ | 修复默认 roles 漏掉 toolResult（占57%） |
+| 3 增量索引 | ✅ | API 正常 |
+| 4 上下文窗口 | ✅ | 修复两处 bug：timestamp float→datetime + before break 导致 after 为空 |
+| 5 BM25 | ✅ | 被第一个 subagent 覆盖，手动补全 |
+| 6 Embedding 预处理 | ✅ | text/display_text 分离 |
+| 7 去重 | ✅ | 7411→6656 条 |
+
+### 修复的 3 个 bug
+1. **roles 过滤**：默认 roles=["user","assistant"] 排除了 57% 的 toolResult 记录
+2. **timestamp 解析**：`float("2026-03-29T12:34:56")` 抛异常，改为 datetime.strptime
+3. **context_after 为空**：ctx_b 满后 break 跳出循环，ctx_a 永远没机会执行
+
 ### 模型清理
 - 删除了 FramePack 模型 (~24GB) + HunyuanVideo (~34GB) + SVD (~14GB) + 其他
 - 释放 103GB，磁盘 63% → 39%

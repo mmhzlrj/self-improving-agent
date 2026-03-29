@@ -33,14 +33,14 @@
 
 **命令：**
 ```bash
-curl -s --max-time 3 "http://127.0.0.1:9223/json/version"
+curl -s --max-time 3 "http://127.0.0.1:18800/json/version"
 ```
 
 **期望结果：** 返回 JSON 包含 `Browser` 字段
 
 **判断：**
 - ✅ 返回 JSON → Chrome CDP 正常
-- ❌ 超时或无响应 → Chrome-Debug-Profile 未启动，**停下来问用户**
+- ❌ 超时或无响应 → OpenClaw 托管浏览器未启动，**停下来问用户**
 
 ---
 
@@ -116,7 +116,7 @@ sessions_spawn(
 
 ```
 工具状态检查（YYYY-MM-DD HH:MM）：
-- Chrome CDP 9223: ✅ Chrome/146.x.x.x
+- Chrome CDP 18800: ✅ Chrome/146.x.x.x
 - Doubao: ✅ (Xs) / ❌ 超时 / ❌ 错误信息
 - Kimi: ✅ (Xs) / ❌ 超时 / ❌ 错误信息
 - GLM: ✅ (Xs) / ❌ 超时 / ❌ 错误信息

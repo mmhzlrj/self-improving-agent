@@ -1,5 +1,7 @@
 # Playwright + Chrome CDP 经验规范
 
+> ⚠️ **已弃用（2026-03-29）**：Chrome-Debug-Profile（9223）方案已废弃，所有功能已迁移到 OpenClaw 托管浏览器（端口 18800）。以下内容仅作为历史记录保留。
+
 > 最后更新：2026-03-22
 
 ## 一、Chrome Debug Profile 信息
@@ -9,16 +11,16 @@
 |------|-----|
 | Profile | Chrome-Debug-Profile |
 | Profile 路径 | `~/Library/Application Support/Google/Chrome/Chrome-Debug-Profile` |
-| 调试端口 | 9223 |
+| 调试端口 | 18800 |
 | WebSocket URL | 动态（每次重启 Chrome 变化）|
-| 获取方式 | `curl -s http://127.0.0.1:9223/json/version` |
+| 获取方式 | `curl -s http://127.0.0.1:18800/json/version` |
 | Chrome 进程数 | ~12（含 Helper 进程）|
 | 启动命令 | 见下方 |
 
 ### 启动命令（正确方式）
 ```bash
 nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
-  --remote-debugging-port=9223 \
+  --remote-debugging-port=18800 \
   --user-data-dir="$HOME/Library/Application Support/Google/Chrome/Chrome-Debug-Profile" \
   2>/dev/null &
 ```
@@ -37,7 +39,7 @@ nohup /Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
 ```javascript
 const { chromium } = require('playwright');
 // 获取 WS URL
-const wsUrl = /* 从 curl http://127.0.0.1:9223/json/version 获取 */;
+const wsUrl = /* 从 curl http://127.0.0.1:18800/json/version 获取 */;
 const browser = await chromium.connectOverCDP(wsUrl);
 const ctx = browser.contexts()[0];
 ```
@@ -60,7 +62,7 @@ const ctx = browser.contexts()[0];
 
 | 端口 | 用途 | 说明 |
 |------|------|------|
-| **9223** | Chrome-Debug-Profile（5个AI页面）| webauth-mcp 连接端口 |
+| **18800** | OpenClaw 托管浏览器（5个AI页面）| MCP Server 连接端口 |
 | 18792 | Browser Relay（OpenClaw 扩展）| OpenClaw 内置 |
 | 18800 | 旧版 zhiku headless 脚本 | 仅作参考，已废弃 |
 
@@ -119,8 +121,8 @@ await page.waitForFunction(() => {
 ## 五、webauth-mcp 工作机制
 
 ### 5.1 连接方式
-- 通过 `chromium.connectOverCDP(WS_URL)` 连接 Chrome 9223
-- WS URL 从 `http://127.0.0.1:9223/json/version` 获取
+- 通过 `chromium.connectOverCDP(WS_URL)` 连接 OpenClaw 托管浏览器 18800
+- WS URL 从 `http://127.0.0.1:18800/json/version` 获取
 - 复用已有 context 中的已有页面
 
 ### 5.2 复用逻辑
@@ -151,7 +153,7 @@ const pg = ctx.pages().find(pg => pg.url().includes('doubao')) || await ctx.newP
 4. **没有用 Playwright** → 放着现成的 Playwright skill 不用，自己乱搞
 
 ### 正确做法
-1. Gateway 重启前，先用 `pgrep -f "Chrome.*Chrome-Debug-Profile"` 确认 Chrome 状态
+1. Gateway 重启前，先用 `pgrep -f "OpenClaw.*managed"` 确认托管浏览器状态
 2. 只杀特定 Chrome 实例（用进程名匹配），不杀所有 Chrome
 3. 始终用已有正确 profile，不创建新的
 4. 页面操作用 Playwright，不尝试 curl/其他方式
@@ -165,6 +167,6 @@ const pg = ctx.pages().find(pg => pg.url().includes('doubao')) || await ctx.newP
 |------|------|
 | Playwright SKILL.md | `~/.openclaw/workspace/skills/playwright-api/SKILL.md` |
 | zhiku 工作流文档 | `~/.openclaw/workspace/skills/zhiku/智库headless工作流v0.5.md` |
-| Chrome Profile | `~/Library/Application Support/Google/Chrome/Chrome-Debug-Profile` |
+| Chrome Profile | `OpenClaw 托管浏览器` |
 | Playwright 源码 | `~/.openclaw/extensions/playwright-mcp-server/node_modules/playwright/` |
 | webauth MCP | `~/.openclaw/extensions/webauth-mcp/server.mjs` |

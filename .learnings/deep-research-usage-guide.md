@@ -54,11 +54,11 @@
 #### 1. Chrome CDP（5个 webauth 工具的基础依赖）
 
 ```bash
-curl -s --max-time 3 "http://127.0.0.1:9223/json/version"
+curl -s --max-time 3 "http://127.0.0.1:18800/json/version"
 ```
 
 - ✅ 返回 JSON 包含 `Browser` 字段 → 正常
-- ❌ 连接超时或无响应 → Chrome-Debug-Profile 未启动，问用户是否需要启动
+- ❌ 连接超时或无响应 → OpenClaw 托管浏览器未启动，问用户是否需要启动
 - ⚠️ Chrome 在但 5 个 webauth 工具都超时 → 可能是 Gateway 与 Chrome 之间连接问题
 
 #### 2. webauth 5平台（直接调用工具本身，不是打开页面）
@@ -109,7 +109,7 @@ sessions_spawn(task="回复OK", runtime="subagent", mode="run", runTimeoutSecond
 
 ```
 工具状态检查（YYYY-MM-DD HH:MM）：
-- Chrome CDP 9223: ✅ Chrome/版本号
+- Chrome CDP 18800: ✅ Chrome/版本号
 - Doubao: ✅ (3.2s) / ❌ 超时/错误信息
 - Kimi: ✅ (2.8s) / ❌ 超时/错误信息
 - GLM: ✅ (4.1s) / ❌ 超时/错误信息
@@ -244,13 +244,13 @@ sessions_spawn(task="回复OK", runtime="subagent", mode="run", runTimeoutSecond
 
 ```bash
 # 检查 Chrome 是否运行
-curl -s --max-time 3 "http://127.0.0.1:9223/json/version"
+curl -s --max-time 3 "http://127.0.0.1:18800/json/version"
 
 # 检查各平台是否登录（用 Playwright）
 node -e "
 const {chromium} = require('playwright');
 (async () => {
-  const browser = await chromium.connectOverCDP('http://127.0.0.1:9223');
+  const browser = await chromium.connectOverCDP('http://127.0.0.1:18800');
   const ctx = await browser.newContext();
   const page = await ctx.newPage();
   await page.goto('https://www.doubao.com/chat/', {timeout: 8000});
