@@ -1134,3 +1134,67 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 - VRAM 需求比官方文档高，实际测试为准
 - CPU offload 可以降低 VRAM 但更慢
 - qwen_inference_server 会占用 1GB VRAM，需要提前检查
+
+---
+
+## 2026-03-29: Semantic Cache 7 项优化（6/7 完成）
+
+### 已完成的 6 项优化
+
+| # | 优化 | 效果 |
+|---|------|------|
+| 1 | time_boost 调优 | 7天+0.15, 30天+0.08, 90天-0.03, 更早-0.08 |
+| 2 | 角色/类型过滤 | 默认排除 model_change/session/thinking_level_change |
+| 3 | 增量索引 | `/reindex?mode=incremental` 只索引变化文件 |
+| 4 | 会话内上下文窗口 | 返回前后 ±120秒 的对话上下文 |
+| 6 | Embedding 预处理 | text（纯内容）+ display_text（带角色前缀）分离 |
+| 7 | 对话去重 | 7411→6656 条（去重 755 条，10%） |
+
+### 未完成
+- #5 BM25 混合检索（被 subagent 冲突覆盖，待重新实现）
+
+### 关键数据
+- 模型：bge-large-zh-v1.5, 1024维, CUDA
+- 索引：6656 条（去重后）
+- 角色分布：toolResult 3809(57%), assistant 1337, system 1126, user 384
+- 搜索延迟：~2秒/查询
+
+### 测试结果（优化后 vs 旧版 all-MiniLM）
+
+| 查询 | 新版 sim | 新版 top1 相关性 | 备注 |
+|------|----------|-----------------|------|
+| 贵庚记忆系统 | 0.659 | ⚠️ top1 是内存信息，#3 才命中贵庚 | 语义偏移 |
+| Jetson Nano 配置 | 0.729 | ✅ 直接命中文档路径 | 大幅提升 |
+| OpenClaw 升级 | 0.838 | ✅ | 最高 |
+| 小龙虾P2P | 0.668 | ⚠️ 返回 QQ养虾空间 | 数据偏移 |
+| T-020 | 0.748 | ✅ 命中任务 ID 模式 | 新能力 |
+
+### 架构经验
+- **不能同时派多个 subagent 编辑同一文件** → 用串行或模块化
+- **添加过滤条件前先看数据分布** → `Counter(role)` 避免过滤掉 57% 数据
+- **sed 远程引号转义容易出错** → 改完必须 grep 验证
+- **索引文件已有时不重建** → 启动时检测 dimension 匹配，匹配则加载
+
+### 代码位置
+- server.py: `/home/jet/semantic_cache/server.py` (514 行)
+- 索引: `~/.semantic_cache/index.faiss` + `texts.json`
+- 日志: `/tmp/semantic_cache.log`
+- API: `http://192.168.1.18:5050/search` (POST), `/health` (GET), `/reindex` (POST)
+
+---
+
+## 2026-03-29: 视频生成方案结论
+
+### 6GB 显存（RTX 2060）不可行的方案
+- **Wan 2.1 I2V 1.3B**: HuggingFace 上不存在（只有 14B I2V）
+- **Wan 2.1 T2V 1.3B**: 文本编码器 umt5-xxl 4.6B 参数，GPU 放不下
+- **FramePack F1 I2V**: 需要 8GB+ VRAM
+- **SVD**: 能跑但输出 2KB 废视频
+
+### 待尝试的替代方案
+- 云端 API（可灵/Kling/Luma/Runway）
+- MiniMax 视频生成 API（需确认 Coding Plan 是否支持）
+
+### 模型清理
+- 删除了 FramePack 模型 (~24GB) + HunyuanVideo (~34GB) + SVD (~14GB) + 其他
+- 释放 103GB，磁盘 63% → 39%

@@ -251,3 +251,70 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 ### 教训
 - 需要重启服务器或实现 reindex API 才能搜索新内容
 - HEARTBEAT 里的同步逻辑需要补充 reindex 步骤
+
+---
+
+## 2026-03-29: Semantic Cache 7 项优化 - 3 Subagent 并行编辑冲突
+
+### 错误
+- 同时派 3 个 subagent 修改同一个 server.py 文件
+- Subagent C（增量索引 + BM25）的修改被 Subagent B 覆盖，BM25 代码丢失
+- 根因：Subagent B 完成时间晚于 C，写文件时覆盖了 C 的改动
+
+### 影响
+- BM25 混合检索功能丢失，需要重新实现
+- 浪费了 subagent C 的 3 分 52 秒运行时间
+
+### 教训
+- **同一文件不能同时交给多个 subagent 编辑**
+- 正确做法：拆成 3 个独立文件（模块），或串行执行，或最后手动合并
+- 或者：每个 subagent 改文件的不同部分（用行号定位 sed），但仍有风险
+
+---
+
+## 2026-03-29: Semantic Cache 角色过滤导致搜索返回 0 条
+
+### 错误
+- Subagent B 添加了 `roles=["user","assistant"]` 默认过滤
+- 但 text_store 中 57% 的记录 role 是 `"toolResult"`（不是 `"assistant"`）
+- 导致所有查询返回 0 条结果，看起来像索引坏了
+
+### 诊断过程
+1. 先怀疑 FAISS 索引损坏 → 用 Python 直接测试，距离正常 (0.5+)
+2. 再怀疑阈值太高 → 降到 0.0 还是 0 条
+3. 最后用 `all roles` 参数测试 → 5 条命中，确认是 roles 过滤问题
+4. 发现 `sed` 修复第一次引号转义失败，第二次才成功
+
+### 教训
+- 添加过滤条件时必须检查数据分布（`Counter(role)`）
+- `sed` 在远程 SSH 中引号转义容易出错，改完后必须 `grep` 验证
+- 搜索返回空时，按顺序排查：索引 → 维度 → 过滤条件 → 阈值
+
+---
+
+## 2026-03-29: ComfyUI + Wan 2.1 方案不可行（6GB 显存限制）
+
+### 错误
+- 调研报告推荐 Wan 2.1 I2V 1.3B，但 HuggingFace 上没有这个模型
+- Wan-AI 只发布了 14B 的 I2V 版本（6GB 跑不动）
+- T2V 1.3B 虽然扩散模型小，但文本编码器 umt5-xxl 是 4.6B 参数
+- 模型下载（~10GB）在 9 分钟内完不成，subagent 超时
+
+### 教训
+- 调研报告的模型名称必须实际验证（hf-mirror.com 上搜一下确认存在）
+- 6GB 显存的图生视频本地方案几乎没有——考虑云端 API（可灵/Kling/Luma）
+- 大文件下载任务不适合 subagent（超时），应该后台运行 + 定时检查
+
+---
+
+## 2026-03-29: SSH pkill 导致连接断开
+
+### 错误
+- 在 SSH session 中执行 `pkill -f "server.py"` 导致整个 SSH 连接断开
+- 因为 pkill 杀掉了 SSH 进程链中的子进程
+- 连续 3 次 exit code 255
+
+### 教训
+- 不要在 SSH session 中 pkill 带有通配符的进程名
+- 正确做法：先用 `pgrep` 找到具体 PID，再用 `kill <pid>` 精确杀
+- 或者用 `nohup ... & disown` 启动进程，确保不受 SSH 断连影响
