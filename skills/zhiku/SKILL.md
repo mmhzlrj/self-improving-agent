@@ -126,7 +126,7 @@ node ~/.openclaw/workspace/skills/zhiku/scripts/zhiku-ask.js "问题"
 
 ## 依赖条件
 
-- Chrome 调试端口 9223 需运行（各平台页面已登录）
+- OpenClaw 托管浏览器（端口 18800）需运行（各平台页面已登录）
 - 各 MCP Server 已注册到 openclaw-mcp-adapter
 - DeepSeek MCP Server 已注册
 

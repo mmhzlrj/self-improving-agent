@@ -37,9 +37,9 @@
 ### 连接已有 Chrome（CDP）
 
 ```javascript
-// 通过 WS URL 连接
+// 通过 WS URL 连接（OpenClaw 托管浏览器，端口 18800）
 const { chromium } = require('playwright');
-const browser = await chromium.connectOverCDP('ws://127.0.0.1:9223/devtools/browser/...');
+const browser = await chromium.connectOverCDP('ws://127.0.0.1:18800/devtools/browser/...');
 
 // 获取页面
 const page = browser.contexts()[0].pages()[0];
@@ -591,9 +591,9 @@ worker.url()                         // URL
 const { chromium } = require('playwright');
 
 // 找到 Chrome WS URL
-// curl http://127.0.0.1:9223/json/version
+// curl http://127.0.0.1:18800/json/version
 
-const browser = await chromium.connectOverCDP('ws://127.0.0.1:9223/...');
+const browser = await chromium.connectOverCDP('ws://127.0.0.1:18800/...');
 const page = browser.contexts()[0].pages().find(p => p.url().includes('target'));
 
 // 操作

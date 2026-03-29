@@ -27,9 +27,11 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-29 04:57 CST (20:57 UTC)
-# MiniMax 套餐状态：周期（00:00-05:00），已用 259/600 (43.2%)，剩余 341
-# 阈值状态：无触发
+# Last check: 2026-03-29 19:59 CST (11:59 UTC)
+# MiniMax 套餐状态：周期 20:00-00:00，已用 513/600 (85.5%)，剩余 87
+# 阈值状态：⚠️ 85% 已触发
+# Wan 2.1 T2V 1.3B 下载中：2.1GB/~10GB（后台继续）
+# 注意：umt5-xxl text encoder 8GB，6GB 显存可能跑不动，需评估
 
 ## MiniMax Coding Plan 额度监控
 
@@ -109,13 +111,16 @@ rsync -avz --ignore-existing ~/.openclaw/agents/main/sessions/ jet@192.168.1.18:
 # 2. 检查 Ubuntu 在线
 ping -c 1 -W 2 192.168.1.18 > /dev/null 2>&1 || exit
 
-# 3. 重启 Semantic Cache 服务器（重新加载 sessions）
-ssh jet@192.168.1.18 'pkill -f "python3.*server.py" 2>/dev/null; sleep 2; cd /home/jet/semantic_cache && ~/miniconda/bin/python server.py > semantic_cache.log 2>&1 &'
+# 3. 同步后触发增量索引（不重启服务器）
+curl -s -X POST --connect-timeout 5 "http://192.168.1.18:5050/reindex" | python3 -c "
+import json,sys
+try:
+    d = json.load(sys.stdin)
+    print(f\"索引更新: {d.get('new_entries',0)} 条, 总计 {d.get('total',0)} 条\")
+except: print('索引更新失败')
+" 2>/dev/null
 
-# 4. 等待服务就绪
-sleep 3
-
-# 5. 获取上下文
+# 4. 获取上下文
 python3 ~/.openclaw/workspace/scripts/smart_context_hook.py
 ```
 

@@ -17,12 +17,15 @@ import { homedir } from 'os';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CREDENTIALS_DIR = resolve(homedir(), '.openclaw/workspace/auth-credentials');
-const CDP_PORT = 9223;
+const CDP_PORT = 18800;
 
 // ─────────────────────────────────────────────
 // MCP Server 路径
 // ─────────────────────────────────────────────
-const WEBAUTH_MCP = resolve(homedir(), '.openclaw/extensions/webauth-mcp/server.mjs');
+const DOUBAO_MCP = resolve(homedir(), '.openclaw/extensions/doubao-mcp-server/doubao-mcp-server.mjs');
+const KIMI_MCP = resolve(homedir(), '.openclaw/extensions/kimi-mcp-server/kimi-mcp-server.mjs');
+const GLM_MCP = resolve(homedir(), '.openclaw/extensions/glm-mcp-server/glm-mcp-server.mjs');
+const QWEN_MCP = resolve(homedir(), '.openclaw/extensions/qwen-mcp-server/qwen-mcp-server.mjs');
 const DEEPSEEK_MCP = resolve(homedir(), '.openclaw/extensions/deepseek-mcp-server/deepseek-mcp-server.mjs');
 
 // ─────────────────────────────────────────────
@@ -85,7 +88,7 @@ async function askDeepSeek(question) {
 
 async function askKimi(question) {
   try {
-    return await mcpCall(WEBAUTH_MCP, 'kimi_chat', { message: question });
+    return await mcpCall(KIMI_MCP, 'kimi_chat', { message: question });
   } catch (e) {
     return `❌ Kimi 错误: ${e.message}`;
   }
@@ -93,7 +96,7 @@ async function askKimi(question) {
 
 async function askDoubao(question) {
   try {
-    return await mcpCall(WEBAUTH_MCP, 'doubao_chat', { message: question });
+    return await mcpCall(DOUBAO_MCP, 'doubao_chat', { message: question });
   } catch (e) {
     return `❌ Doubao 错误: ${e.message}`;
   }
@@ -101,7 +104,7 @@ async function askDoubao(question) {
 
 async function askGLM(question) {
   try {
-    return await mcpCall(WEBAUTH_MCP, 'glm_chat', { message: question });
+    return await mcpCall(GLM_MCP, 'glm_chat', { message: question });
   } catch (e) {
     return `❌ GLM 错误: ${e.message}`;
   }
@@ -109,7 +112,7 @@ async function askGLM(question) {
 
 async function askQwen(question) {
   try {
-    return await mcpCall(WEBAUTH_MCP, 'qwen_chat', { message: question });
+    return await mcpCall(QWEN_MCP, 'qwen_chat', { message: question });
   } catch (e) {
     return `❌ Qwen 错误: ${e.message}`;
   }

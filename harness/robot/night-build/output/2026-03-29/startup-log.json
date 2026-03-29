@@ -1,0 +1,30 @@
+{
+  "version": "3.1",
+  "timestamp": "2026-03-29T20:05:00+08:00",
+  "phase": "startup",
+  "decision": "NOT_STARTED",
+  "reason": "MiniMax额度不足",
+  "details": {
+    "model": "MiniMax-M*",
+    "current_interval_total_count": 600,
+    "current_interval_usage_count": 557,
+    "remaining_count": 43,
+    "threshold": 60,
+    "verdict": "43 < 60，不满足启动条件"
+  },
+  "tasks_reset": {
+    "failed_before_reset": 1,
+    "reset_to_pending": 1,
+    "reset_ids": ["T-0059"]
+  },
+  "queue_stats": {
+    "total": 1800,
+    "pending": 1714,
+    "running": 2,
+    "success": 84,
+    "failed": 0
+  },
+  "output_dir": "harness/robot/night-build/output/2026-03-29",
+  "sop_status": "exists",
+  "next_action": "等待额度恢复后再启动（剩余次数需 ≥ 60）"
+}
