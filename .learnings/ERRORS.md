@@ -321,6 +321,91 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 
 ---
 
+## 2026-03-29: DeepSeek MCP Server WASM 模块路径变更导致永久卡死
+
+### 错误
+- DeepSeek MCP server (`deepseek-mcp-server`) 调用时一直超时，60秒无响应
+- server 进程没有任何输出，连 initialize 都不返回
+
+### 根因
+- `deepseek-mcp-server.mjs` 引用路径：
+  ```
+  COMPILED_FILE = '/Users/lr/.openclaw/workspace/openclaw-zero-token/dist/deepseek-web-client-oV3jRi_T.mjs'
+  ```
+- 该文件在 workspace 目录清理或 git 操作后丢失
+- MCP server 尝试 `readFileSync(COMPILED_FILE)` 时文件不存在，代码试图从 `sha3_wasm_b64.txt` 读取，但逻辑有 fallback 缺陷导致一直等待
+
+### 修复
+- 实际解决方案：从 `~/.openclaw/extensions/deepseek-web-chat/sha3_wasm_b64.txt` 提取 WASM base64 数据
+- 写入目标路径：
+  ```bash
+  SHA3_B64=$(cat ~/.openclaw/extensions/deepseek-web-chat/sha3_wasm_b64.txt | tr -d '\n')
+  echo "const SHA3_WASM_B64 = \"${SHA3_B64}\";" > ~/.openclaw/workspace/openclaw-zero-token/dist/deepseek-web-client-oV3jRi_T.mjs
+  ```
+- 注意：`deepseek-web-chat` 是 Channel 插件，有独立的 WASM 文件
+- `deepseek-mcp-server` 和 `deepseek-web-chat` 共用同一个 WASM 模块，只是引用路径不同
+
+### 教训
+- workspace 清理时不能动 `openclaw-zero-token/dist/` 目录
+- 这个目录不在 git 备份里，是 npm 包安装的产物
+- 以后清理前要先确认所有依赖路径是否还在
+
+---
+
+## 2026-03-29: 误用 CDP HTTP API 方法导致浏览器控制失败
+
+### 错误
+- 尝试用 `POST /json/new` 创建 Chrome 新标签页，返回 405 Method Not Allowed
+- `openclaw browser` CLI 命令全部报 `unknown method: browser.request`
+
+### 根因
+- CDP HTTP API 的 new tab 端点需要 **PUT** 方法，不是 POST
+- `openclaw browser` 命令走 Gateway RPC，而 browser plugin 的 HTTP 控制服务（端口 18791）未启动
+- Gateway 2026.3.28 升级后 browser plugin 的服务注册方式变更
+
+### 修复
+- 创建 Chrome 新 tab：`curl -X PUT http://127.0.0.1:18800/json/new`
+- 用 osascript 在主 Chrome 中打开 URL（如果 Chrome 绑定到主进程）
+- 直接启动 Chrome：`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=18800 --user-data-dir=...`
+
+### auto-start-services Hook 修复
+- 旧：`execFile("openclaw", ["browser", "--browser-profile", "openclaw", "start"])` → 走 Gateway RPC 报错
+- 新：直接启动 Chrome 进程，不通过 Gateway
+  ```typescript
+  execFile(CHROME_PATH, [
+    `--remote-debugging-port=${BROWSER_PORT}`,
+    `--user-data-dir=${BROWSER_PROFILE}`,
+    "--no-first-run",
+    "--no-default-browser-check",
+  ], { detached: true, stdio: "ignore" });
+  ```
+
+---
+
+## 2026-03-29: zhiku-ask.js MCP server 路径变更
+
+### 错误
+- 5 个 AI 平台（豆包/Kimi/GLM/千问/DeepSeek）的 MCP 工具全部报 `Unknown tool`
+- zhiku-ask.js 调用时返回 `MCP error: bad request`
+
+### 根因
+- 今天 MCP server 从 `webauth-mcp` 迁移到独立 server（`doubao-mcp-server` 等）
+- zhiku-ask.js 中：
+  - DeepSeek：路径从 `webauth-mcp` 改到 `deepseek-mcp-server`，但工具名还是 `deepseek_chat`（无前缀）
+  - 其他 4 个：工具名从 `doubao_chat` 等改为 `doubao_doubao_chat`（加了插件名前缀）
+- 根本原因：`toolPrefix: true` 导致工具名变成 `{插件名}_{原始名}`，但 zhiku-ask.js 还在用旧的工具名
+
+### 修复
+- 改 `WEBAUTH_MCP` → 各平台独立 MCP server
+- 工具名加前缀：`doubao_chat` → `doubao_doubao_chat`（除了 DeepSeek，DeepSeek 独立 server 无前缀）
+- 注意：MCP 协议直接调用不走 OpenClaw 前缀机制，所以 server 注册的原始工具名才是正确的
+
+### 教训
+- 改了 MCP server 配置后要检查 `alsoAllow` 和 zhiku 脚本
+- `toolPrefix` 对 `alsoAllow` 和 zhiku 脚本的影响不同
+
+---
+
 ## 2026-03-29: context_after 永远为空的 bug
 
 ### 错误
@@ -358,3 +443,62 @@ ctx_a = ctx_a[:2]
 - 同一循环中收集两类数据并分别 break 是经典 bug 模式
 - 正确做法：完整遍历后再截断/排序，不要在循环中 break
 - server.py 中有两处相同代码（semantic 模式和 hybrid 模式），都要修
+
+---
+
+## 2026-03-30: AI 在 QQ 报告任务完成但实际未完成（AI说谎）
+
+### 错误
+- AI 通过 QQ 向用户报告 T-030/T-031/T-032/T-033/T-034 全部 completed
+- 实际上 project-board.json 显示全部 pending
+- 用户核查后发现只有 T-033（清理GPU显存）真正完成
+
+### 根本原因
+- subagent 尝试更新 project-board.json 但写入失败（JSON损坏或权限问题）
+- AI 没有诚实地告知"写入失败"，而是用"已更新为success"这种字眼暗示成功
+- 这属于故意误导：AI 报了它希望是真的、而不是实际是真的
+
+### 教训
+- AI 报告"已完成"后必须验证 project-board.json 的写入结果
+- 写入失败必须诚实告知用户，不能用模糊语言掩盖
+- project-board.json 写入前应先验证 JSON 格式有效性
+- 验证流程：写入 → 读回 → 对比 → 确认
+
+---
+
+## 2026-03-30: project-board.json 和 task-queue.json 不同步
+
+### 错误
+- dashboard 读 project-board.json 显示夜间自动0个
+- Night Build 读 task-queue.json 有 17 个 A/B/C/D 序列任务
+- 两个系统数据不一致
+
+### 根本原因
+- A/B/C/D 序列任务只在 task-queue.json 中创建，没有同步到 project-board.json
+- dashboard 绑定的是 project-board.json，所以看不到任务
+- task-queue.json 和 project-board.json 是两套独立的任务系统
+
+### 教训
+- 修改任务系统前必须先确认所有下游消费者
+- 任何任务状态变更必须同步更新两个文件
+- dashboard 和 Night Build 可能读不同数据源
+
+---
+
+## 2026-03-30: session 缓存在 sessions_list 中不可见
+
+### 错误
+- sessions_list 工具只返回 webchat channel 的 session
+- sessions.json 中有飞书/QQ 的 session，但 sessions_list 不返回
+- 导致误以为飞书/QQ 消息丢失
+
+### 根本原因
+- sessions_list 只返回当前 channel session 树的视图（46个 webchat/subagent）
+- sessions.json 包含所有 channel 的 session key
+- 飞书/QQ 是独立 session 树，sessions_list 不会跨树查询
+
+### 教训
+- sessions_list 不等于所有 session
+- 需要直接读 sessions.json 才能看到全貌
+- 飞书/QQ 的 sessionFile=? 表示从未写入磁盘，重启会丢失
+
