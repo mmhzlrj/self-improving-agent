@@ -1,28 +1,28 @@
 # Semantic Memory - 相关历史上下文
 
-> 自动更新于 2026-03-29 21:47
+> 自动更新于 2026-03-30 09:25
 
 **Ubuntu 节点状态**: 在线
 
 ## 相关历史上下文
 
-- **[0.96]** ✅ 语法正确 701:        if not args.no_browser: 702:            webbrowser.open(f'http://127.0.0.1:{PORT}/index.html', new=2) 724:    if not args.no_browser: 725:        webbrowser.open(f'http://127.0.0.1:{PORT}/index.html', new=2) 730:    if args.no_brow
+- **[0.97]** Termination requested for session swift-shore.
 
-- **[0.85]** <final> ## 5 个任务完成报告  ### 任务1：验证 node.pending 功能 **❌ 未找到**  - 搜索了 `docs/nodes/` 和所有 `dist/` JS 文件 - `pending` 相关代码只用于 session compaction tracking（`pendingBytes`/`pendingMessages`），与 node API 无关 - **结论：** `node.pending` / `enqueue` / `drain` 功能不存在或尚未实
+- **[0.96]** No session found for swift-glow
 
-- **[0.83]** Ubuntu offline
+- **[0.88]** /Users/lr/.openclaw/workspace/openclaw-zero-token/src/gateway/server-node-events.test.ts /Users/lr/.openclaw/workspace/openclaw-zero-token/src/gateway/session-utils.ts /Users/lr/.openclaw/workspace/openclaw-zero-token/src/gateway/server-node-events.t
 
-- **[0.81]** OpenClaw 2026.3.24 (cff6dc9)
+- **[0.83]** {   "url": "https://new.abb.com/news/detail/134178/wbstr-closing-the-sim-to-real-gap-how-abbs-robotstudior-hyperreality-enables-industrial-scale-physical-ai",   "finalUrl": "https://new.abb.com/news/detail/134178/wbstr-closing-the-sim-to-real-gap-how
 
-- **[0.79]** memory 里搜不到。让我直接查聊天记录索引：
+- **[0.80]** [cron:974a0fdf-36fb-40a1-a10f-026d1ef01aba MiniMax 持续任务管道] 你是 MiniMax 持续任务管道调度器。每次触发执行以下流程：  ## 第一步：检查额度 ``` curl -s -X GET 'https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains' -H 'Authorization: Bearer sk-cp-Zosvx8d6zR6EI34fzFEWopC1kvt
 
-- **[0.77]** 现在检查 Ubuntu：
+- **[0.79]** 9223 也没监听，Chrome 可能启动失败了。让我查一下：
 
-- **[0.76]** 3月28日没有关于扩展修改的记录。让我查更近期的聊天历史——可能还没写入 memory：
+- **[0.77]** {   "status": "accepted",   "childSessionKey": "agent:main:subagent:cf1ae3fe-5aee-4982-96ac-553f40b2ffd4",   "runId": "cafa9799-ada3-4afa-91db-3141be48a74b",   "mode": "run",   "note": "Auto-announce is push-based. After spawning children, do NOT cal
 
-- **[0.76]** 已记录。
+- **[0.76]** **成功了！** 用**全新的 profile**（`/tmp/chrome-relay-test`），`--load-extension` 完全生效！  看到了： - `background_page` → Browser Relay 扩展 ✅ - `service_worker` → 另一个扩展 ✅  **根因找到了：Chrome-Debug-Profile 里有旧的 Secure Preferences 残留，导致 Chrome 拒绝加载命令行指定的扩展。** 用全新 profile 就没
 
-- **[0.75]** Uploaded Uploaded from robot_source.png
+- **[0.76]** npm 被杀了（可能是网络慢导致超时）。让我分步执行：
 
-- **[0.65]** /usr/bin/python3 5.23.0
+- **[0.75]** text_encoder 加载完成！继续等待其他模型：
 

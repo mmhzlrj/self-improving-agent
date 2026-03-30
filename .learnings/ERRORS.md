@@ -321,6 +321,91 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 
 ---
 
+## 2026-03-29: DeepSeek MCP Server WASM 模块路径变更导致永久卡死
+
+### 错误
+- DeepSeek MCP server (`deepseek-mcp-server`) 调用时一直超时，60秒无响应
+- server 进程没有任何输出，连 initialize 都不返回
+
+### 根因
+- `deepseek-mcp-server.mjs` 引用路径：
+  ```
+  COMPILED_FILE = '/Users/lr/.openclaw/workspace/openclaw-zero-token/dist/deepseek-web-client-oV3jRi_T.mjs'
+  ```
+- 该文件在 workspace 目录清理或 git 操作后丢失
+- MCP server 尝试 `readFileSync(COMPILED_FILE)` 时文件不存在，代码试图从 `sha3_wasm_b64.txt` 读取，但逻辑有 fallback 缺陷导致一直等待
+
+### 修复
+- 实际解决方案：从 `~/.openclaw/extensions/deepseek-web-chat/sha3_wasm_b64.txt` 提取 WASM base64 数据
+- 写入目标路径：
+  ```bash
+  SHA3_B64=$(cat ~/.openclaw/extensions/deepseek-web-chat/sha3_wasm_b64.txt | tr -d '\n')
+  echo "const SHA3_WASM_B64 = \"${SHA3_B64}\";" > ~/.openclaw/workspace/openclaw-zero-token/dist/deepseek-web-client-oV3jRi_T.mjs
+  ```
+- 注意：`deepseek-web-chat` 是 Channel 插件，有独立的 WASM 文件
+- `deepseek-mcp-server` 和 `deepseek-web-chat` 共用同一个 WASM 模块，只是引用路径不同
+
+### 教训
+- workspace 清理时不能动 `openclaw-zero-token/dist/` 目录
+- 这个目录不在 git 备份里，是 npm 包安装的产物
+- 以后清理前要先确认所有依赖路径是否还在
+
+---
+
+## 2026-03-29: 误用 CDP HTTP API 方法导致浏览器控制失败
+
+### 错误
+- 尝试用 `POST /json/new` 创建 Chrome 新标签页，返回 405 Method Not Allowed
+- `openclaw browser` CLI 命令全部报 `unknown method: browser.request`
+
+### 根因
+- CDP HTTP API 的 new tab 端点需要 **PUT** 方法，不是 POST
+- `openclaw browser` 命令走 Gateway RPC，而 browser plugin 的 HTTP 控制服务（端口 18791）未启动
+- Gateway 2026.3.28 升级后 browser plugin 的服务注册方式变更
+
+### 修复
+- 创建 Chrome 新 tab：`curl -X PUT http://127.0.0.1:18800/json/new`
+- 用 osascript 在主 Chrome 中打开 URL（如果 Chrome 绑定到主进程）
+- 直接启动 Chrome：`"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --remote-debugging-port=18800 --user-data-dir=...`
+
+### auto-start-services Hook 修复
+- 旧：`execFile("openclaw", ["browser", "--browser-profile", "openclaw", "start"])` → 走 Gateway RPC 报错
+- 新：直接启动 Chrome 进程，不通过 Gateway
+  ```typescript
+  execFile(CHROME_PATH, [
+    `--remote-debugging-port=${BROWSER_PORT}`,
+    `--user-data-dir=${BROWSER_PROFILE}`,
+    "--no-first-run",
+    "--no-default-browser-check",
+  ], { detached: true, stdio: "ignore" });
+  ```
+
+---
+
+## 2026-03-29: zhiku-ask.js MCP server 路径变更
+
+### 错误
+- 5 个 AI 平台（豆包/Kimi/GLM/千问/DeepSeek）的 MCP 工具全部报 `Unknown tool`
+- zhiku-ask.js 调用时返回 `MCP error: bad request`
+
+### 根因
+- 今天 MCP server 从 `webauth-mcp` 迁移到独立 server（`doubao-mcp-server` 等）
+- zhiku-ask.js 中：
+  - DeepSeek：路径从 `webauth-mcp` 改到 `deepseek-mcp-server`，但工具名还是 `deepseek_chat`（无前缀）
+  - 其他 4 个：工具名从 `doubao_chat` 等改为 `doubao_doubao_chat`（加了插件名前缀）
+- 根本原因：`toolPrefix: true` 导致工具名变成 `{插件名}_{原始名}`，但 zhiku-ask.js 还在用旧的工具名
+
+### 修复
+- 改 `WEBAUTH_MCP` → 各平台独立 MCP server
+- 工具名加前缀：`doubao_chat` → `doubao_doubao_chat`（除了 DeepSeek，DeepSeek 独立 server 无前缀）
+- 注意：MCP 协议直接调用不走 OpenClaw 前缀机制，所以 server 注册的原始工具名才是正确的
+
+### 教训
+- 改了 MCP server 配置后要检查 `alsoAllow` 和 zhiku 脚本
+- `toolPrefix` 对 `alsoAllow` 和 zhiku 脚本的影响不同
+
+---
+
 ## 2026-03-29: context_after 永远为空的 bug
 
 ### 错误

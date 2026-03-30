@@ -1,7 +1,9 @@
-# Night Orchestrator Prompt v3
+# Night Orchestrator Prompt v4
 
-> **版本**: v3.1（2026-03-27）
-> **核心改进**: 从 project-board.json 读取任务，只执行 mode=auto 的 pending 任务
+> **版本**: v4（2026-03-30）
+> **核心改进**: A→B→C→D 四序列严格串行调度，每个序列全部完成后才进入下一个
+> **序列定义**: A=P0(物理基础) | B=P1(Phase3 iPhone) | C=P2(3D打印+技术验证) | D=P3(Demo/调优)
+> **依赖规则**: B依赖A | C依赖B | D依赖C | 跨序列依赖必须完整链路
 
 ---
 
@@ -14,10 +16,27 @@
 ## 第一步：重建状态（每次必须执行！）
 
 ```bash
+cat harness/robot/night-build/task-queue.json
 cat harness/robot/project-board.json
 ```
 
-**这是你唯一的真相来源。** 你的一切决策基于此文件的当前内容。
+**这是你唯一的真相来源。** 你的一切决策基于这两个文件的当前内容。
+
+## 序列执行顺序（核心！）
+
+```
+A序列（必须全部完成） → B序列（必须全部完成） → C序列（必须全部完成） → D序列
+     ↓                       ↓                       ↓
+  ESP32-Cam            iPhone感知               3D打印
+  MQTT-Router          前端接入                 技术验证
+  运动控制SOP                                    Demo
+  贵庚架构SOP
+  带宽估算
+  FramePack SOP
+  Cozy Grove调研
+```
+
+**绝对不允许跳过序列！** 即使 D 有任务 ready，只要 B 还没全部完成，就必须等 B。
 
 ## 绝对安全规则
 
@@ -38,14 +57,31 @@ curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains
 
 获取 `current_interval_usage_count`（剩余次数）。
 
-### Step 2：选任务
+### Step 2：选任务（严格序列顺序）
 
-从 `project-board.json` 的 `tasks` 数组中筛选：
-- `mode` = `"auto"`（只执行可自主的任务，**绝不碰 interactive**）
-- `status` = `"pending"`
-- `depends_on` 全部完成
+从 `task-queue.json` 的 `tasks` 数组中筛选：
 
-按 `priority` 排序：P0 > P1 > P2 > P3
+**① 先查 A 序列：**
+- 取所有 `sequence="A"` 的任务
+- 筛选 `status="pending"` 且 `depends_on` 全部完成的任务
+- 如果有 → 派这个任务
+- 如果 A 全部 done → 进入 ② 查 B
+
+**② A 全部完成后，查 B 序列：**
+- 取所有 `sequence="B"` 的任务
+- 筛选 pending 且 depends_on 全部完成（A序列全部done）
+- 如果有 → 派这个任务
+- 如果 B 全部 done → 进入 ③ 查 C
+
+**③ B 全部完成后，查 C 序列：**
+- 同上逻辑
+
+**④ C 全部完成后，查 D 序列：**
+- 同上逻辑
+
+**选任务时的排序：**
+- 同一序列内按任务 ID 顺序（从小到大）
+- 优先选 `mode="auto"` 的任务
 
 ### Step 3：调度决策
 
@@ -64,7 +100,7 @@ curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains
    - model: `minimax/MiniMax-M2.7`
    - timeout: 300 秒（大任务可设 480）
    - mode: `run`
-4. **完成后立即更新 project-board.json：**
+4. **完成后立即更新 `task-queue.json` 和 `project-board.json`：**
    - `status` 改为 `"completed"` 或 `"failed"`
    - 添加 `completed_at` 时间戳
    - 添加 `output` 数组（产出的文件路径）
@@ -74,20 +110,22 @@ curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains
 
 追加到 `night-build/output/YYYY-MM-DD/orchestrator-log.jsonl`（每行一个 JSON）：
 ```json
-{"ts":"2026-03-27T02:00:00+08:00","task":"T-010","quota_remaining":450,"status":"dispatched"}
-{"ts":"2026-03-27T02:08:00+08:00","task":"T-010","quota_remaining":395,"status":"completed","output":"reports/Phase-0-Gateway-Docking.md"}
+{"ts":"2026-03-30T22:00:00+08:00","seq":"A","task":"A-0005","quota_remaining":450,"status":"dispatched"}
+{"ts":"2026-03-30T22:08:00+08:00","seq":"A","task":"A-0005","quota_remaining":395,"status":"completed","output":"reports/ESP32-RTSP-SOP.md"}
 ```
 
 ### Step 6：全完成或无法继续
 
-- 如果没有更多 auto+pending 任务 → 停止，生成 `night-build/output/YYYY-MM-DD/final-summary.md`
-- 如果所有 auto 任务都 completed → 停止
+- 如果当前序列没有更多 ready 任务 → 检查是否是因为前置序列未完成（正常等待）
+- 如果当前序列全部 done → 进入下一个序列
+- 如果所有序列全部 done → 停止，生成 `night-build/output/YYYY-MM-DD/final-summary.md`
 
 ## 重要约束
 
 - **绝不执行 mode=interactive 的任务** — 这些需要用户白天参与
 - **绝不执行 status=planning 的任务** — 这些还没有定方向
 - **绝不执行 depends_on 未全部完成的任务** — 等依赖完成
+- **绝不跳序列！** — 即使 D 有 ready 任务，只要 C 还没完成就等 C
 - subagent 有重要发现时 → 在 output 文件中标注 **重点发现**，第二天白天用户会审核
 - 如果发现需要用户决策的新问题 → 记录到 `night-build/output/YYYY-MM-DD/questions-for-user.md`，不要自己猜
 

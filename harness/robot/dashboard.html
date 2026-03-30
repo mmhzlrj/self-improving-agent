@@ -256,6 +256,7 @@
   .badge-completed { background: rgba(46,213,115,0.15); color: var(--completed); }
   .badge-pending { background: rgba(255,165,2,0.15); color: var(--pending); }
   .badge-failed { background: rgba(255,71,87,0.15); color: var(--failed); }
+  .badge-in-progress { background: rgba(0,206,201,0.15); color: var(--auto); }
   .badge-not-started { background: rgba(136,136,160,0.15); color: var(--text2); }
   .badge-planning { background: rgba(253,121,168,0.15); color: var(--planning); }
   .badge-completed-with-issues { background: rgba(255,165,2,0.15); color: var(--p1); }
@@ -453,12 +454,13 @@ let allTasks = [];
 let selectedTask = null;
 let currentFilter = 'all';
 
-const STATUS_ORDER = { 'not-started': 0, 'planning': 1, 'pending': 2, 'failed': 3, 'completed-with-issues': 4, 'completed': 5 };
+const STATUS_ORDER = { 'not-started': 0, 'planning': 1, 'in-progress': 2, 'pending': 3, 'failed': 4, 'completed-with-issues': 5, 'completed': 6 };
 const PRIORITY_ORDER = { 'P0': 0, 'P1': 1, 'P2': 2, 'P3': 3 };
 const PRIORITY_COLORS = { 'P0': 'var(--p0)', 'P1': 'var(--p1)', 'P2': 'var(--p2)', 'P3': 'var(--p3)' };
 const STATUS_LABELS = {
   'not-started': '未开始',
   'planning': '待规划',
+  'in-progress': '进行中',
   'pending': '等待中',
   'failed': '失败',
   'completed': '已完成',
@@ -484,8 +486,14 @@ function isBlocked(t, tasks) {
 
 function sortTasks(tasks) {
   return [...tasks].sort((a, b) => {
+    // ✅ 已完成的任务排到最后
+    const aDone = isDone(a) ? 1 : 0;
+    const bDone = isDone(b) ? 1 : 0;
+    if (aDone !== bDone) return aDone - bDone;
+    // ✅ 未完成的按优先级（P0→P3）排
     const sp = PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority];
     if (sp !== 0) return sp;
+    // ✅ 同一优先级内按状态排序
     const ss = (STATUS_ORDER[a.status] || 0) - (STATUS_ORDER[b.status] || 0);
     if (ss !== 0) return ss;
     return a.id.localeCompare(b.id);

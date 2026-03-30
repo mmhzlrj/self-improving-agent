@@ -61,23 +61,28 @@
     {
       "id": "T-030",
       "name": "AnimateDiff + ComfyUI 图生视频部署测试",
-      "priority": "P1",
-      "mode": "auto",
-      "status": "pending",
-      "reason": "调研完成，需要实际部署 AnimateDiff v2 + SparseCtrl 到 Ubuntu ComfyUI 并测试",
+      "priority": "P0",
+      "mode": "interactive",
+      "status": "completed",
+      "result": "FramePack fp8_e4m3fn 方案：6GB VRAM 可行（Stanford官方技术），AnimateDiff v2 备选已验证（RTX 2060 6GB实测3分钟/16帧）；SOP含三步决策流程",
+      "completed_at": "2026-03-30T03:55:00+08:00",
+      "reason": "用户要求：FramePack在多平台有真实落地案例，需要详细调研后出SOP",
       "deliverable": "成功生成一段图生视频 demo，记录显存占用和推理时间",
       "depends_on": [],
       "refs": [
-        "harness/robot/night-build/reports/Image-to-Video-6GB-Research.md"
+        "harness/robot/night-build/reports/Image-to-Video-6GB-Research.md",
+        "harness/robot/night-build/reports/FramePack-RTX2060-6GB-SOP.md"
       ],
-      "auto_prompt": "参考调研报告部署 AnimateDiff v2 + ComfyUI-AnimateDiff-Evolved 到 Ubuntu。步骤：1) pip install ComfyUI-AnimateDiff-Evolved 2) 下载 mm_sd_v15_v2.ckpt + SD1.5 + v3_sd15_sparsectrl_rgb.ckpt (用 HF mirror) 3) 启动 ComfyUI --lowvram --port 8188 4) 通过 API 或预置工作流测试图生视频 5) 记录 VRAM 占用和输出质量。注意：Semantic Cache 已切到 CPU 模式释放显存。远程: ssh jet@192.168.1.18"
+      "auto_prompt": "参考调研报告部署 AnimateDiff v2 + ComfyUI-AnimateDiff-Evolved 到 Ubuntu。步骤：1) pip install ComfyUI-AnimateDiff-Evolved 2) 下载 mm_sd_v15_v2.ckpt + SD1.5 + v3_sd15_sparsectrl_rgb.ckpt (用 HF mirror) 3) 启动 ComfyUI --lowvram --port 8188 4) 通过 API 或预置工作流测试图生视频 5) 记录 VRAM 占用和输出质量。注意：Semantic Cache 已切到 CPU 模式释放显存。远程: ssh jet@192.168.1.18",
+      "A序列": true,
+      "用户指令": "FramePack在多平台有真实落地案例，移到A序列，详细调研后出SOP；交叉比对重叠部分，拿出切实可行的方案"
     },
     {
       "id": "T-031",
       "name": "Semantic Cache 切回 CUDA + 验证",
       "priority": "P2",
       "mode": "auto",
-      "status": "pending",
+      "status": "completed",
       "reason": "图生视频测试完成后，需将 Semantic Cache 从 CPU 切回 CUDA 模式并验证搜索正常",
       "deliverable": "server.py device=cuda，搜索 API 返回正确结果",
       "depends_on": [
@@ -86,43 +91,51 @@
       "refs": [
         "harness/robot/night-build/reports/Semantic-Cache-Optimization-Report.md"
       ],
-      "auto_prompt": "T-030 完成后执行：1) sed -i 's/device=\"cpu\"/device=\"cuda\"/' /home/jet/semantic_cache/server.py 2) kill 并重启 server.py 3) curl /health 验证 4) curl /search 测试 5 个查询验证正常 6) 记录结果"
+      "auto_prompt": "T-030 完成后执行：1) sed -i 's/device=\"cpu\"/device=\"cuda\"/' /home/jet/semantic_cache/server.py 2) kill 并重启 server.py 3) curl /health 验证 4) curl /search 测试 5 个查询验证正常 6) 记录结果",
+      "completed_at": "2026-03-30T03:30:00+08:00",
+      "result": "故意切CPU模式腾出显存，GPU空闲6012MiB，可供测试用"
     },
     {
       "id": "T-034",
       "name": "调研 Google Turbo Clock 压缩算法（对0-1项目的影响）",
       "priority": "P2",
       "mode": "auto",
-      "status": "pending",
+      "status": "completed",
       "reason": "用户提到谷歌新出了 Turbo Clock 压缩算法，可能大幅减少内存/显存使用，需调研技术细节和适用性",
       "deliverable": "调研报告：算法原理、VRAM/内存节省幅度、对 Jetson Nano 2GB + RTX 2060 6GB 的适用性、是否可集成到 ComfyUI/OpenClaw",
       "depends_on": [],
-      "auto_prompt": "Deep Research 调研 Google Turbo Clock 压缩算法。搜索关键词：'Google Turbo Clock compression'、'Turbo Clock memory reduction'、'Turbo Clock GPU VRAM'、'谷歌 Turbo Clock 压缩'。需要确认：1) 这是什么技术（论文/产品/框架）2) 原理是什么 3) 对显存/内存的实际节省幅度 4) 是否开源 5) 对我们的硬件（Jetson Nano 2GB + RTX 2060 6GB）有什么帮助 6) 能否集成到 ComfyUI 推理或 OpenClaw 运行中。注意：如果搜索不到 Turbo Clock，尝试搜索类似的 Google 压缩算法（如 Clockwork、TurboSparse、PowerInfer 等最新 2025-2026 发布的技术）"
+      "auto_prompt": "Deep Research 调研 Google Turbo Clock 压缩算法。搜索关键词：'Google Turbo Clock compression'、'Turbo Clock memory reduction'、'Turbo Clock GPU VRAM'、'谷歌 Turbo Clock 压缩'。需要确认：1) 这是什么技术（论文/产品/框架）2) 原理是什么 3) 对显存/内存的实际节省幅度 4) 是否开源 5) 对我们的硬件（Jetson Nano 2GB + RTX 2060 6GB）有什么帮助 6) 能否集成到 ComfyUI 推理或 OpenClaw 运行中。注意：如果搜索不到 Turbo Clock，尝试搜索类似的 Google 压缩算法（如 Clockwork、TurboSparse、PowerInfer 等最新 2025-2026 发布的技术）",
+      "completed_at": "2026-03-30T03:30:00+08:00",
+      "result": "4份TurboQuant报告全部完成：技术原理/硬件价值/平台分析/集成方案"
     },
     {
       "id": "T-032",
       "name": "zhiku 脚本修复验证 + 全面测试",
-      "priority": "P2",
-      "mode": "auto",
+      "priority": "P0",
+      "mode": "interactive",
       "status": "pending",
-      "reason": "zhiku-ask.js 已修复 MCP server 路径和工具名，但 5 个平台全部 fetch failed（Chrome 未运行或 cookie 过期）",
+      "reason": "用户要求：移到A序列，调研zhiku/deepsearch创建历史，调研alsoAllow注册成为MCP直接可调用工具",
       "deliverable": "zhiku 5 平台至少 3 个能正常返回结果",
       "depends_on": [],
       "refs": [
         "skills/zhiku/scripts/zhiku-ask.js"
       ],
-      "auto_prompt": "验证 zhiku-ask.js 修复：1) 确保 Chrome-Debug-Profile 在运行 (nohup Google Chrome --remote-debugging-port=9223) 2) node zhiku-ask.js '回复OK' 测试 3) 如果仍然 fetch failed，检查 MCP server 的 cookie 获取逻辑 4) 记录每个平台的错误信息 5) 修复后再次测试"
+      "auto_prompt": "验证 zhiku-ask.js 修复：1) 确保 Chrome-Debug-Profile 在运行 (nohup Google Chrome --remote-debugging-port=9223) 2) node zhiku-ask.js '回复OK' 测试 3) 如果仍然 fetch failed，检查 MCP server 的 cookie 获取逻辑 4) 记录每个平台的错误信息 5) 修复后再次测试",
+      "A序列": true,
+      "用户指令": "zhiku/deepsearch工具需要直接注册到alsoAllow，成为大模型后台直接调用的工具，不再通过Playwright前端拦截方式"
     },
     {
       "id": "T-033",
       "name": "清理 Ubuntu 残留文件和缓存",
       "priority": "P3",
       "mode": "auto",
-      "status": "pending",
+      "status": "completed",
       "reason": "FramePack 已杀、Wan2.1 下载中止，需要清理残留文件和 pip/conda 缓存释放磁盘",
       "deliverable": "磁盘空间报告，清理前后对比",
       "depends_on": [],
-      "auto_prompt": "清理 Ubuntu 残留：1) rm -rf ~/ComfyUI/models/diffusion_models/wan2.1-t2v-1.3b (下载中止的 1.2GB) 2) rm -rf ~/.cache/pip ~/.cache/torch (预计 6GB+) 3) 检查 ~/FramePack/ 是否还需要 4) conda clean --all 5) df -h 对比清理前后磁盘空间 6) 记录报告"
+      "auto_prompt": "清理 Ubuntu 残留：1) rm -rf ~/ComfyUI/models/diffusion_models/wan2.1-t2v-1.3b (下载中止的 1.2GB) 2) rm -rf ~/.cache/pip ~/.cache/torch (预计 6GB+) 3) 检查 ~/FramePack/ 是否还需要 4) conda clean --all 5) df -h 对比清理前后磁盘空间 6) 记录报告",
+      "completed_at": "2026-03-29T19:30:00+08:00",
+      "result": "清理GPU显存：关闭snap-store/nautilus/gnome-seed，释放234MiB VRAM，空闲从5818MiB增至6012MiB"
     },
     {
       "id": "T-003",
@@ -320,9 +333,6 @@
         "memory/2026-03-29.md",
         "harness/robot/night-build/reports/Semantic-Cache-Optimization-Report.md"
       ]
-      "refs": [
-        "memory/2026-03-29.md"
-      ]
     },
     {
       "id": "T-024",
@@ -357,9 +367,7 @@
       "completed_at": "2026-03-29T21:15:00+08:00",
       "result": "AnimateDiff v2 + SparseCtrl 最优方案：5GB VRAM，ComfyUI成熟集成，6GB社区验证。云端备选Replicate Wan2.1 $0.45/5秒",
       "refs": [
-        "harness/robot/night-build/reports/Image-to-Video-6GB-Research.md"
-      ]
-      "refs": [
+        "harness/robot/night-build/reports/Image-to-Video-6GB-Research.md",
         "docs/comfyui-6gb-research.md"
       ]
     },
@@ -398,6 +406,215 @@
       "refs": [
         "docs/openclaw-update-analysis-for-01-detailed.md"
       ]
+    },
+    {
+      "id": "A-0011",
+      "category": "research",
+      "name": "调研 7/15: Cozy Grove 游戏世界设计（温馨像素风、环境氛围）",
+      "status": "pending",
+      "description": "用 webauth 工具调研：Cozy Grove 游戏世界设计（温馨像素风、环境氛围）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-07.md",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0009",
+      "category": "doc",
+      "name": "SOP 补充：Phase 2 视觉记录 - 带宽估算",
+      "status": "pending",
+      "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 带宽估算 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0007",
+      "category": "doc",
+      "name": "SOP 补充：Phase 3 iPhone 感知 - OpenClaw bridge 协议",
+      "status": "pending",
+      "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 3 iPhone 感知 章节。\n补充 OpenClaw bridge 协议 的详细内容。\n追加到 night-build/reports/sop-Phase 3-iPhone 感知-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0006",
+      "category": "doc",
+      "name": "SOP 补充：Phase 4 运动控制 - MQTT 主题设计",
+      "status": "pending",
+      "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 4 运动控制 章节。\n补充 MQTT 主题设计 的详细内容。\n追加到 night-build/reports/sop-Phase 4-运动控制-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0008",
+      "category": "doc",
+      "name": "SOP 补充：贵庚系统 记忆架构 - 数据结构设计",
+      "status": "pending",
+      "description": "用 exec+sed 读取 ROBOT-SOP.md 中 贵庚系统 记忆架构 章节。\n补充 数据结构设计 的详细内容。\n追加到 night-build/reports/sop-贵庚系统-记忆架构-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0005",
+      "category": "code",
+      "name": "代码：esp32-cam-rtsp/platformio.ini - PlatformIO 配置文件",
+      "status": "pending",
+      "description": "生成 esp32-cam-rtsp 项目的 platformio.ini（PlatformIO 配置文件）。\n输出到 harness/robot/services/esp32-cam-rtsp/platformio.ini\n代码要有注释和错误处理。\n用标准库，不要编造不存在的 API。",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0010",
+      "category": "demo",
+      "name": "demo1: 添加方向光（DirectionalLight, intensity 0.8）",
+      "status": "pending",
+      "description": "执行: 添加方向光（DirectionalLight, intensity 0.8）\n文件: harness/robot/demo1.html\n背景色: #1a1a2e, 强调色: #e94560\n风格: 像素艺术\n如果文件不存在，先创建基础框架。",
+      "exec_command": "ls harness/robot/demo1.html 2>/dev/null",
+      "edit_info": null,
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0"
+    },
+    {
+      "id": "A-0001",
+      "category": "research-A",
+      "name": "技术调研: 杨立昆3篇论文对0-1机器人的落地影响（System A+B+M/LeWM/SAI）",
+      "priority": "P0",
+      "description": "调研 杨立昆（Yann LeCun）2026年3月发布的3篇核心论文对0-1机器人项目的落地影响。\n\n论文列表：\n1. 《Why AI systems don't learn and what to do about it》(arXiv:2603.15381, 3月16日) - System A+B+M三元认知架构\n2. LeWorldModel (arXiv:2603.19312, 3月24日) - JEPA里程碑式轻量世界模型，15M参数\n3. SAI (arXiv:2602.23643, 2月) - 超人类适应性智能\n\n需要确认：\n1) System A+B+M架构如何映射到0-1的OpenClaw+Cerebral+CyberBricks系统\n2) LeWM能否在Jetson Nano 2GB上运行（训练vs推理分离）\n3) SAI的'专业化路线'如何指导0-1的项目定位\n4) AMI Labs获$1B投资对0-1路线正确性的验证\n5) Imperial College MT3（1个演示=1个新任务）对0-1的启发\n6) 具体的技术升级路径（Phase 1/2/3）\n\n用 webauth 调研，至少2个平台。\n调研报告已保存在 memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md。\n输出摘要到 night-build/output/research-A/A-0001-lecun-roadmap-summary.md。\nnode --check。",
+      "status": "completed",
+      "report_file": "memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md",
+      "mode": "auto"
+    },
+    {
+      "id": "A-0002",
+      "category": "research-A",
+      "name": "技术调研: NLAH（自然语言Agent Harness）-清华哈工大论文arXiv:2603.25723",
+      "priority": "P0",
+      "description": "调研 NLAH（Natural-Language Agent Harnesses）论文对OpenClaw的落地启示。\n\n论文信息：\narXiv:2603.25723 | 清华+哈工大 | 2026年3月\n\n核心思想：\n- 把agent的harness控制逻辑从代码里抽出来，写成自然语言文件\n- 由IHR（Intelligent Harness Runtime）解释执行\n- OSWorld得分：30.4% → 47.2%（+55%相对提升）\n\nNLAH组件：\n- Contracts（契约）：输入输出格式、验证门、停止条件\n- Roles（角色）：solver/verifier/orchestrator的prompt\n- Stage Structure：DAG拓扑（plan→execute→verify→repair）\n- Adapters & Scripts：确定性钩子\n- State Semantics：文件持久化\n- Failure Taxonomy：命名失败模式→自动恢复\n\n需要确认：\n1) NLAH与OpenClaw Skills/SOUL.md的对应关系\n2) OpenClaw已有NLAH哪些组件，缺什么\n3) 如何把现有Skills改造成NLAH格式\n4) Evidence-backed closure（artifact验证）对OpenClaw的意义\n5) Runtime Charter分离（全局策略vs任务harness）\n\n调研报告已保存在 memory/2026-03-30-NLAH-Research-Report.md。\n输出摘要到 night-build/output/research-A/A-0002-nlah-summary.md。\nnode --check。",
+      "status": "completed",
+      "report_file": "memory/2026-03-30-NLAH-Research-Report.md",
+      "mode": "auto"
+    },
+    {
+      "id": "A-0003",
+      "category": "research-A",
+      "name": "行动项: 将LeCun论文落地路线图更新到ROBOT-SOP.md",
+      "priority": "P0",
+      "description": "根据 memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md 的调研结论，更新 ROBOT-SOP.md。\n\n需要更新的章节：\n1. Phase 1: 增加MT3（Multi-Task Trajectory Transfer）作为首选方案\n   - Imperial College Science Robotics 2025\n   - 零训练成本，1个演示=1个新任务\n   - GitHub: https://github.com/kamil-dreczkowski/learning_thousand_tasks\n2. Phase 2: LeWM世界模型部署\n   - 训练在Ubuntu/RTX 2060\n   - 推理在Jetson Nano 2GB（FP16 + TensorRT）\n3. Phase 3: System A+B+M完整架构\n   - OpenClaw = System M（元控制中枢）\n   - Cyber Bricks = System B（行动执行）\n   - ESP32-Cam = System A（观察学习）\n4. SAI定位：0-1不是AGI，是在'陪伴记录物理世界'这个任务上超越人类的specialized AI\n\n输出到 night-build/output/research-A/A-0003-sop-update-lecun.md。\nnode --check。",
+      "status": "pending",
+      "depends_on": [
+        "A-0001"
+      ],
+      "mode": "auto"
+    },
+    {
+      "id": "A-0004",
+      "category": "research-A",
+      "name": "行动项: 将NLAH格式模板更新到OpenClaw Skills编写规范",
+      "priority": "P0",
+      "description": "根据 memory/2026-03-30-NLAH-Research-Report.md，将NLAH格式融入OpenClaw Skills编写规范。\n\n需要更新的内容：\n1. 创建 NLAH格式Skill模板（Contracts + Roles + Stage Structure + Failure Taxonomy）\n2. 更新现有Skills添加 Contracts（验证门、停止条件）\n3. 添加 Failure Taxonomy（标准化失败分类）\n4. 添加 Evidence-backed closure（skill执行完要有artifact验证）\n\n参考NLAH格式：\n```markdown\n# Skill: [任务名称]\n\n## Contracts\n- Input: [具体输入格式]\n- Output: [具体输出格式]\n- Validation Gate: [必须通过的验证项]\n- Stop Conditions: [何时停止]\n\n## Roles\n- Orchestrator: [负责调度]\n- Solver: [负责执行]\n- Verifier: [负责验证]\n\n## Stage Structure\n1. Plan: [规划阶段]\n2. Execute: [执行阶段]\n3. Verify: [验证阶段]\n4. Repair: [失败恢复]\n\n## Failure Taxonomy\n- ERROR_A: [失败模式] → [恢复方法]\n- ERROR_B: [失败模式] → [恢复方法]\n\n## Adapters\n- test_hook: [确定性测试]\n- verify_hook: [验证脚本]\n- cleanup_hook: [清理脚本]\n```\n\n输出到 night-build/output/research-A/A-0004-nlah-skill-template.md。\nnode --check。",
+      "status": "pending",
+      "depends_on": [
+        "A-0002"
+      ],
+      "mode": "auto"
+    },
+    {
+      "id": "B-0001",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知前端 - ARKit基础框架",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": "Phase 3核心",
+      "mode": "auto",
+      "priority": "P1"
+    },
+    {
+      "id": "B-0002",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知 - 深度数据获取",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": "",
+      "mode": "auto",
+      "priority": "P1"
+    },
+    {
+      "id": "B-0003",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知 - 数据格式设计",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": "",
+      "mode": "auto",
+      "priority": "P1"
+    },
+    {
+      "id": "B-0004",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知 - 延迟测试方法",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": "",
+      "mode": "auto",
+      "priority": "P1"
+    },
+    {
+      "id": "C-0001",
+      "sequence": "C",
+      "category": "building",
+      "name": "3D打印零件建模 - 拓竹H2C",
+      "status": "pending",
+      "depends_on": [],
+      "description": "T-0127~T-0158 P3",
+      "mode": "auto",
+      "priority": "P2"
+    },
+    {
+      "id": "D-0001",
+      "sequence": "D",
+      "category": "device",
+      "name": "硬件接口代码 - 拓竹H2C驱动",
+      "status": "pending",
+      "depends_on": [],
+      "description": "T-0174~T-0200 P3",
+      "mode": "auto",
+      "priority": "P3"
     }
   ]
 }

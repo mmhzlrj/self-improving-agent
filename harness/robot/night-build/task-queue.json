@@ -1,8 +1,8 @@
 {
-  "version": 6,
-  "date": "2026-03-27",
-  "phase": "continuous-pipeline-v6",
-  "description": "原子任务管道 v8 - 1800 个精确任务",
+  "version": 8,
+  "date": "2026-03-30",
+  "phase": "A序列+连续任务管道-v8",
+  "description": "双序列任务管道 - A序列（重要任务，高优执行）+ T序列（1805个消耗额度任务）",
   "调度规则": {
     "核心原则": "每个任务是一个具体的代码修改/验证操作，MiniMax 无法偷懒",
     "执行流程": [
@@ -20,8 +20,34 @@
     ]
   },
   "stats": {
-    "total": 1800,
-    "estimated_calls": 9000,
+    "total": 1809,
+    "estimated_calls": 9045,
+    "sequences": {
+      "A": {
+        "description": "P0 物理机器人必须先跑起来",
+        "total": 11,
+        "pending": 9,
+        "done": 2
+      },
+      "B": {
+        "description": "P1 Phase 3 iPhone感知接入",
+        "total": 4,
+        "pending": 4,
+        "done": 0
+      },
+      "C": {
+        "description": "P2 3D打印零件 + 技术验证",
+        "total": 1,
+        "pending": 1,
+        "done": 0
+      },
+      "D": {
+        "description": "P3 Demo/内容/调优",
+        "total": 1,
+        "pending": 1,
+        "done": 0
+      }
+    },
     "categories": {
       "light": 13,
       "layout": 12,
@@ -64,7 +90,7 @@
       "demo5-fine": 29,
       "code-ext": 47,
       "css": 48,
-      "tech-research": 46,
+      "tech-research": 47,
       "verify": 94,
       "demo1-color": 5,
       "demo2-color": 5,
@@ -78,7 +104,8 @@
       "demo5-ix": 20,
       "doc-ext": 44,
       "season": 60,
-      "i18n": 15
+      "i18n": 15,
+      "research-A": 4
     }
   },
   "tasks": [
@@ -86,7 +113,7 @@
       "id": "T-0001",
       "category": "light",
       "name": "sl1 intensity 6→15",
-      "status": "success",
+      "status": "completed",
       "description": "将第390行城市高路灯 sl1 的 PointLight intensity 从 6.0 改为 15.0",
       "exec_command": "grep -n '_cityLight1.*PointLight' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -100,7 +127,7 @@
       "id": "T-0002",
       "category": "light",
       "name": "sl1 range 25→45",
-      "status": "success",
+      "status": "completed",
       "description": "将第390行城市高路灯 sl1 的 PointLight range 从 25 改为 45",
       "exec_command": "grep -n '_cityLight1.*PointLight' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -114,7 +141,7 @@
       "id": "T-0003",
       "category": "light",
       "name": "sl1 color 改为更亮暖白",
-      "status": "success",
+      "status": "completed",
       "description": "将 sl1 颜色从 0xffcc66 改为 0xffffaa（更亮的暖白色）",
       "exec_command": "grep -n '_cityLight1.*PointLight' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -128,7 +155,7 @@
       "id": "T-0004",
       "category": "light",
       "name": "sl2 intensity 6→15",
-      "status": "success",
+      "status": "completed",
       "description": "将第391行 sl2 的 PointLight intensity 从 6.0 改为 15.0",
       "exec_command": "grep -n '_cityLight2.*PointLight' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -142,7 +169,7 @@
       "id": "T-0005",
       "category": "light",
       "name": "sl2 range 25→45",
-      "status": "success",
+      "status": "completed",
       "description": "将 sl2 的 range 从 25 改为 45",
       "exec_command": "grep -n '_cityLight2.*PointLight' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -156,7 +183,7 @@
       "id": "T-0006",
       "category": "light",
       "name": "sl2 color 改为更亮暖白",
-      "status": "success",
+      "status": "completed",
       "description": "将 sl2 颜色从 0xffcc66 改为 0xffffaa",
       "exec_command": "grep -n '_cityLight2.*PointLight' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -170,7 +197,7 @@
       "id": "T-0007",
       "category": "light",
       "name": "灯柱 PointLight intensity 4→10",
-      "status": "success",
+      "status": "completed",
       "description": "将 createStreetLight 函数中灯泡 PointLight 的 intensity 从 4.0 改为 10.0",
       "exec_command": "grep -n 'const light = new THREE.PointLight(0xffffcc' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -184,7 +211,7 @@
       "id": "T-0008",
       "category": "light",
       "name": "灯柱 PointLight range 8→18",
-      "status": "success",
+      "status": "completed",
       "description": "将灯泡 PointLight 的 range 从 8 改为 18",
       "exec_command": "grep -n 'const light = new THREE.PointLight(0xffffcc' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -198,7 +225,7 @@
       "id": "T-0009",
       "category": "light",
       "name": "动画循环 ambient 强制值 1→2",
-      "status": "success",
+      "status": "completed",
       "description": "将动画循环中深夜 ambient 强制覆盖值从 1.0 改为 2.0",
       "exec_command": "sed -n '809,812p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -212,7 +239,7 @@
       "id": "T-0010",
       "category": "light",
       "name": "动画循环 sun 强制值 1→2",
-      "status": "success",
+      "status": "completed",
       "description": "将动画循环中深夜 sun 强制覆盖值从 1.0 改为 2.0",
       "exec_command": "sed -n '812,816p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -226,7 +253,7 @@
       "id": "T-0011",
       "category": "light",
       "name": "动画循环 cityLight1 强制值 6→15",
-      "status": "success",
+      "status": "completed",
       "description": "将动画循环中 _cityLight1 强制覆盖值从 6.0 改为 15.0",
       "exec_command": "sed -n '815,817p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -240,7 +267,7 @@
       "id": "T-0012",
       "category": "light",
       "name": "动画循环 cityLight2 强制值 6→15",
-      "status": "success",
+      "status": "completed",
       "description": "将动画循环中 _cityLight2 强制覆盖值从 6.0 改为 15.0",
       "exec_command": "sed -n '816,818p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -254,7 +281,7 @@
       "id": "T-0013",
       "category": "light",
       "name": "动画循环灯柱强制值 4→10",
-      "status": "success",
+      "status": "completed",
       "description": "将动画循环中 scene.children.forEach 里灯柱 intensity 从 4.0 改为 10.0",
       "exec_command": "sed -n '818,820p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -268,7 +295,7 @@
       "id": "T-0014",
       "category": "layout",
       "name": "Ubuntu 桌面 y 值检查",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec 读取 buildUbuntu 函数，列出所有子部件的 y 值，检查哪些不合理",
       "exec_command": "sed -n '591,620p' /Users/lr/.openclaw/workspace/harness/robot/world.html | grep -o 'y[^,)]*[0-9.]*'",
       "edit_info": null,
@@ -278,7 +305,7 @@
       "id": "T-0015",
       "category": "layout",
       "name": "Ubuntu 显示器底座 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将显示器底座 y 从 1.705 改为 1.63（桌面1.58+0.05）",
       "exec_command": "grep -n '底座.*position.*1.705' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -292,7 +319,7 @@
       "id": "T-0016",
       "category": "layout",
       "name": "Ubuntu 显示器支架 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将支架立柱 y 从 2.255 改为 2.13",
       "exec_command": "grep -n '立柱.*position.*2.255' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -306,7 +333,7 @@
       "id": "T-0017",
       "category": "layout",
       "name": "Ubuntu 显示器外壳 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将显示器外壳 y 从 4.005 改为 3.38（支架顶2.13+外壳半高1.25）",
       "exec_command": "grep -n '外壳.*position.*4.005' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -320,7 +347,7 @@
       "id": "T-0018",
       "category": "layout",
       "name": "Ubuntu 显示器屏幕 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将显示器屏幕 y 从 4.005 改为 3.38（与外壳对齐）",
       "exec_command": "grep -n 'ms.position.*4.005' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -334,7 +361,7 @@
       "id": "T-0019",
       "category": "layout",
       "name": "Ubuntu 主机箱位置修正（桌面下方）",
-      "status": "success",
+      "status": "completed",
       "description": "将主机箱 y 从 1.75 改为 0.75（放在桌面下方，地面0+半高0.75）",
       "exec_command": "grep -n '主机箱.*position.*1.75' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -348,7 +375,7 @@
       "id": "T-0020",
       "category": "layout",
       "name": "Ubuntu 光驱 y 修正（跟随主机箱）",
-      "status": "success",
+      "status": "completed",
       "description": "将光驱 y 从 2.5 改为 1.4（主机箱顶部附近）",
       "exec_command": "grep -n 'd1.*position.*2.5.*1.76' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -362,7 +389,7 @@
       "id": "T-0021",
       "category": "layout",
       "name": "Ubuntu 第二光驱 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将第二光驱 y 从 2.1 改为 1.1",
       "exec_command": "grep -n 'd2.*position.*2.1.*1.76' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -376,7 +403,7 @@
       "id": "T-0022",
       "category": "layout",
       "name": "Ubuntu 电源按钮 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将电源按钮 y 从 3.3 改为 1.35",
       "exec_command": "grep -n 'pb.*position.*3.3.*1.76' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -390,7 +417,7 @@
       "id": "T-0023",
       "category": "layout",
       "name": "Ubuntu 状态灯 y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将状态灯 y 从 5.6 改为 1.55（主机箱顶部）",
       "exec_command": "grep -n 'ubStatus.*position.*5.6' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -404,7 +431,7 @@
       "id": "T-0024",
       "category": "layout",
       "name": "Ubuntu Label y 修正",
-      "status": "success",
+      "status": "completed",
       "description": "将 ubuntuLabel y 从 4.8 改为 3.8（跟随显示器顶部）",
       "exec_command": "grep -n 'ubuntuLabel.*position.*4.8' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -418,7 +445,7 @@
       "id": "T-0025",
       "category": "layout",
       "name": "MacBook 布局合理性检查",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec 读取 buildMacbook 函数，列出所有子部件 y 值，判断是否合理",
       "exec_command": "sed -n '524,570p' /Users/lr/.openclaw/workspace/harness/robot/world.html | grep -oP 'y\\)?[:,\\s][\\d.]+'",
       "edit_info": null,
@@ -428,7 +455,7 @@
       "id": "T-0026",
       "category": "npc",
       "name": "NPC 代码现状导出",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec 导出当前 NPC 相关代码（行681-720），分析现有逻辑",
       "exec_command": "sed -n '681,720p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -438,7 +465,7 @@
       "id": "T-0027",
       "category": "npc",
       "name": "添加 NPC workTarget 属性",
-      "status": "success",
+      "status": "completed",
       "description": "在 createNPC 函数中，为 npc.userData 添加 workTarget 属性。MacBook NPC 目标 (0,0,1)，Ubuntu NPC 目标 (10,0,-0.5)。在 createNPC(-6,3) 和 createNPC(6,5) 之后分别设置。",
       "exec_command": "grep -n 'createNPC.*-6.*3' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -452,7 +479,7 @@
       "id": "T-0028",
       "category": "npc",
       "name": "添加 NPC lerp 移动函数",
-      "status": "success",
+      "status": "completed",
       "description": "在 createNPC 函数之后、createTree 函数之前，添加 moveNPCToWork(npc) 函数：\nfunction moveNPCToWork(npc) {\n  if (!npc.userData.workTarget) return;\n  const t = npc.userData.workTarget;\n  const dx = t.x - npc.position.x;\n  const dz = t.z - npc.position.z;\n  const dist = Math.sqrt(dx*dx + dz*dz);\n  if (dist > 0.1) {\n    npc.position.x += dx * 0.02;\n    npc.position.z += dz * 0.02;\n    // 面向移动方向\n    npc.rotation.y = Math.atan2(dx, dz);\n  }\n}",
       "exec_command": "grep -n 'createTree' /Users/lr/.openclaw/workspace/harness/robot/world.html | head -1",
       "edit_info": null,
@@ -462,7 +489,7 @@
       "id": "T-0029",
       "category": "npc",
       "name": "NPC 面向设备（lookAt）",
-      "status": "success",
+      "status": "completed",
       "description": "在 moveNPCToWork 函数中添加：当 dist <= 0.1 时，用 Math.atan2(dx, dz) 设置 rotation.y 面向设备方向",
       "exec_command": "grep -n 'moveNPCToWork' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -472,7 +499,7 @@
       "id": "T-0030",
       "category": "npc",
       "name": "NPC 打字手臂动画",
-      "status": "success",
+      "status": "completed",
       "description": "在 animate 循环的 NPC 区块中，添加手臂打字动画：当 NPC 距离 workTarget < 0.5 且 workType=coding 时，左右手臂 rotation.x 交替 sin 波动",
       "exec_command": "sed -n '831,838p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -482,7 +509,7 @@
       "id": "T-0031",
       "category": "npc",
       "name": "NPC 腿部行走动画",
-      "status": "success",
+      "status": "completed",
       "description": "当 NPC 正在移动（dist > 0.1）时，左右腿 position.z 交替前后移动",
       "exec_command": "sed -n '831,838p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -492,7 +519,7 @@
       "id": "T-0032",
       "category": "npc",
       "name": "NPC 修改状态文字",
-      "status": "success",
+      "status": "completed",
       "description": "将 updateNPCStatus 中的'Dashboard 运维'改为'编码中...'，'待接入'保持不变，'巡检中'改为'前往工作站'",
       "exec_command": "grep -n 'Dashboard 运维' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -506,7 +533,7 @@
       "id": "T-0033",
       "category": "npc",
       "name": "在 animate 中调用 moveNPCToWork",
-      "status": "success",
+      "status": "completed",
       "description": "在 animate 循环的 npcs.forEach 中添加 moveNPCToWork(npc) 调用，在 updateNPCStatus 之前",
       "exec_command": "sed -n '831,838p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -516,7 +543,7 @@
       "id": "T-0034",
       "category": "led",
       "name": "LED 幕墙 fetch 路径修复",
-      "status": "success",
+      "status": "completed",
       "description": "将 updateLEDScreen 中的 fetch URL 从 '/api/open?file=harness/robot/project-board.json' 改为直接读取 task-queue.json：fetch('harness/robot/night-build/task-queue.json')",
       "exec_command": "grep -n 'fetch.*project-board' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -530,7 +557,7 @@
       "id": "T-0035",
       "category": "led",
       "name": "LED 添加 drawTaskQueue 函数",
-      "status": "success",
+      "status": "completed",
       "description": "在 updateLEDScreen 之前添加 drawTaskQueue(ctx, data) 函数：读取 task-queue.json 的 tasks 数组，在 Canvas 上绘制任务列表（名称 + 状态颜色 + 进度条）",
       "exec_command": "grep -n 'function updateLEDScreen' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -540,7 +567,7 @@
       "id": "T-0036",
       "category": "led",
       "name": "drawTaskQueue 绘制标题",
-      "status": "success",
+      "status": "completed",
       "description": "在 drawTaskQueue 中绘制标题 '0-1 项目任务看板'，字体 bold 48px monospace，颜色 #00ddff，居中在 y=80",
       "exec_command": "grep -n 'drawTaskQueue' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -550,7 +577,7 @@
       "id": "T-0037",
       "category": "led",
       "name": "drawTaskQueue 绘制任务列表",
-      "status": "success",
+      "status": "completed",
       "description": "遍历 data.tasks，每行绘制：序号 + 名称（28px）+ 状态色圆点（success=绿 pending=黄 failed=红）",
       "exec_command": "grep -n 'drawTaskQueue' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -560,7 +587,7 @@
       "id": "T-0038",
       "category": "led",
       "name": "drawTaskQueue 绘制进度条",
-      "status": "success",
+      "status": "completed",
       "description": "在底部 y=1000 处绘制进度条：计算 success/total 比例，绘制绿色填充条",
       "exec_command": "grep -n 'drawTaskQueue' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -570,7 +597,7 @@
       "id": "T-0039",
       "category": "led",
       "name": "drawTaskQueue 绘制时间戳",
-      "status": "success",
+      "status": "completed",
       "description": "在右下角 y=1060 绘制当前时间戳，20px monospace，灰色",
       "exec_command": "grep -n 'drawTaskQueue' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -580,7 +607,7 @@
       "id": "T-0040",
       "category": "led",
       "name": "LED 幕墙遮挡物检查",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec 列出所有物体的坐标，找出 z>-12 且 x 在 0-10 之间的物体（LED 屏幕前方区域）",
       "exec_command": "grep -n 'position.set' /Users/lr/.openclaw/workspace/harness/robot/world.html | grep -v '//'",
       "edit_info": null,
@@ -590,7 +617,7 @@
       "id": "T-0041",
       "category": "led",
       "name": "移除 LED 前方遮挡的树",
-      "status": "success",
+      "status": "completed",
       "description": "如果发现 createTree(-4,-5) 或 createTree(0,-8) 的 z 值遮挡 LED 屏幕，将其 z 值改为 -20（移到屏幕后方）",
       "exec_command": "grep -n 'createTree' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -600,7 +627,7 @@
       "id": "T-0042",
       "category": "led",
       "name": "LED updateLEDScreen 改用 drawTaskQueue",
-      "status": "success",
+      "status": "completed",
       "description": "将 updateLEDScreen 的 .then 回调中 drawDashboard(ledCtx, data) 改为 drawTaskQueue(ledCtx, data)",
       "exec_command": "grep -n 'drawDashboard' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -614,7 +641,7 @@
       "id": "T-0043",
       "category": "led",
       "name": "LED 幕墙位置微调",
-      "status": "success",
+      "status": "completed",
       "description": "将 ledScreen.position.set(5, 5, -12) 的 y 从 5 改为 4（降低到更容易看到的高度）",
       "exec_command": "grep -n 'ledScreen.position' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -628,7 +655,7 @@
       "id": "T-0044",
       "category": "sky",
       "name": "添加星星变量声明",
-      "status": "success",
+      "status": "completed",
       "description": "在 buildStars 函数之后添加：let starField = null;",
       "exec_command": "grep -n 'function buildStars' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -638,7 +665,7 @@
       "id": "T-0045",
       "category": "sky",
       "name": "添加 createStarField 函数",
-      "status": "success",
+      "status": "completed",
       "description": "添加函数：function createStarField() { const geo = new THREE.BufferGeometry(); const positions = []; for (let i=0; i<200; i++) { positions.push((Math.random()-0.5)*100, Math.random()*40+10, (Math.random()-0.5)*100); } geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); const mat = new THREE.PointsMaterial({color:0xffffff, size:0.3, transparent:true, opacity:0.8}); starField = new THREE.Points(geo, mat); starField.visible = false; scene.add(starField); }",
       "exec_command": "grep -n 'buildStars' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -648,7 +675,7 @@
       "id": "T-0046",
       "category": "sky",
       "name": "在 animate 中控制星星可见性",
-      "status": "success",
+      "status": "completed",
       "description": "在动画循环中添加：if (starField) starField.visible = (h < 6 || h >= 19);",
       "exec_command": "sed -n '800,810p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -658,7 +685,7 @@
       "id": "T-0047",
       "category": "sky",
       "name": "添加云层数组声明",
-      "status": "success",
+      "status": "completed",
       "description": "在 starField 声明之后添加：const clouds = [];",
       "exec_command": "grep -n 'starField' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -668,7 +695,7 @@
       "id": "T-0048",
       "category": "sky",
       "name": "添加 createClouds 函数",
-      "status": "success",
+      "status": "completed",
       "description": "添加函数创建 4 朵云：function createClouds() { for (let i=0; i<4; i++) { const geo = new THREE.PlaneGeometry(8+Math.random()*6, 2+Math.random()*2); const mat = new THREE.MeshBasicMaterial({color:0xffffff, transparent:true, opacity:0.6, side:THREE.DoubleSide}); const cloud = new THREE.Mesh(geo, mat); cloud.position.set((Math.random()-0.5)*40, 12+Math.random()*5, -15-Math.random()*20); cloud.rotation.x = -Math.PI/2; clouds.push(cloud); scene.add(cloud); } }",
       "exec_command": "grep -n 'createStarField' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -678,7 +705,7 @@
       "id": "T-0049",
       "category": "sky",
       "name": "在 animate 中移动云层",
-      "status": "success",
+      "status": "completed",
       "description": "在动画循环中添加：clouds.forEach((c,i) => { c.position.x += 0.005 * (i%2===0 ? 1 : -1); if (Math.abs(c.position.x) > 30) c.position.x *= -1; });",
       "exec_command": "sed -n '828,830p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -688,7 +715,7 @@
       "id": "T-0050",
       "category": "sky",
       "name": "添加月亮变量和函数",
-      "status": "success",
+      "status": "completed",
       "description": "添加：let moonMesh = null; function createMoon() { const geo = new THREE.CircleGeometry(1.5, 32); const mat = new THREE.MeshBasicMaterial({color:0xffffee, side:THREE.DoubleSide}); moonMesh = new THREE.Mesh(geo, mat); moonMesh.position.set(20, 25, -30); moonMesh.visible = false; scene.add(moonMesh); }",
       "exec_command": "grep -n 'clouds' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -698,7 +725,7 @@
       "id": "T-0051",
       "category": "sky",
       "name": "在 animate 中控制月亮可见性",
-      "status": "success",
+      "status": "completed",
       "description": "在星星控制之后添加：if (moonMesh) moonMesh.visible = (h < 6 || h >= 19);",
       "exec_command": "sed -n '808,812p' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": null,
@@ -708,7 +735,7 @@
       "id": "T-0052",
       "category": "sky",
       "name": "调用初始化函数",
-      "status": "success",
+      "status": "completed",
       "description": "在 buildMacbook(); buildUbuntu(); 之前添加：createStarField(); createClouds(); createMoon();",
       "exec_command": "grep -n 'buildMacbook(); buildUbuntu' /Users/lr/.openclaw/workspace/harness/robot/world.html",
       "edit_info": {
@@ -722,7 +749,7 @@
       "id": "T-0053",
       "category": "research",
       "name": "调研 1/15: QQ养虾空间 UI 设计（布局、配色、交互风格、功能列表）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：QQ养虾空间 UI 设计（布局、配色、交互风格、功能列表）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-01.md",
       "exec_command": "",
       "edit_info": null,
@@ -732,7 +759,7 @@
       "id": "T-0054",
       "category": "research",
       "name": "调研 2/15: Animal Crossing 虚拟房屋 UI（等距视角、可爱风格、状态显示方式",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Animal Crossing 虚拟房屋 UI（等距视角、可爱风格、状态显示方式）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-02.md",
       "exec_command": "",
       "edit_info": null,
@@ -742,7 +769,7 @@
       "id": "T-0055",
       "category": "research",
       "name": "调研 3/15: The Sims 网页版/像素版 UI（NPC 行为系统、工作动画、状态气泡）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：The Sims 网页版/像素版 UI（NPC 行为系统、工作动画、状态气泡）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-03.md",
       "exec_command": "",
       "edit_info": null,
@@ -752,7 +779,7 @@
       "id": "T-0056",
       "category": "research",
       "name": "调研 4/15: Monument Valley Low Poly 3D 设计（几何风格、色彩搭配",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Monument Valley Low Poly 3D 设计（几何风格、色彩搭配、光影处理）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-04.md",
       "exec_command": "",
       "edit_info": null,
@@ -762,7 +789,7 @@
       "id": "T-0057",
       "category": "research",
       "name": "调研 5/15: Cyberpunk 2077 UI 设计（霓虹光效、全息面板、暗色主题）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Cyberpunk 2077 UI 设计（霓虹光效、全息面板、暗色主题）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-05.md",
       "exec_command": "",
       "edit_info": null,
@@ -772,27 +799,28 @@
       "id": "T-0058",
       "category": "research",
       "name": "调研 6/15: Homescapes/Gardenscapes UI（2D 游戏化工作空间、进度",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Homescapes/Gardenscapes UI（2D 游戏化工作空间、进度系统）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-06.md",
       "exec_command": "",
       "edit_info": null,
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0059",
+      "id": "A-0011",
       "category": "research",
       "name": "调研 7/15: Cozy Grove 游戏世界设计（温馨像素风、环境氛围）",
       "status": "pending",
       "description": "用 webauth 工具调研：Cozy Grove 游戏世界设计（温馨像素风、环境氛围）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-07.md",
       "exec_command": "",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0060",
       "category": "research",
       "name": "调研 8/15: macOS 桌面 Widget 设计（glassmorphism、小组件布局）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：macOS 桌面 Widget 设计（glassmorphism、小组件布局）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-08.md",
       "exec_command": "",
       "edit_info": null,
@@ -812,7 +840,7 @@
       "id": "T-0062",
       "category": "research",
       "name": "调研 10/15: Nintendo Switch 主菜单 UI（简洁大方、图标设计）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Nintendo Switch 主菜单 UI（简洁大方、图标设计）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-10.md",
       "exec_command": "",
       "edit_info": null,
@@ -832,7 +860,7 @@
       "id": "T-0064",
       "category": "research",
       "name": "调研 12/15: Linear 项目管理 UI（深色主题、任务列表、进度）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Linear 项目管理 UI（深色主题、任务列表、进度）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-12.md",
       "exec_command": "",
       "edit_info": null,
@@ -842,7 +870,7 @@
       "id": "T-0065",
       "category": "research",
       "name": "调研 13/15: Figma Dashboard 设计趋势（2025-2026 UI/UX）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：Figma Dashboard 设计趋势（2025-2026 UI/UX）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-13.md",
       "exec_command": "",
       "edit_info": null,
@@ -852,7 +880,7 @@
       "id": "T-0066",
       "category": "research",
       "name": "调研 14/15: 低多边形 3D 城市构建游戏（世界布局、建筑风格参考）",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：低多边形 3D 城市构建游戏（世界布局、建筑风格参考）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-14.md",
       "exec_command": "",
       "edit_info": null,
@@ -862,7 +890,7 @@
       "id": "T-0067",
       "category": "research",
       "name": "调研 15/15: 像素艺术 3D 游戏（Stardew Valley / Octopath Tra",
-      "status": "success",
+      "status": "completed",
       "description": "用 webauth 工具调研：像素艺术 3D 游戏（Stardew Valley / Octopath Traveler 风格）\n要求：\n1. 用至少 2 个平台搜索（DeepSeek/Kimi/豆包）\n2. 描述关键设计元素（色彩、布局、动画、交互）\n3. 列出来源链接\n4. 给出对 0-1 项目 3D 世界的借鉴建议\n5. 不要编造，搜索不到就标注\n输出到 night-build/output/research-15.md",
       "exec_command": "",
       "edit_info": null,
@@ -872,7 +900,7 @@
       "id": "T-0068",
       "category": "doc",
       "name": "SOP 补充：Phase 0 Gateway 对接 - OpenClaw 安装步骤",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 0 Gateway 对接 章节。\n补充 OpenClaw 安装步骤 的详细内容。\n追加到 night-build/reports/sop-Phase 0-Gateway 对接-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -882,7 +910,7 @@
       "id": "T-0069",
       "category": "doc",
       "name": "SOP 补充：Phase 0 Gateway 对接 - Node 配置步骤",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 0 Gateway 对接 章节。\n补充 Node 配置步骤 的详细内容。\n追加到 night-build/reports/sop-Phase 0-Gateway 对接-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -892,7 +920,7 @@
       "id": "T-0070",
       "category": "doc",
       "name": "SOP 补充：Phase 0 Gateway 对接 - WebSocket 连接验证",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 0 Gateway 对接 章节。\n补充 WebSocket 连接验证 的详细内容。\n追加到 night-build/reports/sop-Phase 0-Gateway 对接-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -902,7 +930,7 @@
       "id": "T-0071",
       "category": "doc",
       "name": "SOP 补充：Phase 0 Gateway 对接 - DM 配对流程",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 0 Gateway 对接 章节。\n补充 DM 配对流程 的详细内容。\n追加到 night-build/reports/sop-Phase 0-Gateway 对接-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -912,7 +940,7 @@
       "id": "T-0072",
       "category": "doc",
       "name": "SOP 补充：Phase 0 Gateway 对接 - 常见错误排查",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 0 Gateway 对接 章节。\n补充 常见错误排查 的详细内容。\n追加到 night-build/reports/sop-Phase 0-Gateway 对接-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -922,7 +950,7 @@
       "id": "T-0073",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - ESP32 引脚分配表",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 ESP32 引脚分配表 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -932,7 +960,7 @@
       "id": "T-0074",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - 音频硬件选型",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 音频硬件选型 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -942,7 +970,7 @@
       "id": "T-0075",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - Whisper 安装配置",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 Whisper 安装配置 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -952,7 +980,7 @@
       "id": "T-0076",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - Edge-TTS 配置",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 Edge-TTS 配置 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -962,7 +990,7 @@
       "id": "T-0077",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - 语音识别代码框架",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 语音识别代码框架 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -972,7 +1000,7 @@
       "id": "T-0078",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - TTS 代码框架",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 TTS 代码框架 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -982,7 +1010,7 @@
       "id": "T-0079",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - 端到端测试步骤",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 端到端测试步骤 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -992,7 +1020,7 @@
       "id": "T-0080",
       "category": "doc",
       "name": "SOP 补充：Phase 1 语音陪伴 - 延迟优化方案",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 1 语音陪伴 章节。\n补充 延迟优化方案 的详细内容。\n追加到 night-build/reports/sop-Phase 1-语音陪伴-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1002,7 +1030,7 @@
       "id": "T-0081",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - ESP32-Cam 固件结构",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 ESP32-Cam 固件结构 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1012,7 +1040,7 @@
       "id": "T-0082",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - WiFi 配置流程",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 WiFi 配置流程 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1022,7 +1050,7 @@
       "id": "T-0083",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - JPEG 捕获代码",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 JPEG 捕获代码 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1032,7 +1060,7 @@
       "id": "T-0084",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - RTSP 推流代码",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 RTSP 推流代码 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1042,7 +1070,7 @@
       "id": "T-0085",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - Jetson 接收端代码",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 Jetson 接收端代码 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1052,7 +1080,7 @@
       "id": "T-0086",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - YOLOv8n 配置",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 YOLOv8n 配置 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
@@ -1062,21 +1090,22 @@
       "id": "T-0087",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - 检测结果格式",
-      "status": "success",
+      "status": "completed",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 检测结果格式 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0088",
+      "id": "A-0009",
       "category": "doc",
       "name": "SOP 补充：Phase 2 视觉记录 - 带宽估算",
       "status": "pending",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 2 视觉记录 章节。\n补充 带宽估算 的详细内容。\n追加到 night-build/reports/sop-Phase 2-视觉记录-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0089",
@@ -1099,14 +1128,15 @@
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0091",
+      "id": "A-0007",
       "category": "doc",
       "name": "SOP 补充：Phase 3 iPhone 感知 - OpenClaw bridge 协议",
       "status": "pending",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 3 iPhone 感知 章节。\n补充 OpenClaw bridge 协议 的详细内容。\n追加到 night-build/reports/sop-Phase 3-iPhone 感知-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0092",
@@ -1129,14 +1159,15 @@
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0094",
+      "id": "A-0006",
       "category": "doc",
       "name": "SOP 补充：Phase 4 运动控制 - MQTT 主题设计",
       "status": "pending",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 Phase 4 运动控制 章节。\n补充 MQTT 主题设计 的详细内容。\n追加到 night-build/reports/sop-Phase 4-运动控制-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0095",
@@ -1189,14 +1220,15 @@
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0100",
+      "id": "A-0008",
       "category": "doc",
       "name": "SOP 补充：贵庚系统 记忆架构 - 数据结构设计",
       "status": "pending",
       "description": "用 exec+sed 读取 ROBOT-SOP.md 中 贵庚系统 记忆架构 章节。\n补充 数据结构设计 的详细内容。\n追加到 night-build/reports/sop-贵庚系统-记忆架构-supplement.md。\n如果信息不足，用 webauth 搜索官方文档。",
       "exec_command": "",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0101",
@@ -1259,14 +1291,15 @@
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0107",
+      "id": "A-0005",
       "category": "code",
       "name": "代码：esp32-cam-rtsp/platformio.ini - PlatformIO 配置文件",
       "status": "pending",
       "description": "生成 esp32-cam-rtsp 项目的 platformio.ini（PlatformIO 配置文件）。\n输出到 harness/robot/services/esp32-cam-rtsp/platformio.ini\n代码要有注释和错误处理。\n用标准库，不要编造不存在的 API。",
       "exec_command": "",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0108",
@@ -1779,14 +1812,15 @@
       "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
     },
     {
-      "id": "T-0159",
+      "id": "A-0010",
       "category": "demo",
       "name": "demo1: 添加方向光（DirectionalLight, intensity 0.8）",
       "status": "pending",
       "description": "执行: 添加方向光（DirectionalLight, intensity 0.8）\n文件: harness/robot/demo1.html\n背景色: #1a1a2e, 强调色: #e94560\n风格: 像素艺术\n如果文件不存在，先创建基础框架。",
       "exec_command": "ls harness/robot/demo1.html 2>/dev/null",
       "edit_info": null,
-      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html"
+      "verify_command": "node --check /Users/lr/.openclaw/workspace/harness/robot/world.html",
+      "sequence": "A"
     },
     {
       "id": "T-0160",
@@ -13616,6 +13650,115 @@
       "name": "i18n: 语言切换按钮(UI)",
       "status": "pending",
       "description": "语言切换按钮(UI)。输出到 harness/robot/i18n/ 目录。\nnode --check。"
+    },
+    {
+      "id": "T-1801",
+      "category": "tech-research",
+      "name": "技术调研: Google TurboQuant AI内存压缩算法",
+      "description": "调研 Google 2026年3月下旬发布的 TurboQuant AI内存压缩算法。\n搜索关键词：'Google TurboQuant'、'TurboQuant memory compression'、'TurboQuant AI 2026'、'谷歌 TurboQuant'。\n需要确认：1) 这是什么技术（论文/产品/框架）2) 原理是什么 3) 对显存/内存的实际节省幅度 4) 是否开源 5) 对我们的硬件（Jetson Nano 2GB + RTX 2060 6GB）有什么帮助 6) 能否集成到 ComfyUI 推理或 OpenClaw 运行中。\n用 webauth 调研，至少2个平台。\n输出到 night-build/output/tech-1801-turboquant.md。\nnode --check。",
+      "status": "done"
+    },
+    {
+      "id": "A-0001",
+      "category": "research-A",
+      "name": "技术调研: 杨立昆3篇论文对0-1机器人的落地影响（System A+B+M/LeWM/SAI）",
+      "priority": "high",
+      "description": "调研 杨立昆（Yann LeCun）2026年3月发布的3篇核心论文对0-1机器人项目的落地影响。\n\n论文列表：\n1. 《Why AI systems don't learn and what to do about it》(arXiv:2603.15381, 3月16日) - System A+B+M三元认知架构\n2. LeWorldModel (arXiv:2603.19312, 3月24日) - JEPA里程碑式轻量世界模型，15M参数\n3. SAI (arXiv:2602.23643, 2月) - 超人类适应性智能\n\n需要确认：\n1) System A+B+M架构如何映射到0-1的OpenClaw+Cerebral+CyberBricks系统\n2) LeWM能否在Jetson Nano 2GB上运行（训练vs推理分离）\n3) SAI的'专业化路线'如何指导0-1的项目定位\n4) AMI Labs获$1B投资对0-1路线正确性的验证\n5) Imperial College MT3（1个演示=1个新任务）对0-1的启发\n6) 具体的技术升级路径（Phase 1/2/3）\n\n用 webauth 调研，至少2个平台。\n调研报告已保存在 memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md。\n输出摘要到 night-build/output/research-A/A-0001-lecun-roadmap-summary.md。\nnode --check。",
+      "status": "completed",
+      "report_file": "memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md"
+    },
+    {
+      "id": "A-0002",
+      "category": "research-A",
+      "name": "技术调研: NLAH（自然语言Agent Harness）-清华哈工大论文arXiv:2603.25723",
+      "priority": "high",
+      "description": "调研 NLAH（Natural-Language Agent Harnesses）论文对OpenClaw的落地启示。\n\n论文信息：\narXiv:2603.25723 | 清华+哈工大 | 2026年3月\n\n核心思想：\n- 把agent的harness控制逻辑从代码里抽出来，写成自然语言文件\n- 由IHR（Intelligent Harness Runtime）解释执行\n- OSWorld得分：30.4% → 47.2%（+55%相对提升）\n\nNLAH组件：\n- Contracts（契约）：输入输出格式、验证门、停止条件\n- Roles（角色）：solver/verifier/orchestrator的prompt\n- Stage Structure：DAG拓扑（plan→execute→verify→repair）\n- Adapters & Scripts：确定性钩子\n- State Semantics：文件持久化\n- Failure Taxonomy：命名失败模式→自动恢复\n\n需要确认：\n1) NLAH与OpenClaw Skills/SOUL.md的对应关系\n2) OpenClaw已有NLAH哪些组件，缺什么\n3) 如何把现有Skills改造成NLAH格式\n4) Evidence-backed closure（artifact验证）对OpenClaw的意义\n5) Runtime Charter分离（全局策略vs任务harness）\n\n调研报告已保存在 memory/2026-03-30-NLAH-Research-Report.md。\n输出摘要到 night-build/output/research-A/A-0002-nlah-summary.md。\nnode --check。",
+      "status": "completed",
+      "report_file": "memory/2026-03-30-NLAH-Research-Report.md"
+    },
+    {
+      "id": "A-0003",
+      "category": "research-A",
+      "name": "行动项: 将LeCun论文落地路线图更新到ROBOT-SOP.md",
+      "priority": "high",
+      "description": "根据 memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md 的调研结论，更新 ROBOT-SOP.md。\n\n需要更新的章节：\n1. Phase 1: 增加MT3（Multi-Task Trajectory Transfer）作为首选方案\n   - Imperial College Science Robotics 2025\n   - 零训练成本，1个演示=1个新任务\n   - GitHub: https://github.com/kamil-dreczkowski/learning_thousand_tasks\n2. Phase 2: LeWM世界模型部署\n   - 训练在Ubuntu/RTX 2060\n   - 推理在Jetson Nano 2GB（FP16 + TensorRT）\n3. Phase 3: System A+B+M完整架构\n   - OpenClaw = System M（元控制中枢）\n   - Cyber Bricks = System B（行动执行）\n   - ESP32-Cam = System A（观察学习）\n4. SAI定位：0-1不是AGI，是在'陪伴记录物理世界'这个任务上超越人类的specialized AI\n\n输出到 night-build/output/research-A/A-0003-sop-update-lecun.md。\nnode --check。",
+      "status": "pending",
+      "depends_on": [
+        "A-0001"
+      ]
+    },
+    {
+      "id": "A-0004",
+      "category": "research-A",
+      "name": "行动项: 将NLAH格式模板更新到OpenClaw Skills编写规范",
+      "priority": "medium",
+      "description": "根据 memory/2026-03-30-NLAH-Research-Report.md，将NLAH格式融入OpenClaw Skills编写规范。\n\n需要更新的内容：\n1. 创建 NLAH格式Skill模板（Contracts + Roles + Stage Structure + Failure Taxonomy）\n2. 更新现有Skills添加 Contracts（验证门、停止条件）\n3. 添加 Failure Taxonomy（标准化失败分类）\n4. 添加 Evidence-backed closure（skill执行完要有artifact验证）\n\n参考NLAH格式：\n```markdown\n# Skill: [任务名称]\n\n## Contracts\n- Input: [具体输入格式]\n- Output: [具体输出格式]\n- Validation Gate: [必须通过的验证项]\n- Stop Conditions: [何时停止]\n\n## Roles\n- Orchestrator: [负责调度]\n- Solver: [负责执行]\n- Verifier: [负责验证]\n\n## Stage Structure\n1. Plan: [规划阶段]\n2. Execute: [执行阶段]\n3. Verify: [验证阶段]\n4. Repair: [失败恢复]\n\n## Failure Taxonomy\n- ERROR_A: [失败模式] → [恢复方法]\n- ERROR_B: [失败模式] → [恢复方法]\n\n## Adapters\n- test_hook: [确定性测试]\n- verify_hook: [验证脚本]\n- cleanup_hook: [清理脚本]\n```\n\n输出到 night-build/output/research-A/A-0004-nlah-skill-template.md。\nnode --check。",
+      "status": "pending",
+      "depends_on": [
+        "A-0002"
+      ]
+    },
+    {
+      "id": "B-0001",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知前端 - ARKit基础框架",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": "Phase 3核心"
+    },
+    {
+      "id": "B-0002",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知 - 深度数据获取",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": ""
+    },
+    {
+      "id": "B-0003",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知 - 数据格式设计",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": ""
+    },
+    {
+      "id": "B-0004",
+      "sequence": "B",
+      "category": "device",
+      "name": "Phase 3 iPhone感知 - 延迟测试方法",
+      "status": "pending",
+      "depends_on": [
+        "A-0007"
+      ],
+      "description": ""
+    },
+    {
+      "id": "C-0001",
+      "sequence": "C",
+      "category": "building",
+      "name": "3D打印零件建模 - 拓竹H2C",
+      "status": "pending",
+      "depends_on": [],
+      "description": "T-0127~T-0158 P3"
+    },
+    {
+      "id": "D-0001",
+      "sequence": "D",
+      "category": "device",
+      "name": "硬件接口代码 - 拓竹H2C驱动",
+      "status": "pending",
+      "depends_on": [],
+      "description": "T-0174~T-0200 P3"
     }
   ]
 }

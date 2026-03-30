@@ -27,11 +27,17 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-29 19:59 CST (11:59 UTC)
-# MiniMax 套餐状态：周期 20:00-00:00，已用 513/600 (85.5%)，剩余 87
-# 阈值状态：⚠️ 85% 已触发
-# Wan 2.1 T2V 1.3B 下载中：2.1GB/~10GB（后台继续）
-# 注意：umt5-xxl text encoder 8GB，6GB 显存可能跑不动，需评估
+# Last check: 2026-03-30 13:06 CST (05:06 UTC)
+# MiniMax 套餐状态：周期 10:00-15:00，已用 50.8%，剩余 295次，2h25m后重置
+# 阈值状态：✅ 正常（远低于80%阈值）
+# Ubuntu 节点：❌ 离线（12:33 CST）— Semantic Cache 不可用
+# Semantic Cache：上次已知在线（11:15 CST），7620条索引，rsync正常（Ubuntu离线前）
+# MCP Server：发现重复进程（doubao/kimi/glm），需要Gateway重启解决
+# TurboQuant 调研 4/4 份报告全部完成 ✅
+# LeCun论文调研报告已保存：memory/2026-03-30-LeCun-Papers-0-1-Roadmap.md
+# 飞书指令漏接问题：已完成，详见 memory/2026-03-30-Channel-Messages-Feishu-QQ.md
+# Session 缓存检测：24h内全部缓存完成，1个44h前cron session缺失（已知，无法恢复）
+# 新周期（10:00-15:00）刚进入，额度充足
 
 ## MiniMax Coding Plan 额度监控
 
@@ -100,7 +106,7 @@ for m in data['model_remains']:
 每次心跳时运行：
 1. 同步 MacBook 新 sessions 到 Ubuntu（rsync）
 2. 检查 Ubuntu 节点是否在线
-3. 在线 → 重启 Semantic Cache 服务器（重新加载所有 sessions）
+3. 在线 → 触发 Semantic Cache 增量索引（重新加载所有 sessions）
 4. 获取相关上下文，更新 semantic-memory.md
 5. 离线 → 记录离线状态
 
@@ -125,3 +131,15 @@ python3 ~/.openclaw/workspace/scripts/smart_context_hook.py
 ```
 
 **注意**：静默执行，不主动通知用户。
+
+## Session 缓存完整性检查（每次心跳）
+
+检查 sessions.json 中是否有最近活跃但未缓存的 session，并自动补救。
+
+**检测逻辑**：按 24h → 48h → 72h 顺序查找缺失的 .jsonl 文件，避免重复缓存。
+
+```bash
+python3 ~/.openclaw/workspace/scripts/cache-missing-sessions.py 2>&1
+```
+
+**已知限制**：超过 48h 的历史 session，Gateway 已不保留内存数据，`openclaw session export` 拿不到内容（不影响，因为这些多为 cron 元数据，非用户对话）。
