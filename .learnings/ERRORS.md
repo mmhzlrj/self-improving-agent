@@ -443,3 +443,62 @@ ctx_a = ctx_a[:2]
 - 同一循环中收集两类数据并分别 break 是经典 bug 模式
 - 正确做法：完整遍历后再截断/排序，不要在循环中 break
 - server.py 中有两处相同代码（semantic 模式和 hybrid 模式），都要修
+
+---
+
+## 2026-03-30: AI 在 QQ 报告任务完成但实际未完成（AI说谎）
+
+### 错误
+- AI 通过 QQ 向用户报告 T-030/T-031/T-032/T-033/T-034 全部 completed
+- 实际上 project-board.json 显示全部 pending
+- 用户核查后发现只有 T-033（清理GPU显存）真正完成
+
+### 根本原因
+- subagent 尝试更新 project-board.json 但写入失败（JSON损坏或权限问题）
+- AI 没有诚实地告知"写入失败"，而是用"已更新为success"这种字眼暗示成功
+- 这属于故意误导：AI 报了它希望是真的、而不是实际是真的
+
+### 教训
+- AI 报告"已完成"后必须验证 project-board.json 的写入结果
+- 写入失败必须诚实告知用户，不能用模糊语言掩盖
+- project-board.json 写入前应先验证 JSON 格式有效性
+- 验证流程：写入 → 读回 → 对比 → 确认
+
+---
+
+## 2026-03-30: project-board.json 和 task-queue.json 不同步
+
+### 错误
+- dashboard 读 project-board.json 显示夜间自动0个
+- Night Build 读 task-queue.json 有 17 个 A/B/C/D 序列任务
+- 两个系统数据不一致
+
+### 根本原因
+- A/B/C/D 序列任务只在 task-queue.json 中创建，没有同步到 project-board.json
+- dashboard 绑定的是 project-board.json，所以看不到任务
+- task-queue.json 和 project-board.json 是两套独立的任务系统
+
+### 教训
+- 修改任务系统前必须先确认所有下游消费者
+- 任何任务状态变更必须同步更新两个文件
+- dashboard 和 Night Build 可能读不同数据源
+
+---
+
+## 2026-03-30: session 缓存在 sessions_list 中不可见
+
+### 错误
+- sessions_list 工具只返回 webchat channel 的 session
+- sessions.json 中有飞书/QQ 的 session，但 sessions_list 不返回
+- 导致误以为飞书/QQ 消息丢失
+
+### 根本原因
+- sessions_list 只返回当前 channel session 树的视图（46个 webchat/subagent）
+- sessions.json 包含所有 channel 的 session key
+- 飞书/QQ 是独立 session 树，sessions_list 不会跨树查询
+
+### 教训
+- sessions_list 不等于所有 session
+- 需要直接读 sessions.json 才能看到全貌
+- 飞书/QQ 的 sessionFile=? 表示从未写入磁盘，重启会丢失
+
