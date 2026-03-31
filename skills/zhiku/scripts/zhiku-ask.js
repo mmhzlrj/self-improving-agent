@@ -42,7 +42,7 @@ function mcpCall(scriptPath, toolName, args) {
     proc.stderr.on('data', d => { stderr += d.toString(); });
 
     // 初始化
-    proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'zhiku', version: '1.0.0' } } }) + '\n');
+    proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: { tools: {} }, serverInfo: { name: 'zhiku', version: '1.0.0' }, clientInfo: { name: 'zhiku', version: '1.0.0' } } }) + '\n');
     // tools/list
     proc.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: 2, method: 'tools/list', params: {} }) + '\n');
     // tools/call

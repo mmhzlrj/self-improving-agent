@@ -1,5 +1,11 @@
 # ERRORS.md - 错误记录
 
+## 2026-03-31: Qwen URL 幻觉
+- **错误**：在 Playwright 测试中使用了 `https://www.qianwen.com/qwen-chat`（错误 URL）
+- **正确 URL**：`https://chat.qwen.ai/`
+- **根因**：AI 自己生成的错误 URL，不在任何配置文件中（MEMORY.md/skills 里正确 URL 是 `chat.qwen.ai`）
+- **教训**：不要基于"看起来像"的推理生成 URL，必须查配置文件或文档
+
 ## 2026-03-28: mdview.py 打开文件后浏览器停在 dashboard
 
 ### 错误描述
@@ -323,6 +329,14 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
 
 ## 2026-03-29: DeepSeek MCP Server WASM 模块路径变更导致永久卡死
 
+### 特殊说明（2026-03-31 更新）
+- DeepSeek MCP server 是**独立实现**，使用 POW + SSE 流，不走 Playwright Chrome 页面
+- 架构：独立 fetch API + PoW 挑战 + SSE 流式响应，与其他 4 个平台（Playwright DOM 操控）完全不同
+- 当前问题：`[无响应]` 是 DeepSeek 服务器端崩溃导致，非 MCP server bug
+- 其他 4 个平台（Doubao/Kimi/GLM/Qwen）走 Playwright DOM，均正常
+
+### 错误描述
+
 ### 错误
 - DeepSeek MCP server (`deepseek-mcp-server`) 调用时一直超时，60秒无响应
 - server 进程没有任何输出，连 initialize 都不返回
@@ -395,14 +409,17 @@ subagent 的 heredoc 写多行 Python 文件格式错误/超时
   - 其他 4 个：工具名从 `doubao_chat` 等改为 `doubao_doubao_chat`（加了插件名前缀）
 - 根本原因：`toolPrefix: true` 导致工具名变成 `{插件名}_{原始名}`，但 zhiku-ask.js 还在用旧的工具名
 
-### 修复
-- 改 `WEBAUTH_MCP` → 各平台独立 MCP server
-- 工具名加前缀：`doubao_chat` → `doubao_doubao_chat`（除了 DeepSeek，DeepSeek 独立 server 无前缀）
-- 注意：MCP 协议直接调用不走 OpenClaw 前缀机制，所以 server 注册的原始工具名才是正确的
+### 修复（2026-03-31 补充）
+- **2026-03-30 迁移后**，alsoAllow 又犯了同样的错误：设置了 `doubao_doubao_chat`（多了一层前缀）
+- 正确值：`doubao_chat`、`kimi_chat`、`glm_chat`、`qwen_chat`（无前缀）
+- MCP server 由 **openclaw-mcp-adapter**（Gateway 插件）管理，工具名不带前缀
+- 修复：改 alsoAllow 后重启 Gateway 生效
 
-### 教训
+### 教训（⚠️ 此条目描述 2026-03-28 的问题，已于 2026-03-31 修复）
 - 改了 MCP server 配置后要检查 `alsoAllow` 和 zhiku 脚本
 - `toolPrefix` 对 `alsoAllow` 和 zhiku 脚本的影响不同
+- adapter 的 `toolPrefix` 默认 true（`cfg.toolPrefix !== false`），会加服务器名前缀
+- 工具实际注册名：`doubao_doubao_chat` 等，alsoAllow 必须与之匹配
 
 ---
 

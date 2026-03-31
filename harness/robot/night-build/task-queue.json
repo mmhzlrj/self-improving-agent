@@ -13762,6 +13762,19 @@
       "depends_on": [],
       "description": "T-0174~T-0200 P3",
       "report": "harness/robot/night-build/reports/D-0001-拓竹H2C驱动.md"
+    },
+    {
+      "id": "T-1802",
+      "sequence": "A",
+      "category": "vision",
+      "name": "ESP32-Cam视觉关节反馈 - Cyber Bricks闭环控制",
+      "status": "pending",
+      "description": "用ESP32-Cam实现Cyber Bricks关节角度视觉估算，构建闭环控制。现有硬件：Cyber Bricks(ESP32-C3)+ESP32-Cam(RTSP)+Jetson Nano 2GB。方案：固定ESP32-Cam拍摄机械臂→OpenCV特征点检测→几何逆运动学估算关节角度→对比目标角度修正误差。不需要采购新硬件。参考：memory/2026-03-31-Q-AResearch.md Q2方案E。",
+      "exec_command": "echo 'Stage1: ESP32-Cam标定 → Stage2: OpenCV关节检测 → Stage3: 闭环验证'",
+      "edit_info": null,
+      "verify_command": "echo '验证：发出指令 → ESP32-Cam估算角度 → 误差<5度'",
+      "depends_on": [],
+      "auto_prompt": "实现ESP32-Cam视觉关节反馈方案E。\n\n## 步骤\n1. 写ESP32-Cam标定方法（固定位置、拍摄角度）\n2. 写OpenCV特征点检测代码（Jetson Nano上跑）\n3. 写几何逆运动学估算关节角度\n4. 验证：发出指令 vs 估算角度，误差<5度\n\n## 现有硬件\n- Cyber Bricks: ESP32-C3，MQTT控制\n- ESP32-Cam: OV2640，RTSP流已通\n- Jetson Nano 2GB: OpenCV已装\n\n## 输出\n- harness/robot/services/esp32-cam-joint-feedback/\n  - calibrate.py（标定）\n  - joint_estimator.py（关节估算）\n  - test_cyberbricks.py（闭环验证）\n- night-build/reports/T-1802-视觉关节反馈-实现报告.md"
     }
   ]
 }

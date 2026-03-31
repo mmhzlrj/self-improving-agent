@@ -50,16 +50,16 @@ curl -s --max-time 3 "http://127.0.0.1:18800/json/version"
 
 给每个工具发送同样的测试消息：`"OK"`（或 `"你好"`）
 
-**调用方式：** 使用对应的 webauth 工具函数（参考下方完整列表）
+**调用方式：** 使用对应的 MCP 工具函数（由 openclaw-mcp-adapter 注册）
 
 **5个工具的调用命令（串行或并行均可）：**
 
 ```
-1. doubao_doubao_chat(message="OK", thinking=true)
-2. kimi_kimi_chat(message="OK", thinking=true)
-3. glm_glm_chat(message="OK", thinking=true)
-4. qwen_qwen_chat(message="OK", thinking=true)
-5. deepseek_deepseek_chat(message="OK", thinking=true, search=false)
+1. doubao_chat(message="OK")
+2. kimi_chat(message="OK")
+3. glm_chat(message="OK")
+4. qwen_chat(message="OK")
+5. deepseek_chat(message="OK", thinking=true, search=false)
 ```
 
 **注意**：`thinking=true` 是为了验证平台深度思考功能正常。如果某个平台不支持 `thinking` 参数，忽略即可。
@@ -145,11 +145,11 @@ sessions_spawn(
 
 | 平台 | 函数名 | 最小调用参数 |
 |------|--------|------------|
-| 豆包 | `doubao_doubao_chat` | `message="OK", thinking=true` |
-| Kimi | `kimi_kimi_chat` | `message="OK", thinking=true` |
-| 智谱 | `glm_glm_chat` | `message="OK", thinking=true` |
-| 千问 | `qwen_qwen_chat` | `message="OK", thinking=true` |
-| DeepSeek | `deepseek_deepseek_chat` | `message="OK", thinking=true, search=false` |
+| 豆包 | `doubao_chat` | `message="OK"` |
+| Kimi | `kimi_chat` | `message="OK"` |
+| 智谱 | `glm_chat` | `message="OK"` |
+| 千问 | `qwen_chat` | `message="OK"` |
+| DeepSeek | `deepseek_chat` | `message="OK", thinking=true, search=false` |
 
 ---
 

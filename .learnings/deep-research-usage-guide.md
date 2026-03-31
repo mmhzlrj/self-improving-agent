@@ -45,7 +45,7 @@
 - ❌ 只检查 Chrome 能不能连，不检查 MCP Server 能不能调通
 
 **正确做法**：
-- ✅ **直接调用 webauth 工具本身**（`doubao_doubao_chat`、`kimi_kimi_chat` 等），看能不能收到回复
+- ✅ **直接调用 MCP 工具本身**（`doubao_chat`、`kimi_chat` 等），看能不能收到回复
 - ✅ **直接调用搜索工具本身**（`tavily_search`、`minimax search`），看能不能返回结果
 - ✅ **记录每个工具的响应时间**，异常慢的也要标记
 
@@ -67,7 +67,7 @@ curl -s --max-time 3 "http://127.0.0.1:18800/json/version"
 
 ```
 并行调用（同时发出，等待所有返回）：
-1. doubao_doubao_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
+1. doubao_chat("你好，回复OK") → ✅/❌ + 响应时间
 2. kimi_kimi_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
 3. glm_glm_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
 4. qwen_qwen_chat("你好，回复OK", thinking=true) → ✅/❌ + 响应时间
@@ -184,8 +184,8 @@ sessions_spawn(task="回复OK", runtime="subagent", mode="run", runTimeoutSecond
 ```
 并行启动：
 1. web_search "关键词 + 最新"  → 搜索最新信息
-2. deepseek_deepseek_chat "具体问题"  → AI 深度分析
-3. doubao_doubao_chat "具体问题"  → 另一个 AI 视角
+2. deepseek_chat "具体问题"  → AI 深度分析（⚠️ 独立POW+SSE，服务器端不稳定时无响应）
+3. doubao_chat "具体问题"  → 另一个 AI 视角
 4. kimi_kimi_chat "具体问题"  → 第三个 AI 视角
 5. web_fetch "官方文档URL"  → 获取权威来源
 ```

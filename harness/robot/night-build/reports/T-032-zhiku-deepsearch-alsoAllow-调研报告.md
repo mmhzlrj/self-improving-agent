@@ -1,5 +1,8 @@
 # T-032 调研报告：zhiku/deepsearch MCP 工具注册到 alsoAllow
 
+> ⚠️ **已废除（2026-03-31）**：本报告描述的 `webauth_*` 工具命名已废除。
+> 最新方式：工具直接通过 alsoAllow 调用，工具名为 `doubao_doubao_chat` 等（无 `webauth_` 前缀）。
+
 ## 1. zhiku/deepsearch 创建历史时间线
 
 ### deep-research Skill
