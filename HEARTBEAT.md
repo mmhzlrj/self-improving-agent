@@ -317,3 +317,9 @@ python3 ~/.openclaw/workspace/scripts/cache-missing-sessions.py 2>&1
 # Ubuntu: ✅ 在线(rsync+Semantic Cache可达, 0条索引可能重启过)
 # rsync: ✅ 成功
 # cache-missing: ✅ 0个缺失
+
+# Last check: 2026-03-31 21:38 CST (13:38 UTC)
+# MiniMax: 24.2%已用, 455次剩余, 2h21m后重置 ✅ (阈值正常)
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功
+# cache-missing: ✅ 全部缓存完成
