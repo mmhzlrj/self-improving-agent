@@ -1217,3 +1217,9 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 ### 模型清理
 - 删除了 FramePack 模型 (~24GB) + HunyuanVideo (~34GB) + SVD (~14GB) + 其他
 - 释放 103GB，磁盘 63% → 39%
+
+### 7. Flask/WSGI 服务日志重定向陷阱（2026-03-31）
+- **问题**：server.py stdout/stderr 重定向到 pipe 时，Flask 的异常输出不写文件，错误被"吞掉"
+- **现象**：reindex 返回 500，但 /health 和 /search 正常，日志文件是旧内容
+- **修复**：确保日志写入文件：`nohup python3 server.py > ~/app.log 2>&1 &`
+- **验证**：先调用会失败的端点，检查日志文件是否有新输出
