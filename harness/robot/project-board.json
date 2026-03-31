@@ -637,6 +637,129 @@
         "ROBOT-SOP.md §3.3",
         "memory/2026-03-31-Q-AResearch.md"
       ]
+    },
+    {
+      "id": "G-0001",
+      "sequence": "G",
+      "category": "ai",
+      "name": "LeWM Vision Encoder 训练 - pusht/tworoom 数据",
+      "status": "pending",
+      "depends_on": [],
+      "description": "Ubuntu RTX 2060 训练 LeWM 视觉编码器，已跑过部分",
+      "mode": "auto",
+      "priority": "P1",
+      "gpu_required": true,
+      "gpu_memory_gb": 6,
+      "notes": "参考 ~/.stable-wm/lewm_vision_best.pt，lr=3e-6，weight_decay=0.01"
+    },
+    {
+      "id": "G-0002",
+      "sequence": "G",
+      "category": "ai",
+      "name": "Depth Anything V2 - Teacher 模型部署到 Ubuntu",
+      "status": "pending",
+      "depends_on": [],
+      "description": "部署 Depth Anything V2 到 Ubuntu，作为 LeWM 深度感知蒸馏的 Teacher",
+      "mode": "auto",
+      "priority": "P1",
+      "gpu_required": true,
+      "gpu_memory_gb": 4,
+      "notes": "Depth Anything V2 是目前最好的单目深度估计模型，可作为 iPhone LiDAR 的替代"
+    },
+    {
+      "id": "G-0003",
+      "sequence": "G",
+      "category": "ai",
+      "name": "EdgeSAM → LeWM 分割蒸馏",
+      "status": "pending",
+      "depends_on": [
+        "G-0002"
+      ],
+      "description": "用 EdgeSAM（已在 iPhone 验证可跑）蒸馏到 LeWM 视觉编码器",
+      "mode": "auto",
+      "priority": "P2",
+      "gpu_required": true,
+      "gpu_memory_gb": 8,
+      "notes": "EdgeSAM 已验证可在 iPhone 14 上跑 >30FPS，蒸馏后 LeWM 具备分割能力"
+    },
+    {
+      "id": "G-0004",
+      "sequence": "G",
+      "category": "ai",
+      "name": "iPhone RGB-D 数据采集 → LeWM 训练集制作",
+      "status": "pending",
+      "depends_on": [
+        "G-0002"
+      ],
+      "description": "用 iPhone 16 Pro 录制 RGB-D 视频，转换为 LeWM 训练格式",
+      "mode": "auto",
+      "priority": "P2",
+      "gpu_required": false,
+      "gpu_memory_gb": 0,
+      "notes": "数据采集在 iPhone，格式转换在 Mac/Jetson，训练在 Ubuntu"
+    },
+    {
+      "id": "G-0005",
+      "sequence": "G",
+      "category": "ai",
+      "name": "LeWM 完整 VLA 训练 - 视觉编码器 + 动作头联合训练",
+      "status": "pending",
+      "depends_on": [
+        "G-0001",
+        "G-0003"
+      ],
+      "description": "在 Ubuntu GPU 上联合训练 LeWM 视觉编码器和动作预测头",
+      "mode": "auto",
+      "priority": "P1",
+      "gpu_required": true,
+      "gpu_memory_gb": 8,
+      "notes": "最终目标：LeWM 可根据视觉输入预测 Cyber Bricks 动作"
+    },
+    {
+      "id": "G-0006",
+      "sequence": "G",
+      "category": "ai",
+      "name": "MT3 推理优化 - TensorRT 部署到 Ubuntu",
+      "status": "pending",
+      "depends_on": [],
+      "description": "MT3 已验证可跑，优化推理速度，目标是实时控制 Cyber Bricks",
+      "mode": "auto",
+      "priority": "P2",
+      "gpu_required": true,
+      "gpu_memory_gb": 4,
+      "notes": "MT3 代码在 ~/mt3/，已验证环境可用"
+    },
+    {
+      "id": "G-0007",
+      "sequence": "G",
+      "category": "ai",
+      "name": "Cyber Bricks 逆运动学求解器 - Ubuntu 实时推理",
+      "status": "pending",
+      "depends_on": [
+        "G-0005"
+      ],
+      "description": "在 Ubuntu 上部署逆运动学求解器，接收视觉输入，输出关节角度",
+      "mode": "auto",
+      "priority": "P1",
+      "gpu_required": true,
+      "gpu_memory_gb": 2,
+      "notes": "配合 LeWM VLA 模型，实现端到端视觉-动作控制"
+    },
+    {
+      "id": "G-0008",
+      "sequence": "G",
+      "category": "ai",
+      "name": "LeWM 模型量化 - INT8/FP16 部署到 Jetson Nano",
+      "status": "pending",
+      "depends_on": [
+        "G-0005"
+      ],
+      "description": "将训练好的 LeWM 量化为 INT8，部署到 Jetson Nano 2GB 边缘推理",
+      "mode": "auto",
+      "priority": "P2",
+      "gpu_required": true,
+      "gpu_memory_gb": 4,
+      "notes": "Jetson Nano 2GB 内存限制，必须量化后部署"
     }
   ]
 }
