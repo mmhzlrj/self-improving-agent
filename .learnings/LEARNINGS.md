@@ -342,15 +342,16 @@ window.fetch = async (...args) => {
 - **问题：** Qwen 的 `textarea` 有两个，一个 readonly/hidden，一个可见
 - **解决：** 用 `textarea:not([readonly]):not([aria-hidden="true"])` 选择可见元素
 
-### 5. Chrome+webauth 调试（2026-03-22 重大失误）
-- **症状：** Gateway 重启后 webauth_doubao/kimi/glm/qwen 全部报 "Tool not found"
-- **根因1：** alsoAllow 里工具名没有 `webauth_` 前缀（因为 toolPrefix: true）
-- **根因2：** Gateway 重启杀死了 Chrome（LaunchAgent fork 机制）
-- **根因3：** GLM 的 `is_networking: false` 未开启联网搜索
-- **修复1：** alsoAllow 加上 `webauth_` 前缀，重启 Gateway
-- **修复2：** 启动 Chrome-Debug-Profile（端口 9223）
-- **修复3：** `webauth-mcp/server.mjs` line 357：`is_networking: true`
-- **验证：** 5个工具全部正常
+### 5. MCP 工具调用（2026-03-22 旧版 → 2026-03-31 新版）
+
+**旧版（2026-03-22，已废除）：**
+- 工具名带 `webauth_` 前缀：`webauth_doubao_chat` 等
+- 通过 alsoAllow 调用
+
+**新版（2026-03-31 起生效）：**
+- 工具名无前缀：`doubao_doubao_chat`、`kimi_kimi_chat`、`glm_glm_chat`、`qwen_qwen_chat`、`deepseek_deepseek_chat`
+- 通过 openclaw.json alsoAllow 注册后直接调用
+- Gateway 重启后生效
 
 ### 6. 绝对不能再犯的错误
 - ❌ `osascript -e 'quit app "Google Chrome"'` — 关所有窗口，用户正常页面全丢

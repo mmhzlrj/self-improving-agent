@@ -502,3 +502,9 @@ ctx_a = ctx_a[:2]
 - 需要直接读 sessions.json 才能看到全貌
 - 飞书/QQ 的 sessionFile=? 表示从未写入磁盘，重启会丢失
 
+
+### Semantic Cache reindex 500 错误（2026-03-31）
+- **症状**：reindex 端点返回 500，但 health 和 search 正常
+- **根因**：server.py stdout/stderr 重定向到 pipe 而非文件，Python 异常被 Flask 捕获但不写日志
+- **修复**：kill 旧进程 → 正确重定向重启（`> ~/semantic_cache_server.log 2>&1`）
+- **教训**：诊断 Flask/WSGI 服务时，确保日志写入文件而非 pipe
