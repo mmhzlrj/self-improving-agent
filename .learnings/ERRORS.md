@@ -508,3 +508,36 @@ ctx_a = ctx_a[:2]
 - **根因**：server.py stdout/stderr 重定向到 pipe 而非文件，Python 异常被 Flask 捕获但不写日志
 - **修复**：kill 旧进程 → 正确重定向重启（`> ~/semantic_cache_server.log 2>&1`）
 - **教训**：诊断 Flask/WSGI 服务时，确保日志写入文件而非 pipe
+
+---
+
+## 2026-03-31: alsoAllow 配置位置错误 + profile 选错
+
+### 错误
+
+1. 把 alsoAllow 放在根级别 → `Unrecognized key: "alsoAllow"`（Gateway abort）
+2. 把 alsoAllow 放在 `agents.list[0].tools.alsoAllow` + `profile: coding` → 工具被 block
+3. 花了 2 小时排查，以为是时序问题（adapter 注册在 allowlist 检查之后）
+
+### 正确配置
+
+```json
+{
+  "tools": {
+    "profile": "full",
+    "alsoAllow": ["doubao_doubao_chat", ...]
+  }
+}
+```
+
+### 根因
+
+- alsoAllow 在 `agents.list[0].tools`（agent 级别），不是 `tools`（global 级别）
+- `profile: "coding"` → coding profile 有 core tools allowlist
+- alsoAllow 工具被 `stripPluginOnlyAllowlist` 剥离后，还有 core entries 残留
+- 残留的 allowlist 保留，block 非列表工具（包括 MCP 工具）
+
+### 教训
+
+- alsoAllow 必须放在 `tools` 级别（global），不能放在 agent 级别
+- `profile: "full"` = 无限制，`profile: "coding"` = 有限制

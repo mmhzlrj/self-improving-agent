@@ -1216,3 +1216,25 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 ### 模型清理
 - 删除了 FramePack 模型 (~24GB) + HunyuanVideo (~34GB) + SVD (~14GB) + 其他
 - 释放 103GB，磁盘 63% → 39%
+
+---
+
+## 2026-03-31: alsoAllow + MCP 工具注册（重要）
+
+### 学到的东西
+
+1. **alsoAllow 必须放在 `tools` 级别**：`openclaw.json` 的根级别没有 alsoAllow 字段
+2. **profile 决定行为**：`full: {}` = 无限制，`coding: {}` = 有 core tools allowlist
+3. **subagent 无法使用 alsoAllow 工具**：alsoAllow 是 main agent 专属
+4. **zhiku-ask 走不同路径**：直接 stdio JSON-RPC 调用 MCP server，不走 agent 工具系统
+
+### alsoAllow 工作原理
+
+alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
+- 如果 allowlist 还有其他 core entries → allowlist 保留 → 工具被 block
+- 如果 allowlist 无其他 entries → allow=void → 全部允许
+
+### 验证方法
+
+- zhiku-ask 脚本测试有效（MCP server 直连）
+- 主 agent 测试需要新开 session（subagent 无效）
