@@ -1223,3 +1223,37 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 - **现象**：reindex 返回 500，但 /health 和 /search 正常，日志文件是旧内容
 - **修复**：确保日志写入文件：`nohup python3 server.py > ~/app.log 2>&1 &`
 - **验证**：先调用会失败的端点，检查日志文件是否有新输出
+
+---
+
+## 2026-03-31: alsoAllow + MCP 工具注册（重要）
+
+### 学到的东西
+
+1. **alsoAllow 必须放在 `tools` 级别**：`openclaw.json` 的根级别没有 alsoAllow 字段（会报错）
+2. **profile 决定行为**：`full: {}` = 无限制，`coding: {}` = 有 core tools allowlist
+3. **unknown entries 警告是正常的**：不代表工具不能用，只代表不在 core/plugin 列表
+4. **subagent 无法使用 alsoAllow 工具**：alsoAllow 是 main agent 专属
+5. **zhiku-ask 走不同路径**：直接 stdio JSON-RPC 调用 MCP server，不走 agent 工具系统
+
+### alsoAllow 工作原理
+
+```
+alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
+    ↓
+如果 allowlist 还有其他 core entries → allowlist 保留 → 工具被 block
+如果 allowlist 无其他 entries → allow=void → 全部允许
+```
+
+### 验证工具是否可用的正确方法
+
+- Subagent 测试无效（alsoAllow 只给 main agent）
+- zhiku-ask 脚本测试有效（MCP server 直连）
+- 主 agent 测试需要新开 session
+
+### 修复步骤
+
+1. 确认 alsoAllow 在 `tools`（global）下，不在 `agents.list[0].tools` 下
+2. 确认 `tools.profile` 是 `"full"`，不是 `"coding"`
+3. 重启 Gateway
+4. 验证：zhiku-ask 脚本走通
