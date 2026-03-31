@@ -203,6 +203,22 @@ Each session, you wake up fresh. These files _are_ your memory. Read them. Updat
 
 ---
 
+## 🔍 任务开始前必查记忆规则（最高优先级）
+
+**任何任务开始前，必须先调用 `memory_search` 检索相关历史进度，再决定如何继续。**
+
+触发条件（出现任何一个就必须先查再做）：
+- 用户提到具体任务名/项目名（如"A-0003"、"ROBOT-SOP"、"TurboQuant"）
+- 用户说"之前"、"上次"、"接着做"、"继续"
+- 自己感觉"应该做过"但不确定的时候
+
+**执行顺序**：memory_search → memory_get → 分析 → 行动
+
+**禁止**：在未查记忆的情况下凭"感觉"开始执行。
+**违反此规则 = 重复劳动 + 浪费用户资源。**
+
+---
+
 ## 常见重复错误（每次都要查 TOOLS.md）
 
 **打开 Markdown 文件**：用 `python3 ~/.openclaw/workspace/tools/mdview.py <文件路径>`，不要用 `exec + open`。

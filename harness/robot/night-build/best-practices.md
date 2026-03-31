@@ -1,6 +1,10 @@
 # MiniMax Subagent 最佳实践
 
 > 持续更新，每晚迭代。每次 Night Build 后根据结果更新此文件。
+>
+> **Harness Engineering Skill（必须遵循）**：`../../skills/harness-engineering/SKILL.md`
+>
+> **用户做事风格 Contracts**：`../../skills/harness-engineering/contracts.md`
 
 ---
 

@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="utf-8">
-    <title>openclaw-update-analysis-for-01-detailed</title>
+    <title>morning-summary</title>
     <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -83,848 +83,180 @@ table.toc-table tr.toc-chapter td { border-top: 1px solid #e5e7eb; padding-top: 
 </head>
 <body>
 <div class="container">
-<h1>OpenClaw 更新功能 → 0-1 机器人项目落地详细分析</h1>
+<h1>🌅 晨间总结 — 2026-03-31</h1>
+<p><strong>时间</strong>: 09:50 AM (Asia/Shanghai)<br />
+<strong>Night Build</strong>: 连续 2 晚未运行（最后运行：2026-03-28）</p>
+<hr />
+<h2>一、昨晚执行情况</h2>
+<p><strong>A→B→C→D 序列全部完成</strong>（task-queue.json v8，2026-03-30 更新）</p>
+<table>
+<thead>
+<tr>
+<th>序列</th>
+<th>内容</th>
+<th>状态</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>A</strong> (P0)</td>
+<td>物理机器人必须先跑起来</td>
+<td>✅ 11/11 完成</td>
+</tr>
+<tr>
+<td><strong>B</strong> (P1)</td>
+<td>Phase 3 iPhone 感知接入</td>
+<td>✅ 4/4 完成</td>
+</tr>
+<tr>
+<td><strong>C</strong> (P2)</td>
+<td>3D打印零件 + 技术验证</td>
+<td>✅ 1/1 完成</td>
+</tr>
+<tr>
+<td><strong>D</strong> (P3)</td>
+<td>Demo/内容/调优</td>
+<td>✅ 1/1 完成</td>
+</tr>
+</tbody>
+</table>
 <blockquote>
-<p>基于版本 2026.3.8 ~ 2026.3.28 的 changelog（含 gh api 原始 release notes），对照 0-1 项目 Phase 0-6+ 各阶段技术需求，逐阶段分析可用功能和配置方法。</p>
-<p>文档版本：v1.0<br />
-生成日期：2026-03-29<br />
-信息来源：gh api release notes（v2026.3.8/11/12/22/23/24/28）+ ROBOT-SOP.md Phase 0-6+</p>
+<p>🔍 <strong>注意</strong>: task-queue.json 中 stats 区块显示 A 序列 done=2/pending=9，与实际任务数据（11 done）严重不符 — stats 未随任务完成而更新，已失效。</p>
 </blockquote>
-<hr />
-<h2>目录</h2>
-<ul>
-<li><a href="#phase-0ubuntu-台式机对接-gateway">Phase 0：Ubuntu 台式机对接 Gateway</a></li>
-<li><a href="#phase-1语音陪伴模块">Phase 1：语音陪伴模块</a></li>
-<li><a href="#phase-2视觉记录模块esp32-cam">Phase 2：视觉记录模块（ESP32-Cam）</a></li>
-<li><a href="#phase-3iphone-感知前端">Phase 3：iPhone 感知前端</a></li>
-<li><a href="#phase-4运动控制模块">Phase 4：运动控制模块</a></li>
-<li><a href="#phase-5面部表情系统">Phase 5：面部表情系统</a></li>
-<li><a href="#phase-6室内移动与智能家居硬件拓展">Phase 6：室内移动与智能家居硬件拓展</a></li>
-<li><a href="#跨-phase-通用能力">跨 Phase 通用能力</a></li>
-<li><a href="#升级优先级建议">升级优先级建议</a></li>
-</ul>
-<hr />
-<h2>Phase 0：Ubuntu 台式机对接 Gateway</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>Ubuntu 节点（5600G+RTX 2060）通过 OpenClaw Node 协议连接 Mac Gateway</li>
-<li>节点发现 → 配对 → 执行链路跑通</li>
-<li>GPU 任务默认路由到该节点</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. SSH Sandbox 后端（2026.3.22）</h4>
-<p><strong>具体用途</strong>：通过 SSH 安全地远程操作 Jetson Nano，执行代码、传输文件<br />
-- 新增核心 SSH sandbox 后端，支持 secret-backed key/certificate<br />
-- 替代直接 SSH 命令执行，提供更安全的隔离环境<br />
-- <strong>对 Phase 0 的价值</strong>：Ubuntu GPU 节点可通过 SSH sandbox 后端安全接入，无需直接在主机上运行命令</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 在 openclaw.json 中配置</span>
-<span class="o">{</span>
-<span class="w">  </span><span class="s2">&quot;sandbox&quot;</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">    </span><span class="s2">&quot;backend&quot;</span>:<span class="w"> </span><span class="s2">&quot;ssh&quot;</span>,
-<span class="w">    </span><span class="s2">&quot;ssh&quot;</span>:<span class="w"> </span><span class="o">{</span>
-<span class="w">      </span><span class="s2">&quot;target&quot;</span>:<span class="w"> </span><span class="s2">&quot;ubuntu-gpu-node&quot;</span>,
-<span class="w">      </span><span class="s2">&quot;host&quot;</span>:<span class="w"> </span><span class="s2">&quot;192.168.x.x&quot;</span>,
-<span class="w">      </span><span class="s2">&quot;user&quot;</span>:<span class="w"> </span><span class="s2">&quot;nvidia&quot;</span>,
-<span class="w">      </span><span class="s2">&quot;auth&quot;</span>:<span class="w"> </span><span class="s2">&quot;key&quot;</span>
-<span class="w">    </span><span class="o">}</span>
-<span class="w">  </span><span class="o">}</span>
-<span class="o">}</span>
-</code></pre></div>
-
-<h4>2. 设备配对安全升级（2026.3.22 Breaking）</h4>
-<p><strong>具体用途</strong>：设备 pairing 改用短效 bootstrap token，不再在 QR 码中嵌入共享 gateway 凭证<br />
-- <strong>安全性大幅提升</strong>：旧版 /pair 和 openclaw qr 的 setup codes 含共享凭证，有被盗用风险<br />
-- 新版 token 有时效性，过期自动作废<br />
-- <strong>对 Phase 0 的价值</strong>：Ubuntu 节点配对到 Gateway 时更安全</p>
-<h4>3. Gateway/WebSocket 安全加固（2026.3.28）</h4>
-<p><strong>具体用途</strong>：browser origin 验证，防止跨站 WebSocket 劫持<br />
-- 即使在 trusted-proxy 模式下也会验证 origin，防止恶意网页获取 operator.admin 权限<br />
-- <strong>对 Phase 0 的价值</strong>：Ubuntu 节点连接 Gateway 时的通信安全有保障</p>
-<h4>4. Node pending work queue（2026.3.11）</h4>
-<p><strong>具体用途</strong>：休眠节点的任务队列<br />
-- <code>node.pending.enqueue</code> / <code>node.pending.drain</code><br />
-- 向离线/休眠的节点发送任务，上线后自动执行<br />
-- <strong>对 Phase 0 的价值</strong>：Ubuntu 节点在睡眠/休眠后，积累的任务可自动恢复执行</p>
-<h4>5. sessions_yield（2026.3.12）</h4>
-<p><strong>具体用途</strong>：subagent 可主动结束当前轮次<br />
-- 编排器可立即结束当前轮次，跳过排队的工具工作<br />
-- <strong>对 Phase 0 的价值</strong>：Ubuntu GPU 节点的长任务（如 YOLO TensorRT 编译）可分段 yield，不阻塞主会话</p>
-<hr />
-<h2>Phase 1：语音陪伴模块</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>麦克风 → Whisper 语音识别 → OpenClaw → Edge-TTS → 扬声器</li>
-<li>跑通"数字大脑→Cyber Bricks"的第一次物理输出</li>
-<li>语音延迟要低（实时对话体验）</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. Fast Mode /fast 命令（2026.3.22）</h4>
-<p><strong>具体用途</strong>：简单问答/快速响应场景用高速模型<br />
-- <code>/fast</code> 映射到 MiniMax <code>-highspeed</code> 模型<br />
-- 延迟大幅降低，适合语音对话的快速确认场景<br />
-- <strong>对 Phase 1 的价值</strong>：语音交互的确认回复（"好的"/"收到"）用 fast mode，节省延迟</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 启用 fast 模式</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>models.default.fastModel<span class="w"> </span><span class="s2">&quot;minimax/highspeed&quot;</span>
-<span class="c1"># 使用时：/fast</span>
-</code></pre></div>
-
-<h4>2. Per-Model Cooldowns 阶梯限流（2026.3.24/28）</h4>
-<p><strong>具体用途</strong>：一个模型 429 不再阻塞所有模型<br />
-- 30s/1min/5min 阶梯限流<br />
-- MiniMax 限流时可以自动 fallback 到 GLM/Qwen<br />
-- <strong>对 Phase 1 的价值</strong>：语音对话中主模型限流时，fallback 模型自动接管，不中断对话</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 配置 fallback 模型链</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>models.fallback<span class="o">[</span><span class="s2">&quot;minimax&quot;</span><span class="o">]</span><span class="w"> </span><span class="s2">&quot;glm-4-plus&quot;</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>models.fallback<span class="o">[</span><span class="s2">&quot;glm-4-plus&quot;</span><span class="o">]</span><span class="w"> </span><span class="s2">&quot;qwen-plus&quot;</span>
-</code></pre></div>
-
-<h4>3. MCP/Channels Bridge（2026.3.11）</h4>
-<p><strong>具体用途</strong>：Gateway-backed channel MCP bridge<br />
-- Codex/Claude-facing conversation tools<br />
-- Claude channel notifications<br />
-- <strong>对 Phase 1 的价值</strong>：用 MCP 协议桥接 Jetson Nano 上的语音处理模块</p>
-<h4>4. before_dispatch Hook（2026.3.11/23）</h4>
-<p><strong>具体用途</strong>：在消息 dispatch 之前插入自定义逻辑<br />
-- 可用于语音命令的预处理（如降噪级别判断、唤醒词检测）<br />
-- canonical inbound metadata 可访问<br />
-- <strong>对 Phase 1 的价值</strong>：在语音命令进入 AI 前，先判断是否需要触发物理动作</p>
-<h4>5. exec Overlay + before_tool_call requireApproval（2026.3.28）</h4>
-<p><strong>具体用途</strong>：工具执行前需要用户审批<br />
-- <code>before_tool_call</code> hooks 可暂停工具执行，提示用户审批<br />
-- 支持 exec overlay、Telegram 按钮、Discord 交互、/approve 命令<br />
-- <strong>对 Phase 1 的价值</strong>：语音控制 Cyber Bricks 动作时，可设置审批确认（防止误触发）</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1">// plugins/phase1-voice-approval/index.js</span>
-<span class="nx">module</span><span class="p">.</span><span class="nx">exports</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">before_tool_call</span><span class="o">:</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">toolName</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="p">,</span><span class="w"> </span><span class="nx">context</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">toolName</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;exec&#39;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">params</span><span class="p">.</span><span class="nx">command</span><span class="o">?</span><span class="p">.</span><span class="nx">includes</span><span class="p">(</span><span class="s1">&#39;cyberbrick&#39;</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">requireApproval</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">};</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">};</span>
-</code></pre></div>
-
-<h4>6. runHeartbeatOnce（2026.3.28）</h4>
-<p><strong>具体用途</strong>：插件可触发单次心跳<br />
-- <code>runHeartbeatOnce</code> 可精确触发检查任务<br />
-- 支持显式 delivery target 覆盖<br />
-- <strong>对 Phase 1 的价值</strong>：语音交互时，触发定时器检查（如：超时提醒）</p>
-<hr />
-<h2>Phase 2：视觉记录模块（ESP32-Cam）</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>ESP32-Cam 采集 → RTSP 流 → Jetson Nano 处理</li>
-<li>AI 理解画面内容（目标检测/人体姿态）</li>
-<li>本地处理不传云端</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. Image Tool Generic Fallback 修复（2026.3.22/24）</h4>
-<p><strong>具体用途</strong>：ESP32-Cam 拍摄的照片可被 MiniMax/OpenRouter 分析<br />
-- 恢复了 generic image-runtime fallback<br />
-- openrouter/minimax-portal 图片分析修复<br />
-- <strong>对 Phase 2 的价值</strong>：用 MiniMax M2.7 分析 ESP32-Cam 的 RTSP 截帧，无需担心 provider 缺失</p>
-<p><strong>配置方法</strong>：无需额外配置，已默认启用（2026.3.24 已修复）</p>
-<h4>2. MCP/Channels Bridge（2026.3.11）</h4>
-<p><strong>具体用途</strong>：将 Jetson Nano 的视觉处理结果通过 MCP 传回 Gateway<br />
-- 为 Jetson Nano 上的 YOLO/MediaPipe 推理结果建立标准化通道<br />
-- <strong>对 Phase 2 的价值</strong>：视觉检测结果（物体类别/bounding box/人体关键点）可结构化传回贵庚</p>
-<h4>3. Gemini Multimodal Embedding（2026.3.11）</h4>
-<p><strong>具体用途</strong>：图片和音频的向量索引<br />
-- <code>gemini-embedding-2-preview</code> 支持图片和音频索引<br />
-- <code>memorySearch.extraPaths</code> 支持多模态索引<br />
-- <strong>对 Phase 2 的价值</strong>：ESP32-Cam 录像的关键帧自动索引到记忆系统，未来可检索"上次看到这个物体是什么时候"</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 在 memory 配置中启用</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>memory.search.provider<span class="w"> </span><span class="s2">&quot;gemini&quot;</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>memory.search.gemini.embeddingModel<span class="w"> </span><span class="s2">&quot;gemini-embedding-2-preview&quot;</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>memory.search.extraPaths<span class="w"> </span><span class="o">[</span><span class="s2">&quot;/path/to/esp32-frames&quot;</span><span class="o">]</span>
-</code></pre></div>
-
-<h4>4. MiniMax 图片生成（2026.3.28）</h4>
-<p><strong>具体用途</strong>：为 Phase 5 面部表情系统生成素材<br />
-- <code>image-01</code> 模型支持图片生成和图片编辑<br />
-- 支持宽高比控制<br />
-- <strong>对 Phase 2 的价值</strong>：间接——生成测试用仿真图像用于 YOLO 模型测试</p>
-<h4>5. Memory Plugins 化（2026.3.28）</h4>
-<p><strong>具体用途</strong>：记忆 flush 交给 memory-core 插件管理<br />
-- 插件可注册自定义 system-prompt section<br />
-- <strong>对 Phase 2 的价值</strong>：ESP32-Cam 采集的视觉事件可定制为独立的 memory 插件，自动写入 NAS</p>
-<hr />
-<h2>Phase 3：iPhone 感知前端</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>iPhone 16 Pro 通过 OpenClaw Node 协议接入，成为分布式感知网络</li>
-<li>高质量视觉（LiDAR/摄像头）、传感器数据（IMU/UWB）</li>
-<li>室内移动时无缝切换</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. Node Pending Work Queue（2026.3.11）⭐⭐⭐⭐⭐</h4>
-<p><strong>具体用途</strong>：Jetson Nano 等休眠节点的任务队列<br />
-- <code>node.pending.enqueue</code> / <code>node.pending.drain</code><br />
-- 向离线/休眠的 iPhone Node 发送任务，上线后自动执行<br />
-- <strong>对 Phase 3 的价值</strong>：iPhone 移动时网络切换，旧任务缓存，新任务排队，切换完成后自动 drain</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1">// 向 iPhone 节点发送任务</span>
-<span class="k">await</span><span class="w"> </span><span class="nx">openclaw</span><span class="p">.</span><span class="nx">node</span><span class="p">.</span><span class="nx">pending</span><span class="p">.</span><span class="nx">enqueue</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">nodeId</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;iphone-16-pro&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">task</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">type</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;capture&quot;</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">resolution</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;high&quot;</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
-<span class="w">  </span><span class="nx">expiresIn</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;5m&quot;</span>
-<span class="p">});</span>
-
-<span class="c1">// iPhone 重新连接时自动 drain</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">tasks</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">openclaw</span><span class="p">.</span><span class="nx">node</span><span class="p">.</span><span class="nx">pending</span><span class="p">.</span><span class="nx">drain</span><span class="p">(</span><span class="s2">&quot;iphone-16-pro&quot;</span><span class="p">);</span>
-</code></pre></div>
-
-<h4>2. MCP/Channels Bridge（2026.3.11）</h4>
-<p><strong>具体用途</strong>：iPhone（Swift + ARKit）通过 MCP 与 Jetson Nano/ROS 2 桥接<br />
-- WebSocket 传输，标准化接口<br />
-- <strong>对 Phase 3 的价值</strong>：替代自定义 rosbridge JSON 协议，用原生 MCP 通信</p>
-<h4>3. ACP Current-Conversation Bind（2026.3.28）</h4>
-<p><strong>具体用途</strong>：当前对话 ACP 绑定（Discord/BlueBubbles/iMessage）<br />
-- <code>/acp spawn codex --bind here</code> 可将当前聊天转为 Codex 工作区<br />
-- <strong>对 Phase 3 的价值</strong>：iPhone 上的对话可无缝切换到 Codex subagent 处理复杂视觉分析</p>
-<h4>4. before_dispatch Hook（2026.3.11/23）</h4>
-<p><strong>具体用途</strong>：iPhone 传感器数据的预处理<br />
-- IMU 数据到达 Gateway 前可做过滤/聚合<br />
-- <strong>对 Phase 3 的价值</strong>：减少无效传感器数据的处理开销</p>
-<h4>5. sessions_yield + Resume（2026.3.11/12）</h4>
-<p><strong>具体用途</strong>：iPhone 发起的视觉分析任务可中断恢复<br />
-- <code>sessions_spawn</code> 支持 <code>resumeSessionId</code> 参数<br />
-- <strong>对 Phase 3 的价值</strong>：iPhone 拍摄的长视频分析可分段进行，中途网络切换自动恢复</p>
-<h4>6. ACP Sessions Resume（2026.3.11）</h4>
-<p><strong>具体用途</strong>：Codex/Claude 长任务持续<br />
-- 已有 ACP session 可 resume，不从头开始<br />
-- <strong>对 Phase 3 的价值</strong>：iPhone 侧的复杂场景理解任务（如：分析整个室内环境）可跨会话恢复</p>
-<hr />
-<h2>Phase 4：运动控制模块</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>OpenClaw Gateway → MQTT → Jetson Nano → UART → Cyber Bricks</li>
-<li>GPIO 应急停止（&lt;1ms）</li>
-<li>电机/舵机执行物理动作</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. before_tool_call requireApproval + exec Overlay（2026.3.28）⭐⭐⭐⭐⭐</h4>
-<p><strong>具体用途</strong>：Cyber Bricks 动作执行前需要用户审批<br />
-- 插件可暂停工具执行，弹出审批 UI<br />
-- 支持 Telegram 按钮、Discord 交互、/approve 命令<br />
-- <strong>对 Phase 4 的价值</strong>：最关键功能！语音命令触发运动前，必须经过审批，防止误触发危险动作（如机械臂撞人）</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1">// openclaw.json plugins 配置</span>
-<span class="p">{</span>
-<span class="w">  </span><span class="s2">&quot;plugins&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="s2">&quot;entries&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="s2">&quot;cyberbrick-approval&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="s2">&quot;enabled&quot;</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span>
-<span class="w">      </span><span class="p">}</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-
-<span class="c1">// 对应插件代码（伪代码）</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">cyberbrickApproval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="nx">before_tool_call</span><span class="o">:</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">toolName</span><span class="p">,</span><span class="w"> </span><span class="nx">params</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">toolName</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;exec&#39;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">isCyberbrickCommand</span><span class="p">(</span><span class="nx">params</span><span class="p">.</span><span class="nx">command</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">      </span><span class="k">return</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">requireApproval</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="w"> </span><span class="p">};</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">};</span>
-</code></pre></div>
-
-<h4>2. before_dispatch Hook（2026.3.11/23）</h4>
-<p><strong>具体用途</strong>：MQTT 命令发出前的拦截<br />
-- 判断是否是危险动作（高速/大幅度），是则 requireApproval<br />
-- <strong>对 Phase 4 的价值</strong>：在 exec 之前就拦截，不需要等到具体命令执行</p>
-<h4>3. runHeartbeatOnce（2026.3.28）</h4>
-<p><strong>具体用途</strong>：定期检查 Cyber Bricks 状态<br />
-- 插件可触发单次心跳，检查执行器状态<br />
-- <strong>对 Phase 4 的价值</strong>：无需等待用户查询，定时检查电机温度/位置是否正常</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1">// 定期检查 Cyber Bricks 状态</span>
-<span class="nx">setInterval</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">openclaw</span><span class="p">.</span><span class="nx">runHeartbeatOnce</span><span class="p">({</span><span class="w"> </span><span class="nx">target</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;cyberbrick-monitor&quot;</span><span class="w"> </span><span class="p">});</span>
-<span class="p">},</span><span class="w"> </span><span class="mf">60000</span><span class="p">);</span><span class="w"> </span><span class="c1">// 每分钟一次</span>
-</code></pre></div>
-
-<h4>4. Gateway Health Monitoring（2026.3.22）</h4>
-<p><strong>具体用途</strong>：系统稳定性监控<br />
-- 可配置的 stale-event 阈值和重启限制<br />
-- 每通道/每账户独立控制<br />
-- <strong>对 Phase 4 的价值</strong>：监控 MQTT 连接健康状态，Jetson Nano 断连时自动告警</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code>openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.health.staleEventThreshold<span class="w"> </span><span class="m">30000</span><span class="w">  </span><span class="c1"># 30秒无响应则告警</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>gateway.health.restartLimit<span class="w"> </span><span class="m">3</span><span class="w">  </span><span class="c1"># 最多重启3次</span>
-</code></pre></div>
-
-<h4>5. ACP Direct Chats（2026.3.28）</h4>
-<p><strong>具体用途</strong>：TTS 回复在无音频时也发送最终 ACP 结果<br />
-- ACP 结果 delivery 保证<br />
-- <strong>对 Phase 4 的价值</strong>：Cyber Bricks 执行结果的确认消息不丢失</p>
-<hr />
-<h2>Phase 5：面部表情系统</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>面部「0」「-」「1」三个元素</li>
-<li>NeoPixel 灯光带 + OLED 眼睛屏幕</li>
-<li>MQTT 接收表情指令</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. MiniMax 图片生成（2026.3.28）⭐⭐⭐⭐⭐</h4>
-<p><strong>具体用途</strong>：AI 生成表情素材<br />
-- <code>image-01</code> 模型支持图片生成和图片编辑<br />
-- 支持宽高比控制（方形/16:9/9:16）<br />
-- <strong>对 Phase 5 的价值</strong>：<br />
-  - 生成「0」眼睛的眨眼动画帧（生成后转 GIF）<br />
-  - 为不同情绪状态生成概念图（happy/sad/alert）<br />
-  - 生成 3D 打印预览概念图</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1">// 调用 MiniMax 图片生成</span>
-<span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">openclaw</span><span class="p">.</span><span class="nx">minimax</span><span class="p">.</span><span class="nx">generateImage</span><span class="p">({</span>
-<span class="w">  </span><span class="nx">model</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;image-01&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">prompt</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;A cute robot face showing &#39;0-1&#39; expression, digital art style, square format&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="nx">aspectRatio</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1:1&quot;</span>
-<span class="p">});</span>
-</code></pre></div>
-
-<h4>2. MiniMax 图片编辑（2026.3.28）</h4>
-<p><strong>具体用途</strong>：在已有素材上编辑<br />
-- image-to-image 编辑能力<br />
-- <strong>对 Phase 5 的价值</strong>：在基础表情图上微调（换颜色/表情细节），不用每次从头生成</p>
-<h4>3. NeoPixel / Matrix TTS 语音气泡（2026.3.28）</h4>
-<p><strong>具体用途</strong>：Matrix 语音消息改为原生语音气泡<br />
-- <strong>对 Phase 5 的价值</strong>：参考——语音气泡 UI 设计可借鉴到面部表情系统</p>
-<h4>4. before_tool_call requireApproval（2026.3.28）</h4>
-<p><strong>具体用途</strong>：表情切换审批<br />
-- 某些特殊表情（alert/emergency）需要确认才切换<br />
-- <strong>对 Phase 5 的价值</strong>：防止误触发吓人的表情</p>
-<hr />
-<h2>Phase 6：室内移动与智能家居硬件拓展</h2>
-<h3>阶段需求</h3>
-<ul>
-<li>室内自主导航（RGB-D SLAM/视觉）</li>
-<li>IoT 控制（HomeAssistant/米家）</li>
-<li>星闪通信模块（BearPi-Pico H3863）</li>
-<li>拓竹生态扩展</li>
-</ul>
-<h3>可用 OpenClaw 功能</h3>
-<h4>1. Tavily / Exa / Firecrawl 搜索插件（2026.3.22）⭐⭐⭐⭐⭐</h4>
-<p><strong>具体用途</strong>：更丰富的搜索来源<br />
-- Tavily：结构化搜索结果，带 <code>tavily_extract</code> 抓取完整网页<br />
-- Exa：语义搜索，支持网页内容提取<br />
-- Firecrawl：整站抓取，适合调研智能家居设备规格<br />
-- <strong>对 Phase 6 的价值</strong>：<br />
-  - 调研 HomeAssistant 集成方案时快速获取官方文档<br />
-  - 拓竹 H2C 参数问题直接抓取官方规格表<br />
-  - 调研 H3863 星闪模块技术规格</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 安装 Tavily 插件</span>
-openclaw<span class="w"> </span>plugins<span class="w"> </span>install<span class="w"> </span>tavily
-<span class="c1"># 配置 API key</span>
-openclaw<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>plugins.tavily.apiKey<span class="w"> </span><span class="s2">&quot;tvly-xxx&quot;</span>
-
-<span class="c1"># 使用搜索</span>
-/open<span class="w"> </span>tavily<span class="w"> </span>what<span class="err">&#39;</span>s<span class="w"> </span>new<span class="w"> </span><span class="k">in</span><span class="w"> </span>HomeAssistant<span class="w"> </span><span class="m">2026</span>
-</code></pre></div>
-
-<h4>2. Gateway/OpenAI 兼容性（2026.3.23/24）</h4>
-<p><strong>具体用途</strong>：<code>/v1/models</code> 和 <code>/v1/embeddings</code> 接口<br />
-- RAG 兼容性大幅提升<br />
-- <strong>对 Phase 6 的价值</strong>：Jetson Nano 上的本地 embedding 服务可接入 OpenClaw 的 RAG pipeline</p>
-<h4>3. MCP/Channels Bridge（2026.3.11）</h4>
-<p><strong>具体用途</strong>：连接 HomeAssistant 的 MCP 接口<br />
-- HomeAssistant 已支持 MCP 协议（2025年底新特性）<br />
-- <strong>对 Phase 6 的价值</strong>：用 MCP 而非 MQTT 更标准化</p>
-<h4>4. Podman 容器支持（2026.3.24/28）</h4>
-<p><strong>具体用途</strong>：客户设备快速部署<br />
-- 简化 rootless Podman 设置<br />
-- <code>openclaw --container &lt;name&gt; ...</code> 在容器内运行命令<br />
-- <strong>对 Phase 6 的价值</strong>：给客户部署时，HomeAssistant + OpenClaw 可打包为 Podman 容器，一键部署</p>
-<p><strong>配置方法</strong>：</p>
-<div class="codehilite"><pre><span></span><code><span class="c1"># 在客户设备上</span>
-podman<span class="w"> </span>pull<span class="w"> </span>openclaw/openclaw:latest
-openclaw<span class="w"> </span>--container<span class="w"> </span>openclaw-01<span class="w"> </span>run
-</code></pre></div>
-
-<h4>5. Kubernetes 支持（2026.3.12）</h4>
-<p><strong>具体用途</strong>：企业级/多节点部署<br />
-- K8s manifest + Kind 安装文档<br />
-- <strong>对 Phase 6 的价值</strong>：未来多台机器人协同时，可用 K8s 统一管理多个 OpenClaw 实例</p>
-<h4>6. Gemini CLI Backend（2026.3.28）</h4>
-<p><strong>具体用途</strong>：新增 Gemini CLI 后端<br />
-- 替代 <code>gateway run --claude-cli-logs</code> 为通用 <code>--cli-backend-logs</code><br />
-- <strong>对 Phase 6 的价值</strong>：在 Jetson Nano 上用 Gemini CLI 做本地推理，与 OpenClaw 集成</p>
-<h4>7. Memory Plugins 化（2026.3.28）</h4>
-<p><strong>具体用途</strong>：贵庚记忆系统定制<br />
-- memory flush 交给 memory-core 插件管理<br />
-- 插件可注册自定义 system-prompt section<br />
-- <strong>对 Phase 6 的价值</strong>：IoT 设备状态（灯光/门锁/温度）可写入贵庚记忆，未来可检索"上次关灯是什么时候"</p>
-<hr />
-<h2>跨 Phase 通用能力</h2>
-<h3>安全相关</h3>
-<h4>1. 设备 Pairing Token 安全（2026.3.22）</h4>
-<p><strong>具体用途</strong>：短效 bootstrap token 替代永久凭证<br />
-- /pair 和 QR 码不再嵌入共享 gateway 凭证<br />
-- token 有时效性，过期作废<br />
-- <strong>对所有 Phase 的价值</strong>：0-1 机器人的节点配对不会被中间人攻击</p>
-<h4>2. Browser Profile 安全隔离（2026.3.22 Breaking）</h4>
-<p><strong>具体用途</strong>：托管浏览器使用独立 profile<br />
-- <code>driver: "extension"</code> 已被移除，改为内置 CDP 直连<br />
-- <strong>对所有 Phase 的价值</strong>：自动化测试和手动浏览完全隔离，不会互相影响</p>
-<h4>3. Security WebSocket Origin 验证（2026.3.28）</h4>
-<p><strong>具体用途</strong>：防止跨站 WebSocket 劫持<br />
-- <strong>对所有 Phase 的价值</strong>：Gateway 暴露在公网时，防止恶意网页劫持 session</p>
-<h4>4. Security Exec Approvals（2026.3.8~28 多处修复）</h4>
-<p><strong>具体用途</strong>：命令执行安全<br />
-- 零宽字符/Unicode 格式字符检测防止欺骗<br />
-- 路径遍历防护<br />
-- <strong>对所有 Phase 的价值</strong>：防止通过语音命令注入恶意指令</p>
-<h3>Agent / Subagent 相关</h3>
-<h4>5. Agent 超时 48h（2026.3.22）</h4>
-<p><strong>具体用途</strong>：长时间运行的 subagent 任务不再超时<br />
-- 从 600s 提升到 48h<br />
-- <strong>对所有 Phase 的价值</strong>：FramePack 视频生成、YOLO 训练等长任务不中断</p>
-<h4>6. sessions_yield（2026.3.12）</h4>
-<p><strong>具体用途</strong>：编排器主动结束当前轮次<br />
-- <strong>对所有 Phase 的价值</strong>：主 agent 派发子任务后主动 yield，子任务完成后主动汇报</p>
-<h4>7. ACP Resume Session（2026.3.11）</h4>
-<p><strong>具体用途</strong>：已有 ACP session 可 resume<br />
-- <code>sessions_spawn</code> 支持 <code>resumeSessionId</code><br />
-- <strong>对所有 Phase 的价值</strong>：长对话跨节点切换不丢上下文</p>
-<h4>8. Subagent Completion Announce（2026.3.24）</h4>
-<p><strong>具体用途</strong>：subagent 完成通知扩展到 extension channels<br />
-- BlueBubbles 等渠道也能收到完成通知<br />
-- <strong>对所有 Phase 的价值</strong>：跨渠道（飞书/Telegram）控制机器人，完成后多渠道确认</p>
-<h3>Memory / Context 相关</h3>
-<h4>9. Memory Multimodal Indexing（2026.3.11）</h4>
-<p><strong>具体用途</strong>：Gemini embedding-2 支持图片和音频索引<br />
-- <strong>对所有 Phase 的价值</strong>：0-1 积累的所有媒体类型（图片/语音/视频）都可索引检索</p>
-<h4>10. Memory Plugins 化（2026.3.28）</h4>
-<p><strong>具体用途</strong>：记忆 flush 交给插件管理<br />
-- <strong>对所有 Phase 的价值</strong>：贵庚记忆系统可作为独立插件，定制 flush 策略（何时写入 NAS）</p>
-<h4>11. Compact Preserved AGENTS 刷新（2026.3.24/28）</h4>
-<p><strong>具体用途</strong>：压缩后保留 AGENTS 刷新<br />
-- stale-usage 预压缩也保留<br />
-- <strong>对所有 Phase 的价值</strong>：对话历史压缩时不忘刷新 AGENTS.md，保持上下文一致</p>
-<h3>网络 / 通信相关</h3>
-<h4>12. Node Pending Work Queue（2026.3.11）</h4>
-<p><strong>具体用途</strong>：休眠节点任务队列<br />
-- <code>node.pending.enqueue</code> / <code>node.pending.drain</code><br />
-- <strong>对所有 Phase 的价值</strong>：任何节点（Jetson/iPhone/ESP32）休眠时任务自动排队</p>
-<h4>13. Gateway Health Monitoring（2026.3.22）</h4>
-<p><strong>具体用途</strong>：Gateway 健康检查 + 自动重启限制<br />
-- <strong>对所有 Phase 的价值</strong>：Mac Gateway 异常崩溃后自动恢复，0-1 不失联</p>
-<h4>14. Per-Model Cooldowns（2026.3.24/28）</h4>
-<p><strong>具体用途</strong>：按模型限流<br />
-- 30s/1min/5min 阶梯<br />
-- <strong>对所有 Phase 的价值</strong>：MiniMax 限流时 GLM/Qwen 自动接管，不影响 0-1 实时响应</p>
-<h4>15. Heartbeat Guaranteed（2026.3.28）</h4>
-<p><strong>具体用途</strong>：心跳定时器在异常后保证重启<br />
-- <strong>对所有 Phase 的价值</strong>：定时检查（电池/温度/传感器状态）不再静默停止</p>
-<h3>MCP / 插件相关</h3>
-<h4>16. MCP/Channels Bridge（2026.3.11）</h4>
-<p><strong>具体用途</strong>：Gateway-backed MCP bridge<br />
-- Codex/Claude-facing conversation tools<br />
-- safer stdio bridge lifecycle<br />
-- <strong>对所有 Phase 的价值</strong>：Jetson Nano/iPhone/ESP32 都可通过 MCP 接入，标准化接口</p>
-<h4>17. before_dispatch Hook（2026.3.11/23）</h4>
-<p><strong>具体用途</strong>：dispatch 前的拦截<br />
-- canonical inbound metadata<br />
-- <strong>对所有 Phase 的价值</strong>：消息路由前可做过滤/审批/日志</p>
-<h4>18. before_tool_call requireApproval（2026.3.28）</h4>
-<p><strong>具体用途</strong>：工具执行前审批<br />
-- exec overlay / Telegram 按钮 / Discord 交互 / /approve<br />
-- <strong>对所有 Phase 的价值</strong>：任何危险操作（运动/删除/外发消息）都需确认</p>
-<h3>搜索 / 调研相关</h3>
-<h4>19. Tavily / Exa / Firecrawl 内置搜索（2026.3.22）</h4>
-<p><strong>具体用途</strong>：丰富搜索来源<br />
-- Tavily：<code>X-Client-Source: openclaw</code> 标识<br />
-- <strong>对所有 Phase 的价值</strong>：调研智能家居方案/机器人技术时快速获取准确信息</p>
-<h3>调试 / 诊断相关</h3>
-<h4>20. /tools 命令（2026.3.23）</h4>
-<p><strong>具体用途</strong>：显示当前可用工具<br />
-- Control UI 新增 "Available Right Now" 区域<br />
-- <strong>对所有 Phase 的价值</strong>：开发阶段快速确认哪些工具可用</p>
-<h4>21. Control UI Improvements（2026.3.23/24）</h4>
-<p><strong>具体用途</strong>：Agent 工作区文件支持展开和 markdown 预览<br />
-- <strong>对所有 Phase 的价值</strong>：调试 Phase 4/5/6 的控制脚本时直接在 UI 预览</p>
-<h4>22. openclaw config schema（2026.3.28）</h4>
-<p><strong>具体用途</strong>：打印 JSON schema<br />
-- <strong>对所有 Phase 的价值</strong>：开发插件时快速查配置项结构</p>
-<hr />
-<h2>升级优先级建议</h2>
-<h3>🔴 P0（立即升级，高优先级）</h3>
+<p><strong>T 序列状态</strong>（大规模并行任务）：</p>
 <table>
 <thead>
 <tr>
-<th>功能</th>
-<th>原因</th>
-<th>影响 Phase</th>
+<th>状态</th>
+<th>数量</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Agent 超时 48h</strong></td>
-<td>FramePack 视频生成等长任务不再中断</td>
-<td>Phase 2, 3</td>
+<td>✅ 已完成</td>
+<td>84</td>
 </tr>
 <tr>
-<td><strong>Per-Model Cooldowns</strong></td>
-<td>MiniMax 限流不影响其他模型，实时响应不中断</td>
-<td>Phase 1, 2, 3, 4</td>
+<td>🔄 运行中</td>
+<td>2 (T-0061 Windows 11 Widget, T-0063 Notion)</td>
 </tr>
 <tr>
-<td><strong>before_tool_call requireApproval</strong></td>
-<td>Phase 4 运动控制安全的关键保障</td>
-<td>Phase 4</td>
-</tr>
-<tr>
-<td><strong>Node Pending Work Queue</strong></td>
-<td>iPhone/Jetson 休眠恢复的核心机制</td>
-<td>Phase 3</td>
-</tr>
-<tr>
-<td><strong>Memory Multimodal Indexing</strong></td>
-<td>ESP32-Cam 视觉记录索引，Phase 2 核心</td>
-<td>Phase 2</td>
+<td>⏳ 待处理</td>
+<td>1707</td>
 </tr>
 </tbody>
 </table>
-<h3>🟡 P1（近期升级，中优先级）</h3>
+<p><strong>T 序列待处理分布（Top 10）</strong>：</p>
 <table>
 <thead>
 <tr>
-<th>功能</th>
-<th>原因</th>
-<th>影响 Phase</th>
+<th>类别</th>
+<th>数量</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>runHeartbeatOnce</strong></td>
-<td>定期检查 Cyber Bricks 状态，Phase 4 稳定运行</td>
-<td>Phase 4</td>
+<td>sky-tune</td>
+<td>120</td>
 </tr>
 <tr>
-<td><strong>ACP Resume Session</strong></td>
-<td>iPhone 移动切换不丢上下文</td>
-<td>Phase 3</td>
+<td>bld-detail</td>
+<td>100</td>
 </tr>
 <tr>
-<td><strong>sessions_yield</strong></td>
-<td>编排器主动控制轮次，子任务管理更灵活</td>
-<td>Phase 3, 4</td>
+<td>demo（5个Demo）</td>
+<td>99</td>
 </tr>
 <tr>
-<td><strong>MiniMax Image Generation</strong></td>
-<td>Phase 5 表情素材生成</td>
-<td>Phase 5</td>
+<td>verify</td>
+<td>94</td>
 </tr>
 <tr>
-<td><strong>Tavily/Exa/Firecrawl 搜索</strong></td>
-<td>调研拓竹/H3863/智能家居规格</td>
-<td>Phase 6</td>
+<td>building</td>
+<td>80</td>
 </tr>
 <tr>
-<td><strong>Gateway Health Monitoring</strong></td>
-<td>系统稳定性监控，Mac 重启后自动恢复</td>
-<td>Phase 4, 6</td>
-</tr>
-</tbody>
-</table>
-<h3>🟢 P2（后续升级，低优先级）</h3>
-<table>
-<thead>
-<tr>
-<th>功能</th>
-<th>原因</th>
-<th>影响 Phase</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>SSH Sandbox Backend</strong></td>
-<td>远程管理 Jetson Nano（当前手动 SSH 够用）</td>
-<td>Phase 0</td>
+<td>mesh-tune</td>
+<td>61</td>
 </tr>
 <tr>
-<td><strong>Podman 容器支持</strong></td>
-<td>客户部署（当前还没到交付阶段）</td>
-<td>Phase 6</td>
+<td>code（代码生成）</td>
+<td>60</td>
 </tr>
 <tr>
-<td><strong>Kubernetes 支持</strong></td>
-<td>企业级多节点（当前单节点够用）</td>
-<td>Phase 6</td>
+<td>season</td>
+<td>60</td>
 </tr>
 <tr>
-<td><strong>Gemini CLI Backend</strong></td>
-<td>本地推理备选（当前 MiniMax 够用）</td>
-<td>Phase 6</td>
+<td>sop</td>
+<td>52</td>
 </tr>
 <tr>
-<td><strong>MCP/Channels Bridge</strong></td>
-<td>Jetson/iPhone 标准化接入（Phase 3 中已有替代方案）</td>
-<td>Phase 3</td>
-</tr>
-<tr>
-<td><strong>Memory Plugins</strong></td>
-<td>贵庚定制（Phase 1 日志式够用）</td>
-<td>全部</td>
-</tr>
-</tbody>
-</table>
-<h3>⚠️ 升级注意事项</h3>
-<ol>
-<li><strong>Chrome 扩展 relay 已移除</strong>（2026.3.22 Breaking）：<code>driver: "extension"</code> 被移除，但我们已切换到 <code>openclaw</code> 托管浏览器，不受影响</li>
-<li><strong>Qwen OAuth 迁移</strong>（2026.3.28 Breaking）：已废弃 <code>qwen-portal-auth</code>，我们的 Qwen 用的是 webauth MCP，不受影响</li>
-<li><strong>Config Doctor 迁移校验</strong>（2026.3.28 Breaking）：两个月前的 legacy key 现在会验证失败，<code>openclaw doctor</code> 检查一下现有配置</li>
-<li><strong>Node 22 最低版本</strong>（2026.3.23）：需 Node 22.14+，确认 Jetson Nano 上的 Node 版本</li>
-</ol>
-<hr />
-<h2>功能 × Phase 矩阵汇总</h2>
-<table>
-<thead>
-<tr>
-<th>功能</th>
-<th style="text-align: center;">P0</th>
-<th style="text-align: center;">P1</th>
-<th style="text-align: center;">P2</th>
-<th style="text-align: center;">P3</th>
-<th style="text-align: center;">P4</th>
-<th style="text-align: center;">P5</th>
-<th style="text-align: center;">P6</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>SSH Sandbox Backend</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Device Pairing Token 安全</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Agent 超时 48h</td>
-<td style="text-align: center;">🔴</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Per-Model Cooldowns</td>
-<td style="text-align: center;">🔴</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>before_tool_call requireApproval</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🔴</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Node Pending Work Queue</td>
-<td style="text-align: center;">🔴</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Memory Multimodal Indexing</td>
-<td style="text-align: center;">🔴</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>runHeartbeatOnce</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟡</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>ACP Resume Session</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟡</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>sessions_yield</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟡</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>MiniMax Image Generation</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟡</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>Tavily/Exa/Firecrawl</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟡</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>Gateway Health Monitoring</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟡</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>Image Tool Fallback 修复</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>MCP/Channels Bridge</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>Podman 支持</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>Kubernetes 支持</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>Memory Plugins</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>Gemini CLI Backend</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">✅</td>
-</tr>
-<tr>
-<td>ACP Current-Conversation Bind</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;">✅</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>/tools 命令</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-</tr>
-<tr>
-<td>OpenAI apply_patch 默认</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;">🟢</td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
-<td style="text-align: center;"></td>
+<td>css</td>
+<td>48</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<blockquote>
-<p>📝 <strong>生成说明</strong>：本分析基于 gh api 获取的原始 release notes（v2026.3.8/11/12/22/23/24/28）和 ROBOT-SOP.md Phase 0-6+ 章节。v2026.3.13 版本在 GitHub 上未找到（404），可能尚未发布或标签名称不同。如需补充该版本内容，请访问 https://github.com/openclaw/openclaw/releases 手动查看。</p>
-</blockquote>
+<h2>二、A→B→C→D 产出文件</h2>
+<p><strong>A 序列产出</strong>（<code>harness/robot/</code>）：<br />
+- <code>night-build/reports/sop-Phase 3-iPhone 感知-supplement.md</code>（MQTT主题设计 + OpenClaw bridge协议）<br />
+- <code>night-build/reports/sop-Phase 2-视觉记录-supplement.md</code>（带宽估算）<br />
+- <code>night-build/reports/sop-贵庚系统-记忆架构-supplement.md</code>（数据结构设计）<br />
+- <code>harness/robot/services/esp32-cam-rtsp/platformio.ini</code><br />
+- <code>harness/robot/demo1.html</code>（DirectionalLight 添加）<br />
+- <code>night-build/output/research-*.md</code>（7篇调研，含 Cozy Grove/LeCun/NLAH）</p>
+<p><strong>B 序列产出</strong>：<br />
+- Phase 3 iPhone 感知 SOP 4篇（ARKit框架/深度数据/数据格式/延迟测试）</p>
+<p><strong>C 序列产出</strong>：<br />
+- 拓竹 H2C 3D打印零件建模</p>
+<p><strong>D 序列产出</strong>：<br />
+- 拓竹 H2C 硬件接口驱动</p>
+<hr />
+<h2>三、重点发现</h2>
+<ul>
+<li>🔍 <strong>Night Build 已连续 2 晚未运行</strong>（2026-03-29、2026-03-30 均无输出），task-queue.json v8 载有 1811 个 auto 任务等待执行，但无调度</li>
+<li>🔍 <strong>task-queue.json stats 区块过时</strong>：显示 A=done 2/pending 9，实际全 11 个 A 任务已完成</li>
+<li>🔍 <strong>当前 2 个 running 任务</strong>（T-0061/63）均为 research 调研，完成后将自动触发下一批 pending 任务</li>
+<li>🔍 <strong>T 序列 1707 个 pending 任务</strong> 预计消耗大量 MiniMax 额度，需关注余额</li>
+</ul>
+<hr />
+<h2>四、❓ 需要用户决策的问题</h2>
+<ul>
+<li><strong>Night Build 调度问题</strong>：连续 2 晚未运行 — 是 orchestrator 停了，还是调度规则导致？有无需要手动重启？</li>
+<li><strong>A→B→C→D 已全部完成</strong> — 接下来是继续跑完所有 T 序列（1707 个），还是有其他优先级调整？</li>
+<li><strong>T-014 映射报告 v2</strong> 含已知错误（Genesis 物理引擎 ≠ Apple），建议白天审核修正</li>
+</ul>
+<hr />
+<h2>五、今白天建议</h2>
+<table>
+<thead>
+<tr>
+<th>优先级</th>
+<th>动作</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>🔴 P0</td>
+<td>确认 Night Build 为何连续 2 晚未运行</td>
+</tr>
+<tr>
+<td>🔴 P0</td>
+<td>检查 MiniMax 额度是否充足（1707 任务消耗大）</td>
+</tr>
+<tr>
+<td>🟡 P1</td>
+<td>审核 T-014 映射报告 v2 错误修正</td>
+</tr>
+<tr>
+<td>🟡 P1</td>
+<td>手动触发 T-0061/63 之后的 pending 任务队列</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<p><em>由 Night Build 晨间总结 v4 自动生成</em></p>
 </div>
 </body>
 </html>

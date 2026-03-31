@@ -1,0 +1,29 @@
+{
+  "version": "v3.1",
+  "timestamp": "2026-03-30T14:05:00Z",
+  "local_time": "2026-03-30 22:05 CST",
+  "status": "STARTED",
+  "phase": "A序列+连续任务管道-v8",
+  "minimax_quota": {
+    "model": "MiniMax-M*",
+    "interval_total": 600,
+    "interval_used": 512,
+    "remaining_count": 88,
+    "decision": "正常启动 (88 >= 60)"
+  },
+  "task_queue_snapshot": {
+    "total": 1809,
+    "pending": 1713,
+    "completed": 95,
+    "running": 2,
+    "failed": 0,
+    "failed_reset": 0
+  },
+  "actions_taken": [
+    "检查 task-queue.json — 无 failed 任务，无需重置",
+    "创建产出目录 harness/robot/night-build/output/2026-03-30/",
+    "确认 ROBOT-SOP.md 存在于 reference/",
+    "MiniMax 额度检查：88 次剩余，正常启动"
+  ],
+  "build_id": "night-build-2026-03-30-v3.1"
+}

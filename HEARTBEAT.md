@@ -27,7 +27,32 @@
 
 # Keep this file empty (or with only comments) to skip heartbeat API calls.
 
-# Last check: 2026-03-30 13:06 CST (05:06 UTC)
+# Last check: 2026-03-31 00:03 CST (16:03 UTC)
+
+## 2026-03-31 凌晨状态
+
+### LeWM Vision训练 ✅ 调参成功
+- tworoom: loss=0.004 ✅
+- pusht图像(tuned): loss从0.95降至0.119（epoch 17 best），早停机制正常
+- Checkpoint: ~/.stable-wm/lewm_vision_best.pt
+- 参数: lr=3e-6, weight_decay=0.01, dropout=0.2, grad_clip=0.5
+
+### Ubuntu节点
+- IP: 192.168.1.18
+- pusht数据集: ~/.stable-wm/pusht_full/ (7.7GB, 206 episodes)
+- LeWM代码+数据: ~/.stable-wm/
+
+### A序列任务: 7/7 完成 ✅
+# MiniMax: ✅ 6.7%已用, 560次剩余, 4h46m后重置
+# Ubuntu: ❌ 离线
+# Night Build: Orchestrator运行中(A序列9个任务)
+# rsync: 已同步，等待Ubuntu上线后自动索引
+# Ubuntu: ❌ 离线
+# Ebbinghaus InterestTracker: ✅ 已实现，6/6测试通过，详见 reports/A-Ebbinghaus-InterestTracker-实现报告.md
+# 缓存检查: 0个新session同步完成 (05:37 UTC)
+# MiniMax: 69.8%已用, 剩余181次, 1h21m后重置 → ✅ 正常
+# Ubuntu: ❌ 离线
+# 2个subagent调研中：影响力平台(d88d3af3) + 关键词权重衰减(2b3d91a3)
 # MiniMax 套餐状态：周期 10:00-15:00，已用 50.8%，剩余 295次，2h25m后重置
 # 阈值状态：✅ 正常（远低于80%阈值）
 # Ubuntu 节点：❌ 离线（12:33 CST）— Semantic Cache 不可用
@@ -143,3 +168,120 @@ python3 ~/.openclaw/workspace/scripts/cache-missing-sessions.py 2>&1
 ```
 
 **已知限制**：超过 48h 的历史 session，Gateway 已不保留内存数据，`openclaw session export` 拿不到内容（不影响，因为这些多为 cron 元数据，非用户对话）。
+
+## 2026-03-30 13:54 CST 更新
+
+### Ebbinghaus InterestTracker 实现完成 ✅
+- **位置**：Ubuntu `~/semantic_cache/server.py`
+- **备份**：MacBook `~/.openclaw/backup/pre-interest-tracking/`
+- **报告**：`harness/robot/night-build/reports/A-Ebbinghaus-InterestTracker-实现报告.md`
+- **测试结果**：6/6 项全部通过
+- **注意**：服务启动需用 `~/miniconda/bin/python3 server.py`（不能用系统 python3）
+- **已知问题**：进程曾因资源超限被 SIGKILL，确保内存充足
+- **新增端点**：`/interest/update`、`/interest/search`、`/interest/reset`、`/interest/list`
+
+## 2026-03-30 18:46 CST 更新
+
+### LeWM 训练完成 ✅
+- Ubuntu RTX 2060 已就绪
+- LeWM 训练脚本已验证（2.84M 参数，10 epochs 完成）
+- Checkpoint: `/home/jet/lewm_checkpoint.pt`
+
+### A序列任务全部完成 ✅
+- A-0001~A-0011 共7个任务全部完成
+- B序列待执行（Phase 3 iPhone感知）
+
+### Ubuntu 节点状态
+- IP: 192.168.1.18
+- SSH: ✅ 在线
+- GPU: ✅ RTX 2060 可用
+- Semantic Cache: ✅ 在线 (:5050)
+
+## 2026-03-30 19:12 CST 更新
+
+### MiniMax 状态
+- 62.7%已用 | 224次剩余 | 46分钟后重置
+
+### Ubuntu 节点状态
+- IP: 192.168.1.18
+- SSH: ✅ 在线
+- GPU: ✅ RTX 2060 可用（87MB已用/6GB总容量，空闲）
+- rsync: ✅ 已同步sessions到Ubuntu
+
+### LeWM 数据集下载
+- HF镜像(hf-mirror.com)：❌ 文件不存在(404)
+- HF直连：❌ 超时
+- 解决方案待定
+
+### Night Build 状态
+- A序列：✅ 全部完成(7/7)
+- B序列：待执行
+
+## 2026-03-30 19:32 CST 更新
+
+### LeWM 数据集下载进展
+- tworoom.h5 (12GB) ✅ 已下载到 ~/.stable-wm/
+- h5py 无法安装（Ubuntu pip/apt均网络超时）
+- 待解决：sudo apt install python3-h5py 或其他方案
+
+### LeWM 训练 Checkpoint
+- ~/lewm_checkpoint.pt (11MB) - dummy数据训练结果
+
+### Ubuntu 节点
+- 当前状态：❌ 离线
+- IP: 192.168.1.18
+
+## 2026-03-30 20:04 CST 更新
+
+### LeWM 训练完成 ✅
+- Ubuntu RTX 2060 可用
+- tworoom数据集已加载（920809步，numpy格式）
+- Checkpoint: ~/.stable-wm/lewm_tworoom.pt (1.7MB)
+- ⚠️ loss=NaN（简化SIGReg + 无归一化，需后续调参）
+- MiniMax: 3.3%已用，580次剩余，3h55后重置 ✅
+
+## 2026-03-30 23:27 CST 更新
+
+### LeWM Vision训练 ✅
+- pusht图像 Vision Encoder 训练成功
+- loss从0.94降至0.10后发散（学习率太高）
+- Checkpoint: ~/.stable-wm/lewm_vision_v4.pt (3.2MB, 812K params)
+- 206 episodes, 25650 frames, seq_len=8
+
+### Ubuntu节点
+- IP: 192.168.1.18
+- 当前状态: ❌ 离线
+
+### MiniMax额度
+- 27.0%已用 | 438次剩余 | 32分钟后重置 ✅
+
+# Last check: 2026-03-30 23:57 CST (15:57 UTC)
+# MiniMax-M*: 434/600 remaining (166 used), 大量剩余
+# Ubuntu: ❌ 离线
+# rsync: ✅ 所有session已同步
+# cache-missing: 0个缺失
+
+# Last check: 2026-03-31 00:33 CST (16:33 UTC)
+# MiniMax-M*: 581/600 remaining (19 used), 新周期
+# Ubuntu: ❌ 离线
+# rsync: ✅ 2个文件同步（含1个deleted session file）
+# cache-missing: 0个缺失
+
+# Last check: 2026-03-31 00:34 CST
+# MiniMax-M*: 575/600 (⚠️ 25次剩余，几乎耗尽)
+# Ubuntu: ❌ 离线
+
+# Last check: 2026-03-31 01:05 CST
+# MiniMax-M*: 476/600 (124 remaining)
+# Ubuntu: ❌ 离线
+
+# Last check: 2026-03-31 01:35 CST
+# MiniMax-M*: 470/600 (新周期), 130次剩余, 3h24m后重置
+# Ubuntu: ❌ 离线
+
+# Last check: 2026-03-31 02:05 CST (18:05 UTC)n# MiniMax-M*: 467/600 (新周期, 133次剩余)n# Ubuntu: ❌ 离线
+
+# Last check: 2026-03-31 02:35 CSTn# MiniMax-M*: 新周期, 136次剩余 ✅n# Ubuntu: ✅ 在线 (7个新session已同步)n# InterestTracker: 内存态待验证n
+# Last check: 2026-03-31 03:05 CST (19:05 UTC)
+# MiniMax-M*: 459/600 (141 remaining, 新周期刚重置)
+# Ubuntu: rsync可达但ping超时（可能在休眠）

@@ -306,6 +306,15 @@
    - 需补充：Contracts、Failure Taxonomy、Evidence-backed closure
 
 ### Night Build A序列任务（T-1802~T-1805已移到A序列）
+- A-0001：LeCun论文调研 ✅ 已完成
+- A-0002：NLAH调研 ✅ 已完成
+- A-0003：LeCun路线图更新ROBOT-SOP ✅ 已完成
+- A-0004：NLAH格式更新Skills规范 ✅ 已完成（生成报告，未应用）
+
+### 新增 NLAH Skill 模板
+- 路径：`skills/nlah-skill-template/SKILL.md`
+- 格式：基于 arXiv:2603.25723 的 NLAH 格式
+- 包含：Contracts + Roles + Stage Structure + Failure Taxonomy + Evidence-backed Closure
 - A-0001：LeCun论文调研 ✅ 已完成（报告已写）
 - A-0002：NLAH调研 ✅ 已完成（报告已写）
 - A-0003：LeCun路线图更新ROBOT-SOP（pending）
