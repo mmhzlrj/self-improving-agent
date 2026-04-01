@@ -541,3 +541,65 @@ ctx_a = ctx_a[:2]
 
 - alsoAllow 必须放在 `tools` 级别（global），不能放在 agent 级别
 - `profile: "full"` = 无限制，`profile: "coding"` = 有限制
+
+---
+
+## 错误8：偷懒截断读取文件（2026-04-01）
+
+### 事件
+调研 ROBOT-SOP.md 时想"快速了解"文档结构，用了 `head -20` 等截断命令。
+
+### 结果
+- 文件实际：5008 行，10章 + 术语表
+- 误判为：7个章节
+- 被用户发现，要求重新完整读取
+
+### 根因
+- 想走捷径省时间，反而浪费了更多时间
+- 截断输出会掩盖重要信息
+
+### 教训
+- 调研阶段：先 `wc -l` 确认文件大小，再决定读取策略
+- 大文件用 offset/limit 分段读取，但必须覆盖完整
+- 严禁用 head/tail/sed 等截断命令"快速瞄一眼"
+
+---
+
+## 2026-04-02: Task 归纳 LLM API 不可用
+
+### 错误
+创建 TaskInductor 脚本时，尝试调用 MiniMax API 失败：
+- MiniMax Coding Plan API key: `status_code: 2061, status_msg: "your current token plan not support model"`
+- OpenClaw Gateway API: `HTTP Error 403: Forbidden`
+
+### 影响
+无法使用真正的 LLM 提炼任务，改用规则+关键词提取作为备选方案。
+
+### 根因
+- MiniMax Coding Plan 的 API key 绑定的模型套餐不包含所测试的模型
+- OpenClaw Gateway 的 chat completions endpoint 需要特殊认证
+
+### 教训
+- 实现关键功能前先验证 API 可用性
+- 保留备选方案确保功能可用
+
+---
+
+## 2026-04-02: Session 文件名匹配错误
+
+### 错误
+TaskInductor 脚本使用 `session-*.jsonl` 匹配 session 文件，但匹配结果为空。
+
+### 结果
+- 找到 0 个今天的 sessions
+- 任务无法执行
+
+### 根因
+- 实际 session 文件名是 UUID 格式（如 `f0aa51b7-a6f6-405d-b061-00a21cf8002e.jsonl`）
+- 不是预期的 `session-*.jsonl` 格式
+
+### 修复
+改为 `*.jsonl`，并过滤掉非 session 文件（如 channel-messages、feishu 等）
+
+### 教训
+- 实现前先用 `ls` 确认实际文件名格式
