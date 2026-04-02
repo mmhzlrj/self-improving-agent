@@ -323,3 +323,144 @@ python3 ~/.openclaw/workspace/scripts/cache-missing-sessions.py 2>&1
 # Ubuntu: ❌ 离线
 # rsync: ✅ 成功
 # cache-missing: ✅ 全部缓存完成
+
+# Last check: 2026-03-31 23:50 CST (15:50 UTC)
+# MiniMax: ⚠️ 80.2%已用, 119次剩余, 8分钟后重置 (⚠️ 触及80%阈值)
+# Ubuntu: rsync成功 (154MB total), ping不可达
+# cache-missing: ✅ 0个缺失
+# docs.0-1.ai: ✅ 已重启(http://127.0.0.1:18998/)
+
+# Last check: 2026-04-01 00:59 CST (16:59 UTC)
+# MiniMax: ✅ 新周期 00:00-05:00, 53.2%已用, 281次剩余, 4h后重置
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功(159MB total)
+# docs.0-1.ai: ✅ 运行中(http://127.0.0.1:18998/)
+# cache-missing: 脚本超时，跳过
+
+# Last check: 2026-03-31 23:50 CST → 04-01 02:35 CST
+# MiniMax: ⚠️ 88.0%已用, 72次剩余, 2h24m后重置 (⚠️ 超过80%阈值)
+# rsync: ✅ 成功
+# docs.0-1.ai: ✅ 在线
+# Last check: 04-01 02:35 CST | MiniMax: ⚠️88%已用,72次剩余,2h24m后重置 | docs: ✅
+# Last check: 2026-04-01 04:38 CST (20:38 UTC)
+# MiniMax: ⚠️ 91.7%已用, 50次剩余, 21分钟后重置 (⚠️ 超过90%阈值)
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功
+# docs.0-1.ai: ✅ 在线
+
+# Last check: 2026-04-01 04:05 CST (20:05 UTC)
+# MiniMax: ⚠️ 90.3%已用, 58次剩余, 53分钟后重置 (⚠️ 超过90%阈值)
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功
+# cache-missing: 脚本超时，跳过
+
+# Last check: 2026-04-01 08:19 CST (00:19 UTC)
+# MiniMax: ✅ 9.8%已用, 541次剩余, 1h39m后重置 ✅
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功
+# docs.0-1.ai: ✅ 在线
+# Note: 3个cron session报错 "crontab: tmp/tmp.XXXXX: Operation not permitted" — sandbox限制，不影响主流程
+
+# Last check: 2026-04-01 06:39 CST (22:39 UTC)
+# MiniMax: ✅ 新周期刚进入, 97.7%剩余, 586次剩余, 3h19m后重置
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功
+
+# Last check: 2026-04-01 09:44 CST (01:44 UTC)
+# MiniMax: ✅ 28.8%已用, 427次剩余, 15分钟后重置
+# Kimi调研subagent: 运行中(35m)，通过Playwright Chrome方式，尚未完成
+# docs.0-1.ai: ✅ 在线(http://127.0.0.1:18998/)
+# 待用户确认: kimi_kimi_chat是否能在主agent直接调用（alsoAllow已配置）
+
+# Last check: 2026-04-01 10:03 CST (02:03 UTC)
+# MiniMax: ✅ 2.3%已用, 586次剩余, 4h56m后重置 (新周期10:00-15:00)
+# Ubuntu: ❌ 离线(rsync可达, ping不可达)
+# rsync: ✅ 成功(15KB sent)
+# docs.0-1.ai: ❌ 不响应(连接失败，需重启)
+# Kimi调研subagent: 已中止(用户操作)
+# cache-missing: 脚本超时，跳过
+
+# Last check: 2026-04-02 00:05 CST (16:05 UTC)
+# MiniMax: ✅ 0.7%已用, 596次剩余, 4h53m后重置 (新周期 00:00-05:00)
+# Ubuntu: ❌ 离线(rsync可达，ping不可达)
+# rsync: ✅ 成功(1个新session同步)
+# cache-missing: 脚本超时，跳过
+# docs.0-1.ai: 未检查
+
+# Last check: 2026-04-01 22:09 CST (14:09 UTC)
+# MiniMax: ✅ 9.8%已用, 541次剩余, 1h50m后重置 (阈值正常)
+# Ubuntu: ❌ 离线
+# rsync: ✅ 成功(466KB sent)
+# docs.0-1.ai: ✅ 在线
+# docs.0-1.ai修复进度: F-006✅ F-007✅(代码已写入) F-008~F-013⏳
+
+# Last check: 2026-04-01 22:12 CST (14:12 UTC)
+# Night Build v5: A-0012 (Buzzy AI调研) 派发到subagent运行中
+# MiniMax: ⚠️ 88.5%已用, ~69次剩余, 1h46m后重置 (⚠️ 80%阈值触发)
+# A-0012状态: pending -> running
+# Ubuntu: ❌ 离线
+# rsync: 待确认
+# docs.0-1.ai: ✅ 在线
+
+# Last check: 2026-04-01 22:59 CST (14:59 UTC)
+# Night Build v5: A-0012 ✅ + T-1802 ✅ → A序列 9/9 完成
+# A序列: 全部完成 (A-0001~A-0012, T-1802)
+# 产出: 3个py代码文件 + 2份调研/实现报告
+# docs.0-1.ai: ✅ 在线
+
+# Last check: 2026-04-02 05:31 CST (21:31 UTC)
+# MiniMax: ✅ 2.5%已用, 585次剩余, 4h26m后重置 (阈值正常)
+# Ubuntu: ❌ 离线(rsync可达, ping不可达)
+# rsync: ✅ 成功(1个session同步: deleted file)
+# docs.0-1.ai: ❌ 404(进程可能挂了，需重启)
+# 凌晨静默，阈值正常
+
+# Last check: 2026-04-02 01:26 CST (17:26 UTC)
+# MiniMax: ✅ 27.0%已用, 438次剩余, 3h33m后重置 (阈值正常)
+# Ubuntu: ❌ rsync可达但ping不可达(离线)
+# rsync: ✅ 成功(16.8KB sent)
+# docs.0-1.ai: ❌ 不响应
+# cache-missing: 脚本超时，跳过
+
+# Last check: 2026-04-02 05:01 CST (21:01 UTC)
+# MiniMax: ✅ 0.5%已用, 597次剩余, 4h57m后重置
+# Ubuntu: ❌ 离线(rsync可达, ping不可达)
+# rsync: ✅ 成功(1个session同步: e01c7fe0)
+# docs.0-1.ai: ❌ 404(可能需重启)
+# 凌晨静默，阈值正常
+
+# Last check: 2026-04-02 07:46 CST (23:46 UTC)
+# MiniMax: ✅ 34.8%已用, 391次剩余, 2h12m后重置 (阈值正常)
+# Ubuntu: ❌ 离线(rsync可达, ping不可达)
+# docs.0-1.ai: ❌ 404(进程挂了，需重启)
+
+# Last check: 2026-04-02 20:58 CST (12:58 UTC)
+# Tailscale: ✅ Ubuntu已接入 Tailnet (100.97.193.116)
+# Semantic Cache: ✅ Tailnet IP可访问 (10972条索引)
+# Ubuntu Tailscale: userspace模式，jets bin/，开机自启已配置
+# MiniMax: 未检查(Gateway离线)
+
+### Tailscale 远程访问（已完成 2026-04-02）
+- Ubuntu: Tailscale userspace 模式安装在 ~/bin/
+- Tailnet IP: 100.97.193.116
+- 自启: ~/.config/autostart/tailscale.desktop
+- Mac 同账号: 100.106.79.30
+- Semantic Cache: http://100.97.193.116:5050
+
+### OpenClaw 版本检查（不定期）
+- 每次心跳时检查 GitHub latest release
+- 如果发现新版本，按照 `skills/openclaw-upgrade/SKILL.md` 执行升级准备流程
+- 询问用户是否执行升级
+
+### Session Cache Cron（已完成 2026-04-02）
+- cron ID: e8c93642-c134-481b-9897-595ca27610f0
+- 频率: 每30分钟 (xx:30)
+- 动作: rsync sessions → Ubuntu + curl reindex
+- exec 白名单已设置: rsync, curl, python3, ssh, ssh-keyscan
+- 脚本: cache-missing-sessions.py (UPDATED参数增量同步)
+
+### exec-approvals 经验（2026-04-02）
+- v4.1 新增 exec 审批：`~/.openclaw/exec-approvals.json` 控制白名单
+- `allow-always` 后命令永久免审批
+- `security: allowlist` 模式下每个命令路径都要在白名单里
+- 推荐流程：把常用命令跑一遍 → 用户批准 allow-always → 以后免审批

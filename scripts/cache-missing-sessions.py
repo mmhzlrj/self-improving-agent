@@ -24,9 +24,9 @@ import urllib.error
 
 SESSIONS_JSON = os.path.expanduser("~/.openclaw/agents/main/sessions/sessions.json")
 SESSIONS_DIR = os.path.expanduser("~/.openclaw/agents/main/sessions")
-UBUNTU_HOST = "jet@192.168.1.18"
+UBUNTU_HOST = "jet@100.97.193.116"
 UBUNTU_SESSIONS_DIR = "~/.openclaw/agents/main/sessions"
-UBUNTU_SC_URL = "http://127.0.0.1:5050"
+UBUNTU_SC_URL = "http://100.97.193.116:5050"
 OPENCLAW_BIN = "/usr/local/bin/openclaw"  # 实际路径由 which 确定
 
 DRY_RUN = "--dry-run" in sys.argv
