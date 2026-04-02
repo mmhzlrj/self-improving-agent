@@ -603,3 +603,31 @@ TaskInductor 脚本使用 `session-*.jsonl` 匹配 session 文件，但匹配结
 
 ### 教训
 - 实现前先用 `ls` 确认实际文件名格式
+
+---
+
+## 2026-04-02: Tailscale Mac 安装位置问题
+
+### 错误
+brew install tailscale 退出码0（安装成功），但 `which tailscale` 找不到。
+
+### 结果
+- go 依赖安装成功（brew 耗时5分钟）
+- tailscale 主程序未找到
+
+### 根因
+- macOS 上 brew 可能把 tailscale 安装到非标准路径
+- 或者需要额外的手动步骤（如菜单栏点击）
+
+### 教训
+- 安装完成后要用 `brew list tailscale` 检查实际安装位置
+- Mac Tailscale 需要用户打开浏览器授权登录
+
+---
+
+## 2026-04-02: docs-server.py HTML 静态修改验证
+
+### 教训
+修改 HTML/JS 后用 curl + grep 验证关键字符串是否在页面中。
+重启服务后再验证，确保修改生效。
+
