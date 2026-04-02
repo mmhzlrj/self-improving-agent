@@ -1,0 +1,92 @@
+{
+  "openclaw": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "docs.0-1.ai 站点搭建：SOP 文档展示 + 模块文档 + 调研报告",
+        "date": "2026-04-01"
+      },
+      {
+        "type": "added",
+        "detail": "暗黑/亮色主题切换",
+        "date": "2026-04-01"
+      },
+      {
+        "type": "added",
+        "detail": "Prism.js 代码高亮 + Fuse.js 模糊搜索",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "lewm": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "LeWM 世界模型文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "gui-geng": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "贵庚记忆系统文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "arm": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "机械臂模块文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "vision": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "视觉识别模块文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "suction": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "吸盘抓手模块文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "locomotion": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "移动模块文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  },
+  "face": {
+    "version": "v0.1.0",
+    "changes": [
+      {
+        "type": "added",
+        "detail": "面部模块文档初始化",
+        "date": "2026-04-01"
+      }
+    ]
+  }
+}
