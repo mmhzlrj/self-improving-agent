@@ -609,7 +609,7 @@
       "sequence": "C",
       "category": "building",
       "name": "3D打印零件建模 - 拓竹H2C",
-      "status": "pending",
+      "status": "completed",
       "depends_on": [],
       "description": "T-0127~T-0158 P3",
       "mode": "auto",
@@ -760,6 +760,64 @@
       "gpu_required": true,
       "gpu_memory_gb": 4,
       "notes": "Jetson Nano 2GB 内存限制，必须量化后部署"
+    },
+    {
+      "id": "A-0012",
+      "category": "research",
+      "name": "调研: Buzzy AI - 1个灵感生成万个视频创意的病毒内容系统",
+      "status": "completed",
+      "description": "调研 Buzzy AI（buzzy.now）的病毒内容生成系统，结合0-1项目的小红书内容生产需求。\n详见 task-queue.json。\n输出到 night-build/reports/A-0012-Buzzy-AI-调研.md",
+      "exec_command": "",
+      "edit_info": null,
+      "verify_command": "test -f /Users/lr/.openclaw/workspace/harness/robot/night-build/reports/A-0012-Buzzy-AI-调研.md && echo \"OK\" || echo \"NOT_FOUND\"",
+      "sequence": "A",
+      "mode": "auto",
+      "priority": "P0",
+      "completed_at": 1775053636,
+      "result": "Buzzy AI调研完成，5步工作流+病毒基因图谱+案例验证",
+      "output": [
+        "reports/A-0012-Buzzy-AI-调研.md"
+      ]
+    },
+    {
+      "id": "A-0013",
+      "title": "docs-server.py 自动重启 crontab",
+      "description": "添加 crontab 监控脚本，当 docs.0-1.ai 服务 (端口18998) 挂掉时自动重启",
+      "status": "pending",
+      "priority": "P0",
+      "sequence": "A",
+      "created": "2026-04-02T07:20:00+08:00",
+      "updated": "2026-04-02T07:20:00+08:00"
+    },
+    {
+      "id": "A-0014",
+      "title": "PDF 导出功能验证",
+      "description": "验证 markdown-to-pdf 包和 /api/export/sop-pdf 路由是否正常工作",
+      "status": "pending",
+      "priority": "P0",
+      "sequence": "A",
+      "created": "2026-04-02T07:20:00+08:00",
+      "updated": "2026-04-02T07:20:00+08:00"
+    },
+    {
+      "id": "A-0015",
+      "title": "track-alsoAllow crontab 添加",
+      "description": "用户手动添加 alsoAllow 变更追踪 crontab：0 * * * * python3 ~/.openclaw/workspace/scripts/track-alsoAllow.py",
+      "status": "pending",
+      "priority": "P1",
+      "sequence": "A",
+      "created": "2026-04-02T07:20:00+08:00",
+      "updated": "2026-04-02T07:20:00+08:00"
+    },
+    {
+      "id": "A-0016",
+      "title": "搜索索引大小优化",
+      "description": "当前搜索索引包含全部 SOP 内容，可能过大，需要优化 Fuse.js 索引构建方式",
+      "status": "pending",
+      "priority": "P1",
+      "sequence": "A",
+      "created": "2026-04-02T07:20:00+08:00",
+      "updated": "2026-04-02T07:20:00+08:00"
     }
   ]
 }
