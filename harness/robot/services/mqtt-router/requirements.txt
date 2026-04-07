@@ -1,0 +1,7 @@
+# mqtt-router/requirements.txt
+# Python 依赖列表
+#
+# mqtt_router.py 需要 paho-mqtt
+# bridge.py 使用标准库实现，不依赖第三方库
+
+paho-mqtt>=1.6.0

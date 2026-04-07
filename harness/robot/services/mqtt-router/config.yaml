@@ -1,0 +1,325 @@
+# ============================================================
+# mqtt-router / bridge 配置文件模板
+# ============================================================
+#
+# 用法：
+#   方式一：直接传入 MQTTRouter / MqttOpenClawBridge
+#       router = MQTTRouter(**yaml.safe_load(open("config.yaml")))
+#       router.connect()
+#
+#   方式二：配合 bridge.py CLI
+#       python bridge.py --config config.yaml
+#
+#   方式三：环境变量覆盖（环境变量优先级高于文件配置）
+#       MQTT_HOST=192.168.1.100 MQTT_PORT=1883 python bridge.py
+#
+# 注意事项：
+#   - 布尔值使用 yes/no/true/false/1/0（YAML 标准）
+#   - 密码和 API Key 建议通过环境变量注入，不要明文写在文件里
+#   - # 注释仅为说明，不要在 YAML 值中使用 # 开头（会被解析为注释）
+# ============================================================
+
+# ------------------------------------------------------------
+# §1 MQTT Broker 连接配置
+# ------------------------------------------------------------
+mqtt:
+  # Broker 地址
+  # 环境变量：MQTT_HOST
+  # 默认：localhost
+  broker_host: "localhost"
+
+  # Broker 端口
+  # 环境变量：MQTT_PORT
+  # 默认：1883
+  broker_port: 1883
+
+  # MQTT 客户端标识符
+  # 空字符串则自动生成（推荐，保持空让框架自动生成唯一 ID）
+  # 环境变量：MQTT_CLIENT_ID
+  client_id: ""
+
+  # 保活心跳间隔（秒）
+  # Broker 在此时间内没收到任何消息则判定客户端断开
+  # 环境变量：MQTT_KEEPALIVE
+  # 范围：60 ~ 600（建议值）
+  keepalive: 60
+
+  # 是否清理旧会话（QoS 1/2 消息与离线订阅者的关联）
+  # true  = 每次重连重新订阅（干净，推荐）
+  # false = 保留会话（断线期间消息不丢失，但重连后可能收到重复消息）
+  # 环境变量：MQTT_CLEAN_SESSION
+  clean_session: true
+
+  # MQTT 用户名（可选，留空则不认证）
+  # 环境变量：MQTT_USERNAME
+  # 推荐通过环境变量注入：MQTT_USERNAME=myuser
+  username: ""
+
+  # MQTT 密码（可选，留空则不认证）
+  # 环境变量：MQTT_PASSWORD
+  # ⚠️ 生产环境强烈建议通过环境变量注入，不要明文写在此文件
+  password: ""
+
+  # 连接失败后的首次重连延迟（秒）
+  # 环境变量：MQTT_RECONNECT_DELAY
+  reconnect_delay: 5.0
+
+  # 重连最大延迟上限（秒），超过后保持此值不再增长
+  # 防止退避时间过长（如网络闪断后等待过久）
+  # 环境变量：MQTT_MAX_RECONNECT_DELAY
+  max_reconnect_delay: 300.0
+
+  # 默认 QoS 等级（0/1/2）
+  # 0 = 至多一次（可丢，适合心跳）
+  # 1 = 至少一次（适合命令控制）
+  # 2 = 恰好一次（适合重要指令，但性能开销大）
+  # 环境变量：MQTT_DEFAULT_QOS
+  default_qos: 1
+
+# ------------------------------------------------------------
+# §2 MQTT 遗嘱消息（Last Will & Testament）
+# ------------------------------------------------------------
+# 当路由器异常断开时，Broker 会自动向指定 topic 发送此消息
+# 常用于通知其他节点本节点已离线
+mqtt_will:
+  # 是否启用遗嘱消息
+  # 环境变量：MQTT_WILL_ENABLED
+  enabled: false
+
+  # 遗嘱消息 topic
+  # 例如：robot/0-1/status/lwt
+  # 环境变量：MQTT_WILL_TOPIC
+  topic: "robot/0-1/status/lwt"
+
+  # 遗嘱消息内容
+  # 环境变量：MQTT_WILL_PAYLOAD
+  payload: "offline"
+
+  # 遗嘱消息 QoS（建议 1 或 2）
+  # 环境变量：MQTT_WILL_QOS
+  qos: 1
+
+  # 是否 retain（Broker 保留最后一条遗嘱消息）
+  # 环境变量：MQTT_WILL_RETAIN
+  retain: false
+
+# ------------------------------------------------------------
+# §3 MQTT 订阅配置
+# ------------------------------------------------------------
+subscriptions:
+  # 订阅的 Topic 过滤器列表（支持 MQTT 通配符 # / +）
+  #
+  # 常用过滤器说明：
+  #   robot/+/cyberbrick/cmd/#    - 订阅所有机器人的 Cyber Brick 命令
+  #   robot/+/+/status/#         - 订阅所有机器人的所有设备状态
+  #   robot/+/+/event/estop      - 订阅所有机器人的急停事件
+  #
+  # ⚠️ 注意：paho-mqtt 对 # 的处理是"该层级及之后所有层级"
+  #   "robot/#" 匹配 "robot/0-1/cyberbrick/cmd/motor" ✓
+  #   "#"        匹配所有 topic
+  #
+  # 环境变量：MQTT_SUBSCRIBE_TOPICS（JSON 数组格式）
+  #   例：MQTT_SUBSCRIBE_TOPICS='["robot/#", "agent/#"]'
+  topics:
+    - "robot/#"
+
+  # 每个 Topic 对应的 QoS 等级（可选，不填则使用 default_qos）
+  # 格式：{ "topic_pattern": qos_int }
+  # topic_pattern 必须与上方 topics 列表中的条目完全一致
+  qos_map:
+    # "robot/+/cyberbrick/cmd/motor": 2   # 电机命令需要高可靠
+    # "robot/+/+/status/#": 0             # 状态可丢
+
+# ------------------------------------------------------------
+# §4 OpenClaw Gateway 配置（仅 bridge.py 使用）
+# ------------------------------------------------------------
+openclaw:
+  # OpenClaw Gateway HTTP 地址
+  # 环境变量：OPENCLAW_URL
+  # 默认：http://127.0.0.1:18789
+  url: "http://127.0.0.1:18789"
+
+  # OpenClaw API Key（可选，留空则无认证）
+  # 环境变量：OPENCLAW_API_KEY
+  # ⚠️ 生产环境强烈建议通过环境变量注入
+  api_key: ""
+
+  # HTTP 请求超时（秒）
+  # 环境变量：OPENCLAW_TIMEOUT
+  timeout: 10.0
+
+  # OpenClaw 健康检查间隔（秒）
+  # 设为 0 可禁用定期健康检查
+  # 环境变量：OPENCLAW_HEALTH_CHECK_INTERVAL
+  health_check_interval: 30.0
+
+# ------------------------------------------------------------
+# §5 Bridge HTTP 服务配置（仅 bridge.py 使用）
+# ------------------------------------------------------------
+http:
+  # HTTP 服务监听地址
+  # 0.0.0.0 = 接受所有网络接口的连接
+  # 127.0.0.1 = 仅本机访问（更安全）
+  # 环境变量：HTTP_HOST
+  host: "0.0.0.0"
+
+  # HTTP 服务监听端口
+  # 环境变量：HTTP_PORT
+  port: 8080
+
+  # HTTP POST /publish 允许发布的 MQTT topics 列表
+  # 使用 MQTT 通配符 # / +
+  # 安全提示：仅允许必要的 topics，避免开放所有 topics
+  # 环境变量：HTTP_ALLOWED_PUBLISH_TOPICS（JSON 数组格式）
+  allowed_publish_topics:
+    - "robot/cmd/#"
+    - "agent/#"
+
+# ------------------------------------------------------------
+# §6 日志配置
+# ------------------------------------------------------------
+logging:
+  # 日志级别
+  # DEBUG  = 详细（开发调试用，包含 MQTT 报文内容）
+  # INFO   = 一般（推荐，日常运行）
+  # WARNING= 警告（仅显示异常）
+  # ERROR  = 仅错误
+  # 环境变量：LOG_LEVEL
+  level: "INFO"
+
+  # 日志格式（Python logging 标准格式）
+  # %(name)s       = logger 名称（如 mqtt_router）
+  # %(levelname)s  = 日志级别
+  # %(asctime)s    = 时间戳
+  # %(message)s    = 日志内容
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+
+  # 时间戳格式
+  date_format: "%H:%M:%S"
+
+  # 日志输出目标
+  #   "stdout"   = 标准输出（推荐，容器/systemd 日志收集）
+  #   "stderr"   = 标准错误
+  #   "/path/to/file.log" = 文件（追加模式）
+  # 环境变量：LOG_OUTPUT
+  output: "stdout"
+
+  # 日志文件最大大小（MB），仅当 output 为文件时有效
+  # 超过后自动轮转（追加 .1, .2 ...）
+  # 环境变量：LOG_MAX_BYTES
+  max_bytes: 10
+
+  # 日志备份数量（轮转保留文件数）
+  # 环境变量：LOG_BACKUP_COUNT
+  backup_count: 3
+
+# ------------------------------------------------------------
+# §7 错误处理与重试策略
+# ------------------------------------------------------------
+error_handling:
+  # 连接失败时的最大重试次数
+  # 0 = 无限重试（推荐，生产环境保持 0）
+  # >0 = 重试指定次数后放弃
+  # 环境变量：MAX_CONNECT_RETRIES
+  max_connect_retries: 0
+
+  # 单次 MQTT 操作（如 publish）失败是否自动重试
+  # 环境变量：AUTO_RETRY_OPERATIONS
+  auto_retry_operations: true
+
+  # 发布失败重试次数
+  # 环境变量：PUBLISH_RETRY_COUNT
+  publish_retry_count: 3
+
+  # 发布失败重试间隔（秒）
+  # 环境变量：PUBLISH_RETRY_DELAY
+  publish_retry_delay: 1.0
+
+  # 未知 topic 消息的处理方式
+  #   "log"      = 仅记录警告日志（默认）
+  #   "drop"     = 直接丢弃
+  #   "forward"  = 转发到 OpenClaw（需要 bridge 模式）
+  # 环境变量：UNKNOWN_TOPIC_ACTION
+  unknown_topic_action: "log"
+
+# ------------------------------------------------------------
+# §8 回调配置
+# ------------------------------------------------------------
+callbacks:
+  # 是否在收到消息时自动打印日志
+  # 环境变量：CALLBACK_LOG_ENABLED
+  log_messages: true
+
+  # 消息 payload 的日志截断长度（字符）
+  # 防止大 payload 刷屏
+  # 环境变量：CALLBACK_LOG_TRUNCATE
+  log_truncate: 100
+
+  # 回调函数执行超时（秒）
+  # 超时的回调会被强制终止并记录错误
+  # 0 = 不设超时
+  # 环境变量：CALLBACK_TIMEOUT
+  callback_timeout: 5.0
+
+  # 回调执行异常是否继续传播
+  # true  = 记录日志后继续执行其他回调
+  # false = 回调异常时立即抛出
+  # 环境变量：CALLBACK_SWALLOW_ERRORS
+  swallow_errors: true
+
+# ------------------------------------------------------------
+# §9 性能与资源限制
+# ------------------------------------------------------------
+performance:
+  # 消息队列最大长度（条）
+  # 超过后新消息会被丢弃（QoS 0）或阻塞（QoS 1/2）
+  # 环境变量：MAX_QUEUE_SIZE
+  max_queue_size: 1000
+
+  # 单个 payload 最大长度（字节）
+  # 超过此大小的消息会被拒绝并记录错误
+  # 环境变量：MAX_PAYLOAD_SIZE
+  max_payload_size: 65536   # 64KB，MQTT 默认限制
+
+  # 每次 loop_start() 处理的最多消息数
+  # 提高此值可提升高吞吐场景性能，但会增加单次调用延迟
+  # 环境变量：MAX_MESSAGES_PER_LOOP
+  max_messages_per_loop: 20
+
+  # 是否启用 TCP NoDelay（禁用 Nagle 算法）
+  # true  = 降低延迟，但增加小包数量（推荐 MQTT 场景）
+  # false = 增大吞吐，但可能引入延迟
+  # 环境变量：TCP_NODELAY
+  tcp_nodelay: true
+
+# ------------------------------------------------------------
+# §10 安全配置（高级）
+# ------------------------------------------------------------
+security:
+  # TLS/SSL 连接
+  # 注意：启用 TLS 需要 broker_host 为 tls:// 或 mqtts:// 前缀
+  tls:
+    enabled: false
+
+    # CA 证书文件路径（可选，不填则使用系统默认 CA）
+    # 环境变量：TLS_CA_CERTS
+    ca_certs: ""
+
+    # 客户端证书文件路径（双向 TLS 时需要）
+    # 环境变量：TLS_CERT_FILE
+    cert_file: ""
+
+    # 客户端私钥文件路径（双向 TLS 时需要）
+    # 环境变量：TLS_KEY_FILE
+    key_file: ""
+
+    # 是否验证 broker 证书
+    # 生产环境建议 true
+    # 环境变量：TLS_INSECURE
+    insecure: false
+
+  # 心跳间隔（秒）
+  # 小于 keepalive，用于检测对端存活
+  # 默认 keepalive / 2
+  # 环境变量：PING_TIMEOUT
+  ping_interval: 30

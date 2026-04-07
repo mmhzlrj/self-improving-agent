@@ -1,0 +1,50 @@
+{
+  "tasks": [
+    {
+      "id": "T-0128",
+      "title": "生成 whisper-tts 音频录制服务",
+      "status": "completed",
+      "priority": 128,
+      "mode": "code",
+      "output": "harness/robot/services/whisper-tts/audio_capture.py",
+      "depends_on": [],
+      "created_at": "2026-04-07T18:40:00+08:00",
+      "completed_at": "2026-04-07T19:11:00+08:00"
+    },
+    {
+      "id": "T-0129",
+      "title": "生成 vad.py 静音检测服务",
+      "status": "completed",
+      "priority": 129,
+      "mode": "code",
+      "output": "harness/robot/services/whisper-tts/vad.py",
+      "depends_on": ["T-0128"],
+      "created_at": "2026-04-07T19:11:00+08:00",
+      "completed_at": "2026-04-07T19:15:00+08:00"
+    },
+    {
+      "id": "T-0142",
+      "title": "调研宇树科技 Unitree Go2",
+      "status": "completed",
+      "priority": 142,
+      "mode": "report",
+      "output": "night-build/reports/competitor-unitree-go2.md",
+      "depends_on": [],
+      "created_at": "2026-04-07T10:37:00+08:00",
+      "completed_at": "2026-04-07T10:40:00+08:00"
+    },
+    {
+      "id": "T-0148",
+      "title": "调研 Anki Vector 竞品分析",
+      "status": "completed",
+      "priority": 148,
+      "mode": "report",
+      "output": "night-build/reports/competitor-anki-vector.md",
+      "depends_on": [],
+      "created_at": "2026-04-07T20:03:00+08:00",
+      "completed_at": "2026-04-07T20:20:00+08:00",
+      "notes": "调研内容：Anki Vector功能规格、停产原因(融资失败)、社区替代方案(Wire-Pod)、DDL接管后续、竞品对比(Loona/Emo)"
+    }
+  ],
+  "last_updated": "2026-04-07T20:20:00+08:00"
+}

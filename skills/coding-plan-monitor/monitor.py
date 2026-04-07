@@ -32,11 +32,11 @@ def get_usage():
                 start_ts = m['start_time'] / 1000
                 end_ts = m['end_time'] / 1000
                 remaining = m['current_interval_usage_count']
-                total = m['current_interval_total_count']
+                total = m.get('current_interval_total_count', 0)
                 used = total - remaining
                 
-                pct_used = (used / total) * 100
-                pct_remaining = (remaining / total) * 100
+                pct_used = (used / total * 100) if total > 0 else 0.0
+                pct_remaining = (remaining / total * 100) if total > 0 else 0.0
                 
                 start_dt = datetime.fromtimestamp(start_ts, tz)
                 end_dt = datetime.fromtimestamp(end_ts, tz)

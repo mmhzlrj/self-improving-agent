@@ -1257,3 +1257,31 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 2. 确认 `tools.profile` 是 `"full"`，不是 `"coding"`
 3. 重启 Gateway
 4. 验证：zhiku-ask 脚本走通
+
+## 2026-04-07
+
+### openclaw-upgrade Skill 经验
+
+**正确的升级检查命令**：
+- ✅ `gh release list --repo openclaw/openclaw --limit 3`
+- ✅ `openclaw --version`
+- ✅ `openclaw gateway status`
+
+**错误的命令**：
+- ❌ `openclaw update run` — too many arguments，update 不接受参数
+- ✅ `openclaw update` — 正确命令（无参数）
+
+**避免 SSL 问题**：
+- ❌ `curl ... | python3` — urllib 需要加 `ssl._create_unverified_context()`
+- ✅ 用封装脚本 `python3 check-openclaw-latest.py`
+
+**exec 命令记录**：
+- 每次 exec 后必须立即追加到 `docs/command-log.md`
+- command-log.md 位置：`http://127.0.0.1:18998/docs.0-1.ai/command-log.html`
+
+**git push 失败时**：用 git-retry-push skill 自动重试
+
+### docs-server.py 导航修改经验
+- 按钮放在 header 内会错位（position:fixed 嵌套问题）
+- 正确做法：按钮放在 header 外、nav 前的独立位置
+- 添加新页面路由：在 Board 路由后加 if path == "/xxx.html"

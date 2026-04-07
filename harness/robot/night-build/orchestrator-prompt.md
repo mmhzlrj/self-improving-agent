@@ -108,7 +108,7 @@ prompt 结尾必须加：
 
 ## 执行流程
 
-### Step 1：查额度
+### Step 1：查 MiniMax 额度
 
 ```bash
 curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains" \
@@ -116,6 +116,20 @@ curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains
 ```
 
 获取 `current_interval_usage_count`（剩余次数）。
+
+### Step 1.5：检查全局活跃 subagent 数（⚠️ 必做！）
+
+```bash
+# 获取当前所有活跃 subagent 数量
+openclaw subagent list 2>/dev/null | grep -c "running" || echo 0
+```
+
+| 活跃 subagent | 当前可派 | 决策 |
+|--------------|---------|------|
+| 0-2 | 派 1 个 | 正常（派完最多 3 个，不会超） |
+| ≥ 3 | 0 | **停止**，等下一轮 cron |
+
+**为什么要限制？** 如果已有太多 subagent 在跑，主 agent 忙于管理它们，无法及时响应用户消息（Feishu 超时）。宁可慢，不要崩。
 
 ### Step 2：选任务（严格序列顺序）
 
@@ -145,12 +159,12 @@ curl -s -X GET "https://www.minimaxi.com/v1/api/openplatform/coding_plan/remains
 
 ### Step 3：调度决策
 
-| 剩余额度 | 决策 |
-|---------|------|
-| ≥ 300 | 取下一个 pending 任务派 subagent |
-| 150-299 | 只派小任务（预估消耗 < 50 次的） |
-| 60-149 | 暂停，记录状态到日志 |
-| < 60 | 停止，记录"额度不足" |
+| 活跃 subagent | 时间段 | 剩余额度 | 决策 |
+|--------------|---------|---------|------|
+| 0-2 | 非高峰 | ≥ 60 | 取 pending 任务派 1 个 subagent |
+| 0-2 | 非高峰 | < 60 | 停止，记录"额度不足" |
+| 0-2 | **15:00-20:00 高峰** | 任意 | 只派 1 个 subagent |
+| ≥ 3 | 任意 | 任意 | **停止**，等下一轮 cron |
 
 ### Step 4：派 subagent + 更新状态（⚠️ 强制规则！）
 

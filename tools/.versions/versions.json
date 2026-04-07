@@ -1,0 +1,40 @@
+{
+  "openclaw": {
+    "version": "2026.03.31",
+    "changes": [
+      {
+        "date": "2026-03-31",
+        "type": "modified",
+        "detail": "alsoAllow移到tools级别，profile改为full，MCP工具可正常通行"
+      }
+    ]
+  },
+  "gui-geng": {
+    "version": "0.1.0",
+    "changes": []
+  },
+  "lewm": {
+    "version": "0.1.0",
+    "changes": []
+  },
+  "arm": {
+    "version": "0.1.0",
+    "changes": []
+  },
+  "vision": {
+    "version": "0.0.1",
+    "changes": []
+  },
+  "suction": {
+    "version": "0.0.1",
+    "changes": []
+  },
+  "locomotion": {
+    "version": "0.0.1",
+    "changes": []
+  },
+  "face": {
+    "version": "0.0.1",
+    "changes": []
+  }
+}

@@ -1,0 +1,405 @@
+# ============================================================
+# jetson-yolo / YOLO 目标检测服务配置文件
+# ============================================================
+#
+# 用法：
+#   方式一：直接传入 YOLODetector / YOLOMQTTPublisher
+#       config = yaml.safe_load(open("config.yaml"))
+#       detector = YOLODetector(**config['yolo'])
+#       publisher = YOLOMQTTPublisher(**config['mqtt'])
+#
+#   方式二：配合 start.sh 启动脚本
+#       ./start.sh --config config.yaml
+#
+#   方式三：环境变量覆盖（环境变量优先级高于文件配置）
+#       YOLO_MODEL=yolov8n.pt MQTT_BROKER=192.168.1.100 python detect.py
+#
+# 注意事项：
+#   - 布尔值使用 yes/no/true/false/1/0（YAML 标准）
+#   - 密码和 API Key 建议通过环境变量注入，不要明文写在文件里
+#   - # 注释仅为说明，不要在 YAML 值中使用 # 开头（会被解析为注释）
+# ============================================================
+
+# ------------------------------------------------------------
+# §1 YOLO 检测模型配置
+# ------------------------------------------------------------
+yolo:
+  # 模型权重路径
+  # 支持本地路径（如 yolov8n.pt）或模型名称（如 yolov8n, yolov8s, yolov8m）
+  # 环境变量：YOLO_MODEL
+  # 默认：yolov8n.pt
+  model_path: "yolov8n.pt"
+
+  # 置信度阈值
+  # 只保留置信度 >= 此值的检测结果
+  # 范围：0.0 ~ 1.0
+  # 环境变量：YOLO_CONF_THRESHOLD
+  # 默认：0.25
+  conf_threshold: 0.25
+
+  # NMS IOU 阈值
+  # 用于去除重叠的检测框
+  # 范围：0.0 ~ 1.0
+  # 环境变量：YOLO_IOU_THRESHOLD
+  # 默认：0.45
+  iou_threshold: 0.45
+
+  # 运行设备
+  #   "cpu"           = CPU 推理（慢，但兼容性好）
+  #   "0"             = 第1块 NVIDIA GPU（ Jetson 默认）
+  #   "1", "2", ...   = 第2、3块 GPU
+  # 环境变量：YOLO_DEVICE
+  # 默认："0"
+  device: "0"
+
+  # 是否输出详细信息
+  # 环境变量：YOLO_VERBOSE
+  # 默认：false
+  verbose: false
+
+  # 检测类别过滤（可选）
+  # 空列表表示检测所有类别
+  # 例如：["person", "car", "bicycle"]
+  # 环境变量：YOLO_CLASSES（JSON 数组格式）
+  classes: []
+
+  # 图像输入尺寸
+  # 设为 0 则使用模型默认输入尺寸
+  # 环境变量：YOLO_IMAGE_SIZE
+  # 默认：0
+  image_size: 0
+
+  # 是否使用半精度推理（FP16）
+  # 加速 GPU 推理，略微降低精度
+  # Jetson 设备建议开启
+  # 环境变量：YOLO_HALF
+  # 默认：true
+  half: true
+
+# ------------------------------------------------------------
+# §2 RTSP 流配置
+# ------------------------------------------------------------
+rtsp:
+  # RTSP 流地址
+  # 格式：rtsp://<用户名>:<密码>@<IP>:<端口>/<路径>
+  # 环境变量：RTSP_URL
+  # 示例：rtsp://192.168.1.100:8554/stream
+  url: "rtsp://192.168.1.100:8554/stream"
+
+  # 连接失败后的重连延迟（秒）
+  # 环境变量：RTSP_RECONNECT_DELAY
+  # 默认：2.0
+  reconnect_delay: 2.0
+
+  # 最大重连尝试次数
+  # 0 = 无限重连
+  # 环境变量：RTSP_MAX_RECONNECT_ATTEMPTS
+  # 默认：0（无限重连）
+  max_reconnect_attempts: 0
+
+  # 帧读取超时时间（秒）
+  # 超过此时间没有读取到帧则判定为断流
+  # 环境变量：RTSP_FRAME_TIMEOUT
+  # 默认：30.0
+  frame_timeout: 30.0
+
+  # RTSP 传输协议
+  #   "tcp"  = TCP 传输（稳定，推荐）
+  #   "udp"  = UDP 传输（快，但可能丢包）
+  #   "any"  = 自动选择
+  # 环境变量：RTSP_TRANSPORT
+  # 默认："tcp"
+  transport: "tcp"
+
+  # 缓冲区大小（帧数）
+  # 增加可减少卡顿，但会增加延迟
+  # 环境变量：RTSP_BUFFER_SIZE
+  # 默认：1
+  buffer_size: 1
+
+# ------------------------------------------------------------
+# §3 MQTT Broker 连接配置
+# ------------------------------------------------------------
+mqtt:
+  # Broker 地址
+  # 环境变量：MQTT_BROKER
+  # 默认：localhost
+  broker_host: "localhost"
+
+  # Broker 端口
+  # 环境变量：MQTT_PORT
+  # 默认：1883
+  broker_port: 1883
+
+  # MQTT 客户端标识符
+  # 空字符串则自动生成（推荐，保持空让框架自动生成唯一 ID）
+  # 环境变量：MQTT_CLIENT_ID
+  client_id: ""
+
+  # 保活心跳间隔（秒）
+  # Broker 在此时间内没收到任何消息则判定客户端断开
+  # 环境变量：MQTT_KEEPALIVE
+  # 范围：60 ~ 600（建议值）
+  keepalive: 60
+
+  # 是否清理旧会话（QoS 1/2 消息与离线订阅者的关联）
+  # true  = 每次重连重新订阅（干净，推荐）
+  # false = 保留会话（断线期间消息不丢失，但重连后可能收到重复消息）
+  # 环境变量：MQTT_CLEAN_SESSION
+  clean_session: true
+
+  # MQTT 用户名（可选，留空则不认证）
+  # 环境变量：MQTT_USERNAME
+  username: ""
+
+  # MQTT 密码（可选，留空则不认证）
+  # 环境变量：MQTT_PASSWORD
+  # ⚠️ 生产环境强烈建议通过环境变量注入，不要明文写在此文件
+  password: ""
+
+  # 连接失败后的首次重连延迟（秒）
+  # 环境变量：MQTT_RECONNECT_DELAY
+  reconnect_delay: 5.0
+
+  # 重连最大延迟上限（秒），超过后保持此值不再增长
+  # 环境变量：MQTT_MAX_RECONNECT_DELAY
+  max_reconnect_delay: 300.0
+
+  # 默认 QoS 等级（0/1/2）
+  # 0 = 至多一次（可丢，适合心跳）
+  # 1 = 至少一次（适合命令控制）
+  # 2 = 恰好一次（适合重要指令，但性能开销大）
+  # 环境变量：MQTT_DEFAULT_QOS
+  default_qos: 1
+
+  # 发布主题
+  # 检测结果将发布到此主题
+  # 环境变量：MQTT_PUBLISH_TOPIC
+  publish_topic: "yolo/detections"
+
+  # 发布消息是否 retain（Broker 保留最后一条消息）
+  # 环境变量：MQTT_RETAIN
+  retain: false
+
+# ------------------------------------------------------------
+# §4 MQTT 遗嘱消息（Last Will & Testament）
+# ------------------------------------------------------------
+mqtt_will:
+  # 是否启用遗嘱消息
+  # 环境变量：MQTT_WILL_ENABLED
+  enabled: false
+
+  # 遗嘱消息 topic
+  # 例如：robot/0-1/yolo/status/lwt
+  # 环境变量：MQTT_WILL_TOPIC
+  topic: "robot/0-1/yolo/status/lwt"
+
+  # 遗嘱消息内容
+  # 环境变量：MQTT_WILL_PAYLOAD
+  payload: "offline"
+
+  # 遗嘱消息 QoS（建议 1 或 2）
+  # 环境变量：MQTT_WILL_QOS
+  qos: 1
+
+  # 是否 retain（Broker 保留最后一条遗嘱消息）
+  # 环境变量：MQTT_WILL_RETAIN
+  retain: false
+
+# ------------------------------------------------------------
+# §5 检测输出配置
+# ------------------------------------------------------------
+output:
+  # 是否显示实时检测窗口
+  # 在 Jetson 无屏幕环境下设为 false
+  # 环境变量：OUTPUT_DISPLAY
+  # 默认：false
+  display: false
+
+  # 是否保存检测视频
+  # 环境变量：OUTPUT_SAVE_VIDEO
+  # 默认：false
+  save_video: false
+
+  # 输出视频路径（save_video 为 true 时有效）
+  # 环境变量：OUTPUT_VIDEO_PATH
+  # 默认："output/detections.mp4"
+  video_path: "output/detections.mp4"
+
+  # 是否保存检测到的帧图像
+  # 环境变量：OUTPUT_SAVE_FRAMES
+  # 默认：false
+  save_frames: false
+
+  # 保存帧的目录（save_frames 为 true 时有效）
+  # 环境变量：OUTPUT_FRAMES_DIR
+  # 默认："output/frames"
+  frames_dir: "output/frames"
+
+  # 是否在终端打印检测结果摘要
+  # 环境变量：OUTPUT_LOG_SUMMARY
+  # 默认：true
+  log_summary: true
+
+  # 检测结果摘要打印间隔（帧数）
+  # 每隔此帧数打印一次摘要
+  # 环境变量：OUTPUT_LOG_INTERVAL
+  # 默认：30
+  log_interval: 30
+
+# ------------------------------------------------------------
+# §6 OpenClaw Gateway 配置（可选，用于状态上报）
+# ------------------------------------------------------------
+openclaw:
+  # OpenClaw Gateway HTTP 地址
+  # 环境变量：OPENCLAW_URL
+  # 默认：http://127.0.0.1:18789
+  url: "http://127.0.0.1:18789"
+
+  # OpenClaw API Key（可选，留空则无认证）
+  # 环境变量：OPENCLAW_API_KEY
+  api_key: ""
+
+  # HTTP 请求超时（秒）
+  # 环境变量：OPENCLAW_TIMEOUT
+  timeout: 10.0
+
+  # 是否启用健康检查定期上报
+  # 环境变量：OPENCLAW_HEALTH_CHECK_ENABLED
+  # 默认：false
+  enabled: false
+
+  # 健康检查间隔（秒）
+  # 环境变量：OPENCLAW_HEALTH_CHECK_INTERVAL
+  # 默认：30.0
+  health_check_interval: 30.0
+
+# ------------------------------------------------------------
+# §7 日志配置
+# ------------------------------------------------------------
+logging:
+  # 日志级别
+  # DEBUG  = 详细（开发调试用）
+  # INFO   = 一般（推荐，日常运行）
+  # WARNING= 警告（仅显示异常）
+  # ERROR  = 仅错误
+  # 环境变量：LOG_LEVEL
+  level: "INFO"
+
+  # 日志格式（Python logging 标准格式）
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+
+  # 时间戳格式
+  date_format: "%Y-%m-%d %H:%M:%S"
+
+  # 日志输出目标
+  #   "stdout"   = 标准输出（推荐，容器/systemd 日志收集）
+  #   "stderr"   = 标准错误
+  #   "/path/to/file.log" = 文件（追加模式）
+  # 环境变量：LOG_OUTPUT
+  output: "stdout"
+
+  # 日志文件最大大小（MB），仅当 output 为文件时有效
+  # 超过后自动轮转（追加 .1, .2 ...）
+  # 环境变量：LOG_MAX_BYTES
+  max_bytes: 10
+
+  # 日志备份数量（轮转保留文件数）
+  # 环境变量：LOG_BACKUP_COUNT
+  backup_count: 3
+
+# ------------------------------------------------------------
+# §8 错误处理与重试策略
+# ------------------------------------------------------------
+error_handling:
+  # 连接失败时的最大重试次数
+  # 0 = 无限重试（推荐，生产环境保持 0）
+  # 环境变量：MAX_CONNECT_RETRIES
+  max_connect_retries: 0
+
+  # 单次 MQTT 操作（如 publish）失败是否自动重试
+  # 环境变量：AUTO_RETRY_OPERATIONS
+  auto_retry_operations: true
+
+  # 发布失败重试次数
+  # 环境变量：PUBLISH_RETRY_COUNT
+  publish_retry_count: 3
+
+  # 发布失败重试间隔（秒）
+  # 环境变量：PUBLISH_RETRY_DELAY
+  publish_retry_delay: 1.0
+
+  # 检测失败时的处理方式
+  #   "log"      = 仅记录警告日志（默认）
+  #   "skip"     = 跳过当前帧，继续处理
+  #   "restart"  = 重启 RTSP 连接
+  # 环境变量：DETECTION_ERROR_ACTION
+  detection_error_action: "log"
+
+# ------------------------------------------------------------
+# §9 性能与资源限制
+# ------------------------------------------------------------
+performance:
+  # 消息队列最大长度（条）
+  # 超过后新消息会被丢弃（QoS 0）或阻塞（QoS 1/2）
+  # 环境变量：MAX_QUEUE_SIZE
+  max_queue_size: 1000
+
+  # 单个 payload 最大长度（字节）
+  # 超过此大小的消息会被拒绝并记录错误
+  # 环境变量：MAX_PAYLOAD_SIZE
+  max_payload_size: 65536   # 64KB，MQTT 默认限制
+
+  # 检测结果发布间隔（秒）
+  # 设为 0 则每帧都发布（高延迟，高资源占用）
+  # 设为 >0 则合并多帧结果后发布（推荐，降低带宽）
+  # 环境变量：PUBLISH_INTERVAL
+  # 默认：0.5
+  publish_interval: 0.5
+
+  # 是否启用 FPS 限制
+  # 环境变量：ENABLE_FPS_LIMIT
+  # 默认：false
+  enable_fps_limit: false
+
+  # 最大 FPS（enable_fps_limit 为 true 时有效）
+  # 环境变量：MAX_FPS
+  # 默认：30
+  max_fps: 30
+
+  # 是否启用 TCP NoDelay（禁用 Nagle 算法）
+  # 环境变量：TCP_NODELAY
+  tcp_nodelay: true
+
+# ------------------------------------------------------------
+# §10 服务模式配置
+# ------------------------------------------------------------
+service:
+  # 运行模式
+  #   "rtsp"    = RTSP 流检测模式（默认）
+  #   "camera"  = USB 摄像头模式
+  #   "video"   = 视频文件模式
+  #   "image"   = 单张图像模式
+  # 环境变量：SERVICE_MODE
+  mode: "rtsp"
+
+  # 视频文件路径（mode 为 video 时有效）
+  # 环境变量：VIDEO_PATH
+  video_path: "input/video.mp4"
+
+  # 图像文件路径（mode 为 image 时有效）
+  # 环境变量：IMAGE_PATH
+  image_path: "input/image.jpg"
+
+  # USB 摄像头索引（mode 为 camera 时有效）
+  # 环境变量：CAMERA_INDEX
+  camera_index: 0
+
+  # 是否以守护进程模式运行
+  # 环境变量：DAEMON_MODE
+  # 默认：false
+  daemon: false
+
+  # PID 文件路径（daemon 模式时有效）
+  # 环境变量：PID_FILE
+  pid_file: "/var/run/jetson-yolo.pid"

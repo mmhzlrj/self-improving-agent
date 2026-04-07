@@ -83,180 +83,215 @@ table.toc-table tr.toc-chapter td { border-top: 1px solid #e5e7eb; padding-top: 
 </head>
 <body>
 <div class="container">
-<h1>🌅 晨间总结 — 2026-03-31</h1>
-<p><strong>时间</strong>: 09:50 AM (Asia/Shanghai)<br />
-<strong>Night Build</strong>: 连续 2 晚未运行（最后运行：2026-03-28）</p>
+<h1>🌅 0-1 项目晨间总结 — 2026-04-07</h1>
+<blockquote>
+<p>生成时间：2026-04-07 18:13 (Asia/Shanghai)</p>
+</blockquote>
 <hr />
-<h2>一、昨晚执行情况</h2>
-<p><strong>A→B→C→D 序列全部完成</strong>（task-queue.json v8，2026-03-30 更新）</p>
+<h2>⚠️ 昨晚执行情况</h2>
+<p><strong>Night Build 自 2026-03-30 后未再实际运行。</strong><br />
+- <code>output/2026-03-30/orchestrator-log.jsonl</code> 记录：2 个任务完成（A-0003, A-0004）后结束<br />
+- <code>output/2026-04-03/</code> 晨间总结已标注 Night Build 未运行<br />
+- 当前 task-queue.json 仍为 <strong>v8（2026-03-30）</strong>，无更新</p>
+<hr />
+<h2>📊 任务队列状态（task-queue.json v8，2026-03-30）</h2>
+<h3>A→B→C→D 序列</h3>
 <table>
 <thead>
 <tr>
 <th>序列</th>
-<th>内容</th>
-<th>状态</th>
+<th>描述</th>
+<th style="text-align: center;">完成</th>
+<th style="text-align: center;">待处理</th>
+<th>阻塞关系</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>A</strong> (P0)</td>
-<td>物理机器人必须先跑起来</td>
-<td>✅ 11/11 完成</td>
+<td><strong>A</strong></td>
+<td>P0 物理机器人必须先跑起来</td>
+<td style="text-align: center;">3</td>
+<td style="text-align: center;">8</td>
+<td>🔴 阻塞 B/C/D</td>
 </tr>
 <tr>
-<td><strong>B</strong> (P1)</td>
-<td>Phase 3 iPhone 感知接入</td>
-<td>✅ 4/4 完成</td>
+<td><strong>B</strong></td>
+<td>P1 Phase 3 iPhone感知接入</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">3</td>
+<td>🔴 等待A完成</td>
 </tr>
 <tr>
-<td><strong>C</strong> (P2)</td>
-<td>3D打印零件 + 技术验证</td>
-<td>✅ 1/1 完成</td>
+<td><strong>C</strong></td>
+<td>P2 3D打印零件 + 技术验证</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td>🔴 等待B完成</td>
 </tr>
 <tr>
-<td><strong>D</strong> (P3)</td>
-<td>Demo/内容/调优</td>
-<td>✅ 1/1 完成</td>
+<td><strong>D</strong></td>
+<td>P3 Demo/内容/调优</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">1</td>
+<td>🔴 等待C完成</td>
 </tr>
 </tbody>
 </table>
-<blockquote>
-<p>🔍 <strong>注意</strong>: task-queue.json 中 stats 区块显示 A 序列 done=2/pending=9，与实际任务数据（11 done）严重不符 — stats 未随任务完成而更新，已失效。</p>
-</blockquote>
-<p><strong>T 序列状态</strong>（大规模并行任务）：</p>
-<table>
-<thead>
-<tr>
-<th>状态</th>
-<th>数量</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>✅ 已完成</td>
-<td>84</td>
-</tr>
-<tr>
-<td>🔄 运行中</td>
-<td>2 (T-0061 Windows 11 Widget, T-0063 Notion)</td>
-</tr>
-<tr>
-<td>⏳ 待处理</td>
-<td>1707</td>
-</tr>
-</tbody>
-</table>
-<p><strong>T 序列待处理分布（Top 10）</strong>：</p>
+<p><strong>全局：</strong> 1809 任务 | 仅解析 59 个任务定义（~3%）</p>
+<h3>类别进度（59个已定义任务）</h3>
 <table>
 <thead>
 <tr>
 <th>类别</th>
-<th>数量</th>
+<th style="text-align: center;">完成</th>
+<th style="text-align: center;">总数</th>
+<th>状态</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>sky-tune</td>
-<td>120</td>
+<td>light</td>
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">13</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>bld-detail</td>
-<td>100</td>
+<td>layout</td>
+<td style="text-align: center;">12</td>
+<td style="text-align: center;">12</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>demo（5个Demo）</td>
-<td>99</td>
+<td>npc</td>
+<td style="text-align: center;">8</td>
+<td style="text-align: center;">8</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>verify</td>
-<td>94</td>
+<td>led</td>
+<td style="text-align: center;">10</td>
+<td style="text-align: center;">10</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>building</td>
-<td>80</td>
+<td>sky</td>
+<td style="text-align: center;">9</td>
+<td style="text-align: center;">9</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>mesh-tune</td>
-<td>61</td>
+<td>research</td>
+<td style="text-align: center;">13</td>
+<td style="text-align: center;">15</td>
+<td>⚠️ 2 running</td>
 </tr>
 <tr>
-<td>code（代码生成）</td>
-<td>60</td>
+<td>doc</td>
+<td style="text-align: center;">39</td>
+<td style="text-align: center;">39</td>
+<td>✅</td>
 </tr>
 <tr>
-<td>season</td>
-<td>60</td>
+<td>code</td>
+<td style="text-align: center;">16</td>
+<td style="text-align: center;">~61</td>
+<td>🔄</td>
 </tr>
 <tr>
-<td>sop</td>
-<td>52</td>
+<td>competitor</td>
+<td style="text-align: center;">5</td>
+<td style="text-align: center;">12</td>
+<td>⏳</td>
 </tr>
 <tr>
-<td>css</td>
-<td>48</td>
+<td>demo</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">100</td>
+<td>⏳</td>
 </tr>
 </tbody>
 </table>
 <hr />
-<h2>二、A→B→C→D 产出文件</h2>
-<p><strong>A 序列产出</strong>（<code>harness/robot/</code>）：<br />
-- <code>night-build/reports/sop-Phase 3-iPhone 感知-supplement.md</code>（MQTT主题设计 + OpenClaw bridge协议）<br />
-- <code>night-build/reports/sop-Phase 2-视觉记录-supplement.md</code>（带宽估算）<br />
-- <code>night-build/reports/sop-贵庚系统-记忆架构-supplement.md</code>（数据结构设计）<br />
-- <code>harness/robot/services/esp32-cam-rtsp/platformio.ini</code><br />
-- <code>harness/robot/demo1.html</code>（DirectionalLight 添加）<br />
-- <code>night-build/output/research-*.md</code>（7篇调研，含 Cozy Grove/LeCun/NLAH）</p>
-<p><strong>B 序列产出</strong>：<br />
-- Phase 3 iPhone 感知 SOP 4篇（ARKit框架/深度数据/数据格式/延迟测试）</p>
-<p><strong>C 序列产出</strong>：<br />
-- 拓竹 H2C 3D打印零件建模</p>
-<p><strong>D 序列产出</strong>：<br />
-- 拓竹 H2C 硬件接口驱动</p>
-<hr />
-<h2>三、重点发现</h2>
-<ul>
-<li>🔍 <strong>Night Build 已连续 2 晚未运行</strong>（2026-03-29、2026-03-30 均无输出），task-queue.json v8 载有 1811 个 auto 任务等待执行，但无调度</li>
-<li>🔍 <strong>task-queue.json stats 区块过时</strong>：显示 A=done 2/pending 9，实际全 11 个 A 任务已完成</li>
-<li>🔍 <strong>当前 2 个 running 任务</strong>（T-0061/63）均为 research 调研，完成后将自动触发下一批 pending 任务</li>
-<li>🔍 <strong>T 序列 1707 个 pending 任务</strong> 预计消耗大量 MiniMax 额度，需关注余额</li>
-</ul>
-<hr />
-<h2>四、❓ 需要用户决策的问题</h2>
-<ul>
-<li><strong>Night Build 调度问题</strong>：连续 2 晚未运行 — 是 orchestrator 停了，还是调度规则导致？有无需要手动重启？</li>
-<li><strong>A→B→C→D 已全部完成</strong> — 接下来是继续跑完所有 T 序列（1707 个），还是有其他优先级调整？</li>
-<li><strong>T-014 映射报告 v2</strong> 含已知错误（Genesis 物理引擎 ≠ Apple），建议白天审核修正</li>
-</ul>
-<hr />
-<h2>五、今白天建议</h2>
+<h2>✅ 已完成产出</h2>
+<h3>A序列（3/11 done）</h3>
 <table>
 <thead>
 <tr>
-<th>优先级</th>
-<th>动作</th>
+<th>任务</th>
+<th>产出</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>🔴 P0</td>
-<td>确认 Night Build 为何连续 2 晚未运行</td>
+<td>A-0005</td>
+<td><code>services/esp32-cam-rtsp/platformio.ini</code></td>
 </tr>
 <tr>
-<td>🔴 P0</td>
-<td>检查 MiniMax 额度是否充足（1707 任务消耗大）</td>
+<td>A-0006</td>
+<td><code>services/mqtt-router/topics.py</code></td>
 </tr>
 <tr>
-<td>🟡 P1</td>
-<td>审核 T-014 映射报告 v2 错误修正</td>
+<td>A-0007</td>
+<td><code>reports/sop-Phase 3-iPhone感知-supplement.md</code></td>
 </tr>
 <tr>
-<td>🟡 P1</td>
-<td>手动触发 T-0061/63 之后的 pending 任务队列</td>
+<td>A-0008</td>
+<td><code>reports/sop-贵庚系统-记忆架构-supplement.md</code></td>
+</tr>
+<tr>
+<td>A-0009</td>
+<td><code>reports/sop-Phase 2-视觉记录-supplement.md</code></td>
+</tr>
+<tr>
+<td>A-0010</td>
+<td><code>demo1.html</code> DirectionalLight ✅</td>
+</tr>
+<tr>
+<td>A-0011</td>
+<td><code>research-07.md</code> (Cozy Grove)</td>
 </tr>
 </tbody>
 </table>
+<h3>B序列（1/4 done）</h3>
+<table>
+<thead>
+<tr>
+<th>任务</th>
+<th>产出</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>T-0089</td>
+<td><code>reports/sop-Phase 3-iPhone感知-supplement.md</code> (ARKit)</td>
+</tr>
+</tbody>
+</table>
+<h3>核心服务代码（已完成）</h3>
+<ul>
+<li><code>esp32-cam-rtsp/</code> 全部6个文件 ✅</li>
+<li><code>mqtt-router/</code> 全部6个文件 ✅</li>
+<li><code>jetson-yolo/</code> 部分完成（T-0120~T-0122 done）</li>
+<li><code>whisper-tts/</code> 仅 stt_service.py 完成</li>
+</ul>
 <hr />
-<p><em>由 Night Build 晨间总结 v4 自动生成</em></p>
+<h2>🔍 重点发现</h2>
+<ul>
+<li>🔍 <strong>Night Build 已停止运行 8 天</strong>（2026-03-30 后无新 run）</li>
+<li>🔍 <strong>task-queue.json 仍停留在 v8（2026-03-30）</strong>，无版本更新</li>
+<li>🔍 <strong>A-0018~A-0023（6个任务）</strong> sequence 字段缺失，可能被 orchestrator 跳过</li>
+<li>🔍 <strong>research-09.md 和 research-11.md</strong> 状态为 running 但一直未完成</li>
+<li>🔍 <strong>100 个 demo 任务全部 pending</strong>，demo1.html 仅完成方向光</li>
+<li>🔍 <strong>jetson-yolo/whisper-tts/node-setup</strong> 代码任务大部分 pending</li>
+</ul>
+<hr />
+<h2>❓ 需要用户决策的问题</h2>
+<ul>
+<li>❓ <strong>Night Build 为何停止？</strong> 是额度不足、进程崩溃还是被手动停止？</li>
+<li>❓ <strong>是否需要手动重启 Night Build？</strong> 当前 task-queue.json 状态与实际不符</li>
+<li>❓ <strong>A-0018~A-0023 是否补全 sequence=A？</strong> 涉及 WebMCP、MemOS、ESP-AI 语音模块</li>
+<li>❓ <strong>1809 个任务中剩余 ~1750 个如何处理？</strong> 批量生成还是合并？</li>
+</ul>
 </div>
 </body>
 </html>

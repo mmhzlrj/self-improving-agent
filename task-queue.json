@@ -1,0 +1,82 @@
+{
+  "tasks": [
+    {
+      "task_id": "T-0127",
+      "status": "completed",
+      "description": "TTS语音合成服务",
+      "file": "harness/robot/services/whisper-tts/tts_service.py",
+      "completed_at": "2026-04-07T18:33:00+08:00"
+    },
+    {
+      "task_id": "T-0128",
+      "status": "completed",
+      "description": "音频录制服务",
+      "file": "harness/robot/services/whisper-tts/audio_capture.py",
+      "completed_at": "2026-04-07T19:11:00+08:00"
+    },
+    {
+      "task_id": "T-0129",
+      "status": "completed",
+      "description": "VAD语音活动检测服务",
+      "file": "harness/robot/services/whisper-tts/vad.py",
+      "completed_at": "2026-04-07T19:15:00+08:00"
+    },
+    {
+      "task_id": "T-0130",
+      "status": "completed",
+      "description": "WebSocket接口服务",
+      "file": "harness/robot/services/whisper-tts/ws_interface.py",
+      "completed_at": "2026-04-07T19:41:00+08:00"
+    },
+    {
+      "task_id": "T-0140",
+      "status": "completed",
+      "description": "node-setup卸载脚本",
+      "file": "harness/robot/services/node-setup/uninstall.sh",
+      "completed_at": "2026-04-07T19:49:00+08:00"
+    },
+    {
+      "task_id": "T-0141",
+      "status": "completed",
+      "description": "node-setup README文档",
+      "file": "harness/robot/services/node-setup/README.md",
+      "completed_at": "2026-04-07T20:02:00+08:00"
+    },
+    {
+      "task_id": "T-0149",
+      "status": "completed",
+      "description": "MarsCat竞品分析",
+      "file": "night-build/reports/competitor-marscat.md",
+      "completed_at": "2026-04-07T20:10:00+08:00"
+    },
+    {
+      "task_id": "T-0150",
+      "status": "completed",
+      "description": "国内桌面陪伴机器人品牌汇总",
+      "file": "night-build/reports/competitor-china-desktop.md",
+      "completed_at": "2026-04-07T20:15:00+08:00"
+    },
+    {
+      "task_id": "T-0151",
+      "status": "completed",
+      "description": "日本陪伴机器人市场分析",
+      "file": "night-build/reports/competitor-japan.md",
+      "completed_at": "2026-04-07T20:18:00+08:00"
+    },
+    {
+      "task_id": "T-0152",
+      "status": "completed",
+      "description": "OpenClaw vs Home Assistant全面对比",
+      "file": "night-build/reports/competitor-openclaw-vs-ha.md",
+      "completed_at": "2026-04-07T20:26:00+08:00"
+    },
+    {
+      "task_id": "T-0153",
+      "status": "completed",
+      "description": "开源机器人框架汇总ROS2/Isaac Sim/Cyberdog SDK",
+      "file": "night-build/reports/competitor-oss-frameworks.md",
+      "completed_at": "2026-04-07T20:26:00+08:00"
+    }
+  ],
+  "last_updated": "2026-04-07T20:26:00+08:00"
+}

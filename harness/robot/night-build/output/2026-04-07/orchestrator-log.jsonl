@@ -1,0 +1,1 @@
+{"timestamp":"2026-04-07T10:39:12Z","level":"INFO","task_id":"T-0123","action":"completed","agent":"subagent:de06f7ad-c435-4371-bb4d-aa3740c18637","details":{"file":"harness/robot/services/jetson-yolo/config.yaml","description":"YOLO/MQTT/RTSP配置文件，包含yolo检测参数、rtsp流配置、mqtt发布配置、output配置、openclaw配置、日志配置、错误处理、性能优化和服务模式配置","task_queue_updated":true}}

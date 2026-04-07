@@ -463,6 +463,7 @@ NAV_CONFIG = [
         {"id": "ref-openclaw",  "label": "OpenClaw 官方文档", "external": "https://docs.openclaw.ai"},
      ]},
     {"id": "board",    "label": "任务看板",   "icon": "📋", "path": "/board/"},
+    {"id": "cmdlog",  "label": "命令行记录", "icon": "📜", "path": "/command-log.html"},
 ]
 
 # ─── Template ────────────────────────────────────────────────────────────────
@@ -706,13 +707,15 @@ tr:hover{{background:var(--surface2)}}
 <div class="header">
   <div class="header-logo">🦞 docs.0-1.ai</div>
   <button id="themeToggle" onclick="toggleTheme()" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 12px;cursor:pointer;font-size:12px;margin-left:16px;color:var(--text)">🌙</button>
-  <button id="scrollBottomBtn" onclick="scrollToBottom()" title="滑到底部" style="position:fixed;bottom:24px;right:24px;width:40px;height:40px;background:var(--accent);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:18px;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,.3);display:none;align-items:center;justify-content:center">↓</button>
+  
   <div class="search-box">
     <input type="text" id="searchInput" placeholder="搜索文档..." oninput="handleSearch(this.value)">
     <div class="search-results" id="searchResults"></div>
   </div>
   <div class="header-version">v0.1.0</div>
 </div>
+<button id="scrollBottomBtn" onclick="scrollToBottom()" title="滑到底部" style="position:fixed;bottom:24px;right:24px;width:40px;height:40px;background:var(--accent);color:#fff;border:none;border-radius:50%;cursor:pointer;font-size:18px;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);display:none;align-items:center;justify-content:center">↓</button>
+
 <nav class="sidebar">
 {nav_html}
 </nav>
@@ -1935,6 +1938,18 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # Board / task kanban
         if path == "/board/" or path == "/board/index.html":
             return self.send_html(make_board())
+
+        # Command log (exec approval history)
+        if path == "/command-log.html" or path == "/command-log":
+            f = DOCS_ROOT / "command-log.md"
+            if f.exists():
+                content = f.read_text(encoding='utf-8')
+                html = render_markdown(content)
+                title_m = re.match(r'^#\s+(.+)$', content)
+                title = title_m.group(1).strip() if title_m else "命令行记录"
+                return self.send_html(make_page("cmdlog", title, html))
+            self.send_error(404)
+            return
 
         # Tech reference pages
         if path.startswith("/techref/"):

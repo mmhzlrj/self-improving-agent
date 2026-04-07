@@ -1,0 +1,24 @@
+{
+  "printer": {
+    "host": "192.168.x.x",
+    "access_code": "xxxx",
+    "serial": "H2CXXXX",
+    "lan_mode": true
+  },
+  "slicer": {
+    "bambu_studio_path": "/path/to/Bambu_Studio_linux.AppImage",
+    "preset_file": "H2C_standard.json"
+  },
+  "paths": {
+    "output_dir": "/tmp/h2c_jobs/",
+    "gcode_dir": "/tmp/h2c_jobs/gcode/",
+    "stl_dir": "/tmp/h2c_jobs/stl/"
+  },
+  "blender": {
+    "blender_bin": "blender"
+  },
+  "monitor": {
+    "interval_seconds": 2,
+    "log_level": "INFO"
+  }
+}

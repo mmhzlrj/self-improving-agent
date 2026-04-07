@@ -226,6 +226,13 @@ Each session, you wake up fresh. These files _are_ your memory. Read them. Updat
 - ✅ 正确：`python3 ~/.openclaw/workspace/tools/mdview.py <文件路径>`
 - 教训：已经犯过很多次，每次都浪费用户时间
 
+### 严禁截断命令（2026-04-01 新增）
+- ❌ 禁止用 `head -n`、`tail -n`、`sed -n`、`awk NR==` 等任何截断方式读取文件
+- ❌ 禁止偷懒只读部分内容来"快速了解"文件
+- ✅ 调研阶段必须一次性读取完整文件（或足够大的范围），确保不遗漏关键信息
+- ✅ 判断标准：如果要基于文件内容做决策，必须完整读取
+- 教训：2026-04-01 用 `head -20` 调研导致遗漏重要章节信息（"7章"实为"10章+术语表"）
+
 ---
 
 _This file is yours to evolve. As you learn who you are, update it._
