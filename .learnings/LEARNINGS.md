@@ -1237,4 +1237,16 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 ### 验证方法
 
 - zhiku-ask 脚本测试有效（MCP server 直连）
+
+## 2026-04-07
+
+### openclaw-upgrade Skill 经验
+- ✅ `gh release list --repo openclaw/openclaw --limit 3` — 查最新版本
+- ✅ `openclaw --version` — 查当前版本
+- ✅ `openclaw update` — 升级正确命令（无参数）
+- ❌ `openclaw update run` — 不接受参数
+- ✅ `python3 check-openclaw-latest.py` — 避免 curl|pipe SSL 问题
+- 每次 exec 后必须追加到 `docs/command-log.md`
+- docs-server 按钮错位修复：放在 header 外、nav 前的独立 position:fixed 位置
 - 主 agent 测试需要新开 session（subagent 无效）
+- **exec 白名单**：不要新增 `/sbin/xxx` 路径，统一用已有的 `/usr/bin/curl`、`/usr/bin/rsync` 等批准路径；添加前先 `ls /usr/bin/xxx /sbin/xxx` 确认存在
