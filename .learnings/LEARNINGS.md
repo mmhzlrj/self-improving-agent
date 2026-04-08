@@ -1290,3 +1290,29 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 - 按钮放在 header 内会错位（position:fixed 嵌套问题）
 - 正确做法：按钮放在 header 外、nav 前的独立位置
 - 添加新页面路由：在 Board 路由后加 if path == "/xxx.html"
+
+---
+
+## 2026-04-08
+
+### 经验1：dashboard_mcp_server 和 docs-server.py 的关系
+- dashboard_mcp_server.py（端口18999）和 docs-server.py（端口18998）是两个独立的 HTTP 服务器
+- dashboard_mcp_server.py 只负责 night-build 相关的动态数据（/night-build/*、/project-board.json）
+- docs-server.py 负责 docs.0-1.ai 文档站
+- world.html 同时向 18999 请求数据（LED墙）和向 18998 请求基础资源
+
+### 经验2：重启 docs-server.py 的正确方式
+- pkill -f docs-server.py 会误杀同名进程（如 kill 错了 PID）
+- 正确做法：先 ps aux | grep docs-server 找到真正 PID，再 kill <PID>
+- 或用 python3 scripts/restart-docs-server.py（需确认它 kill 的是正确 PID）
+- 验证：新进程启动后用 /api/board-count 调试端点确认代码版本
+
+### 经验3：load_tasks() fallback 陷阱
+- task-queue.json 加载失败时（JSON解析成功但返回空），不能盲目用 tasks/ 目录 fallback
+- tasks/ 目录有 1800+ 个 legacy 任务文件，会把看板淹没
+- 正确：只有当 task-queue.json 文件本身不存在时才 fallback，解析失败要报错而非静默降级
+
+### 经验4：board 看板和 task-queue.json 实时关联
+- board 页面的唯一真实来源是 harness/robot/night-build/task-queue.json
+- world.html LED墙的 fetch URL 要指向 /night-build/task-queue.json（不是 /project-board.json）
+- dashboard.html 的 /project-board.json 需要 dashboard_mcp_server.py 做动态 schema 转换

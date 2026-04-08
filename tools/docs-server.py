@@ -968,103 +968,121 @@ def parse_sop_chapters(text):
 # ─── Task Board Loader ───────────────────────────────────────────────────────
 
 def load_tasks():
-    """Load tasks from night-build/tasks/ directory.
-    Status detection:
-    - done: output directory exists for the task
-    - in-progress: task file contains 'running' or 'processing' in content
-    - pending: otherwise
-    Returns: list of task dicts with id, group, type, status, title
-    """
-    tasks_dir = SOP_ROOT / "night-build" / "tasks"
-    output_base = SOP_ROOT / "night-build" / "output"
-    tasks = []
+    """Load tasks from the single source of truth: task-queue.json.
+    Falls back to tasks/ directory only if task-queue.json doesn't exist.
 
-    # Known task sequences
+    Column mapping (task-queue status → board column):
+      done/completed → done
+      running/in-progress/ready → in-progress
+      pending/error → pending
+    """
     seq_config = {
         "A": {"label": "A序列", "priority": "high", "color": "#ff4757"},
         "B": {"label": "B序列", "priority": "high", "color": "#ffa502"},
+        "C": {"label": "C序列", "priority": "medium", "color": "#70a1ff"},
+        "D": {"label": "D序列", "priority": "medium", "color": "#2ed573"},
         "F": {"label": "F序列", "priority": "medium", "color": "#70a1ff"},
         "R": {"label": "R序列", "priority": "low", "color": "#a29bfe"},
         "H": {"label": "H序列", "priority": "medium", "color": "#2ed573"},
         "E": {"label": "E序列", "priority": "low", "color": "#5352ed"},
     }
 
-    if not tasks_dir.exists():
-        return [], seq_config
-
-    for f in sorted(tasks_dir.glob("T-*.md")):
-        if f.name == "README.md":
-            continue
+    # Primary source: task-queue.json
+    tq_path = SOP_ROOT / "night-build" / "task-queue.json"
+    if tq_path.exists():
         try:
-            content = f.read_text(encoding="utf-8")
+            tq_data = json.loads(tq_path.read_text(encoding="utf-8"))
+            tasks_out = []
+            for t in tq_data.get("tasks", []):
+                raw_status = t.get("status", "pending")
+                # Map task-queue status to board column
+                if raw_status in ("done", "completed"):
+                    status = "done"
+                elif raw_status in ("running", "in-progress", "ready"):
+                    status = "in-progress"
+                else:
+                    status = "pending"
+
+                group = t.get("group", "?")
+                seq_info = seq_config.get(group, {"label": f"{group}序列", "priority": "low", "color": "#888"})
+                title = t.get("title", t.get("id", "?"))
+
+                tasks_out.append({
+                    "id": t.get("id", "?"),
+                    "group": group,
+                    "group_label": seq_info["label"],
+                    "priority": seq_info["priority"],
+                    "color": seq_info["color"],
+                    "type": t.get("priority", "?"),  # reuse priority field as type label
+                    "status": status,
+                    "title": title,
+                    "filename": t.get("task_file", ""),
+                    "status_reason": t.get("status_reason", ""),
+                })
+            return tasks_out, seq_config
         except Exception:
-            continue
+            pass  # Fall through to tasks/ dir
 
-        # Parse JSON header
-        status = "pending"
-        task_id = f.stem
-        group = "?"
-        task_type = "unknown"
-
-        # Extract JSON block at top
-        json_m = re.match(r'^#.*?\n(\{.*?\n\})', content, re.DOTALL)
-        if json_m:
+    # Fallback: scan tasks/ directory ONLY if task-queue.json doesn't exist
+    # (DO NOT run if JSON parses but returns empty — that's a real empty state)
+    tasks_dir = SOP_ROOT / "night-build" / "tasks"
+    if not tq_path.exists():
+        tasks_out = []
+        output_base = SOP_ROOT / "night-build" / "output"
+        if not tasks_dir.exists():
+            return [], seq_config
+        for f in sorted(tasks_dir.glob("T-*.md")):
+            if f.name == "README.md":
+                continue
             try:
-                meta = json.loads(json_m.group(1))
-                task_id = meta.get("id", f.stem)
-                group_raw = meta.get("group", "?")
-                # Handle group like "A", "B", or "AR" (A sequence research)
-                group = group_raw.strip()
-                task_type = meta.get("type", "unknown")
+                content = f.read_text(encoding="utf-8")
             except Exception:
-                pass
+                continue
+            status = "pending"
+            task_id = f.stem
+            group = "?"
+            json_m = re.match(r'^#.*?\n(\{.*?\n\})', content, re.DOTALL)
+            if json_m:
+                try:
+                    meta = json.loads(json_m.group(1))
+                    task_id = meta.get("id", f.stem)
+                    group_raw = meta.get("group", "?")
+                    group = group_raw.strip()
+                except Exception:
+                    pass
+            fname_m = re.match(r'T-\d+-([A-Z]+)\d+', f.stem)
+            if fname_m and group == "?":
+                group = fname_m.group(1)
+            output_dir = output_base / "2026-03-26" / f.stem
+            if not output_dir.exists():
+                output_dir = output_base / "2026-03-27" / f.stem
+            if not output_dir.exists():
+                for date_dir in sorted(output_base.glob("*")):
+                    if date_dir.is_dir():
+                        check = date_dir / f.stem
+                        if check.exists():
+                            output_dir = check
+                            break
+            if output_dir.exists() and output_dir.is_dir():
+                status = "done"
+            elif "running" in content[:200].lower():
+                status = "in-progress"
+            title = task_id
+            prompt_m = re.search(r'^##?\s+Prompt.*?\n(.*)', content, re.MULTILINE)
+            if prompt_m:
+                first_line = prompt_m.group(1).strip()[:60]
+                if first_line:
+                    title = first_line[:50] + ("..." if len(first_line) > 50 else "")
+            seq_info = seq_config.get(group, {"label": f"{group}序列", "priority": "low", "color": "#888"})
+            tasks_out.append({
+                "id": task_id, "group": group, "group_label": seq_info["label"],
+                "priority": seq_info["priority"], "color": seq_info["color"],
+                "type": "?", "status": status, "title": title, "filename": f.name,
+            })
+        return tasks_out, seq_config
 
-        # Also try to detect group from filename: T-01-A01 → A, T-01-B01 → B
-        fname_m = re.match(r'T-\d+-([A-Z]+)\d+', f.stem)
-        if fname_m and group == "?":
-            group = fname_m.group(1)
-
-        # Detect status: check output directory
-        output_dir = output_base / "2026-03-26" / f.stem
-        if not output_dir.exists():
-            output_dir = output_base / "2026-03-27" / f.stem
-        if not output_dir.exists():
-            # Check any date subdir
-            for date_dir in sorted(output_base.glob("*")):
-                if date_dir.is_dir():
-                    check = date_dir / f.stem
-                    if check.exists():
-                        output_dir = check
-                        break
-
-        if output_dir.exists() and output_dir.is_dir():
-            status = "done"
-        elif "running" in content[:200].lower() or "processing" in content[:200].lower():
-            status = "in-progress"
-
-        # Extract title from first heading or prompt
-        title = task_id
-        prompt_m = re.search(r'^##?\s+Prompt.*?\n(.*)', content, re.MULTILINE)
-        if prompt_m:
-            first_line = prompt_m.group(1).strip()[:60]
-            if first_line:
-                title = first_line[:50] + ("..." if len(first_line) > 50 else "")
-
-        seq_info = seq_config.get(group, {"label": f"{group}序列", "priority": "low", "color": "#888"})
-
-        tasks.append({
-            "id": task_id,
-            "group": group,
-            "group_label": seq_info["label"],
-            "priority": seq_info["priority"],
-            "color": seq_info["color"],
-            "type": task_type,
-            "status": status,
-            "title": title,
-            "filename": f.name,
-        })
-
-    return tasks, seq_config
+    # task-queue.json exists but failed to parse — report error, don't silently fall back
+    return [], seq_config
 
 def make_board():
     """Task Board page — three-column kanban: pending | in-progress | done"""
@@ -1953,6 +1971,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         # Board / task kanban
         if path == "/board/" or path == "/board/index.html":
             return self.send_html(make_board())
+
+        # Debug: report task count without rendering HTML
+        if path == "/api/board-count":
+            from json import dumps
+            tasks, seq_config = load_tasks()
+            self._json(200, {"task_count": len(tasks), "source": "task-queue.json" if (SOP_ROOT / "night-build" / "task-queue.json").exists() else "fallback-dir"})
 
         # Command log (exec approval history)
         if path == "/command-log.html" or path == "/command-log":

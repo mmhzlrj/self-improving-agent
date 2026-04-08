@@ -880,7 +880,7 @@ function drawTaskQueue(ctx, data) {
 }
 
 function updateLEDScreen() {
-  fetch('/project-board.json')
+  fetch('/night-build/task-queue.json')
     .then(r => r.json())
     .then(data => {
       drawTaskQueue(ledCtx, data);

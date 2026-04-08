@@ -83,6 +83,44 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self._json(500, {'error': 'mdview did not generate index.html'})
             return
 
+        # Dynamic /project-board.json → serve task-queue.json in project-board format
+        if parsed.path == '/project-board.json':
+            tq_path = os.path.join(DIR, 'night-build', 'task-queue.json')
+            if os.path.isfile(tq_path):
+                try:
+                    import datetime as dt
+                    tq = json.loads(open(tq_path).read())
+                    pb_tasks = []
+                    for t in tq.get('tasks', []):
+                        raw_status = t.get('status', 'pending')
+                        if raw_status == 'done':
+                            status = 'completed'
+                        elif raw_status in ('running', 'in-progress', 'ready'):
+                            status = 'in-progress'
+                        else:
+                            status = 'not-started'
+                        pb_tasks.append({
+                            'id': t.get('id', '?'),
+                            'name': t.get('title', t.get('id', '?')),
+                            'mode': 'auto',
+                            'status': status,
+                            'priority': (t.get('priority', 'p3') or 'p3').replace('P', 'p').lower(),
+                            'depends_on': t.get('dependencies', []),
+                            'refs': [t.get('task_file', '')] if t.get('task_file') else [],
+                            'note': t.get('status_reason', ''),
+                            'output': [],
+                            'completed_at': dt.datetime.now().isoformat() if status == 'completed' else '',
+                            'reason': '',
+                            'deliverable': '',
+                            'subtasks': [],
+                            'group': t.get('group', '?'),
+                        })
+                    self._json(200, {'tasks': pb_tasks})
+                    return
+                except Exception as e:
+                    self._json(500, {'error': str(e)})
+                    return
+
         # Add explicit route for night-build files
         if parsed.path.startswith('/night-build/'):
             relative_path = urllib.parse.unquote(parsed.path[len('/night-build/'):])
