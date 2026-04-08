@@ -452,6 +452,7 @@ NAV_CONFIG = [
      "children": [
         {"id": "tr-browser", "label": "Browser Relay",   "path": "/techref/browser-relay.html"},
         {"id": "tr-openclaw", "label": "OpenClaw 更新",   "path": "/techref/openclaw-updates.html"},
+        {"id": "tr-v245", "label": "v2026.4.5 新功能", "path": "/techref/openclaw-v2026-4-5-changelog.html"},
         {"id": "tr-hardware", "label": "硬件参考",        "path": "/techref/hardware.html"},
         {"id": "tr-research", "label": "调研资料",        "path": "/techref/research.html"},
         {"id": "tr-misc",     "label": "其他文档",        "path": "/techref/misc.html"},
@@ -1909,7 +1910,21 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
         m = re.match(r'^/reports/(.+\.md)$', path)
         if m:
-            return self.send_html(make_report_detail(m.group(1)))
+            fname = m.group(1)
+            # Try SOP night-build reports first
+            f = SOP_ROOT / "night-build" / "reports" / fname
+            if f.exists():
+                return self.send_html(make_report_detail(fname))
+            # Fall back to DOCS_ROOT/reports/ (standalone docs)
+            f2 = DOCS_ROOT / "reports" / fname
+            if f2.exists():
+                content = f2.read_text(encoding='utf-8')
+                html = render_markdown(content)
+                title_m = re.match(r'^#\s+(.+)$', content)
+                title = title_m.group(1).strip() if title_m else fname
+                return self.send_html(make_page("reports", title, html))
+            self.send_error(404)
+            return
 
         # Changelog
         if path == "/changelog/openclaw.html":
@@ -1951,12 +1966,63 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_error(404)
             return
 
+        # fix-sop pages (F-series fix records)
+        if path.startswith("/fix-sop/"):
+            subpath = path[len("/fix-sop/"):]
+            if subpath.endswith(".html"):
+                fname = subpath[:-5] + ".md"
+            else:
+                fname = subpath + ".md"
+            f = DOCS_ROOT / "fix-sop" / fname
+            if f.exists():
+                content = f.read_text(encoding='utf-8')
+                html = render_markdown(content)
+                title_m = re.match(r'^#\s+(.+)$', content)
+                title = title_m.group(1).strip() if title_m else fname
+                return self.send_html(make_page("fix-sop", title, html))
+            self.send_error(404)
+            return
+
+        # tools pages (config, mcp, etc.)
+        if path.startswith("/tools/"):
+            subpath = path[len("/tools/"):]
+            if subpath.endswith(".html"):
+                fname = subpath[:-5] + ".md"
+            else:
+                fname = subpath + ".md"
+            f = DOCS_ROOT / "tools" / fname
+            if f.exists():
+                content = f.read_text(encoding='utf-8')
+                html = render_markdown(content)
+                title_m = re.match(r'^#\s+(.+)$', content)
+                title = title_m.group(1).strip() if title_m else fname
+                return self.send_html(make_page("tools", title, html))
+            self.send_error(404)
+            return
+
+        # integrations pages
+        if path.startswith("/integrations/"):
+            subpath = path[len("/integrations/"):]
+            if subpath.endswith(".html"):
+                fname = subpath[:-5] + ".md"
+            else:
+                fname = subpath + ".md"
+            f = DOCS_ROOT / "integrations" / fname
+            if f.exists():
+                content = f.read_text(encoding='utf-8')
+                html = render_markdown(content)
+                title_m = re.match(r'^#\s+(.+)$', content)
+                title = title_m.group(1).strip() if title_m else fname
+                return self.send_html(make_page("integrations", title, html))
+            self.send_error(404)
+            return
+
         # Tech reference pages
         if path.startswith("/techref/"):
             techref_dir = path[len("/techref/"):]
             category_map = {
                 "browser-relay.html": ["browser-relay-config.md", "browser-relay-full-guide.md", "browser-relay-keepalive.md", "browser-background-open.md"],
-                "openclaw-updates.html": ["openclaw-builtin-skills.md", "openclaw-release-log.md", "openclaw-update-analysis-for-01.md", "openclaw-update-analysis-for-01-detailed.md", "post-upgrade-20260329.md", "docs.openclaw.ai-sop.md"],
+                "openclaw-updates.html": ["openclaw-builtin-skills.md", "openclaw-release-log.md", "openclaw-update-analysis-for-01.md", "openclaw-update-analysis-for-01-detailed.md", "post-upgrade-20260329.md", "docs.openclaw.ai-sop.md", "openclaw-v2026-4-5-changelog.md"],
                 "hardware.html": ["jetson-nano-opensclaw-video-stream.md", "node-pairing-sop.md"],
                 "research.html": ["comfyui-6gb-research.md", "video-generation-research.md"],
                 "misc.html": ["SPEC.md", "before_tool_call-example.md", "blender-robot-test.md", "chat-export-for-rl.md"],
@@ -1985,7 +2051,7 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                             <div class="report-item-title">📄 {title}</div>
                             <div class="report-item-meta">{fname} · {size_kb:.1f} KB</div>
                             <div style="margin-top:8px">
-                                <a href="{SCRIPT_PREFIX}/{fname.replace('.md','.html')}" class="btn btn-outline" style="font-size:12px;padding:4px 12px">📖 查看</a>
+                                <a href="{SCRIPT_PREFIX}/techref/{fname.replace('.md','.html')}" class="btn btn-outline" style="font-size:12px;padding:4px 12px">📖 查看</a>
                             </div>
                         </div>"""
 
@@ -2014,6 +2080,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                     {html}
                     """))
 
+        # Catch-all: serve any .md from DOCS_ROOT as standalone .html
+        # Handles links generated by techref pages using SCRIPT_PREFIX/{fname}
+        # Supports both /docs.0-1.ai/SPEC and /docs.0-1.ai/SPEC.html
+        if path.startswith("/docs.0-1.ai/"):
+            raw = path[len("/docs.0-1.ai/"):]
+            if raw.endswith(".html"):
+                doc_name = raw[:-5] + ".md"
+            else:
+                doc_name = raw + ".md"
+            f = DOCS_ROOT / doc_name
+            if f.exists():
+                content = f.read_text(encoding='utf-8')
+                html = render_markdown(content)
+                title_m = re.match(r'^#\s+(.+)$', content)
+                title = title_m.group(1).strip() if title_m else doc_name
+                return self.send_html(make_page("docs", title, html))
+
         # Refs - proxy to 18999
         if path == "/refs/dashboard/" or path == "/refs/dashboard.html":
             self.send_response(302)
@@ -2024,6 +2107,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.send_response(302)
             self.send_header("Location", "http://127.0.0.1:18999/world.html")
             self.end_headers()
+            return
+        if path == "/refs/openclaw/" or path == "/refs/openclaw.html":
+            return self.send_html(make_page("refs", "OpenClaw 官方文档", """
+            <div class="alert alert-info">
+                <p>📎 <strong>OpenClaw 官方文档</strong></p>
+                <p>本页面为外部链接：<a href="https://docs.openclaw.ai" target="_blank">https://docs.openclaw.ai</a></p>
+                <p><a href="https://docs.openclaw.ai" class="btn btn-primary" target="_blank">打开官方文档 →</a></p>
+            </div>
+            """))
             return
 
         # Raw file download (e.g. /raw/ROBOT-SOP.md)
@@ -2083,6 +2175,23 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps(result, ensure_ascii=False).encode('utf-8'))
             return
+
+        # ── Catch-all: serve any remaining .md file as standalone HTML ──
+        # Handles docs that don't have explicit routes (e.g. before_tool_call-example.md,
+        # openclaw-release-log.md when accessed directly as .md, etc.)
+        _md_catchall_pattern = re.match(r'^([^?]*)\.md(?:\?|$)', path)
+        if _md_catchall_pattern:
+            _md_basename = _md_catchall_pattern.group(1).lstrip('/')
+            _md_file = DOCS_ROOT / (_md_basename + '.md')
+            if _md_file.exists():
+                try:
+                    _md_content = _md_file.read_text(encoding='utf-8')
+                    _md_title_m = re.match(r'^#\s+(.+)$', _md_content)
+                    _md_title = _md_title_m.group(1).strip() if _md_title_m else _md_file.name
+                    _md_html = render_markdown(_md_content)
+                    return self.send_html(make_page("docs", _md_title, _md_html))
+                except Exception:
+                    pass
 
         # Static files
         return super().do_GET()

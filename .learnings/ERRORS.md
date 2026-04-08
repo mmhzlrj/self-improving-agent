@@ -29,6 +29,30 @@
 - 导致旧的 Last check 信息被覆盖
 - 教训：编辑 HEARTBEAT.md 时要保留旧记录的完整性，只在底部追加新记录
 
+## 错误11：docs.0-1.ai 导航链接指向不存在的文件（2026-04-08）
+- `NAV_CONFIG` 中 `/tools/config.html` 和 `/tools/mcp.html` 路由存在，但 `docs/tools/config.md` 和 `docs/tools/mcp.md` 文件不存在
+- 导致用户点击导航后 404
+- 教训：添加导航路由时，同步创建对应的 `.md` 文件，不能只加路由不加内容
+
+## 错误12：techref 分类页"查看"按钮链接缺少分类前缀（2026-04-08）
+- techref category 页面（如 `/techref/browser-relay.html`）的"查看"按钮生成链接为 `/docs.0-1.ai/browser-relay-config.html`
+- 正确链接应为 `/docs.0-1.ai/techref/browser-relay-config.html`
+- 导致所有 techref 分类下的子文档链接 404
+- 教训：生成带分类路径的链接时，要使用完整路径 prefix，不能省略分类层级
+- 修复：在 href 中加 `/techref/` 前缀
+
+## 错误13：docs.0-1.ai 新增 section 后未同步更新 category_map（2026-04-08）
+- NAV_CONFIG 添加了 `/techref/openclaw-v2026-4-5-changelog.html` 链接，但 `category_map` 中未注册，导致 404
+- 教训：每次在 `docs/` 下新增 `.md` 文件时，同步检查 NAV_CONFIG 或 category_map 是否已注册路由
+
+## 错误14：docs.0-1.ai `integrations/` 和 `fix-sop/` 目录无路由（2026-04-08）
+- subagent A-0024 负责修复，但在我自己的排查中也发现了同样问题
+- 说明 subagent 和我同时在修同一个问题，没有协调好
+- 教训：发现 404 时先检查是否已有其他 agent/subagent 在处理同类问题，避免重复劳动
+- 编辑 HEARTBEAT.md 时用新内容块替换了旧内容块，但旧内容块引用的是更新前的状态
+- 导致旧的 Last check 信息被覆盖
+- 教训：编辑 HEARTBEAT.md 时要保留旧记录的完整性，只在底部追加新记录
+
 ---
 
 所有错误经验必须同步记录到两个地方：

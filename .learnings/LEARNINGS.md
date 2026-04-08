@@ -1267,11 +1267,16 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 - ✅ `openclaw --version`
 - ✅ `openclaw gateway status`
 
-**错误的命令**：
+**错误记录（重要修正）**：
 - ❌ `openclaw update run` — too many arguments，update 不接受参数
 - ✅ `openclaw update` — 正确命令（无参数）
 
-**避免 SSL 问题**：
+**exec 白名单路径经验**：
+- ❌ 不要新增 `/sbin/xxx` 路径 → 从未被批准
+- ✅ 统一用已有的 allow-always 批准路径：`/usr/bin/curl`、`/usr/bin/rsync` 等
+- ⚠️ macOS ping 在 `/sbin/ping`，不是 `/usr/bin/ping`
+- ⚠️ macOS curl 在 `/usr/bin/curl`，`/sbin/curl` 不存在
+- ✅ 添加新路径前必须先 `ls /usr/bin/xxx /sbin/xxx` 确认存在**避免 SSL 问题**：
 - ❌ `curl ... | python3` — urllib 需要加 `ssl._create_unverified_context()`
 - ✅ 用封装脚本 `python3 check-openclaw-latest.py`
 

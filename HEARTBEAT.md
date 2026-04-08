@@ -11,9 +11,11 @@
 - ping Ubuntu: ✅ 已永久免审（/sbin/ping）
 - curl reindex: ✅ 已永久免审（/sbin/curl），服务可达
 
-### exec 白名单更新（2026-04-03）
-- 新增 allow-always：`/usr/bin/ping`、`/usr/bin/curl`（任意参数）
-- 现有 allow-always：`rsync`、`ssh`、`ssh-keyscan`、`python3` 等
+### exec 白名单更新（2026-04-03 记录，2026-04-07 修正）
+- ❌ 旧记录错误：`/usr/bin/ping`、`/usr/bin/curl` — macOS 上这些路径不正确
+- ✅ 正确路径：`/sbin/ping`（macOS ping 实际位置）、`/usr/bin/curl`（curl 实际位置）
+- ⚠️ `/sbin/curl` 从未被批准，之前记录为正确是错的
+- 经验：添加新路径前先 `ls /usr/bin/xxx /sbin/xxx` 确认存在
 
 ### Gateway 重启记录
 - 2026-04-02 22:52 → 04-03 ~09:27，约 9 小时宕机（根因：subagent 审批链断裂）
@@ -23,11 +25,12 @@
 
 ---
 
-# Last check: 2026-04-07 21:21 CST (13:21 UTC)
+# Last check: 2026-04-07 22:10 CST (14:10 UTC)
 # Gateway: ✅ 正常（端口18789，LaunchAgent）
 # docs.0-1.ai: ✅ 在线
-# openclaw-upgrade skill: ✅ 已修复 front matter
-# 升级准备: v2026.4.1 → v2026.4.5 ✅ 已完成，等待用户确认升级
+# openclaw-upgrade skill: ✅ 已修复 front matter + A-F 步骤
+# 升级准备: v2026.4.1 → v2026.4.5 ✅ Step A-E 完成，Step F 待更新
+# exec 白名单修正: /sbin/curl 从未批准，/usr/bin/curl ✅ 是正确路径
 # MiniMax: ⏳ heartbeat channel 审批限制，需 Web UI 批准
 # ⚠️ heartbeat channel exec 审批限制已知问题：heartbeat 无法自行批准 exec
 #   解决：考虑开启 Telegram/Discord exec approvals，或 main session 定时批量检查
