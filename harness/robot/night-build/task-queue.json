@@ -20,19 +20,19 @@
     ]
   },
   "stats": {
-    "total": 1809,
+    "total": 1810,
     "estimated_calls": 9045,
     "sequences": {
       "A": {
         "description": "P0 物理机器人必须先跑起来",
-        "total": 11,
-        "pending": 8,
+        "total": 19,
+        "pending": 16,
         "done": 3
       },
       "B": {
         "description": "P1 Phase 3 iPhone感知接入",
-        "total": 4,
-        "pending": 3,
+        "total": 5,
+        "pending": 4,
         "done": 1
       },
       "C": {
@@ -186,6 +186,108 @@
       "task_file": "harness/robot/night-build/tasks/T-01-A18.md",
       "assigned_to": null,
       "created_at": "2026-04-01T23:50:00+08:00"
+    },
+    {
+      "id": "T-01-A21",
+      "group": "A",
+      "status": "pending",
+      "title": "Step1 - Task 归纳实现（Session → 结构化任务）",
+      "priority": "P0",
+      "dependencies": [],
+      "sop": "harness/robot/night-build/SOP-Self-Memory-3Step.md",
+      "task_file": "harness/robot/night-build/tasks/T-01-A21.md",
+      "assigned_to": null,
+      "created_at": "2026-04-02T00:30:00+08:00"
+    },
+    {
+      "id": "T-01-A24",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - video_generate 测试 + SOP",
+      "priority": "P1",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0017.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
+    },
+    {
+      "id": "T-01-A25",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - music_generate 测试 + SOP",
+      "priority": "P1",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0018.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
+    },
+    {
+      "id": "T-01-A26",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - ComfyUI workflow 集成验证",
+      "priority": "P2",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0019.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
+    },
+    {
+      "id": "T-01-A27",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - ClawHub skills 功能测试",
+      "priority": "P1",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0020.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
+    },
+    {
+      "id": "T-01-A28",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - Control UI 多语言测试",
+      "priority": "P2",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0021.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
+    },
+    {
+      "id": "T-01-A29",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - MiniMax TTS 集成测试",
+      "priority": "P2",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0022.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
+    },
+    {
+      "id": "T-01-A31",
+      "group": "A",
+      "status": "completed",
+      "completed_at": "2026-04-08T10:30:00+08:00",
+      "result": "fix-sop/14文件 + integrations/ + v2026.4.5路由全部修复，command-log.md已更新",
+      "title": "docs.0-1.ai 大量 .md 页面 404 修复",
+      "priority": "P0",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0024.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:35:00+08:00"
+    },
+    {
+      "id": "T-01-A30",
+      "group": "A",
+      "status": "pending",
+      "title": "v2026.4.5 - /dreaming 实验功能测试",
+      "priority": "P3",
+      "dependencies": [],
+      "task_file": "harness/robot/night-build/tasks/A-0023.md",
+      "assigned_to": null,
+      "created_at": "2026-04-07T15:20:00+08:00"
     },
     {
       "id": "T-0001",
@@ -14034,6 +14136,19 @@
       "sequence": "A",
       "mode": "auto",
       "depends_on": []
+    },
+    {
+      "id": "B-0005",
+      "title": "HappyHorse-1.0 调研（人形机器人/AI感知）",
+      "description": "调研 HappyHorse-1.0 开源项目（https://github.com/happy-horse/happyhorse-1）和官网 happyhorse-ai.com，评估其技术路线、功能特性，及其与 0-1 机器人 Phase 3（iPhone 感知前端接入）的关联性。输出：功能分析 + 接入可行性 + 建议。",
+      "sequence": "B",
+      "status": "pending",
+      "priority": "high",
+      "category": "research",
+      "assignee": "MiniMax-subagent",
+      "created": "2026-04-08",
+      "due": null,
+      "notes": "官网: happyhorse-ai.com | GitHub: happy-horse/happyhorse-1"
     }
   ]
 }
