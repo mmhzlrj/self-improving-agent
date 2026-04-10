@@ -97,3 +97,56 @@ Gateway 过载时，sessions.json 膨胀到 16MB，误以为需要清理
 1. status=done/failed/timeout 的 subagent 不一定孤儿（必须检查 .jsonl 文件是否存在）
 2. runs.json 绝对不能清空，只能删对应 orphan 相关的条目
 3. 清理前必须先确认 backup 存在
+
+## 2026-04-10: T-01-A22 SSH 访问 Ubuntu 受限
+
+### 问题
+SSH 到 Ubuntu 192.168.1.18 被拒绝，无法直接修改 Semantic Cache server.py
+
+### 错误信息
+```
+Permission denied (publickey,password)
+```
+
+### 尝试过的方案
+1. `ssh root@192.168.1.18` - 失败
+2. `ssh 192.168.1.18` (默认用户) - 失败  
+3. `ssh mmhzlrj@100.97.193.116` (Tailscale) - 超时
+4. `ssh mmhzlrj@192.168.1.18` (password auth) - 失败
+5. 检查 SSH key: `~/.ssh/id_ed25519.pub` 存在，但 Ubuntu 无对应 authorized_keys
+
+### 解决方案
+在 MacBook 本地实现 NamespaceCache 包装器类：
+- `scripts/namespace_semantic_cache.py` - 核心实现
+- 包装 Ubuntu Semantic Cache API，增加 namespace 层
+- 本地使用 SQLite FTS5 存储 user/project/global namespace
+
+### 教训
+- ❌ 不要假设 SSH 访问总是可用的
+- ✅ 远程服务器访问受限时应立即尝试替代方案
+- ✅ 本地 wrapper/proxy 模式可以间接实现功能
+
+## 2026-04-10 ESP32-CAM 烧录失败
+
+### 问题
+多次烧录新固件失败，ESP32不断重启报`invalid header: 0xffffffff`
+
+### 根本原因
+烧录时USB供电不足导致Flash写入损坏
+
+### 教训
+- ❌ 烧录时不能同时读取串口
+- ❌ ESP32-CAM USB供电能力有限，烧录时可能需要外接5V电源
+- ✅ 烧录前应确保`esptool.py flash_id`能成功读取Flash状态
+- ✅ 断电重插后设备自动恢复，没有真的砖
+
+## 2026-04-10 MiniMax音乐API 充值误解
+
+### 问题
+用户有music-2.6额度（100次），但API返回1008 insufficient balance
+
+### 根本原因
+MiniMax Token Plan套餐额度≠账户余额，API调用需要账户有现金余额
+
+### 教训
+- API返回1008 = 账户余额不足，需要充值
