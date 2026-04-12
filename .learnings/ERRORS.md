@@ -257,3 +257,31 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 
 ### 教训
 - MEMORY.md 信息需核实后才能报，不确定时说"需要核实"
+
+## 错误22：exec host=node 调试 — systemd Environment 覆盖 + 多层配置遗漏（2026-04-12）
+
+### 问题概述
+调试 Ubuntu OpenClaw node 连接 Mac Gateway，执行 `exec host=node` 时持续失败。
+
+### 问题演进
+**Phase 1: SYSTEM_RUN_DENIED** → exec-approvals.json 的 defaults 为空
+**Phase 2: SECURITY ERROR** → Mac Gateway 拒绝明文 WebSocket
+**Phase 3: env var 没传入 systemd** → service file 覆盖遗漏
+**Phase 4: 二进制路径两套** → ~/.npm-global/ vs ~/.nvm/...
+**Phase 5: tools.exec.host 被锁** → 需要改回 "node"
+
+### 最终修复
+1. exec-approvals.json: defaults.security="full", ask="off"
+2. systemd service: Environment="OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1"
+3. openclaw.json: tools.exec.host="node"
+
+### 关键教训
+- systemd Environment 同一key多行=后者覆盖前者
+- 改完配置必须验证（cat/grep /proc/PID/environ）
+- 长命令用 background=true 避免 SIGKILL
+- npm install --prefix 只装到用户目录，不替代系统 npm global
+
+## 错误22：exec host=node 调试 — systemd Environment 覆盖 + 多层配置遗漏（2026-04-12）
+### 问题：5层配置同时出问题（exec-approvals.json空 → SECURITY ERROR → env未传入 → binary路径错 → exec.host锁）
+### 修复：defaults.security=full + OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1 + tools.exec.host=node
+### 教训：systemd Environment 同一key多行=后者覆盖；改完必须验证；长命令用background=true
