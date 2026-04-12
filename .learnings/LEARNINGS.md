@@ -1250,3 +1250,20 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 - docs-server 按钮错位修复：放在 header 外、nav 前的独立 position:fixed 位置
 - 主 agent 测试需要新开 session（subagent 无效）
 - **exec 白名单**：不要新增 `/sbin/xxx` 路径，统一用已有的 `/usr/bin/curl`、`/usr/bin/rsync` 等批准路径；添加前先 `ls /usr/bin/xxx /sbin/xxx` 确认存在
+
+## exec timeout 规范（2026-04-12）
+
+### 规则
+- 短命令：10-15s
+- 中等命令（npm/git push）：60s+
+- 长命令（rsync/systemctl/npm大包）：600s+
+- **禁止 5-10s**（必然 SIGKILL）
+
+### 长任务处理
+- 需要等待 → cron 定时器
+- 持续运行 → background=true + process 监控
+- 一次性 → 用完删除 cron job
+
+### 监控
+- `openclaw status`
+- `process list`
