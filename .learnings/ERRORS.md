@@ -285,3 +285,21 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 ### 问题：5层配置同时出问题（exec-approvals.json空 → SECURITY ERROR → env未传入 → binary路径错 → exec.host锁）
 ### 修复：defaults.security=full + OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1 + tools.exec.host=node
 ### 教训：systemd Environment 同一key多行=后者覆盖；改完必须验证；长命令用background=true
+
+## 2026-04-13 超时时间设置错误的后遗症（严重）
+
+**问题**：timeout 设太短 → exec 被 SIGKILL → subagent 异常退出 → session orphan → transcript 产生 `.deleted.` 垃圾文件
+
+**教训**：SIGKILL 不只是"命令失败"那么简单，它会导致整个 OpenClaw 的 session 管理链产生孤儿记录。每次我因为 timeout 太短导致 exec 被 kill，都可能在 sessions/ 目录留下 orphan transcript 文件。
+
+**正确的 timeout 设置原则**：
+1. 短命令（读文件、查状态）：15-30s
+2. 中等命令（npm install、git push）：60s+
+3. 长命令（rsync、systemctl restart、大文件复制）：600s+
+4. **严禁设置 5-10s**（必然 SIGKILL）
+5. 对于耗时脚本，timeout 应该是脚本实际运行时间的 2-3 倍
+6. cron 任务的 timeoutSeconds = 单次最大耗时，不是间隔
+
+**预防措施**：
+- 任何 exec 调用前，先评估预期耗时
+- 不确定的命令宁可设长 timeout（600s+）也不要设短
