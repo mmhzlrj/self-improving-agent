@@ -303,3 +303,28 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 **预防措施**：
 - 任何 exec 调用前，先评估预期耗时
 - 不确定的命令宁可设长 timeout（600s+）也不要设短
+
+---
+
+## 2026-04-13 exec.host="node" 全局设置导致灾难性错误
+
+**日期**：2026-04-13
+**严重程度**：🔴 严重
+**涉及文件**：`~/.openclaw/openclaw.json` → `tools.exec.host`
+
+### 错误描述
+将 `tools.exec.host` 从 `"auto"` 改为 `"node"` 后，所有 exec 命令默认发送到 Ubuntu node 执行。导致：Chrome 扩展文件写到了 Ubuntu、Mac 文件操作全部失败、docs-server 无法启动。
+
+### 根本原因
+`exec.host = "node"` 是全局开关，AI 助手不可能每次都记得加 `host: "gateway"` 参数。
+
+### 正确做法
+- 保持 `exec.host = "auto"`
+- 需要操作 Ubuntu 时，按命令级别指定：`exec({ host: "node", ... })`
+- 永远不要全局改成 `"node"`
+
+## 错误8：write 覆盖 HEARTBEAT.md（2026-04-14）
+- 想追加节点在线检查，用 write 写了 HEARTBEAT.md，**覆盖了整个文件**
+- AGENTS.md 明确规定「编辑 HEARTBEAT.md — 只在底部追加，不覆盖旧记录」
+- 恢复：立即用之前读取的完整内容重新写入
+- 教训：HEARTBEAT.md 只能用 append/编辑追加，**绝对不能用 write 覆盖**
