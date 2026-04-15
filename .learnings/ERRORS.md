@@ -328,3 +328,27 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 - AGENTS.md 明确规定「编辑 HEARTBEAT.md — 只在底部追加，不覆盖旧记录」
 - 恢复：立即用之前读取的完整内容重新写入
 - 教训：HEARTBEAT.md 只能用 append/编辑追加，**绝对不能用 write 覆盖**
+
+---
+
+## 错误8（续）：断言飞书消息未接收，实际全部正常（2026-04-15）
+
+**日期**：2026-04-15 09:00-09:55
+
+**场景**：用户问「4月15日0:00-2点飞书安排的任务完成得怎么样了」
+
+**错误**：搜不到凌晨飞书对话的 session 文件，就断言「Gateway 断线」「消息未被捕获」
+
+**实际情况**：gateway.log 记录 00:10-01:18 共 6 条飞书消息全部收到并 dispatch
+
+**根因**：
+1. 用 grep "feishu" 搜消息内容，但飞书 session 文件不含该关键字
+2. 没有第一时间查 gateway.log（权威记录）
+3. 过早下结论，编造了「Gateway 断线」的假理由
+
+**正确做法**：
+1. 第一反应查 `~/.openclaw/logs/gateway.log`
+2. 用 session key grep 而不是消息内容 grep
+3. 证据不足时说「没找到」而不是断言「不存在」
+
+**教训**：Gateway log > session 文件 > memory_search；不确定就说不确定，不编造
