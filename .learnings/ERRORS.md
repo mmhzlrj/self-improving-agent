@@ -352,3 +352,41 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 3. 证据不足时说「没找到」而不是断言「不存在」
 
 **教训**：Gateway log > session 文件 > memory_search；不确定就说不确定，不编造
+
+---
+
+**日期**：2026-04-15 14:50-15:11
+
+**场景**：Ubuntu 上启动 server.py（semantic-cache），尝试用 nohup/setsid/ssh 等方式后台运行
+
+**错误**：每次启动后进程在模型加载完成后神秘消失
+
+**实际情况**：
+- OpenClaw node executor 在每次命令执行后会向 Ubuntu 发送 SIGKILL 杀掉整个进程组
+- nohup/setsid/disown 都无法阻止（因为杀的是进程组，不是单个进程）
+- 只有 cron 触发的方式可能绕过（cron 是独立 session）
+
+**根因**：
+- 不知道 node executor 会杀后台进程
+- 以为"退出 shell 后台进程会继续"，但 node executor 行为不同
+
+**正确做法**：
+1. 在 Ubuntu 上建立 crontab 保活（每3分钟检查，不在则重启）
+2. 或者用 systemd service（需要 sudo 权限，当前 jet 用户无）
+3. 启动后立即测试，不要等
+
+**教训**：在 node executor 下运行后台服务，必须用 crontab/systemd 等不依赖 shell 退出的方式
+
+## 2026-04-16 飞书发送音频文件多次失败（幻觉成功 + 参数错误）
+
+### 问题
+1. 幻觉成功：tool 返回 `ok:true` 就以为成功了
+2. 参数错误：`filePath="/tmp/..."` → `/tmp` 不在白名单，只发文字
+3. 根因：飞书 `mediaLocalRoots` 默认只有 workspace 目录
+
+### 解决
+文件放 `/Users/lr/.openclaw/workspace/`，用 `filePath` 绝对路径发送
+
+### 教训
+- 工具返回成功 ≠ 实际成功，要确认对方收到的是文件还是文字
+- 飞书发送本地文件路径必须在 `mediaLocalRoots` 白名单内
