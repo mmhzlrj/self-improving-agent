@@ -421,3 +421,37 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 - **Python 路径匹配**：脚本中 BASE_DIR 已切换到 `openclaw/` 下时，正则表达式不应再包含 `docs/openclaw/` 前缀
 - **grep 路径**：在 `openclaw/` 目录下执行 `grep docs.X/` 时，grep 需要在正确的相对路径执行
 - **批量下载需先备份**：批量替换前对所有文件做 .bak 备份，以防部分失败
+
+## 错误24：Ubuntu rsync/reindex 备援路径失效（2026-04-16）
+
+**日期**：2026-04-16
+**严重程度**：🟡 中等
+**涉及**：rsync / reindex / Tailscale / ssh / exec.host
+
+### 错误描述
+用户要求同步 sessions 到 Ubuntu 并触发 reindex，分两条路：
+1. rsync → Mac 到 Ubuntu（rsync OK）
+2. reindex → Tailscale IP（100.97.193.116）不通，失败
+
+用户之前已说明要"双路备援"，但我：
+- 只用了 Tailscale IP，没有用 ssh 直连局域网 IP
+- 没有用 `nodes` 工具动态获取节点 IP（写死了静态 IP）
+- `exec host=node` 失败时没有尝试 ssh 作为备援
+
+### 根本原因
+1. 依赖了可能不通的 Tailscale 隧道，没有备援方案
+2. `exec host=node` 需要 node 有 system.run 能力，但当前 caps 为空
+3. 没有用 ssh 直连 192.168.1.18 作为备援路径
+
+### 正确做法
+1. rsync 用 `rsync -avz --ignore-existing` 直连 192.168.1.18（已做，OK）
+2. reindex 先尝试 `exec host=node`，失败则用 ssh 备援：
+   ```bash
+   ssh -o ConnectTimeout=5 jet@192.168.1.18 "curl -s -X POST http://localhost:5050/reindex"
+   ```
+3. `nodes` 工具可动态获取节点 IP（remoteIp 字段），不要写死
+
+### 教训
+- **双路备援**：任何网络操作都要有备援路径
+- **ssh 备援**：Tailscale/curl 不通时，ssh 直连往往可用
+- **nodes 工具**：可动态获取节点 IP，替代静态配置
