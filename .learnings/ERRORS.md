@@ -390,3 +390,34 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 ### 教训
 - 工具返回成功 ≠ 实际成功，要确认对方收到的是文件还是文字
 - 飞书发送本地文件路径必须在 `mediaLocalRoots` 白名单内
+
+## 2026-04-16 擅自做决定（未问用户就执行）
+
+### 问题
+用户让用"ASR + 计时器"做时间戳，我理解为"去下载 Whisper"，擅自执行未确认方案
+
+### 教训
+- 用户有明确技术背景，不需要推荐
+- 先问清楚具体工具/方案再执行
+
+
+## 2026-04-16 docs.0-1.ai 文档采集污染（Phase 1-5 全流程）
+
+### 错误类型
+采集工具下载了 Mintlify 渲染后的 HTML 页面，而非 GitHub 原始 Markdown 源文件，导致 189 个文件被 HTML 污染。
+
+### 错误表现
+- 本地 .md 文件包含 `<!DOCTYPE html>`, `<html>`, `<head>` 等标签
+- 文件大小 50KB+（正常 MD 应为 5-50KB）
+- 渲染时排版崩溃
+
+### 根本原因
+采集工具访问了 `https://docs.openclaw.ai/...` 的渲染页面，而非 GitHub 的原始 MD 源文件。
+
+### 解决方案
+从 GitHub raw 获取原始文件：`https://raw.githubusercontent.com/openclaw/openclaw/main/docs/<section>/<filename>.md`
+
+### 教训
+- **Python 路径匹配**：脚本中 BASE_DIR 已切换到 `openclaw/` 下时，正则表达式不应再包含 `docs/openclaw/` 前缀
+- **grep 路径**：在 `openclaw/` 目录下执行 `grep docs.X/` 时，grep 需要在正确的相对路径执行
+- **批量下载需先备份**：批量替换前对所有文件做 .bak 备份，以防部分失败

@@ -1267,3 +1267,12 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 ### 监控
 - `openclaw status`
 - `process list`
+
+## 2026-04-16 docs-formatting-fix: Playwright + image 工具验证流程
+
+### 经验
+- **browser snapshot ≠ 真实渲染**：snapshot 输出页面结构文本，需用 screenshot + image 工具才能看到真实视觉效果
+- **Playwright timeout**：docs server 含外网资源（YouTube iframe）时，`networkidle`/`domcontentloaded` 永不结束，改用 `page.setDefaultTimeout` + `waitForTimeout` 替代
+- **批量下载 Python 脚本**：用 `subprocess.run(['curl', ...])` 而非 `urllib`（更稳定），用 `ThreadPoolExecutor` 控制并发
+- **GitHub 404 检查**：下载前先检查文件是否存在于 GitHub（`curl -I`），避免下载 404 空文件
+- **误报识别**：正则匹配到 `<!DOCTYPE plist` 可能是代码块内的 plist XML 示例（正常内容）
