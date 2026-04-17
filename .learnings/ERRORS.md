@@ -550,3 +550,11 @@ gateway-log-daemon.py 的 IGNORABLE_PATTERNS 包含 "529 overloaded"，且 ERROR
 - abort/529 是用户可见的故障，必须检测
 - context overflow 会导致数据丢失，不能忽略
 - 插件式架构让新增检测项零改动核心代码
+
+## 🔴 错误23：subagent 上下文爆炸（2026-04-17）
+Subagent session `53d06535-6539-448d-a23c-65e9beba0a52` 在执行 Step 6（精简上下文文件）时，上下文窗口溢出：`Context overflow: prompt too large for the model. Try /reset (or /new) to start a fresh session, or use a larger-context model.`
+原因：读取 AGENTS.md 等大文件时上下文累积过大。
+教训：
+- subagent 在读取文件前先估算大小，禁止一次读入多个大文件
+- 大文件精简应分批执行，不能在单次 subagent 内完成
+- lobster 执行期间，主 session 尽量不要累积太多上下文（每步验证后主动汇报）
