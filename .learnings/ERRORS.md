@@ -455,3 +455,37 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 - **双路备援**：任何网络操作都要有备援路径
 - **ssh 备援**：Tailscale/curl 不通时，ssh 直连往往可用
 - **nodes 工具**：可动态获取节点 IP，替代静态配置
+
+## 错误25：贵庚 reindex 服务长期失效未被及时发现（2026-04-17）
+
+**日期**：2026-04-17 13:09
+**严重程度**：🔴 严重
+**涉及**：ubuntu-sync cron / 贵庚记忆系统 / memory_search
+
+### 错误描述
+用户说"分类从6大类变回来之前了"，用 memory_search 搜不到相关记录，怀疑是 reindex 没有执行。
+
+### 根因
+从 cron runs 历史发现：**所有 reindex 请求从 2026-04-16 19:00 之后全部失败**（超时/404/405），导致新 sessions 没有被索引到贵庚记忆系统。
+
+### cron runs 关键记录
+- 唯一成功：ts=1776312564691（2026-04-16 19:00）
+- 此后 44 次运行全部失败：exit:28 / curl: (7) / 404 / 405
+- 原因：Ubuntu 上 `server.py`（贵庚记忆服务）5050 端口无响应
+
+### 教训
+- **cron runs 记录要定期检查**：不只是看 summary 的 ok/error，还要看 reindex 是否真正成功
+- **reindex 失败不影响 rsync**：sessions 同步到 Ubuntu 正常，但没有被索引
+- **nodes 工具能连通 ≠ 服务正常**：node 2026.3.24 在线，但 5050 端口的 server.py 无响应
+- **memory_search 搜不到 = 立即查 reindex 状态**
+
+### 正确做法
+1. 每次 cron run 都要检查 reindex 是否返回 200（不只是"已发送"）
+2. 发现 reindex 连续失败 → 立即在 Ubuntu 本地验证服务状态
+3. 验证命令：`curl -X POST http://localhost:5050/reindex`（Ubuntu 本地）
+4. 或 `ps aux | grep server.py` 确认进程存在
+
+### 待处理
+- 在 Ubuntu 上检查 `server.py` 是否在跑
+- 如果挂了，用 cron 方式重启（避免被 node executor SIGKILL）
+- 修复后手动触发一次 reindex
