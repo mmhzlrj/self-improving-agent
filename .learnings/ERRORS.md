@@ -489,3 +489,27 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 - 在 Ubuntu 上检查 `server.py` 是否在跑
 - 如果挂了，用 cron 方式重启（避免被 node executor SIGKILL）
 - 修复后手动触发一次 reindex
+
+## 2026-04-17 14:41 docs-server.py 路由前缀写错
+
+**文件**：~/.openclaw/workspace/tools/docs-server.py
+
+**问题**：把 review 路由写成 `/docs.0-1.ai/review/`，但 do_GET() 第2198行 strip SCRIPT_PREFIX 后 path 已变成 `/review/`，所以 404。
+
+**修复**：
+- 路由用 `/review/`（path 变量值）
+- mdview.py URL 用 `/docs.0-1.ai/review/`（用户看到的 URL）
+
+**教训**：写路由前先读 do_GET()，搞清楚 path 变量在 strip 前后的值。
+
+## 2026-04-17 15:04 路径缩写导致 AI 找不到文件
+
+**问题**：用户给了绝对路径 `/Users/lr/.openclaw/workspace/webmcp.md`，我自作主张缩写成 `~/workspace/webmcp.md`。AI 读模板时 `~` 不一定展开，导致找不到文件。
+
+**教训**：用户给的路径原样保留，禁止缩写。绝对路径就是绝对路径。
+
+## 2026-04-17 15:08 Chrome Prompt Assistant 模板位置搞错
+
+**问题**：Chrome 扩展读的是 `tools/openclaw-prompt-assistant/template.json`，我却改了 `docs/tools/prompt-template.json`。
+
+**教训**：改模板前先确认 Chrome 扩展的数据源路径（看 docs-server.py route）。
