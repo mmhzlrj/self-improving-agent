@@ -513,3 +513,40 @@ contextWindow 改为 32768，server --n_ctx 同步更新
 **问题**：Chrome 扩展读的是 `tools/openclaw-prompt-assistant/template.json`，我却改了 `docs/tools/prompt-template.json`。
 
 **教训**：改模板前先确认 Chrome 扩展的数据源路径（看 docs-server.py route）。
+
+## 🔴 错误22：docs-server catch-all 路由永远不匹配（2026-04-17）
+三个 bug 叠加导致子目录 .md 无法渲染为 HTML：
+1. `do_GET` 入口 strip 了 SCRIPT_PREFIX，但 catch-all 仍用 `path.startswith("/docs.0-1.ai/")` 判断
+2. `doc_name` 有前导 `/`，`Path("/") / "sub/file"` = 绝对路径
+3. `.html` 分支的 `if f.exists()` 被错误缩进到 `else:` 块里
+修复：去掉前缀检查 + `path.lstrip('/')` + 修正缩进
+
+## 🟡 教训16：exec background 完成事件可能被 compaction 吞掉（2026-04-17）
+retry-minimax-api.py 在 16:51 写完结果文件并退出，但 exec 完成事件没被收到。
+原因：可能是 compaction 发生时事件被丢弃。
+对策：重试脚本不能只靠 announce 通知，必须写结果文件，主 session 应主动轮询文件。
+
+## 🔴 错误21：指示灯遗漏 abort/529/context-overflow 检测（2026-04-17 修复）
+
+**日期**：2026-04-17 15:27 发现，17:30 修复
+**严重程度**：🔴 P0 — 遗漏导致会话重置未被发现
+
+### 错误描述
+gateway-log-daemon.py 的 IGNORABLE_PATTERNS 包含 "529 overloaded"，且 ERROR_PATTERNS 缺少 abort/context.overflow/isError=true，导致严重错误被忽略，指示灯持续绿灯。
+
+### 根因
+1. IGNORABLE_PATTERNS 中的 "529 overloaded" 把关键 Provider 错误当噪音忽略
+2. ERROR_PATTERNS 缺少 "abort"、"context.overflow"、"session reset"、"auto-compaction failed"、"isError=true"
+3. 没有健康检查端点（/check/*），指示灯无法感知外部依赖状态
+
+### 修复
+1. 从 IGNORABLE_PATTERNS 移除 "529 overloaded"、"Gateway closed"、"host gateway closed"
+2. ERROR_PATTERNS 新增 abort, context.overflow, session reset, auto-compaction failed, isError=true, 529, overloaded
+3. 新增 6 项健康检查端点（/check/all, /check/docs, /check/minimax, /check/reindex, /check/sessions, /check/plugins）
+4. 引入插件式 CHECK_PLUGINS 注册表（未来零改动核心代码即可新增检测项）
+
+### 教训
+- IGNORABLE 模式要非常谨慎，不能忽略 Provider 层面错误
+- abort/529 是用户可见的故障，必须检测
+- context overflow 会导致数据丢失，不能忽略
+- 插件式架构让新增检测项零改动核心代码
