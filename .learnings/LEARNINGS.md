@@ -1276,3 +1276,7 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 - **批量下载 Python 脚本**：用 `subprocess.run(['curl', ...])` 而非 `urllib`（更稳定），用 `ThreadPoolExecutor` 控制并发
 - **GitHub 404 检查**：下载前先检查文件是否存在于 GitHub（`curl -I`），避免下载 404 空文件
 - **误报识别**：正则匹配到 `<!DOCTYPE plist` 可能是代码块内的 plist XML 示例（正常内容）
+
+## 2026-04-19 alsoAllow 工具名查找方法
+- **命令**：`grep -rh "name: '" ~/.openclaw/extensions/*/server.mjs 2>/dev/null | grep -E "doubao_chat|deepseek_chat|kimi_chat|qwen_chat|glm_chat"`
+- **原理**：MCP server 通过 ListToolsRequestSchema 注册工具，工具名在 `name: 'xxx'` 字段
