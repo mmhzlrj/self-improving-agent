@@ -1,5 +1,24 @@
 # 经验教训 - MCP Server 接入 AI 网页
 
+## 2026-04-30 MiniMax Coding Plan 配置排查
+
+### MiniMax baseUrl 必须匹配 API Key 类型
+- Coding Plan key (sk-cp-xxx) → baseUrl = `api.minimax.chat`
+- 普通 API key → baseUrl = `api.minimaxi.com`
+- 配错会导致频繁超时，token 不被计入
+
+### OpenClaw token 统计是自动的
+- Gateway 解析 API 响应中的 usage 字段，自动计入 session 成本
+- 不需要额外脚本（monitor.py / daemon 是独立额度监控，非必需）
+
+### Session fallback 后不会自动切回主模型
+- MiniMax 超时 fallback 到 DeepSeek 后，session 一直用 DeepSeek
+- 需要 `/new` 才会重新尝试 MiniMax
+
+### config.patch 不能改 protected paths
+- models.providers.*.baseUrl 是 protected → 直接编辑 json 文件
+- Gateway 检测文件变更自动 hot-reload
+
 ## 2026-03-19
 
 ### 成功经验
@@ -1280,3 +1299,20 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 ## 2026-04-19 alsoAllow 工具名查找方法
 - **命令**：`grep -rh "name: '" ~/.openclaw/extensions/*/server.mjs 2>/dev/null | grep -E "doubao_chat|deepseek_chat|kimi_chat|qwen_chat|glm_chat"`
 - **原理**：MCP server 通过 ListToolsRequestSchema 注册工具，工具名在 `name: 'xxx'` 字段
+
+## 2026-05-02 Multi-Agent 委派长监控任务
+
+**场景**：需要持续监控远程编码进度（预计 65 分钟）。
+
+**正确方法**：
+- `sessions_send(sessionKey="agent:minimax:main", message=...)` 委派给 Minimax 独立 agent
+- Minimax 用自己的 brain 持续监控，完成后汇报
+
+**错误方法**：
+- `sessions_spawn(agentId="minimax")` → 不是 subagent 用法，会被 forbid
+- 自己轮询 ssh → 浪费 token
+
+**关键概念**：
+- Multi-agent = 独立 brain，各有自己的 workspace/SOUL/AGENTS
+- sessions_send = 跨 agent 任务委派
+- sessions_spawn = 同 agent 内的子任务
