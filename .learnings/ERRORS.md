@@ -1,4 +1,26 @@
+## 2026-05-03 15:10 直接改 openclaw.json 导致 config 损坏 + Gateway reload 死循环
+- 错误：Python 写 openclaw.json 与 Gateway 热加载冲突，config 损坏
+- 根因：未用 gateway 工具改 config
+- 修复：从 golden backup 恢复 + SIGUSR1 重启
+- 教训：配置变更必须用 gateway 工具，不能直接改 json
+
+## 2026-05-03 15:09 channelConfigs 警告修复
+- 禁用 channels 和 deepseek-web-chat 插件
+
 # ERRORS.md - 错误记录
+
+## 2026-05-03 09:44 daemon /check/reindex 取错字段名导致 index_total 丢失
+- 错误：daemon check_reindex() 用 `stats.get("total")` 但 Ubuntu 5050 /stats 返回 `index_total`
+- 根因：字段名不一致，SSH 查询成功但 key 不匹配，total 永远是 None
+- 影响：daemon 返回结果缺少 index_total 字段，morning-briefing 交叉验证只能从方式2获取
+- 修复：`stats.get("total")` → `stats.get("index_total")`，响应字段同步改名
+- 文件：tools/gateway-log-daemon.py
+
+## 2026-05-03 09:41 rl-training-headers agent_end hook 被 blocked (5535次)
+- 错误：v2026.4.27 引入 Hook Policy 后，rl-training-headers 作为非内置插件，agent_end hook 全被拦截
+- 根因：新版本要求非内置插件显式设置 `hooks.allowConversationAccess=true`
+- 影响：4/13 以来累计 5535 次 agent_end 被 blocked，RFC 9457 训练头写不进 session
+- 修复：openclaw.json plugins.entries.rl-training-headers 添加 `"hooks": {"allowConversationAccess": true}`
 
 ## 2026-05-01 00:06 activation.onStartup 写错位置导致 Gateway 无法启动
 - 错误：Step 6 Plugin 修复时把 activation.onStartup 写进了 openclaw.json 的 plugin entries
@@ -124,3 +146,7 @@
 - CUDA 清理要克制，频繁清理反而坏事
 - 后台任务用 systemd，不要 nohup+SSH
 - 架构决策必须先确认用户
+
+## 2026-05-02 18:34 最终根因：gc.collect 是 GPU OOM 元凶
+
+5 次 OOM 对照实验确认：在 CUDA encode 循环中调用 gc.collect()+torch.cuda.empty_cache() 是唯一根因。移除后 batch=1 正常运行。
