@@ -150,3 +150,35 @@
 ## 2026-05-02 18:34 最终根因：gc.collect 是 GPU OOM 元凶
 
 5 次 OOM 对照实验确认：在 CUDA encode 循环中调用 gc.collect()+torch.cuda.empty_cache() 是唯一根因。移除后 batch=1 正常运行。
+
+## 2026-05-04 贵庚索引重建连环错误
+
+### 错误1: 反复重试 CLI 命令刷爆 session
+- `openclaw cron list/rm` 超时 → 反复重试 6+ 次 → Mac 端大量 operator session
+- 教训: CLI 超时换方案，不重试
+
+### 错误2: encode.py v1 设计缺陷
+- 全量加载一次性编码、无 flush、无断点续跑、无进度文件
+- 教训: 长任务必须分段+增量写入+进度文件+flush
+
+### 错误3: cron 单路径 / 错误4: 干扰编码 / 错误5: 搞错节点 / 错误6: Minimax 不理解自然语言
+
+## 2026-05-04 knowledge-graph.html 6 轮 Debug 教训
+- **错误**：知识图谱页面 CDN 加载失败，6 轮才修完（3d-force-graph + 传递依赖 + 数据文件路径 + 服务端不支持.json）
+- **根因**：
+  1. jsdelivr 需手动列出全部传递依赖（d3-force-3d, ngraph.graph, polished, @tweenjs 等十几个），漏一个就报错
+  2. 逐个修 bug → 用户反复复制粘贴报错 → 效率极低
+  3. 数据文件用了相对路径，但页面 URL 和文件系统路径不一致
+  4. docs-server.py 不提供 .json 文件
+- **教训**：
+  1. ESM 模块用 esm.sh 替代 jsdelivr（自动解析传递依赖，一条 URL 搞定）
+  2. 必须浏览器打开页面一次性抓全部报错，不能靠猜
+  3. fetch 相对路径要换算为 HTTP 路径后验证
+  4. 服务端能力预先检查（支持哪些文件类型）
+- **改进**：创建 web-debug-template.lobster v2.0（7步法：浏览器抓全部→依赖树分析→路径验证→服务端检查→一次性修复→浏览器验证0报错→汇报）
+
+## 2026-05-04 18:51 Userlog 分类误判
+- **错误**：【User】消息内容含 [error]/[warn] 文字时被误标为异常
+- **根因**：content.includes('[error]') 不区分用户消息和系统日志
+- **教训**：文本分类必须用结构化 tag 而非全文搜索
+- **修复**：加 !isUser 保护，用户消息始终 type=user
