@@ -1316,3 +1316,23 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 - Multi-agent = 独立 brain，各有自己的 workspace/SOUL/AGENTS
 - sessions_send = 跨 agent 任务委派
 - sessions_spawn = 同 agent 内的子任务
+
+## 2026-05-05 OpenClaw 升级后 alsoAllow + openclaw-mcp-adapter 重复故障根因
+
+**根因 1：alsoAllow 冗余条目**
+- 本地配置垃圾（profile:full 已覆盖，alsoAllow 多余）
+- v2026.5.3 验证更严格 → 静默问题暴露
+- 永久修复：alsoAllow: []
+
+**根因 2：openclaw-mcp-adapter 缺少编译输出**
+- 插件只有 .ts 源码，无 dist/
+- v2026.5.3 移除了隐式 TypeScript 转译支持
+- 修复：tsc 编译 → dist/index.js + package.json main
+
+**预防：升级后自动执行检查（写入 upgrade-prep SKILL.md Step L/M）**
+
+
+## 2026-05-05 Prompt Assistant 缺 docs.openclaw.ai 链接修复
+**根因**：docs.openclaw.ai 改 Mintlify → HTML抓取失效；Tavily API key 未传
+**修复**：docs-server.py 加 Tavily 搜索 (http.client → api.tavily.com)
+**教训**：urllib.request HTTPS 在 server 上下文不稳定，用 http.client

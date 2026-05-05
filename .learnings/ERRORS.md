@@ -202,3 +202,14 @@
 - **根因**: 嵌套 JSON 的 `{}` 使简单正则 `[^}]*` 在第一层就停
 - **教训**: 含嵌套结构的截断用 `indexOf` + `slice`，不用正则
 - **修复**: `content.slice(0, rpIdx)` 直接截断
+
+## 2026-05-05 alsoAllow 工具名错误（OpenClaw 升级后）
+
+**问题**：OpenClaw 升级到 v2026.5.3 后，tools.allow 持续报 unknown entries
+**修复**：改为 alsoAllow: []（profile:full 覆盖，不需要 alsoAllow）
+**教训**：工具名必须和 server.mjs 注册名完全一致，不能凭记忆填写
+
+## 2026-05-05 Prompt Assistant 缺 docs.openclaw.ai 链接
+**根因**：Mintlify JS渲染破坏了 HTML 抓取；Tavily API key 未传给 docs-server
+**修复**：docs-server.py 加 http.client → Tavily API
+**教训**：urllib.request HTTPS 在 server 内不稳定
