@@ -1,3 +1,40 @@
+## 2026-05-07 13:28 macOS BSD date %:z 产生破损 ISO 时间戳
+- 错误：reindex-last-success.txt 反复出现 `2026-05-07T09:08:12:z` 格式，daemon /check/reindex 报 Invalid isoformat string
+- 根因：ubuntu-sync cron 用 `date %:z`（GNU 扩展），macOS BSD date 输出字面量 `:z`
+- 修复：cron payload 改为 `python3 isoformat()`
+- 教训：跨平台 shell 脚本避免 GNU 扩展，用 Python 替代
+
+## 2026-05-07 13:23 飞书消息触发 Gateway 反复重启
+- 错误：飞书发消息后 ~20s Gateway 重启，复现 8 次
+- 根因：session transcript 38K+ tokens → pi-trajectory-flush >10s timeout → Gateway 重启
+- 修复：compaction 压缩 + maxConcurrent 1→4
+- Issue: #78791
+
+## 2026-05-06 09:29 systemd 服务 env var 需 daemon-reload 才生效
+- 错误：修改 systemd service 文件添加 `Environment=OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1` 后，`systemctl restart` 不加载新变量
+- 根因：systemd 在 service 文件变更后必须 `daemon-reload`，否则 restart 用缓存旧版本
+- 影响：Ubuntu 节点连接永远失败，多次重启无效
+- 修复：`systemctl --user daemon-reload && systemctl --user restart openclaw-node`
+- 教训：改 systemd 文件后永远先 daemon-reload 再 restart
+
+## 2026-05-06 08:33 cron delivery 飞书推送失败（连续 3-7 次 error）
+- 错误：cron 任务完成后推送到飞书失败，报 `Delivering to Feishu requires target`
+- 根因：cron delivery 缺少 `to` 字段，飞书插件不知道发给谁
+- 修复：从 Gateway 日志提取 feishu DM openId（`ou_18ed3541348294718c48833176aea3b8`），cron.update patch delivery.to
+- 教训：(1) cron delivery mode=announce 必须同时指定 to；(2) 飞书 userId 可从 Gateway 日志提取
+
+## 2026-05-06 08:33 Ubuntu 节点连接 Gateway 失败（192.168.1.19 幽灵 IP + env var 未生效）
+- 错误：节点日志显示连接 192.168.1.19（网内另一设备）且 `SECURITY ERROR`
+- 根因：(1) 旧节点进程可能错误解析了 DNS；(2) OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1 因 daemon-reload 缺失未生效
+- 修复：daemon-reload + restart + 手动验证
+- 教训：不要相信 log 文件内容（旧进程日志残留），优先看 systemd journal
+
+## 2026-05-06 01:01 memory-core dreaming 导致 P99 事件循环延迟 3609ms
+- 错误：dreaming promotion 触发时 CPU 0.945 满载，事件循环阻塞近 4 秒
+- 根因：dreaming cron 在 01:00 + 2 个活跃 agent 并发
+- 建议修复：改 dreaming cron 到低负载时段（如 `0 3 * * *`）
+- 教训：memory-core dreaming 是 CPU 杀手级操作
+
 ## 2026-05-03 15:10 直接改 openclaw.json 导致 config 损坏 + Gateway reload 死循环
 - 错误：Python 写 openclaw.json 与 Gateway 热加载冲突，config 损坏
 - 根因：未用 gateway 工具改 config
@@ -213,3 +250,28 @@
 **根因**：Mintlify JS渲染破坏了 HTML 抓取；Tavily API key 未传给 docs-server
 **修复**：docs-server.py 加 http.client → Tavily API
 **教训**：urllib.request HTTPS 在 server 内不稳定
+
+## 2026-05-06 UsbEAM 302 HTTPS 代理不工作 — TLS 握手失败
+- 错误：Ubuntu CLI 版 302 用 hosts 模式 + UsbEAM CDN IP，curl https://discord.com 返回 TLS 握手失败
+- 根因：共享 CDN IP 在中国大陆 TLS SNI 被墙——ICMP 通行但 HTTPS 被拦截
+- 修复：改用下载版 302 的 NFQUEUE DNS 重定向模式
+- 教训：IP 层可达 ≠ 应用层可用
+
+## 2026-05-06 Caddy 反代 Discord 失败 — 上游 503
+- 错误：用 302 自带 Caddy 反代 Discord，上游 CDN IP 返回 "Backend not available"（HTTP 503）
+- 根因：301/302 CDN IP 是共享节点，不保证后端服务可达
+
+## 2026-05-06 Cloudflare CDN IP 直连 Discord 失败 — TLS SNI 被墙
+- 错误：5 个 Discord Cloudflare CDN IP 全部 ping 通但 HTTPS 握手失败
+- 根因：GFW 对 Cloudflare 共享 IP 的 TLS SNI 做深度包检测，SNI=discord.com 被 RST
+- 教训：Ping 通不代表 TLS 通
+
+## 2026-05-06 SteamCommunity 302 CLI 版 vs 下载版混用
+- 错误：一直在操作 `~/steamcommunity302/`（CLI 版，discord=空），下载版 V14.0.02 才有所需配置
+- 根因：下载版的 GUI 会生成完整配置（discord=1、NFQUEUE 模式、CDN 优选），CLI 版默认配置为空
+- 修复：切换到 `/home/jet/下载/steamcommunity_302_Linux_AMD64_V14.0.02/Steamcommunity_302/`
+- 教训：多个实例时先 diff 配置文件，确认哪个才是实际在用的版本
+
+## 2026-05-06 Firefox SEC_ERROR_BAD_SIGNATURE — 下载版 302 使用独立 CA
+- 错误：下载版 302 生成独立自签 CA（Issuer: Steamcommunity302），未安装到 Firefox NSS
+- 待修复：需将下载版 steamcommunityCA.pem 安装到 Firefox snap NSS 数据库

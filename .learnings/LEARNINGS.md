@@ -1,5 +1,30 @@
 # 经验教训 - MCP Server 接入 AI 网页
 
+## 2026-05-07 跨平台 shell 避免 GNU 扩展 / 飞书 compaction
+- `date %:z` 在 macOS 输出字面量 `:z`，用 Python isoformat() 替代
+- 大 session 先 /compact 再排查，不要一上来就杀 session 或换模型
+
+## 2026-05-06 cron delivery 飞书推送必须显式指定 to 字段
+- **现象**：cron 任务 delivery.mode="announce" 但飞书推送报 `Delivering to Feishu requires target`
+- **根因**：cron 在 webchat session 创建，announce 模式不知该推送到哪个 DM
+- **解决方案**：cron.update patch delivery.to = feishu DM openId（如 `ou_18ed3541348294718c48833176aea3b8`）
+
+## 2026-05-06 systemd 服务 env var 变更流程
+- **正确流程**：`systemctl --user daemon-reload` → `systemctl --user restart`（两步缺一不可）
+- **错误做法**：改完 service 文件直接 restart，env var 不生效
+
+## 2026-05-06 Ubuntu 节点 LAN 连接必须设置 OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1
+- **现象**：gateway.bind=lan 时节点连 Gateway 报 `SECURITY ERROR: Cannot connect over plaintext ws://`
+- **修复**：在节点 systemd service 添加 `Environment="OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1"`
+
+## 2026-05-06 memory-core dreaming promotion 是 CPU 杀手（P99=3609ms）
+- **现象**：凌晨 01:00 dreaming cron 触发，CPU 0.945 满载，事件循环阻塞近 4 秒
+- **建议**：改 dreaming cron 到低负载时段（如 `0 3 * * *`）
+
+## 2026-05-06 sessions.list 走 SSH 到远程 node 导致 8-10s I/O 阻塞
+- **现象**：exec.host=auto 时 sessions.list 走 SSH 到 Ubuntu，单次 8-10 秒
+- **教训**：session 列表/状态等 Gateway 本地操作不应走远程 SSH
+
 ## 2026-04-30 MiniMax Coding Plan 配置排查
 
 ### MiniMax baseUrl 必须匹配 API Key 类型
@@ -1336,3 +1361,20 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 **根因**：docs.openclaw.ai 改 Mintlify → HTML抓取失效；Tavily API key 未传
 **修复**：docs-server.py 加 Tavily 搜索 (http.client → api.tavily.com)
 **教训**：urllib.request HTTPS 在 server 上下文不稳定，用 http.client
+
+## 2026-05-06 SteamCommunity 302 工作原理与版本差异
+- **302 是本地反代**：Caddy 反代 + hosts 劫持 / DNS NFQUEUE 重定向 + CDN 优选，不需要 VPS
+- **CLI 版 vs 下载版**：CLI 版默认配置为空；下载版（V14.0.02）有 GUI 生成完整配置
+- **NFQUEUE DNS 模式优于 hosts 模式**：NFQUEUE 直接劫持 DNS 查询
+- **正确版本路径**：`/home/jet/下载/steamcommunity_302_Linux_AMD64_V14.0.02/Steamcommunity_302/`
+
+## 2026-05-06 中国大陆访问 Discord 网络限制总结
+- UsbEAM Hosts CDN IP → TLS SNI 被墙
+- Caddy 反代 → 上游 503 不可达
+- Cloudflare CDN IP 直连 → Ping 通但 TLS 被 RST
+- **唯一可行**：本地反代 + DNS 劫持（302 NFQUEUE 模式）
+
+## 2026-05-06 302 每个实例独立 CA
+- 302 每个版本/实例首次运行生成独立的自签 CA（Issuer: Steamcommunity302）
+- 安装一个版本的 CA 不覆盖另一个版本；切换 302 实例需重新安装 CA
+- Firefox snap 需用 `certutil` 直接导入 NSS 数据库，不使用系统 CA 库
