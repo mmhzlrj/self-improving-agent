@@ -1,48 +1,68 @@
 # 经验教训 - MCP Server 接入 AI 网页
 
-## 2026-05-07 跨平台 shell 避免 GNU 扩展 / 飞书 compaction
-- `date %:z` 在 macOS 输出字面量 `:z`，用 Python isoformat() 替代
-- 大 session 先 /compact 再排查，不要一上来就杀 session 或换模型
+## 2026-05-07 跨平台 shell 命令避免 GNU 扩展
+- `date '+%:z'` 在 macOS BSD date 输出 `:z` 字面量，Linux GNU date 才输出 `+08:00`
+- 教训：shell 脚本里用 Python `datetime.now().astimezone().isoformat()` 替代
+
+## 2026-05-07 /compact 是问题诊断利器
+- 当飞书 session 38K tokens 导致 trajectory flush 超时 → Gateway 重启，compaction 是第一个要试的操作
+- 不要一上来就杀 session 或换模型
 
 ## 2026-05-06 cron delivery 飞书推送必须显式指定 to 字段
-- **现象**：cron 任务 delivery.mode="announce" 但飞书推送报 `Delivering to Feishu requires target`
+- **现象**：cron 任务 `delivery.mode="announce"` 但飞书推送报 `Delivering to Feishu requires target`
 - **根因**：cron 在 webchat session 创建，announce 模式不知该推送到哪个 DM
-- **解决方案**：cron.update patch delivery.to = feishu DM openId（如 `ou_18ed3541348294718c48833176aea3b8`）
+- **解决方案**：`cron.update` patch `delivery.to` = feishu DM 的 openId（如 `ou_18ed3541348294718c48833176aea3b8`）
+- **取飞书 userId**：从 Gateway 日志 `feishu[default]: DM from` 或 session key `agent:main:feishu:direct:ou_xxx` 提取
 
 ## 2026-05-06 systemd 服务 env var 变更流程
 - **正确流程**：`systemctl --user daemon-reload` → `systemctl --user restart`（两步缺一不可）
 - **错误做法**：改完 service 文件直接 restart，env var 不生效
+- **验证 env**：`systemctl --user show <service> | grep Environment`
 
 ## 2026-05-06 Ubuntu 节点 LAN 连接必须设置 OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1
-- **现象**：gateway.bind=lan 时节点连 Gateway 报 `SECURITY ERROR: Cannot connect over plaintext ws://`
+- **现象**：`gateway.bind=lan` 时，节点连 Gateway 报 `SECURITY ERROR: Cannot connect to X.X.X.X over plaintext ws://`
+- **原因**：OpenClaw 安全策略禁止 non-loopback plaintext WebSocket 连接
 - **修复**：在节点 systemd service 添加 `Environment="OPENCLAW_ALLOW_INSECURE_PRIVATE_WS=1"`
+- **注意**：仅限内网可信环境，公网部署必须用 wss:// 或 SSH tunnel
 
 ## 2026-05-06 memory-core dreaming promotion 是 CPU 杀手（P99=3609ms）
 - **现象**：凌晨 01:00 dreaming cron 触发，CPU 0.945 满载，事件循环阻塞近 4 秒
+- **根因**：`normalized recall artifacts` 重写整个 sqlite-vec store 是同步 CPU 操作
 - **建议**：改 dreaming cron 到低负载时段（如 `0 3 * * *`）
 
 ## 2026-05-06 sessions.list 走 SSH 到远程 node 导致 8-10s I/O 阻塞
-- **现象**：exec.host=auto 时 sessions.list 走 SSH 到 Ubuntu，单次 8-10 秒
+- **现象**：`exec.host=auto` 时 sessions.list 走 SSH 到 Ubuntu，单次 8-10 秒
+- **根因**：exec 插件配置的 node 偏好导致本地操作被路由到远程
 - **教训**：session 列表/状态等 Gateway 本地操作不应走远程 SSH
 
 ## 2026-04-30 MiniMax Coding Plan 配置排查
 
 ### MiniMax baseUrl 必须匹配 API Key 类型
-- Coding Plan key (sk-cp-xxx) → baseUrl = `api.minimax.chat`
-- 普通 API key → baseUrl = `api.minimaxi.com`
-- 配错会导致频繁超时，token 不被计入
+- **错误**：MiniMax Coding Plan API key（sk-cp-xxx）配了普通 API 端点 `api.minimaxi.com`
+- **后果**：调用频繁超时 → fallback 到 DeepSeek → MiniMax token 不被计入 OpenClaw usage
+- **根因**：Coding Plan 需要 `api.minimax.chat`，普通 API 需要 `api.minimaxi.com`
+- **教训**：改 API key 时同步检查 baseUrl 是否匹配 key 类型
 
-### OpenClaw token 统计是自动的
-- Gateway 解析 API 响应中的 usage 字段，自动计入 session 成本
-- 不需要额外脚本（monitor.py / daemon 是独立额度监控，非必需）
+### OpenClaw token 统计是自动的，不需要额外脚本
+- **误解**：以为需要 monitor.py / daemon /check 端点才能看到 MiniMax 用量
+- **真相**：OpenClaw Gateway 自己解析 API 响应中的 `usage` 字段，自动计入 session 成本
+- **前提**：API 调用必须成功（不超时），返回完整 usage 数据
+- **教训**：先看 `/status` 和 `session_status`，不要一上来就写监控脚本
 
-### Session fallback 后不会自动切回主模型
-- MiniMax 超时 fallback 到 DeepSeek 后，session 一直用 DeepSeek
-- 需要 `/new` 才会重新尝试 MiniMax
+### Session 模型 fallback 后不会自动切回
+- **现象**：MiniMax 超时 fallback 到 DeepSeek 后，session 就一直用 DeepSeek
+- **解决**：需要 `/new` 开新 session 才会重新尝试 MiniMax
+- **教训**：修完配置后提醒用户发 `/new` 验证
 
 ### config.patch 不能改 protected paths
-- models.providers.*.baseUrl 是 protected → 直接编辑 json 文件
-- Gateway 检测文件变更自动 hot-reload
+- **错误**：`gateway config.patch` 改 `models.providers.minimax.baseUrl` 被拒绝
+- **原因**：models.providers 下的 apiKey/baseUrl 等是 protected config paths
+- **正确做法**：直接编辑 openclaw.json → 等 Gateway 检测文件变更自动 hot-reload
+
+### /check/minimax 端点不存在
+- **已实现的 check**：docs、reindex、sessions、plugins（4个）
+- **未实现**：minimax（HEARTBEAT.md 提前写了但代码没跟上）
+- **教训**：工具文档≠实际代码，动手前先 curl 验证端点是否存在
 
 ## 2026-03-19
 
@@ -557,10 +577,11 @@ if (!kimiAuth) throw new Error('[Kimi] 未找到 kimi-auth Cookie，请在 Chrom
 
 ```javascript
 // 快速验证 5 平台是否都通
-webauth_doubao_chat("1+1")  // ✅
-webauth_kimi_chat("1+1")     // ✅
-webauth_glm_chat("1+1")     // ✅
-webauth_qwen_chat("1+1")    // ✅
+doubao_chat("1+1")  // ✅ (adapter 注册，toolPrefix: null)
+kimi_chat("1+1")     // ✅
+glm_chat("1+1")     // ✅
+qwen_chat("1+1")    // ✅
+deepseek_chat("1+1") // ✅
 deepseek_deepseek_chat("1+1") // ✅
 ```
 
@@ -1261,56 +1282,158 @@ dashboard 的 `/api/open` 调用 mdview.py 时，mdview.py 会自己调用 webbr
 - 删除了 FramePack 模型 (~24GB) + HunyuanVideo (~34GB) + SVD (~14GB) + 其他
 - 释放 103GB，磁盘 63% → 39%
 
+### 7. Flask/WSGI 服务日志重定向陷阱（2026-03-31）
+- **问题**：server.py stdout/stderr 重定向到 pipe 时，Flask 的异常输出不写文件，错误被"吞掉"
+- **现象**：reindex 返回 500，但 /health 和 /search 正常，日志文件是旧内容
+- **修复**：确保日志写入文件：`nohup python3 server.py > ~/app.log 2>&1 &`
+- **验证**：先调用会失败的端点，检查日志文件是否有新输出
+
 ---
 
 ## 2026-03-31: alsoAllow + MCP 工具注册（重要）
 
 ### 学到的东西
 
-1. **alsoAllow 必须放在 `tools` 级别**：`openclaw.json` 的根级别没有 alsoAllow 字段
+1. **alsoAllow 必须放在 `tools` 级别**：`openclaw.json` 的根级别没有 alsoAllow 字段（会报错）
 2. **profile 决定行为**：`full: {}` = 无限制，`coding: {}` = 有 core tools allowlist
-3. **subagent 无法使用 alsoAllow 工具**：alsoAllow 是 main agent 专属
-4. **zhiku-ask 走不同路径**：直接 stdio JSON-RPC 调用 MCP server，不走 agent 工具系统
+3. **unknown entries 警告是正常的**：不代表工具不能用，只代表不在 core/plugin 列表
+4. **subagent 无法使用 alsoAllow 工具**：alsoAllow 是 main agent 专属
+5. **zhiku-ask 走不同路径**：直接 stdio JSON-RPC 调用 MCP server，不走 agent 工具系统
 
 ### alsoAllow 工作原理
 
+```
 alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
-- 如果 allowlist 还有其他 core entries → allowlist 保留 → 工具被 block
-- 如果 allowlist 无其他 entries → allow=void → 全部允许
+    ↓
+如果 allowlist 还有其他 core entries → allowlist 保留 → 工具被 block
+如果 allowlist 无其他 entries → allow=void → 全部允许
+```
 
-### 验证方法
+### 验证工具是否可用的正确方法
 
+- Subagent 测试无效（alsoAllow 只给 main agent）
 - zhiku-ask 脚本测试有效（MCP server 直连）
+- 主 agent 测试需要新开 session
+
+### 修复步骤
+
+1. 确认 alsoAllow 在 `tools`（global）下，不在 `agents.list[0].tools` 下
+2. 确认 `tools.profile` 是 `"full"`，不是 `"coding"`
+3. 重启 Gateway
+4. 验证：zhiku-ask 脚本走通
 
 ## 2026-04-07
 
 ### openclaw-upgrade Skill 经验
-- ✅ `gh release list --repo openclaw/openclaw --limit 3` — 查最新版本
-- ✅ `openclaw --version` — 查当前版本
-- ✅ `openclaw update` — 升级正确命令（无参数）
-- ❌ `openclaw update run` — 不接受参数
-- ✅ `python3 check-openclaw-latest.py` — 避免 curl|pipe SSL 问题
-- 每次 exec 后必须追加到 `docs/command-log.md`
-- docs-server 按钮错位修复：放在 header 外、nav 前的独立 position:fixed 位置
-- 主 agent 测试需要新开 session（subagent 无效）
-- **exec 白名单**：不要新增 `/sbin/xxx` 路径，统一用已有的 `/usr/bin/curl`、`/usr/bin/rsync` 等批准路径；添加前先 `ls /usr/bin/xxx /sbin/xxx` 确认存在
 
-## exec timeout 规范（2026-04-12）
+**正确的升级检查命令**：
+- ✅ `gh release list --repo openclaw/openclaw --limit 3`
+- ✅ `openclaw --version`
+- ✅ `openclaw gateway status`
 
-### 规则
-- 短命令：10-15s
-- 中等命令（npm/git push）：60s+
-- 长命令（rsync/systemctl/npm大包）：600s+
-- **禁止 5-10s**（必然 SIGKILL）
+**错误记录（重要修正）**：
+- ❌ `openclaw update run` — too many arguments，update 不接受参数
+- ✅ `openclaw update` — 正确命令（无参数）
 
-### 长任务处理
-- 需要等待 → cron 定时器
-- 持续运行 → background=true + process 监控
-- 一次性 → 用完删除 cron job
+**exec 白名单路径经验**：
+- ❌ 不要新增 `/sbin/xxx` 路径 → 从未被批准
+- ✅ 统一用已有的 allow-always 批准路径：`/usr/bin/curl`、`/usr/bin/rsync` 等
+- ⚠️ macOS ping 在 `/sbin/ping`，不是 `/usr/bin/ping`
+- ⚠️ macOS curl 在 `/usr/bin/curl`，`/sbin/curl` 不存在
+- ✅ 添加新路径前必须先 `ls /usr/bin/xxx /sbin/xxx` 确认存在**避免 SSL 问题**：
+- ❌ `curl ... | python3` — urllib 需要加 `ssl._create_unverified_context()`
+- ✅ 用封装脚本 `python3 check-openclaw-latest.py`
 
-### 监控
-- `openclaw status`
-- `process list`
+**exec 命令记录**：
+- 每次 exec 后必须立即追加到 `docs/command-log.md`
+- command-log.md 位置：`http://127.0.0.1:18998/docs.0-1.ai/command-log.html`
+
+**git push 失败时**：用 git-retry-push skill 自动重试
+
+### docs-server.py 导航修改经验
+- 按钮放在 header 内会错位（position:fixed 嵌套问题）
+- 正确做法：按钮放在 header 外、nav 前的独立位置
+- 添加新页面路由：在 Board 路由后加 if path == "/xxx.html"
+
+---
+
+## 2026-04-08
+
+### 经验1：dashboard_mcp_server 和 docs-server.py 的关系
+- dashboard_mcp_server.py（端口18999）和 docs-server.py（端口18998）是两个独立的 HTTP 服务器
+- dashboard_mcp_server.py 只负责 night-build 相关的动态数据（/night-build/*、/project-board.json）
+- docs-server.py 负责 docs.0-1.ai 文档站
+- world.html 同时向 18999 请求数据（LED墙）和向 18998 请求基础资源
+
+### 经验2：重启 docs-server.py 的正确方式
+- pkill -f docs-server.py 会误杀同名进程（如 kill 错了 PID）
+- 正确做法：先 ps aux | grep docs-server 找到真正 PID，再 kill <PID>
+- 或用 python3 scripts/restart-docs-server.py（需确认它 kill 的是正确 PID）
+- 验证：新进程启动后用 /api/board-count 调试端点确认代码版本
+
+### 经验3：load_tasks() fallback 陷阱
+- task-queue.json 加载失败时（JSON解析成功但返回空），不能盲目用 tasks/ 目录 fallback
+- tasks/ 目录有 1800+ 个 legacy 任务文件，会把看板淹没
+- 正确：只有当 task-queue.json 文件本身不存在时才 fallback，解析失败要报错而非静默降级
+
+### 经验4：board 看板和 task-queue.json 实时关联
+- board 页面的唯一真实来源是 harness/robot/night-build/task-queue.json
+- world.html LED墙的 fetch URL 要指向 /night-build/task-queue.json（不是 /project-board.json）
+- dashboard.html 的 /project-board.json 需要 dashboard_mcp_server.py 做动态 schema 转换
+
+## 2026-04-10 MiniMax Music API 正确配置
+
+- Key: sk-cp... (Token Plan key)
+- 端点: https://api.minimaxi.com (国内版)
+- 模型: music-2.6 (仅限Token Plan用户)
+- 额度: 100次/天
+- 超时: 需要设360秒（API同步响应约3分钟）
+- 返回格式: {"status_code":0,"data":{"audio":"https://..."}}
+- URL有效期: 24小时
+
+## 2026-04-10 ESP32-CAM WiFi网络存储方案
+
+### 架构
+ESP32-CAM检测到motion/person → WiFiClient POST到Ubuntu HTTP服务器 → 保存到目录
+
+### 服务器命令（Ubuntu）
+```bash
+nohup python3 /home/jet/esp32_capture_server.py 5000 > /dev/null 2>&1 &
+```
+
+### 烧录座正确用法
+按住001(BOOT) → 按RST → 松开001 → 立即开始烧录
+成功率100%，不会损坏Flash
+
+### ESP32端上传逻辑
+- motion触发 → type=motion
+- person触发 → type=person  
+- 8秒上传间隔
+- 原始JPEG body + URL参数（Content-Type: image/jpeg）
+
+## 2026-04-16 飞书发送本地文件正确方法
+
+### 错误方法
+- ❌ `media="/tmp/xxx.mp3"` → 只发文字
+- ❌ `filePath="/tmp/xxx.mp3"` → 只发文字（/tmp 不在白名单）
+- ❌ 只看 tool 返回 `ok:true` 就判断成功 → 幻觉
+
+### 正确方法
+1. 把文件复制到 `/Users/lr/.openclaw/workspace/`
+2. 用 `filePath` 参数发送：
+```python
+message(
+  action="send",
+  channel="feishu",
+  filePath="/Users/lr/.openclaw/workspace/xxx.mp3",
+  message="说明文字"
+)
+```
+
+### 判断成功标准
+- 飞书收到的是**可点击播放的音频卡片**（不是文字链接）
+- 工具返回 `ok:true` + `messageId` ≠ 实际成功，要看对方收到的是什么
+
 
 ## 2026-04-16 docs-formatting-fix: Playwright + image 工具验证流程
 
@@ -1324,6 +1447,16 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 ## 2026-04-19 alsoAllow 工具名查找方法
 - **命令**：`grep -rh "name: '" ~/.openclaw/extensions/*/server.mjs 2>/dev/null | grep -E "doubao_chat|deepseek_chat|kimi_chat|qwen_chat|glm_chat"`
 - **原理**：MCP server 通过 ListToolsRequestSchema 注册工具，工具名在 `name: 'xxx'` 字段
+- **注意**：不要用 `doubao_doubao_chat` 这种格式，要查实际注册名
+
+## OpenClaw 升级前检查（2026-04-30）
+
+### Gateway channel ENOTEMPTY 警告
+- **现象**：`openclaw gateway status` 时 feishu/qqbot/imessage 报 `ENOTEMPTY: directory not empty, rmdir '...plugin-sdk'`
+- **原因**：插件目录残留，之前升级时未完全清理
+- **影响**：不影响功能，只是 warning，不阻塞升级
+- **建议**：如升级后问题持续，可手动 `rm -rf ~/.openclaw/plugin-runtime-deps/openclaw-*/extensions/node_modules/openclaw/plugin-sdk` 清理（需先确认 Gateway 已停止）
+
 
 ## 2026-05-02 Multi-Agent 委派长监控任务
 
@@ -1342,39 +1475,87 @@ alsoAllow 工具 → stripPluginOnlyAllowlist() → 剥离为 unknown
 - sessions_send = 跨 agent 任务委派
 - sessions_spawn = 同 agent 内的子任务
 
-## 2026-05-05 OpenClaw 升级后 alsoAllow + openclaw-mcp-adapter 重复故障根因
+## 2026-05-05 升级后 alsoAllow + openclaw-mcp-adapter 重复故障根因分析
 
-**根因 1：alsoAllow 冗余条目**
-- 本地配置垃圾（profile:full 已覆盖，alsoAllow 多余）
-- v2026.5.3 验证更严格 → 静默问题暴露
-- 永久修复：alsoAllow: []
+### 根因 1：alsoAllow 工具名不匹配 —— 本地配置问题
 
-**根因 2：openclaw-mcp-adapter 缺少编译输出**
-- 插件只有 .ts 源码，无 dist/
-- v2026.5.3 移除了隐式 TypeScript 转译支持
-- 修复：tsc 编译 → dist/index.js + package.json main
+**为什么每次都出问题？**
+- 本地 `openclaw.json` 的 `alsoAllow` 中有 5 个 MCP 工具条目
+- 这些条目用双重前缀命名（`doubao_doubao_chat`），来自 MCP adapter `toolPrefix: true` 的行为
+- 但 `profile: "full"` 已允许所有工具，alsoAllow 完全冗余
+- v2026.5.3 加强了 tools.allow 验证，之前被静默忽略的不匹配现在产出 WARN
 
-**预防：升级后自动执行检查（写入 upgrade-prep SKILL.md Step L/M）**
+**根因判定：本地配置垃圾**（不应存在冗余 alsoAllow）
+**修复：alsoAllow: []（永久性修复，不依赖版本）**
+
+### 根因 2：openclaw-mcp-adapter TypeScript 编译 —— 本地 + OpenClaw 双重问题
+
+**为什么每次都出问题？**
+- 本地：插件是 androidStern/openclaw-mcp-adapter@0.1.1，仅含 .ts 源码，无 dist/
+- OpenClaw：v2026.5.3 重构了插件加载逻辑，移除了隐式 TypeScript 转译支持
+- 老版本（v2026.4.27）静默转译 .ts 文件，新版本要求编译输出
+
+**根因判定：本地缺少编译输出 + OpenClaw 版本变更**
+**修复：tsc 编译 → dist/ + package.json main → dist/index.js（需要每次版本更新后检查）**
+
+### 预防措施（写入升级准备 Skill）
+1. 升级后检查 `alsoAllow` 是否含 MCP 工具名，如有则自动清空
+2. 升级后检查 openclaw-mcp-adapter 是否有 dist/index.js，如无则自动编译
+3. 升级后检查 qqbot 等 stale entries 是否存在
 
 
-## 2026-05-05 Prompt Assistant 缺 docs.openclaw.ai 链接修复
-**根因**：docs.openclaw.ai 改 Mintlify → HTML抓取失效；Tavily API key 未传
-**修复**：docs-server.py 加 Tavily 搜索 (http.client → api.tavily.com)
-**教训**：urllib.request HTTPS 在 server 上下文不稳定，用 http.client
+## 2026-05-05 Prompt Assistant 优化提示词缺 docs.openclaw.ai 链接
+
+**问题**：/api/optimize-prompt 只返回本地 docs.0-1.ai 链接，无 docs.openclaw.ai
+
+**根因**：
+1. docs.openclaw.ai 改用 Mintlify（JS渲染），旧的 HTML 抓取失效
+2. Tavily API Key 存在于 openclaw.json 但未传给 docs-server.py
+3. docs-server.py 未集成 Tavily 搜索
+
+**修复**：
+- `_get_tavily_api_key()` 从 openclaw.json 读取 API Key
+- `_search_openclaw_docs_tavily()` 用 http.client 调用 Tavily API
+- optimize-prompt handler 调用 Tavily + 结果合并（3 本地 + 3 openclaw）
+
+**关键教训**：urllib.request 在 HTTP 服务器内调用 HTTPS 不稳定，改用 http.client.HTTPSConnection
 
 ## 2026-05-06 SteamCommunity 302 工作原理与版本差异
 - **302 是本地反代**：Caddy 反代 + hosts 劫持 / DNS NFQUEUE 重定向 + CDN 优选，不需要 VPS
-- **CLI 版 vs 下载版**：CLI 版默认配置为空；下载版（V14.0.02）有 GUI 生成完整配置
-- **NFQUEUE DNS 模式优于 hosts 模式**：NFQUEUE 直接劫持 DNS 查询
+- **CLI 版 vs 下载版**：CLI 版（`~/steamcommunity302/`）默认配置为空；下载版（V14.0.02）有 GUI 生成完整配置
+- **NFQUEUE DNS 模式优于 hosts 模式**：NFQUEUE 直接劫持 DNS 查询，绕过系统 hosts 限制
 - **正确版本路径**：`/home/jet/下载/steamcommunity_302_Linux_AMD64_V14.0.02/Steamcommunity_302/`
+- **关键配置项**：`discord=1` + DNS 重定向 + CDN 优选（49条规则）
 
 ## 2026-05-06 中国大陆访问 Discord 网络限制总结
-- UsbEAM Hosts CDN IP → TLS SNI 被墙
-- Caddy 反代 → 上游 503 不可达
-- Cloudflare CDN IP 直连 → Ping 通但 TLS 被 RST
-- **唯一可行**：本地反代 + DNS 劫持（302 NFQUEUE 模式）
+- **UsbEAM Hosts Editor**：提供 CDN IP，但共享 IP 的 TLS SNI 被墙
+- **Caddy 反代**：上游 CDN IP 不可达（503 Backend not available）
+- **Cloudflare CDN IP 直连**：Ping 通（193-208ms）但 TLS 握手失败——GFW 做 SNI 深度包检测
+- **唯一可行方案**：本地反代 + DNS 劫持（302 NFQUEUE 模式）
+- **根本原因**：GFW 对 TLS SNI 字段（discord.com）做 DPI，共享 CDN IP 无法绕过
 
 ## 2026-05-06 302 每个实例独立 CA
-- 302 每个版本/实例首次运行生成独立的自签 CA（Issuer: Steamcommunity302）
-- 安装一个版本的 CA 不覆盖另一个版本；切换 302 实例需重新安装 CA
-- Firefox snap 需用 `certutil` 直接导入 NSS 数据库，不使用系统 CA 库
+- **发现**：302 每个版本/实例首次运行生成独立的自签 CA（Issuer: Steamcommunity302）
+- **影响**：安装一个版本的 CA 不覆盖另一个版本；切换 302 实例需重新安装 CA
+- **Firefox snap 特殊**：Firefox 不使用系统 CA 库，需用 `certutil` 直接导入 NSS 数据库
+
+# 2026-05-09 — Blender JSON 状态架构 + Session Model Override 机制
+
+## Blender Background 模式经验
+- `save_mainfile` 在 `--background` 模式下不保留自定义 datablock（材质、对象等）
+- 正确方案：用 JSON 文件做状态持久化，每次调用从 JSON 重建场景
+- `repr()` 生成 Python 字面量比 `json.dumps()` 更安全（避免 null/true/false）
+- SSH 远程执行 bpy 脚本时，脚本长度不是问题，但语法正确性必须本地预验证
+
+## Session Model Override 机制
+- `sessions.json` 中每个 session 可存储 `modelOverride` + `modelOverrideSource`
+- `modelOverrideSource: user` = 用户通过 `/model xxx` 命令设置
+- per-session override 优先级高于 `agents.defaults.model.primary`
+- heartbeat 使用 session 的 model，不是 agent 默认 model
+- 排查 model 问题：先查 sessions.json → 再查 openclaw.json
+
+## Gateway 异常排查方法
+- `gateway.err.log` 比 `gateway.log` 更详细（含 model fallback 决策）
+- `model-fallback/decision` 日志行显示 fallback 链和 cooldown 状态
+- `embedded run agent end` 日志显示实际使用的 model 和 error
+- 异常模式识别：固定间隔（30m/1h）→ 多半是 heartbeat/cron 触发
