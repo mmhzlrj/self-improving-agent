@@ -84,6 +84,23 @@ Then create the log files (or copy from `assets/`):
 Both files must be synced AND pushed to their respective remotes after each update.
 **This prevents learnings from being siloed in one place.**
 
+### ⚠️ 贵庚 Semantic Cache Sync (2026-05-15)
+
+**Every time you log a learning/error, you MUST also POST to 贵庚 FAISS index:**
+
+```bash
+curl -s -X POST http://192.168.1.18:5050/add \
+  -H "Content-Type: application/json" \
+  -d '{"texts": ["[learning] [category] summary of the learning"], "source": "self-improvement", "importance": 0.8}'
+```
+
+This ensures learnings are:
+1. Semantically searchable via FAISS (not just grep on MD files)
+2. Included in 贵庚's InterestTracker for importance decay
+3. Available for memory_search across sessions
+
+**Note**: Use `exec host=node` when calling 贵庚 API (Ubuntu 192.168.1.18:5050).
+
 ### Promotion Targets
 
 When learnings prove broadly applicable, promote them to workspace files:
@@ -399,6 +416,57 @@ grep -l "Area\*\*: backend" .learnings/*.md
 - Promote applicable learnings
 - Link related entries
 - Escalate recurring issues
+
+## 贵庚 RAG 修正（OpenClaw 闭环最后一步）
+
+与 OpenClaw 的 贵庚（Gui Geng）记忆系统配合使用时，完成标准提升后还有最后一步：
+**将教训喂入 RAG 索引，让下次检索能命中。**
+
+### 完整闭环
+
+```
+犯错 → 记录(ERRORS.md) → 提升(SOUL/AGENTS/TOOLS.md) → RAG修正(贵庚 /add)
+```
+
+缺了 RAG 修正这一步，下次类似场景发生时，memory_search 搜不到这个教训，
+等于没学习。
+
+### `/add` 端点用法
+
+```bash
+# Ubuntu 贵庚服务 (192.168.1.18:5050)
+ssh jet@192.168.1.18 "curl -s http://localhost:5050/add \
+  -X POST -H 'Content-Type: application/json' \
+  -d '{\"texts\":[\"<教训文本>\"]}'"
+```
+
+### 验证 RAG 检索
+
+```bash
+ssh jet@192.168.1.18 "curl -s http://localhost:5050/search \
+  -X POST -H 'Content-Type: application/json' \
+  -d '{\"query\":\"<关键词>\",\"top_k\":2}'"
+```
+
+### 喂入内容规范
+
+- 每条教训用简洁的中文描述，包含具体场景 + 根因 + 正确做法
+- 一次喂入一条（避免长文被 FAISS 切分语义）
+- 喂完后验证 search 能命中
+
+### 示例
+
+```bash
+# 错误教训
+ssh jet@192.168.1.18 "curl -s http://localhost:5050/add -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{\"texts\":[\"子Agent 读 graph.json 失败：不要假设字段名。node.degree 不存在，实际需从 links 计算。links 不是 edges。file_type 不是 type。派子Agent 时必须在任务中明确指定所有字段名。\"]}'"
+
+# 最佳实践
+ssh jet@192.168.1.18 "curl -s http://localhost:5050/add -X POST \
+  -H 'Content-Type: application/json' \
+  -d '{\"texts\":[\"操作前验证规则：先 inspect 后 operate。读 JSON 先 print keys()。调接口先 grep handler。派子Agent 明确字段名。\"]}'"
+```
 
 ## Detection Triggers
 

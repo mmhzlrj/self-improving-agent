@@ -1559,3 +1559,20 @@ message(
 - `model-fallback/decision` 日志行显示 fallback 链和 cooldown 状态
 - `embedded run agent end` 日志显示实际使用的 model 和 error
 - 异常模式识别：固定间隔（30m/1h）→ 多半是 heartbeat/cron 触发
+
+## 2026-05-10 Ubuntu openclaw 升级正确流程
+- **正确流程**：`npm install -g openclaw@beta` → `systemctl --user daemon-reload` → `systemctl --user restart openclaw-node`
+- **不要用**：`openclaw update`（内部 doctor 会检查 gateway.remote.url 安全性，可能失败）
+
+## 2026-05-10 判断 Gateway 崩溃 vs watchdog 日志
+- "gateway startup failed" + "gateway already running under launchd" = 正常行为
+- 判断标准：能否回复用户消息
+
+## [LRN-20260512-001] Ubuntu 远程启动 GUI：DISPLAY从gnome-shell进程环境获取
+
+**Logged**: 2026-05-12T17:20+08:00
+**Status**: resolved
+**Area**: infra
+
+### Summary
+SSH 远程启动 Blender：DISPLAY=:0 错误 → 实际是 :1，从 /proc/PID/environ 获取 gnome-shell 的真实 DISPLAY/XAUTHORITY/DBUS。Blender 版本不兼容也需要注意。

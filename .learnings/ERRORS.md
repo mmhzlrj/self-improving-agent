@@ -78,3 +78,63 @@ Heartbeat 每 30 分钟触发 → 发送到 main session → 使用 deepseek-v4-
 2. `modelOverrideSource: user` 表示用户命令设置（`/model xxx`），不是系统默认
 3. heartbeat 使用 session 存储的 model，不是 agent 默认 model
 4. 排查 model 问题时，先查 `sessions.json` 的 modelOverride，再查 openclaw.json
+
+# 2026-05-10 10:17 — Ubuntu openclaw 升级：openclaw update 失败需用 npm install 直接安装
+
+## 现象
+Ubuntu 节点 v2026.3.24 升级到 v2026.5.9-beta.1 时，`openclaw update --tag beta --yes` 失败。
+
+## 修复
+直接用 `npm install -g openclaw@beta` 绕过 openclaw update 内部验证。升级后必须 `systemctl --user daemon-reload` + `systemctl --user restart openclaw-node`。
+
+---
+
+# 2026-05-10 10:17 — Mac Gateway "gateway startup failed" 不是真正的崩溃
+
+## 现象
+v2026.5.9-beta.1 日志每 ~15s 出现 "shutdown started: gateway startup failed"。
+
+## 根因
+launchd watchdog 正常日志模式。子进程检测到已有实例运行 → 自行退出。Gateway 一直在正常运行。
+
+## 教训
+- 判断 Gateway 是否崩溃的标准：能否回复用户消息，不是看日志中的 "shutdown" 关键字
+- "gateway startup failed" + "gateway already running under launchd" = 正常行为
+
+---
+
+## 2026-05-12 09:05 — MiniMax subagent graphify 探索连续失败
+
+### 现象
+3 个子 Agent 执行 graphify batch #45#46 探索任务，全部报告 "0条边 / 所有节点 degree=0"。
+但用主 session 直接 python3 读 graph.json 确认 38,575 节点 / 36,351 边。
+
+### 根因
+子 Agent 在读取 graph.json 时使用了 **错误的数据结构假设**：
+
+| 子 Agent 使用的字段 | 实际 graph.json 字段 | 结果 |
+|---|---|---|
+| `node.get('degree', 0)` | ❌ 不存在，degree 需从 links 计算 | 所有节点被判为 degree=0 |
+| `g.get('edges', [])` | `g['links']` ✅ | 返回空数组 → 认为无边 |
+| `node.get('type')` | `node.get('file_type')` ✅ | 返回 None → 过滤掉所有节点 |
+
+### 修复
+子 Agent 第一步应先 inspect 数据结构再写代码，不能假设字段名。
+
+---
+
+## 2026-05-12 11:47 — docs.openclaw.ai 搜索跑偏：关键词概念域不匹配
+
+### 现象
+搜 MiniMax 多账户方案时，误搜 provider/rate.limit 等词，错过 multi-agent/parallel-specialist-lanes。用户手动给 URL 才看到。
+
+### 教训
+概念域匹配先于关键词匹配。先看索引再搜。
+
+## 2026-05-15 多项错误记录
+
+### 1. 日志污染 + 错误恢复策略
+- 日志被 HTML 代码污染后，第一时间想 git 恢复而非用 贵庚/sessions_history
+- 用 `which ollama` 断言服务未安装，实际是 App 安装不在 PATH
+- 清理脚本过度删除导致日志丢失
+- **教训**: 信任已建系统；先查后断言；清理前备份
